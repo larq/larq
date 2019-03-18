@@ -11,7 +11,7 @@ setup(
     version="0.0.0",
     author="Plumerai",
     author_email="lukas@plumerai.co.uk",
-    description="Library of Extreme Quantized Neural Networks designed to make Quantized Deep Learning more accessible",
+    description="An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks",
     long_description=readme(),
     long_description_content_type="text/markdown",
     url="https://github.com/lgeiger/xquant",
