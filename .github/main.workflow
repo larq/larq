@@ -14,20 +14,33 @@ action "Pyflakes Syntax Checker" {
 
 workflow "Unit tests" {
   on = "push"
-  resolves = ["Python 3.6 TF 1.13", "Python 3.7 TF 1.13", "Python 3.7 TF 2.0"]
+  resolves = [
+    "Python 3.6 TF 1",
+    "Python 3.7 TF 1",
+    "Python 3.7 TF 2",
+  ]
 }
 
-action "Python 3.6 TF 1.13" {
+action "Python 3.6 TF 1" {
   uses = "docker://python:3.6-slim"
-  runs = "./scripts/test.sh 1.13.1"
+  runs = "./scripts/test.sh"
+  env = {
+    TF_VERSION = "1.13.1"
+  }
 }
 
-action "Python 3.7 TF 1.13" {
+action "Python 3.7 TF 1" {
   uses = "docker://python:3.7-slim"
-  runs = "./scripts/test.sh 1.13.1"
+  runs = "./scripts/test.sh"
+  env = {
+    TF_VERSION = "1.13.1"
+  }
 }
 
-action "Python 3.7 TF 2.0" {
+action "Python 3.7 TF 2" {
   uses = "docker://python:3.7-slim"
-  runs = "./scripts/test.sh 2.0.0-alpha0"
+  runs = "./scripts/test.sh"
+  env = {
+    TF_VERSION = "2.0.0-alpha0"
+  }
 }
