@@ -1,13 +1,13 @@
-import tensorflow as _tf
+import tensorflow as tf
 
 
-@_tf.custom_gradient
+@tf.custom_gradient
 def sign(x):
     def grad(dy):
         return dy
 
-    return _tf.sign(x), grad
+    return tf.sign(x), grad
 
 
 def binarize(x):
-    return sign(_tf.clip_by_value(x, -1, 1))
+    return sign(tf.clip_by_value(x, -1, 1))
