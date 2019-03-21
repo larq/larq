@@ -1,12 +1,13 @@
 import tensorflow as tf
 from xquant import utils
+from xquant import quantizers
 
 
 class QuantizerBase(tf.keras.layers.Layer):
     def __init__(self, *args, kernel_quantizer=None, input_quantizer=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.kernel_quantizer = kernel_quantizer
-        self.input_quantizer = input_quantizer
+        self.kernel_quantizer = quantizers.get(kernel_quantizer)
+        self.input_quantizer = quantizers.get(input_quantizer)
 
     def call(self, inputs):
         if self.kernel_quantizer:
@@ -14,6 +15,13 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
         return super().call(inputs)
+
+    def get_config(self):
+        config = {
+            "kernel_quantizer": quantizers.serialize(self.kernel_quantizer),
+            "input_quantizer": quantizers.serialize(self.input_quantizer),
+        }
+        return {**super().get_config(), **config}
 
 
 @utils.register_keras_custom_object
