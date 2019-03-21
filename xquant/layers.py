@@ -1,7 +1,7 @@
-import tensorflow as _tf
+import tensorflow as tf
 
 
-class _QuantizerBase(_tf.keras.layers.Layer):
+class QuantizerBase(tf.keras.layers.Layer):
     def __init__(self, *args, kernel_quantizer=None, input_quantizer=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.kernel_quantizer = kernel_quantizer
@@ -15,33 +15,33 @@ class _QuantizerBase(_tf.keras.layers.Layer):
         return super().call(inputs)
 
 
-class QuantConv1D(_QuantizerBase, _tf.keras.layers.Conv1D):
+class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     pass
 
 
-class QuantConv2D(_QuantizerBase, _tf.keras.layers.Conv2D):
+class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     pass
 
 
-class QuantConv3D(_QuantizerBase, _tf.keras.layers.Conv3D):
+class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     pass
 
 
-class QuantConv2DTranspose(_QuantizerBase, _tf.keras.layers.Conv2DTranspose):
+class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     pass
 
 
-class QuantConv3DTranspose(_QuantizerBase, _tf.keras.layers.Conv3DTranspose):
+class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     pass
 
 
-class QuantLocallyConnected1D(_QuantizerBase, _tf.keras.layers.LocallyConnected1D):
+class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D):
     pass
 
 
-class QuantLocallyConnected2D(_QuantizerBase, _tf.keras.layers.LocallyConnected2D):
+class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D):
     pass
 
 
-class QuantDense(_QuantizerBase, _tf.keras.layers.Dense):
+class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     pass
