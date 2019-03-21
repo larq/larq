@@ -31,6 +31,48 @@ class QuantizerBase(tf.keras.layers.Layer):
         return {**super().get_config(), **config}
 
 
+class QuantizerSeparableBase(tf.keras.layers.Layer):
+    def __init__(
+        self,
+        *args,
+        depthwise_quantizer=None,
+        pointwise_quantizer=None,
+        input_quantizer=None,
+        **kwargs
+    ):
+        super().__init__(*args, **kwargs)
+        self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
+        self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
+        self.input_quantizer = quantizers.get(input_quantizer)
+
+    def call(self, inputs):
+        if self.input_quantizer:
+            inputs = self.input_quantizer(inputs)
+        if self.depthwise_quantizer:
+            full_precision_depthwise_kernel = self.depthwise_kernel
+            self.depthwise_kernel = self.depthwise_quantizer(self.depthwise_kernel)
+        if self.pointwise_quantizer:
+            full_precision_pointwise_kernel = self.pointwise_kernel
+            self.pointwise_kernel = self.pointwise_quantizer(self.pointwise_kernel)
+
+        output = super().call(inputs)
+        # Reset the full precision kernel to make keras eager tests pass.
+        # Is this a problem with our unit tests or a real bug?
+        if self.depthwise_quantizer:
+            self.depthwise_kernel = full_precision_depthwise_kernel
+        if self.pointwise_quantizer:
+            self.pointwise_kernel = full_precision_pointwise_kernel
+        return output
+
+    def get_config(self):
+        config = {
+            "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
+            "pointwise_quantizer": quantizers.serialize(self.pointwise_quantizer),
+            "input_quantizer": quantizers.serialize(self.input_quantizer),
+        }
+        return {**super().get_config(), **config}
+
+
 @utils.register_keras_custom_object
 class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     pass
@@ -68,4 +110,14 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
 
 @utils.register_keras_custom_object
 class QuantDense(QuantizerBase, tf.keras.layers.Dense):
+    pass
+
+
+@utils.register_keras_custom_object
+class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv1D):
+    pass
+
+
+@utils.register_keras_custom_object
+class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv2D):
     pass
