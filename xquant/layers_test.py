@@ -99,3 +99,53 @@ class LayersTest(keras_parameterized.TestCase):
         )
 
         self.assertAllClose(quant_output, fp_output)
+
+    @parameterized.named_parameters(
+        (
+            "QuantSeparableConv1D",
+            xq.layers.QuantSeparableConv1D,
+            tf.keras.layers.SeparableConv1D,
+            (2, 3, 7),
+        ),
+        (
+            "QuantSeparableConv2D",
+            xq.layers.QuantSeparableConv2D,
+            tf.keras.layers.SeparableConv2D,
+            (2, 3, 7, 6),
+        ),
+    )
+    def test_separable_layers(self, quantized_layer, layer, input_shape):
+        input_data = random_input(input_shape)
+        random_d_kernel = np.random.random() - 0.5
+        random_p_kernel = np.random.random() - 0.5
+
+        quant_output = testing_utils.layer_test(
+            quantized_layer,
+            kwargs=dict(
+                filters=3,
+                kernel_size=3,
+                depthwise_quantizer="sign_ste",
+                pointwise_quantizer="sign_ste",
+                input_quantizer="sign_ste",
+                depthwise_initializer=tf.keras.initializers.constant(random_d_kernel),
+                pointwise_initializer=tf.keras.initializers.constant(random_p_kernel),
+            ),
+            input_data=input_data,
+        )
+
+        fp_output = testing_utils.layer_test(
+            layer,
+            kwargs=dict(
+                filters=3,
+                kernel_size=3,
+                depthwise_initializer=tf.keras.initializers.constant(
+                    np.sign(random_d_kernel)
+                ),
+                pointwise_initializer=tf.keras.initializers.constant(
+                    np.sign(random_p_kernel)
+                ),
+            ),
+            input_data=np.sign(input_data),
+        )
+
+        self.assertAllClose(quant_output, fp_output)
