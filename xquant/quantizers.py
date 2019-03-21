@@ -34,9 +34,8 @@ def get(identifier):
         return None
     if isinstance(identifier, str):
         return deserialize(str(identifier))
-    elif callable(identifier):
+    if callable(identifier):
         return identifier
-    else:
-        raise ValueError(
-            "Could not interpret quantization function identifier:", identifier
-        )
+    raise ValueError(
+        "Could not interpret quantization function identifier:", identifier
+    )
