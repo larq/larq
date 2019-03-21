@@ -1,4 +1,5 @@
 import tensorflow as tf
+from xquant import utils
 
 
 class QuantizerBase(tf.keras.layers.Layer):
@@ -15,33 +16,41 @@ class QuantizerBase(tf.keras.layers.Layer):
         return super().call(inputs)
 
 
+@utils.register_keras_custom_object
 class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D):
     pass
 
 
+@utils.register_keras_custom_object
 class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     pass
