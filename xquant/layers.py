@@ -11,10 +11,17 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def call(self, inputs):
         if self.kernel_quantizer:
+            full_precision_kernel = self.kernel
             self.kernel = self.kernel_quantizer(self.kernel)
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-        return super().call(inputs)
+
+        output = super().call(inputs)
+        if self.kernel_quantizer:
+            # Reset the full precision kernel to make keras eager tests pass.
+            # Is this a problem with our unit tests or a real bug?
+            self.kernel = full_precision_kernel
+        return output
 
     def get_config(self):
         config = {
