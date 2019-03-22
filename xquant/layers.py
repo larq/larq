@@ -4,17 +4,17 @@ from xquant import quantizers
 
 
 class QuantizerBase(tf.keras.layers.Layer):
-    def __init__(self, *args, kernel_quantizer=None, input_quantizer=None, **kwargs):
+    def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.kernel_quantizer = quantizers.get(kernel_quantizer)
         self.input_quantizer = quantizers.get(input_quantizer)
+        self.kernel_quantizer = quantizers.get(kernel_quantizer)
 
     def call(self, inputs):
+        if self.input_quantizer:
+            inputs = self.input_quantizer(inputs)
         if self.kernel_quantizer:
             full_precision_kernel = self.kernel
             self.kernel = self.kernel_quantizer(self.kernel)
-        if self.input_quantizer:
-            inputs = self.input_quantizer(inputs)
 
         output = super().call(inputs)
         if self.kernel_quantizer:
@@ -25,8 +25,8 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def get_config(self):
         config = {
-            "kernel_quantizer": quantizers.serialize(self.kernel_quantizer),
             "input_quantizer": quantizers.serialize(self.input_quantizer),
+            "kernel_quantizer": quantizers.serialize(self.kernel_quantizer),
         }
         return {**super().get_config(), **config}
 
@@ -35,15 +35,15 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
     def __init__(
         self,
         *args,
+        input_quantizer=None,
         depthwise_quantizer=None,
         pointwise_quantizer=None,
-        input_quantizer=None,
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+        self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
-        self.input_quantizer = quantizers.get(input_quantizer)
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -66,9 +66,9 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
 
     def get_config(self):
         config = {
+            "input_quantizer": quantizers.serialize(self.input_quantizer),
             "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
             "pointwise_quantizer": quantizers.serialize(self.pointwise_quantizer),
-            "input_quantizer": quantizers.serialize(self.input_quantizer),
         }
         return {**super().get_config(), **config}
 
