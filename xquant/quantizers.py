@@ -12,6 +12,20 @@ def sign_ste(x):
 
 
 @utils.register_keras_custom_object
+@tf.custom_gradient
+def approx_sign(x):
+    def grad(dy):
+        return (1 - tf.abs(x)) * 2 * dy
+
+    return tf.sign(x), grad
+
+
+@utils.register_keras_custom_object
+def approx_sign_clip(x):
+    return approx_sign(tf.clip_by_value(x, -1, 1))
+
+
+@utils.register_keras_custom_object
 def sign_clip_ste(x):
     return sign_ste(tf.clip_by_value(x, -1, 1))
 
