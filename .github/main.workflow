@@ -1,6 +1,12 @@
-workflow "Lint" {
+workflow "Testing" {
   on = "push"
-  resolves = ["Black Code Formatter", "Pyflakes Syntax Checker"]
+  resolves = [
+    "Black Code Formatter",
+    "Pyflakes Syntax Checker",
+    "Python 3.6 TF 1",
+    "Python 3.7 TF 1",
+    "Python 3.7 TF 2",
+  ]
 }
 
 action "Black Code Formatter" {
@@ -10,15 +16,6 @@ action "Black Code Formatter" {
 
 action "Pyflakes Syntax Checker" {
   uses = "lgeiger/pyflakes-action@v1.0.1"
-}
-
-workflow "Unit tests" {
-  on = "push"
-  resolves = [
-    "Python 3.6 TF 1",
-    "Python 3.7 TF 1",
-    "Python 3.7 TF 2",
-  ]
 }
 
 action "Python 3.6 TF 1" {
