@@ -14,7 +14,7 @@ generate:
     - xquant.layers.QuantLocallyConnected1D
     - xquant.layers.QuantLocallyConnected2D
 pages:
-- Home: index.md << ../README.md
+- Home: index.md << README.md
 - Quantized Layers: layers.md
 
 headers: markdown
