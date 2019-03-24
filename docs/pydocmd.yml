@@ -1,0 +1,28 @@
+site_name: XQuant
+site_description: 'An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks'
+generate:
+- layers.md:
+  - xquant.layers+
+pages:
+- Home: index.md << ../README.md
+- Quantized Layers: layers.md
+
+headers: markdown
+repo_url: https://github.com/lgeiger/xquant
+theme: material
+
+extra:
+  social:
+    - type: 'github'
+      link: 'https://github.com/plumerai'
+    - type: 'twitter'
+      link: 'https://twitter.com/PlumeraiLab'
+    - type: 'linkedin'
+      link: 'https://www.linkedin.com/company/plumerai/'
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - toc:
+      permalink: true
