@@ -16,6 +16,8 @@ generate:
 pages:
 - Home: index.md << README.md
 - Quantized Layers: layers.md
+- Examples:
+  - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
 
 headers: markdown
 repo_url: https://github.com/lgeiger/xquant
@@ -36,3 +38,7 @@ markdown_extensions:
   - pymdownx.superfences
   - toc:
       permalink: true
+
+plugins:
+  - mknotebooks:
+      execute: false
