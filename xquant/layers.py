@@ -90,6 +90,77 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
 
 
 @utils.register_keras_custom_object
+class QuantDense(QuantizerBase, tf.keras.layers.Dense):
+    """Just your regular densely-connected quantized NN layer.
+
+    `QuantDense` implements the operation:
+    `output = activation(dot(input_quantizer(input), kernel_quantizer(kernel)) + bias)`,
+    where `activation` is the element-wise activation function passed as the
+    `activation` argument, `kernel` is a weights matrix created by the layer, and `bias`
+    is a bias vector created by the layer (only applicable if `use_bias` is `True`).
+    `input_quantizer` and `kernel_quantizer` are the element-wise quantization
+    functions to use. If both quantization functions are `None` this layer is
+    equivalent to `Dense`.
+
+    !!! note ""
+        If the input to the layer has a rank greater than 2, then it is flattened
+        prior to the initial dot product with `kernel`.
+
+    !!! example
+        ```python
+        # as first layer in a sequential model:
+        model = Sequential()
+        model.add(
+            QuantDense(
+                32,
+                input_quantizer="sign_clip_ste",
+                kernel_quantizer="sign_clip_ste",
+                input_shape=(16,),
+            )
+        )
+        # now the model will take as input arrays of shape (*, 16)
+        # and output arrays of shape (*, 32)
+
+        # after the first layer, you don't need to specify
+        # the size of the input anymore:
+        model.add(
+            QuantDense(
+                32,
+                input_quantizer="sign_clip_ste",
+                kernel_quantizer="sign_clip_ste",
+            )
+        )
+        ```
+
+    # Arguments
+    units: Positive integer, dimensionality of the output space.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the `kernel` weights matrix.
+    bias_constraint: Constraint function applied to the bias vector.
+
+    # Input shape
+    N-D tensor with shape: `(batch_size, ..., input_dim)`. The most common situation
+    would be a 2D input with shape `(batch_size, input_dim)`.
+
+    # Output shape
+    N-D tensor with shape: `(batch_size, ..., units)`. For instance, for a 2D input with
+    shape `(batch_size, input_dim)`, the output would have shape `(batch_size, units)`.
+    """
+
+    pass
+
+
+@utils.register_keras_custom_object
 class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     """1D quantized convolution layer (e.g. temporal convolution).
 
@@ -287,6 +358,144 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         data_format='channels_last'.
     `new_conv_dim1`, `new_conv_dim2` and `new_conv_dim3` values might have
         changed due to padding.
+    """
+
+    pass
+
+
+@utils.register_keras_custom_object
+class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv1D):
+    """Depthwise separable 1D quantized convolution.
+
+    This layer performs a depthwise convolution that acts separately on channels,
+    followed by a pointwise convolution that mixes channels.
+    `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
+    element-wise quantization functions to use. If all quantization functions are `None`
+    this layer is equivalent to `SeparableConv1D`. If `use_bias` is True and
+    a bias initializer is provided, it adds a bias vector to the output.
+    It then optionally applies an activation function to produce the final output.
+
+    # Arguments
+    filters: Integer, the dimensionality of the output space (i.e. the number
+        of filters in the convolution).
+    kernel_size: A single integer specifying the spatial dimensions of the filters.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the depthwise kernel.
+    pointwise_quantizer: Quantization function applied to the pointwise kernel.
+    strides: A single integer specifying the strides of the convolution.
+        Specifying any `stride` value != 1 is incompatible with specifying
+        any `dilation_rate` value != 1.
+    padding: One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds
+        to inputs with shape `(batch, length, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, length)`.
+    dilation_rate: A single integer, specifying the dilation rate to use for dilated
+        convolution. Currently, specifying any `dilation_rate` value != 1 is
+        incompatible with specifying any stride value != 1.
+    depth_multiplier: The number of depthwise convolution output channels for
+        each input channel. The total number of depthwise convolution output
+        channels will be equal to `num_filters_in * depth_multiplier`.
+    activation: Activation function. Set it to None to maintain a linear activation.
+    use_bias: Boolean, whether the layer uses a bias.
+    depthwise_initializer: An initializer for the depthwise convolution kernel.
+    pointwise_initializer: An initializer for the pointwise convolution kernel.
+    bias_initializer: An initializer for the bias vector. If None, the default
+        initializer will be used.
+    depthwise_regularizer: Optional regularizer for the depthwise convolution kernel.
+    pointwise_regularizer: Optional regularizer for the pointwise convolution kernel.
+    bias_regularizer: Optional regularizer for the bias vector.
+    activity_regularizer: Optional regularizer function for the output.
+    depthwise_constraint: Optional projection function to be applied to the
+        depthwise kernel after being updated by an `Optimizer`
+        (e.g. used for norm constraints or value constraints for layer weights).
+        The function must take as input the unprojected variable and must return
+        the projected variable (which must have the same shape). Constraints are
+        not safe to use when doing asynchronous distributed training.
+    pointwise_constraint: Optional projection function to be applied to the
+        pointwise kernel after being updated by an `Optimizer`.
+    bias_constraint: Optional projection function to be applied to the
+        bias after being updated by an `Optimizer`.
+    trainable: Boolean, if `True` the weights of this layer will be marked as
+        trainable (and listed in `layer.trainable_weights`).
+    name: A string, the name of the layer.
+    """
+
+    pass
+
+
+@utils.register_keras_custom_object
+class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv2D):
+    """Depthwise separable 2D convolution.
+
+    Separable convolutions consist in first performing a depthwise spatial convolution
+    (which acts on each input channel separately) followed by a pointwise convolution
+    which mixes together the resulting output channels. The `depth_multiplier` argument
+    controls how many output channels are generated per input channel
+    in the depthwise step.
+    `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
+    element-wise quantization functions to use. If all quantization functions are `None`
+    this layer is equivalent to `SeparableConv1D`. If `use_bias` is True and
+    a bias initializer is provided, it adds a bias vector to the output.
+    It then optionally applies an activation function to produce the final output.
+
+    Intuitively, separable convolutions can be understood as a way to factorize a
+    convolution kernel into two smaller kernels,
+    or as an extreme version of an Inception block.
+
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 2 integers, specifying the height and
+        width of the 2D convolution window. Can be a single integer to specify the
+        same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the depthwise kernel matrix.
+    pointwise_quantizer: Quantization function applied to the pointwise kernel matrix.
+    strides: An integer or tuple/list of 2 integers, specifying the strides of the
+        convolution along the height and width. Can be a single integer to specify
+        the same value for all spatial dimensions. Specifying any stride value != 1
+        is incompatible with specifying any `dilation_rate` value != 1.
+    padding: one of `"valid"` or `"same"` (case-insensitive).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds to
+        inputs with shape `(batch, height, width, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, height, width)`. It
+        defaults to the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    dilation_rate: An integer or tuple/list of 2 integers, specifying the dilation rate
+        to use for dilated convolution. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any `strides` value != 1.
+    depth_multiplier: The number of depthwise convolution output channels for each
+        input channel. The total number of depthwise convolution output channels
+        will be equal to `filters_in * depth_multiplier`.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    depthwise_initializer: Initializer for the depthwise kernel matrix.
+    pointwise_initializer: Initializer for the pointwise kernel matrix.
+    bias_initializer: Initializer for the bias vector.
+    depthwise_regularizer: Regularizer function applied to the depthwise kernel matrix.
+    pointwise_regularizer: Regularizer function applied to the pointwise kernel matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    depthwise_constraint: Constraint function applied to the depthwise kernel matrix.
+    pointwise_constraint: Constraint function applied to the pointwise kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
+
+    # Input shape
+    4D tensor with shape:
+    `(batch, channels, rows, cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(batch, rows, cols, channels)` if data_format='channels_last'.
+
+    # Output shape
+    4D tensor with shape:
+    `(batch, filters, new_rows, new_cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(batch, new_rows, new_cols, filters)` if data_format='channels_last'.
+    `rows` and `cols` values might have changed due to padding.
     """
 
     pass
@@ -631,215 +840,6 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     `(samples, filters, new_rows, new_cols)` if data_format='channels_first'
     or 4D tensor with shape:
     `(samples, new_rows, new_cols, filters)` if data_format='channels_last'.
-    `rows` and `cols` values might have changed due to padding.
-    """
-
-    pass
-
-
-@utils.register_keras_custom_object
-class QuantDense(QuantizerBase, tf.keras.layers.Dense):
-    """Just your regular densely-connected quantized NN layer.
-
-    `QuantDense` implements the operation:
-    `output = activation(dot(input_quantizer(input), kernel_quantizer(kernel)) + bias)`,
-    where `activation` is the element-wise activation function passed as the
-    `activation` argument, `kernel` is a weights matrix created by the layer, and `bias`
-    is a bias vector created by the layer (only applicable if `use_bias` is `True`).
-    `input_quantizer` and `kernel_quantizer` are the element-wise quantization
-    functions to use. If both quantization functions are `None` this layer is
-    equivalent to `Dense`.
-
-    !!! note ""
-        If the input to the layer has a rank greater than 2, then it is flattened
-        prior to the initial dot product with `kernel`.
-
-    !!! example
-        ```python
-        # as first layer in a sequential model:
-        model = Sequential()
-        model.add(
-            QuantDense(
-                32,
-                input_quantizer="sign_clip_ste",
-                kernel_quantizer="sign_clip_ste",
-                input_shape=(16,),
-            )
-        )
-        # now the model will take as input arrays of shape (*, 16)
-        # and output arrays of shape (*, 32)
-
-        # after the first layer, you don't need to specify
-        # the size of the input anymore:
-        model.add(
-            QuantDense(
-                32,
-                input_quantizer="sign_clip_ste",
-                kernel_quantizer="sign_clip_ste",
-            )
-        )
-        ```
-
-    # Arguments
-    units: Positive integer, dimensionality of the output space.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-    activation: Activation function to use. If you don't specify anything,
-        no activation is applied (`a(x) = x`).
-    use_bias: Boolean, whether the layer uses a bias vector.
-    kernel_initializer: Initializer for the `kernel` weights matrix.
-    bias_initializer: Initializer for the bias vector.
-    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-    bias_regularizer: Regularizer function applied to the bias vector.
-    activity_regularizer: Regularizer function applied to
-        the output of the layer (its "activation").
-    kernel_constraint: Constraint function applied to the `kernel` weights matrix.
-    bias_constraint: Constraint function applied to the bias vector.
-
-    # Input shape
-    N-D tensor with shape: `(batch_size, ..., input_dim)`. The most common situation
-    would be a 2D input with shape `(batch_size, input_dim)`.
-
-    # Output shape
-    N-D tensor with shape: `(batch_size, ..., units)`. For instance, for a 2D input with
-    shape `(batch_size, input_dim)`, the output would have shape `(batch_size, units)`.
-    """
-
-    pass
-
-
-@utils.register_keras_custom_object
-class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv1D):
-    """Depthwise separable 1D quantized convolution.
-
-    This layer performs a depthwise convolution that acts separately on channels,
-    followed by a pointwise convolution that mixes channels.
-    `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
-    element-wise quantization functions to use. If all quantization functions are `None`
-    this layer is equivalent to `SeparableConv1D`. If `use_bias` is True and
-    a bias initializer is provided, it adds a bias vector to the output.
-    It then optionally applies an activation function to produce the final output.
-
-    # Arguments
-    filters: Integer, the dimensionality of the output space (i.e. the number
-        of filters in the convolution).
-    kernel_size: A single integer specifying the spatial dimensions of the filters.
-    input_quantizer: Quantization function applied to the input of the layer.
-    depthwise_quantizer: Quantization function applied to the depthwise kernel.
-    pointwise_quantizer: Quantization function applied to the pointwise kernel.
-    strides: A single integer specifying the strides of the convolution.
-        Specifying any `stride` value != 1 is incompatible with specifying
-        any `dilation_rate` value != 1.
-    padding: One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
-    data_format: A string, one of `channels_last` (default) or `channels_first`.
-        The ordering of the dimensions in the inputs. `channels_last` corresponds
-        to inputs with shape `(batch, length, channels)` while `channels_first`
-        corresponds to inputs with shape `(batch, channels, length)`.
-    dilation_rate: A single integer, specifying the dilation rate to use for dilated
-        convolution. Currently, specifying any `dilation_rate` value != 1 is
-        incompatible with specifying any stride value != 1.
-    depth_multiplier: The number of depthwise convolution output channels for
-        each input channel. The total number of depthwise convolution output
-        channels will be equal to `num_filters_in * depth_multiplier`.
-    activation: Activation function. Set it to None to maintain a linear activation.
-    use_bias: Boolean, whether the layer uses a bias.
-    depthwise_initializer: An initializer for the depthwise convolution kernel.
-    pointwise_initializer: An initializer for the pointwise convolution kernel.
-    bias_initializer: An initializer for the bias vector. If None, the default
-        initializer will be used.
-    depthwise_regularizer: Optional regularizer for the depthwise convolution kernel.
-    pointwise_regularizer: Optional regularizer for the pointwise convolution kernel.
-    bias_regularizer: Optional regularizer for the bias vector.
-    activity_regularizer: Optional regularizer function for the output.
-    depthwise_constraint: Optional projection function to be applied to the
-        depthwise kernel after being updated by an `Optimizer`
-        (e.g. used for norm constraints or value constraints for layer weights).
-        The function must take as input the unprojected variable and must return
-        the projected variable (which must have the same shape). Constraints are
-        not safe to use when doing asynchronous distributed training.
-    pointwise_constraint: Optional projection function to be applied to the
-        pointwise kernel after being updated by an `Optimizer`.
-    bias_constraint: Optional projection function to be applied to the
-        bias after being updated by an `Optimizer`.
-    trainable: Boolean, if `True` the weights of this layer will be marked as
-        trainable (and listed in `layer.trainable_weights`).
-    name: A string, the name of the layer.
-    """
-
-    pass
-
-
-@utils.register_keras_custom_object
-class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv2D):
-    """Depthwise separable 2D convolution.
-
-    Separable convolutions consist in first performing a depthwise spatial convolution
-    (which acts on each input channel separately) followed by a pointwise convolution
-    which mixes together the resulting output channels. The `depth_multiplier` argument
-    controls how many output channels are generated per input channel
-    in the depthwise step.
-    `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
-    element-wise quantization functions to use. If all quantization functions are `None`
-    this layer is equivalent to `SeparableConv1D`. If `use_bias` is True and
-    a bias initializer is provided, it adds a bias vector to the output.
-    It then optionally applies an activation function to produce the final output.
-
-    Intuitively, separable convolutions can be understood as a way to factorize a
-    convolution kernel into two smaller kernels,
-    or as an extreme version of an Inception block.
-
-    # Arguments
-    filters: Integer, the dimensionality of the output space
-        (i.e. the number of output filters in the convolution).
-    kernel_size: An integer or tuple/list of 2 integers, specifying the height and
-        width of the 2D convolution window. Can be a single integer to specify the
-        same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    depthwise_quantizer: Quantization function applied to the depthwise kernel matrix.
-    pointwise_quantizer: Quantization function applied to the pointwise kernel matrix.
-    strides: An integer or tuple/list of 2 integers, specifying the strides of the
-        convolution along the height and width. Can be a single integer to specify
-        the same value for all spatial dimensions. Specifying any stride value != 1
-        is incompatible with specifying any `dilation_rate` value != 1.
-    padding: one of `"valid"` or `"same"` (case-insensitive).
-    data_format: A string, one of `channels_last` (default) or `channels_first`.
-        The ordering of the dimensions in the inputs. `channels_last` corresponds to
-        inputs with shape `(batch, height, width, channels)` while `channels_first`
-        corresponds to inputs with shape `(batch, channels, height, width)`. It
-        defaults to the `image_data_format` value found in your Keras config file at
-        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
-    dilation_rate: An integer or tuple/list of 2 integers, specifying the dilation rate
-        to use for dilated convolution. Currently, specifying any `dilation_rate`
-        value != 1 is incompatible with specifying any `strides` value != 1.
-    depth_multiplier: The number of depthwise convolution output channels for each
-        input channel. The total number of depthwise convolution output channels
-        will be equal to `filters_in * depth_multiplier`.
-    activation: Activation function to use. If you don't specify anything,
-        no activation is applied (`a(x) = x`).
-    use_bias: Boolean, whether the layer uses a bias vector.
-    depthwise_initializer: Initializer for the depthwise kernel matrix.
-    pointwise_initializer: Initializer for the pointwise kernel matrix.
-    bias_initializer: Initializer for the bias vector.
-    depthwise_regularizer: Regularizer function applied to the depthwise kernel matrix.
-    pointwise_regularizer: Regularizer function applied to the pointwise kernel matrix.
-    bias_regularizer: Regularizer function applied to the bias vector.
-    activity_regularizer: Regularizer function applied to
-        the output of the layer (its "activation").
-    depthwise_constraint: Constraint function applied to the depthwise kernel matrix.
-    pointwise_constraint: Constraint function applied to the pointwise kernel matrix.
-    bias_constraint: Constraint function applied to the bias vector.
-
-    # Input shape
-    4D tensor with shape:
-    `(batch, channels, rows, cols)` if data_format='channels_first'
-    or 4D tensor with shape:
-    `(batch, rows, cols, channels)` if data_format='channels_last'.
-
-    # Output shape
-    4D tensor with shape:
-    `(batch, filters, new_rows, new_cols)` if data_format='channels_first'
-    or 4D tensor with shape:
-    `(batch, new_rows, new_cols, filters)` if data_format='channels_last'.
     `rows` and `cols` values might have changed due to padding.
     """
 
