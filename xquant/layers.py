@@ -106,46 +106,43 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     10 vectors of 128-dimensional vectors, or `(None, 128)` for variable-length
     sequences of 128-dimensional vectors.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of a single integer,
-            specifying the length of the 1D convolution window.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of a single integer, specifying the stride
-            length of the convolution. Specifying any stride value != 1 is incompatible
-            with specifying any `dilation_rate` value != 1.
-        padding: One of `"valid"`, `"causal"` or `"same"` (case-insensitive).
-            `"causal"` results in causal (dilated) convolutions, e.g. output[t]
-            does not depend on input[t+1:]. Useful when modeling temporal data
-            where the model should not violate the temporal order.
-            See [WaveNet: A Generative Model for Raw Audio, section
-                2.1](https://arxiv.org/abs/1609.03499).
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-        dilation_rate: an integer or tuple/list of a single integer, specifying
-            the dilation rate to use for dilated convolution.
-            Currently, specifying any `dilation_rate` value != 1 is
-            incompatible with specifying any `strides` value != 1.
-        activation: Activation function to use.
-            If you don't specify anything, no activation is applied
-            (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation")..
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of a single integer,
+        specifying the length of the 1D convolution window.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of a single integer, specifying the stride
+        length of the convolution. Specifying any stride value != 1 is incompatible
+        with specifying any `dilation_rate` value != 1.
+    padding: One of `"valid"`, `"causal"` or `"same"` (case-insensitive). `"causal"`
+        results in causal (dilated) convolutions, e.g. output[t] does not depend on
+        input[t+1:]. Useful when modeling temporal data where the model should not
+        violate the temporal order. See [WaveNet: A Generative Model for Raw Audio,
+            section 2.1](https://arxiv.org/abs/1609.03499).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+    dilation_rate: an integer or tuple/list of a single integer, specifying the dilation
+        rate to use for dilated convolution. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any `strides` value != 1.
+    activation: Activation function to use. If you don't specify anything, no activation
+        is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        3D tensor with shape: `(batch_size, steps, input_dim)`
+    # Input shape
+    3D tensor with shape: `(batch_size, steps, input_dim)`
 
-    Output shape:
-        3D tensor with shape: `(batch_size, new_steps, filters)`
-            `steps` value might have changed due to padding or strides.
+    # Output shape
+    3D tensor with shape: `(batch_size, new_steps, filters)`.
+    `steps` value might have changed due to padding or strides.
     """
 
     pass
@@ -168,57 +165,53 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures in
     `data_format="channels_last"`.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of 2 integers, specifying the
-            height and width of the 2D convolution window. Can be a single integer
-            to specify the same value for all spatial dimensions.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of 2 integers, specifying the strides of
-            the convolution along the height and width. Can be a single integer to
-            specify the same value for all spatial dimensions. Specifying any stride
-            value != 1 is incompatible with specifying any `dilation_rate` value != 1.
-        padding: one of `"valid"` or `"same"` (case-insensitive).
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs. `channels_last` corresponds
-            to inputs with shape `(batch, height, width, channels)`
-            while `channels_first` corresponds to inputs with shape
-            `(batch, channels, height, width)`.
-            It defaults to the `image_data_format` value found in your
-            Keras config file at `~/.keras/keras.json`.
-            If you never set it, then it will be "channels_last".
-        dilation_rate: an integer or tuple/list of 2 integers, specifying
-            the dilation rate to use for dilated convolution. Can be a single integer
-            to specify the same value for all spatial dimensions.
-            Currently, specifying any `dilation_rate` value != 1 is
-            incompatible with specifying any stride value != 1.
-        activation: Activation function to use.
-            If you don't specify anything, no activation is applied
-            (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 2 integers, specifying the
+        height and width of the 2D convolution window. Can be a single integer
+        to specify the same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of 2 integers, specifying the strides of
+        the convolution along the height and width. Can be a single integer to
+        specify the same value for all spatial dimensions. Specifying any stride
+        value != 1 is incompatible with specifying any `dilation_rate` value != 1.
+    padding: one of `"valid"` or `"same"` (case-insensitive).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds to
+        inputs with shape `(batch, height, width, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, height, width)`. It defaults
+        to the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    dilation_rate: an integer or tuple/list of 2 integers, specifying the dilation rate
+        to use for dilated convolution. Can be a single integer to specify the same
+        value for all spatial dimensions. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any stride value != 1.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        4D tensor with shape:
-        `(samples, channels, rows, cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(samples, rows, cols, channels)` if data_format='channels_last'.
+    # Input shape
+    4D tensor with shape:
+    `(samples, channels, rows, cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(samples, rows, cols, channels)` if data_format='channels_last'.
 
-    Output shape:
-        4D tensor with shape:
-        `(samples, filters, new_rows, new_cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(samples, new_rows, new_cols, filters)` if data_format='channels_last'.
-        `rows` and `cols` values might have changed due to padding.
+    # Output shape
+    4D tensor with shape:
+    `(samples, filters, new_rows, new_cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(samples, new_rows, new_cols, filters)` if data_format='channels_last'.
+    `rows` and `cols` values might have changed due to padding.
     """
 
     pass
@@ -241,64 +234,59 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     e.g. `input_shape=(128, 128, 128, 1)` for 128x128x128 volumes
     with a single channel, in `data_format="channels_last"`.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of 3 integers, specifying the
-            depth, height and width of the 3D convolution window. Can be a single
-            integer to specify the same value for all spatial dimensions.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of 3 integers, specifying the strides of
-            the convolution along each spatial dimension. Can be a single integer
-            to specify the same value for all spatial dimensions.
-            Specifying any stride value != 1 is incompatible with specifying
-            any `dilation_rate` value != 1.
-        padding: one of `"valid"` or `"same"` (case-insensitive).
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs.
-            `channels_last` corresponds to inputs with shape
-            `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
-            while `channels_first` corresponds to inputs with shape
-            `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
-            It defaults to the `image_data_format` value found in your
-            Keras config file at `~/.keras/keras.json`.
-            If you never set it, then it will be "channels_last".
-        dilation_rate: an integer or tuple/list of 3 integers, specifying
-            the dilation rate to use for dilated convolution.
-            Can be a single integer to specify the same value for
-            all spatial dimensions.
-            Currently, specifying any `dilation_rate` value != 1 is
-            incompatible with specifying any stride value != 1.
-        activation: Activation function to use. If you don't specify anything,
-            no activation is applied (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 3 integers, specifying the
+        depth, height and width of the 3D convolution window. Can be a single
+        integer to specify the same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of 3 integers, specifying the strides of the
+        convolution along each spatial dimension. Can be a single integer to specify the
+        same value for all spatial dimensions. Specifying any stride value != 1 is
+        incompatible with specifying any `dilation_rate` value != 1.
+    padding: one of `"valid"` or `"same"` (case-insensitive).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds to
+        inputs with shape `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+        while `channels_first` corresponds to inputs with shape
+        `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`. It defaults to
+        the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    dilation_rate: an integer or tuple/list of 3 integers, specifying the dilation rate
+        to use for dilated convolution. Can be a single integer to specify the same
+        value for all spatial dimensions. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any stride value != 1.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        5D tensor with shape:
-        `(samples, channels, conv_dim1, conv_dim2, conv_dim3)` if
-            data_format='channels_first'
-        or 5D tensor with shape:
-        `(samples, conv_dim1, conv_dim2, conv_dim3, channels)` if
-            data_format='channels_last'.
+    # Input shape
+    5D tensor with shape:
+    `(samples, channels, conv_dim1, conv_dim2, conv_dim3)` if
+        data_format='channels_first'
+    or 5D tensor with shape:
+    `(samples, conv_dim1, conv_dim2, conv_dim3, channels)` if
+        data_format='channels_last'.
 
-    Output shape:
-        5D tensor with shape:
-        `(samples, filters, new_conv_dim1, new_conv_dim2, new_conv_dim3)` if
-            data_format='channels_first'
-        or 5D tensor with shape:
-        `(samples, new_conv_dim1, new_conv_dim2, new_conv_dim3, filters)` if
-            data_format='channels_last'.
-        `new_conv_dim1`, `new_conv_dim2` and `new_conv_dim3` values might have
-            changed due to padding.
+    # Output shape
+    5D tensor with shape:
+    `(samples, filters, new_conv_dim1, new_conv_dim2, new_conv_dim3)` if
+        data_format='channels_first'
+    or 5D tensor with shape:
+    `(samples, new_conv_dim1, new_conv_dim2, new_conv_dim3, filters)` if
+        data_format='channels_last'.
+    `new_conv_dim1`, `new_conv_dim2` and `new_conv_dim3` values might have
+        changed due to padding.
     """
 
     pass
@@ -321,67 +309,65 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     `input_shape=(128, 128, 3)` for 128x128 RGB pictures in
     `data_format="channels_last"`.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of 2 integers, specifying the
-            height and width of the 2D convolution window. Can be a single integer
-            to specify the same value for all spatial dimensions.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of 2 integers, specifying the strides of
-            the convolution along the height and width. Can be a single integer to
-            specify the same value for all spatial dimensions. Specifying any stride
-            value != 1 is incompatible with specifying any `dilation_rate` value != 1.
-        padding: one of `"valid"` or `"same"` (case-insensitive).
-        output_padding: An integer or tuple/list of 2 integers, specifying the amount
-            of padding along the height and width of the output tensor. Can be a single
-            integer to specify the same value for all spatial dimensions. The amount of
-            output padding along a given dimension must be lower than the stride along
-            that same dimension.
-            If set to `None` (default), the output shape is inferred.
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs. `channels_last` corresponds
-            to inputs with shape `(batch, height, width, channels)` while
-            `channels_first` corresponds to inputs with shape
-            `(batch, channels, height, width)`. It defaults to the `image_data_format`
-            value found in your Keras config file at `~/.keras/keras.json`.
-            If you never set it, then it will be "channels_last".
-        dilation_rate: an integer or tuple/list of 2 integers, specifying
-            the dilation rate to use for dilated convolution. Can be a single integer
-            to specify the same value for all spatial dimensions. Currently, specifying
-            any `dilation_rate` value != 1 is incompatible with specifying any
-            stride value != 1.
-        activation: Activation function to use. If you don't specify anything,
-            no activation is applied (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 2 integers, specifying the
+        height and width of the 2D convolution window. Can be a single integer
+        to specify the same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of 2 integers, specifying the strides of
+        the convolution along the height and width. Can be a single integer to
+        specify the same value for all spatial dimensions. Specifying any stride
+        value != 1 is incompatible with specifying any `dilation_rate` value != 1.
+    padding: one of `"valid"` or `"same"` (case-insensitive).
+    output_padding: An integer or tuple/list of 2 integers, specifying the amount
+        of padding along the height and width of the output tensor. Can be a single
+        integer to specify the same value for all spatial dimensions. The amount of
+        output padding along a given dimension must be lower than the stride along
+        that same dimension.
+        If set to `None` (default), the output shape is inferred.
+    data_format: A string, one of `channels_last` (default) or `channels_first`. The
+        ordering of the dimensions in the inputs. `channels_last` corresponds to inputs
+        with shape `(batch, height, width, channels)` while `channels_first` corresponds
+        to inputs with shape `(batch, channels, height, width)`. It defaults to the
+        `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    dilation_rate: an integer or tuple/list of 2 integers, specifying the dilation rate
+        to use for dilated convolution. Can be a single integer to specify the same
+        value for all spatial dimensions. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any stride value != 1.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        4D tensor with shape:
-        `(batch, channels, rows, cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(batch, rows, cols, channels)` if data_format='channels_last'.
+    # Input shape
+    4D tensor with shape:
+    `(batch, channels, rows, cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(batch, rows, cols, channels)` if data_format='channels_last'.
 
-    Output shape:
-        4D tensor with shape:
-        `(batch, filters, new_rows, new_cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(batch, new_rows, new_cols, filters)` if data_format='channels_last'.
-        `rows` and `cols` values might have changed due to padding.
+    # Output shape
+    4D tensor with shape:
+    `(batch, filters, new_rows, new_cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(batch, new_rows, new_cols, filters)` if data_format='channels_last'.
+    `rows` and `cols` values might have changed due to padding.
 
-    References:
-        - [A guide to convolution arithmetic for deep
-          learning](https://arxiv.org/abs/1603.07285v1)
-        - [Deconvolutional
-          Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+    # References
+    - [A guide to convolution arithmetic for deep
+      learning](https://arxiv.org/abs/1603.07285v1)
+    - [Deconvolutional
+      Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
     """
 
     pass
@@ -405,69 +391,64 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     e.g. `input_shape=(128, 128, 128, 3)` for a 128x128x128 volume with 3 channels
     if `data_format="channels_last"`.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of 3 integers, specifying the
-            depth, height and width of the 3D convolution window.
-            Can be a single integer to specify the same value for
-            all spatial dimensions.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of 3 integers, specifying the strides of the
-            convolution along the depth, height and width. Can be a single integer to
-            specify the same value for all spatial dimensions. Specifying any stride
-            value != 1 is incompatible with specifying any `dilation_rate` value != 1.
-        padding: one of `"valid"` or `"same"` (case-insensitive).
-        output_padding: An integer or tuple/list of 3 integers, specifying the amount
-            of padding along the depth, height, and width. Can be a single integer to
-            specify the same value for all spatial dimensions. The amount of output
-            padding along a given dimension must be lower than the stride along that
-            same dimension. If set to `None` (default), the output shape is inferred.
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs. `channels_last` corresponds
-            to inputs with shape `(batch, depth, height, width, channels)` while
-            `channels_first` corresponds to inputs with shape
-            `(batch, channels, depth, height, width)`. It defaults to the
-            `image_data_format` value found in your Keras config file at
-            `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
-        dilation_rate: an integer or tuple/list of 3 integers, specifying the dilation
-            rate to use for dilated convolution. Can be a single integer to specify the
-            same value for all spatial dimensions. Currently, specifying any
-            `dilation_rate` value != 1 is incompatible with specifying any
-            stride value != 1.
-        activation: Activation function to use. If you don't specify anything,
-            no activation is applied (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 3 integers, specifying the depth, height
+        and width of the 3D convolution window. Can be a single integer to specify the
+        same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of 3 integers, specifying the strides of the
+        convolution along the depth, height and width. Can be a single integer to
+        specify the same value for all spatial dimensions. Specifying any stride
+        value != 1 is incompatible with specifying any `dilation_rate` value != 1.
+    padding: one of `"valid"` or `"same"` (case-insensitive).
+    output_padding: An integer or tuple/list of 3 integers, specifying the amount
+        of padding along the depth, height, and width. Can be a single integer to
+        specify the same value for all spatial dimensions. The amount of output
+        padding along a given dimension must be lower than the stride along that
+        same dimension. If set to `None` (default), the output shape is inferred.
+    data_format: A string, one of `channels_last` (default) or `channels_first`. The
+        ordering of the dimensions in the inputs. `channels_last` corresponds to inputs
+        with shape `(batch, depth, height, width, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, depth, height, width)`.
+        It defaults to the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    dilation_rate: an integer or tuple/list of 3 integers, specifying the dilation
+        rate to use for dilated convolution. Can be a single integer to specify the
+        same value for all spatial dimensions. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any stride value != 1.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        5D tensor with shape:
-        `(batch, channels, depth, rows, cols)` if data_format='channels_first'
-        or 5D tensor with shape:
-        `(batch, depth, rows, cols, channels)` if data_format='channels_last'.
+    # Input shape
+    5D tensor with shape:
+    `(batch, channels, depth, rows, cols)` if data_format='channels_first'
+    or 5D tensor with shape:
+    `(batch, depth, rows, cols, channels)` if data_format='channels_last'.
 
-    Output shape:
-        5D tensor with shape:
-        `(batch, filters, new_depth, new_rows, new_cols)` if
-          data_format='channels_first'
-        or 5D tensor with shape:
-        `(batch, new_depth, new_rows, new_cols, filters)` if
-          data_format='channels_last'.
-        `depth` and `rows` and `cols` values might have changed due to padding.
+    # Output shape
+    5D tensor with shape:
+    `(batch, filters, new_depth, new_rows, new_cols)` if data_format='channels_first'
+    or 5D tensor with shape:
+    `(batch, new_depth, new_rows, new_cols, filters)` if data_format='channels_last'.
+    `depth` and `rows` and `cols` values might have changed due to padding.
 
-    References:
-        - [A guide to convolution arithmetic for deep
-          learning](https://arxiv.org/abs/1603.07285v1)
-        - [Deconvolutional
-          Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+    # References
+    - [A guide to convolution arithmetic for deep
+      learning](https://arxiv.org/abs/1603.07285v1)
+    - [Deconvolutional
+      Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
     """
 
     pass
@@ -483,7 +464,7 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
     are the element-wise quantization functions to use. If both quantization functions
     are `None` this layer is equivalent to `LocallyConnected1D`.
 
-    Example:
+    !!! example
         ```python
         # apply a unshared weight convolution 1d of length 3 to a sequence with
         # 10 timesteps, with 64 output filters
@@ -495,64 +476,65 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
         # now model.output_shape == (None, 6, 32)
         ```
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of a single integer,
-            specifying the length of the 1D convolution window.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of a single integer, specifying the stride
-            length of the convolution. Specifying any stride value != 1 is incompatible
-            with specifying any `dilation_rate` value != 1.
-        padding: Currently only supports `"valid"` (case-insensitive).
-            `"same"` may be supported in the future.
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs. `channels_last` corresponds
-            to inputs with shape `(batch, length, channels)` while `channels_first`
-            corresponds to inputs with shape `(batch, channels, length)`. It defaults
-            to the `image_data_format` value found in your Keras config file at
-            `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
-        activation: Activation function to use. If you don't specify anything,
-            no activation is applied (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
-        implementation: implementation mode, either `1` or `2`.
-            `1` loops over input spatial locations to perform the forward pass.
-            It is memory-efficient but performs a lot of (small) ops.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of a single integer,
+        specifying the length of the 1D convolution window.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of a single integer, specifying the stride
+        length of the convolution. Specifying any stride value != 1 is incompatible
+        with specifying any `dilation_rate` value != 1.
+    padding: Currently only supports `"valid"` (case-insensitive).
+        `"same"` may be supported in the future.
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds
+        to inputs with shape `(batch, length, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, length)`. It defaults
+        to the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
+    implementation: implementation mode, either `1` or `2`.
+        `1` loops over input spatial locations to perform the forward pass.
+        It is memory-efficient but performs a lot of (small) ops.
 
-            `2` stores layer weights in a dense but sparsely-populated 2D matrix
-            and implements the forward pass as a single matrix-multiply. It uses
-            a lot of RAM but performs few (large) ops.
+        `2` stores layer weights in a dense but sparsely-populated 2D matrix
+        and implements the forward pass as a single matrix-multiply. It uses
+        a lot of RAM but performs few (large) ops.
 
-            Depending on the inputs, layer parameters, hardware, and
-            `tf.executing_eagerly()` one implementation can be dramatically faster
-            (e.g. 50X) than another.
+        Depending on the inputs, layer parameters, hardware, and
+        `tf.executing_eagerly()` one implementation can be dramatically faster
+        (e.g. 50X) than another.
 
-            It is recommended to benchmark both in the setting of interest to pick
-            the most efficient one (in terms of speed and memory usage).
+        It is recommended to benchmark both in the setting of interest to pick
+        the most efficient one (in terms of speed and memory usage).
 
-            Following scenarios could benefit from setting `implementation=2`:
-                - eager execution;
-                - inference;
-                - running on CPU;
-                - large amount of RAM available;
-                - small models (few filters, small kernel);
-                - using `padding=same` (only possible with `implementation=2`).
+        Following scenarios could benefit from setting `implementation=2`:
 
-    Input shape:
-        3D tensor with shape: `(batch_size, steps, input_dim)`
+        - eager execution;
+        - inference;
+        - running on CPU;
+        - large amount of RAM available;
+        - small models (few filters, small kernel);
+        - using `padding=same` (only possible with `implementation=2`).
 
-    Output shape:
-        3D tensor with shape: `(batch_size, new_steps, filters)`
-        `steps` value might have changed due to padding or strides.
+    # Input shape
+    3D tensor with shape: `(batch_size, steps, input_dim)`
+
+    # Output shape
+    3D tensor with shape: `(batch_size, new_steps, filters)`
+    `steps` value might have changed due to padding or strides.
     """
 
     pass
@@ -568,7 +550,7 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     are the element-wise quantization functions to use. If both quantization functions
     are `None` this layer is equivalent to `LocallyConnected2D`.
 
-    Examples:
+    !!! example
         ```python
         # apply a 3x3 unshared weights convolution with 64 output filters on a
         32x32 image
@@ -584,71 +566,72 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
         # now model.output_shape == (None, 28, 28, 32)
         ```
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of 2 integers, specifying the
-            width and height of the 2D convolution window. Can be a single integer to
-            specify the same value for all spatial dimensions.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        strides: An integer or tuple/list of 2 integers, specifying the strides of the
-            convolution along the width and height. Can be a single integer to specify
-            the same value for all spatial dimensions.
-        padding: Currently only support `"valid"` (case-insensitive).
-            `"same"` will be supported in future.
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs. `channels_last` corresponds to
-            inputs with shape `(batch, height, width, channels)` while `channels_first`
-            corresponds to inputs with shape `(batch, channels, height, width)`. It
-            defaults to the `image_data_format` value found in your Keras config file at
-            `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
-        activation: Activation function to use. If you don't specify anything,
-            no activation is applied (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        kernel_constraint: Constraint function applied to the kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
-        implementation: implementation mode, either `1` or `2`.
-            `1` loops over input spatial locations to perform the forward pass.
-            It is memory-efficient but performs a lot of (small) ops.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 2 integers, specifying the
+        width and height of the 2D convolution window. Can be a single integer to
+        specify the same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    strides: An integer or tuple/list of 2 integers, specifying the strides of the
+        convolution along the width and height. Can be a single integer to specify
+        the same value for all spatial dimensions.
+    padding: Currently only support `"valid"` (case-insensitive).
+        `"same"` will be supported in future.
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds to
+        inputs with shape `(batch, height, width, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, height, width)`. It
+        defaults to the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
+    implementation: implementation mode, either `1` or `2`.
+        `1` loops over input spatial locations to perform the forward pass.
+        It is memory-efficient but performs a lot of (small) ops.
 
-            `2` stores layer weights in a dense but sparsely-populated 2D matrix
-            and implements the forward pass as a single matrix-multiply. It uses
-            a lot of RAM but performs few (large) ops.
+        `2` stores layer weights in a dense but sparsely-populated 2D matrix
+        and implements the forward pass as a single matrix-multiply. It uses
+        a lot of RAM but performs few (large) ops.
 
-            Depending on the inputs, layer parameters, hardware, and
-            `tf.executing_eagerly()` one implementation can be dramatically faster
-            (e.g. 50X) than another.
+        Depending on the inputs, layer parameters, hardware, and
+        `tf.executing_eagerly()` one implementation can be dramatically faster
+        (e.g. 50X) than another.
 
-            It is recommended to benchmark both in the setting of interest to pick
-            the most efficient one (in terms of speed and memory usage).
+        It is recommended to benchmark both in the setting of interest to pick
+        the most efficient one (in terms of speed and memory usage).
 
-            Following scenarios could benefit from setting `implementation=2`:
-                - eager execution;
-                - inference;
-                - running on CPU;
-                - large amount of RAM available;
-                - small models (few filters, small kernel);
-                - using `padding=same` (only possible with `implementation=2`).
+        Following scenarios could benefit from setting `implementation=2`:
 
-    Input shape:
-        4D tensor with shape:
-        `(samples, channels, rows, cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(samples, rows, cols, channels)` if data_format='channels_last'.
+        - eager execution;
+        - inference;
+        - running on CPU;
+        - large amount of RAM available;
+        - small models (few filters, small kernel);
+        - using `padding=same` (only possible with `implementation=2`).
 
-    Output shape:
-        4D tensor with shape:
-        `(samples, filters, new_rows, new_cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(samples, new_rows, new_cols, filters)` if data_format='channels_last'.
-        `rows` and `cols` values might have changed due to padding.
+    # Input shape
+    4D tensor with shape:
+    `(samples, channels, rows, cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(samples, rows, cols, channels)` if data_format='channels_last'.
+
+    # Output shape
+    4D tensor with shape:
+    `(samples, filters, new_rows, new_cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(samples, new_rows, new_cols, filters)` if data_format='channels_last'.
+    `rows` and `cols` values might have changed due to padding.
     """
 
     pass
@@ -659,7 +642,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     """Just your regular densely-connected quantized NN layer.
 
     `QuantDense` implements the operation:
-    `output = activation(dot(input_quantizer(input), kernel_quantizer(kernel)) + bias)`
+    `output = activation(dot(input_quantizer(input), kernel_quantizer(kernel)) + bias)`,
     where `activation` is the element-wise activation function passed as the
     `activation` argument, `kernel` is a weights matrix created by the layer, and `bias`
     is a bias vector created by the layer (only applicable if `use_bias` is `True`).
@@ -667,63 +650,59 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     functions to use. If both quantization functions are `None` this layer is
     equivalent to `Dense`.
 
-    Note: If the input to the layer has a rank greater than 2, then it is flattened
-    prior to the initial dot product with `kernel`.
+    !!! note ""
+        If the input to the layer has a rank greater than 2, then it is flattened
+        prior to the initial dot product with `kernel`.
 
-    Example:
-
-    ```python
-    # as first layer in a sequential model:
-    model = Sequential()
-    model.add(
-        QuantDense(
-            32,
-            input_quantizer="sign_clip_ste",
-            kernel_quantizer="sign_clip_ste",
-            input_shape=(16,),
+    !!! example
+        ```python
+        # as first layer in a sequential model:
+        model = Sequential()
+        model.add(
+            QuantDense(
+                32,
+                input_quantizer="sign_clip_ste",
+                kernel_quantizer="sign_clip_ste",
+                input_shape=(16,),
+            )
         )
-    )
-    # now the model will take as input arrays of shape (*, 16)
-    # and output arrays of shape (*, 32)
+        # now the model will take as input arrays of shape (*, 16)
+        # and output arrays of shape (*, 32)
 
-    # after the first layer, you don't need to specify
-    # the size of the input anymore:
-    model.add(
-        QuantDense(
-            32,
-            input_quantizer="sign_clip_ste",
-            kernel_quantizer="sign_clip_ste",
+        # after the first layer, you don't need to specify
+        # the size of the input anymore:
+        model.add(
+            QuantDense(
+                32,
+                input_quantizer="sign_clip_ste",
+                kernel_quantizer="sign_clip_ste",
+            )
         )
-    )
-    ```
+        ```
 
-    Arguments:
-        units: Positive integer, dimensionality of the output space.
-        input_quantizer: Quantization function applied to the input of the layer.
-        kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
-        activation: Activation function to use.
-            If you don't specify anything, no activation is applied
-            (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        kernel_initializer: Initializer for the `kernel` weights matrix.
-        bias_initializer: Initializer for the bias vector.
-        kernel_regularizer: Regularizer function applied to
-            the `kernel` weights matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation")..
-        kernel_constraint: Constraint function applied to the `kernel` weights matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    units: Positive integer, dimensionality of the output space.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    kernel_initializer: Initializer for the `kernel` weights matrix.
+    bias_initializer: Initializer for the bias vector.
+    kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    kernel_constraint: Constraint function applied to the `kernel` weights matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        N-D tensor with shape: `(batch_size, ..., input_dim)`.
-        The most common situation would be
-        a 2D input with shape `(batch_size, input_dim)`.
+    # Input shape
+    N-D tensor with shape: `(batch_size, ..., input_dim)`. The most common situation
+    would be a 2D input with shape `(batch_size, input_dim)`.
 
-    Output shape:
-        N-D tensor with shape: `(batch_size, ..., units)`.
-        For instance, for a 2D input with shape `(batch_size, input_dim)`,
-        the output would have shape `(batch_size, units)`.
+    # Output shape
+    N-D tensor with shape: `(batch_size, ..., units)`. For instance, for a 2D input with
+    shape `(batch_size, input_dim)`, the output would have shape `(batch_size, units)`.
     """
 
     pass
@@ -741,54 +720,50 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     a bias initializer is provided, it adds a bias vector to the output.
     It then optionally applies an activation function to produce the final output.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space (i.e. the number
-            of filters in the convolution).
-        kernel_size: A single integer specifying the spatial dimensions of the filters.
-        input_quantizer: Quantization function applied to the input of the layer.
-        depthwise_quantizer: Quantization function applied to the
-            depthwise convolution kernel.
-        pointwise_quantizer: Quantization function applied to the
-            pointwise convolution kernel.
-        strides: A single integer specifying the strides of the convolution.
-              Specifying any `stride` value != 1 is incompatible with specifying
-              any `dilation_rate` value != 1.
-        padding: One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-              The ordering of the dimensions in the inputs. `channels_last` corresponds
-              to inputs with shape `(batch, length, channels)` while `channels_first`
-              corresponds to inputs with shape `(batch, channels, length)`.
-        dilation_rate: A single integer, specifying the dilation rate to use for dilated
-            convolution. Currently, specifying any `dilation_rate` value != 1 is
-            incompatible with specifying any stride value != 1.
-        depth_multiplier: The number of depthwise convolution output channels for
-              each input channel. The total number of depthwise convolution output
-              channels will be equal to `num_filters_in * depth_multiplier`.
-        activation: Activation function. Set it to None to maintain a linear activation.
-        use_bias: Boolean, whether the layer uses a bias.
-        depthwise_initializer: An initializer for the depthwise convolution kernel.
-        pointwise_initializer: An initializer for the pointwise convolution kernel.
-        bias_initializer: An initializer for the bias vector. If None, the default
-            initializer will be used.
-        depthwise_regularizer: Optional regularizer for the
-            depthwise convolution kernel.
-        pointwise_regularizer: Optional regularizer for the
-            pointwise convolution kernel.
-        bias_regularizer: Optional regularizer for the bias vector.
-        activity_regularizer: Optional regularizer function for the output.
-        depthwise_constraint: Optional projection function to be applied to the
-            depthwise kernel after being updated by an `Optimizer`
-            (e.g. used for norm constraints or value constraints for layer weights).
-            The function must take as input the unprojected variable and must return
-            the projected variable (which must have the same shape). Constraints are
-            not safe to use when doing asynchronous distributed training.
-        pointwise_constraint: Optional projection function to be applied to the
-            pointwise kernel after being updated by an `Optimizer`.
-        bias_constraint: Optional projection function to be applied to the
-            bias after being updated by an `Optimizer`.
-        trainable: Boolean, if `True` the weights of this layer will be marked as
-            trainable (and listed in `layer.trainable_weights`).
-        name: A string, the name of the layer.
+    # Arguments
+    filters: Integer, the dimensionality of the output space (i.e. the number
+        of filters in the convolution).
+    kernel_size: A single integer specifying the spatial dimensions of the filters.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the depthwise kernel.
+    pointwise_quantizer: Quantization function applied to the pointwise kernel.
+    strides: A single integer specifying the strides of the convolution.
+        Specifying any `stride` value != 1 is incompatible with specifying
+        any `dilation_rate` value != 1.
+    padding: One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds
+        to inputs with shape `(batch, length, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, length)`.
+    dilation_rate: A single integer, specifying the dilation rate to use for dilated
+        convolution. Currently, specifying any `dilation_rate` value != 1 is
+        incompatible with specifying any stride value != 1.
+    depth_multiplier: The number of depthwise convolution output channels for
+        each input channel. The total number of depthwise convolution output
+        channels will be equal to `num_filters_in * depth_multiplier`.
+    activation: Activation function. Set it to None to maintain a linear activation.
+    use_bias: Boolean, whether the layer uses a bias.
+    depthwise_initializer: An initializer for the depthwise convolution kernel.
+    pointwise_initializer: An initializer for the pointwise convolution kernel.
+    bias_initializer: An initializer for the bias vector. If None, the default
+        initializer will be used.
+    depthwise_regularizer: Optional regularizer for the depthwise convolution kernel.
+    pointwise_regularizer: Optional regularizer for the pointwise convolution kernel.
+    bias_regularizer: Optional regularizer for the bias vector.
+    activity_regularizer: Optional regularizer function for the output.
+    depthwise_constraint: Optional projection function to be applied to the
+        depthwise kernel after being updated by an `Optimizer`
+        (e.g. used for norm constraints or value constraints for layer weights).
+        The function must take as input the unprojected variable and must return
+        the projected variable (which must have the same shape). Constraints are
+        not safe to use when doing asynchronous distributed training.
+    pointwise_constraint: Optional projection function to be applied to the
+        pointwise kernel after being updated by an `Optimizer`.
+    bias_constraint: Optional projection function to be applied to the
+        bias after being updated by an `Optimizer`.
+    trainable: Boolean, if `True` the weights of this layer will be marked as
+        trainable (and listed in `layer.trainable_weights`).
+    name: A string, the name of the layer.
     """
 
     pass
@@ -813,66 +788,59 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     convolution kernel into two smaller kernels,
     or as an extreme version of an Inception block.
 
-    Arguments:
-        filters: Integer, the dimensionality of the output space
-            (i.e. the number of output filters in the convolution).
-        kernel_size: An integer or tuple/list of 2 integers, specifying the height and
-            width of the 2D convolution window. Can be a single integer to specify the
-            same value for all spatial dimensions.
-        input_quantizer: Quantization function applied to the input of the layer.
-        depthwise_quantizer: Quantization function applied to the
-            depthwise convolution kernel matrix.
-        pointwise_quantizer: Quantization function applied to the
-            pointwise convolution kernel matrix.
-        strides: An integer or tuple/list of 2 integers, specifying the strides of the
-            convolution along the height and width. Can be a single integer to specify
-            the same value for all spatial dimensions. Specifying any stride value != 1
-            is incompatible with specifying any `dilation_rate` value != 1.
-        padding: one of `"valid"` or `"same"` (case-insensitive).
-        data_format: A string, one of `channels_last` (default) or `channels_first`.
-            The ordering of the dimensions in the inputs. `channels_last` corresponds to
-            inputs with shape `(batch, height, width, channels)` while `channels_first`
-            corresponds to inputs with shape `(batch, channels, height, width)`. It
-            defaults to the `image_data_format` value found in your Keras config file at
-            `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
-        dilation_rate: An integer or tuple/list of 2 integers, specifying the dilation
-            rate to use for dilated convolution. Currently, specifying any
-            `dilation_rate` value != 1 is incompatible with specifying any
-            `strides` value != 1.
-        depth_multiplier: The number of depthwise convolution output channels for each
-            input channel. The total number of depthwise convolution output channels
-            will be equal to `filters_in * depth_multiplier`.
-        activation: Activation function to use. If you don't specify anything,
-            no activation is applied (ie. "linear" activation: `a(x) = x`).
-        use_bias: Boolean, whether the layer uses a bias vector.
-        depthwise_initializer: Initializer for the depthwise kernel matrix.
-        pointwise_initializer: Initializer for the pointwise kernel matrix.
-        bias_initializer: Initializer for the bias vector.
-        depthwise_regularizer: Regularizer function applied to
-            the depthwise kernel matrix.
-        pointwise_regularizer: Regularizer function applied to
-            the pointwise kernel matrix.
-        bias_regularizer: Regularizer function applied to the bias vector.
-        activity_regularizer: Regularizer function applied to
-            the output of the layer (its "activation").
-        depthwise_constraint: Constraint function applied to
-            the depthwise kernel matrix.
-        pointwise_constraint: Constraint function applied to
-            the pointwise kernel matrix.
-        bias_constraint: Constraint function applied to the bias vector.
+    # Arguments
+    filters: Integer, the dimensionality of the output space
+        (i.e. the number of output filters in the convolution).
+    kernel_size: An integer or tuple/list of 2 integers, specifying the height and
+        width of the 2D convolution window. Can be a single integer to specify the
+        same value for all spatial dimensions.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the depthwise kernel matrix.
+    pointwise_quantizer: Quantization function applied to the pointwise kernel matrix.
+    strides: An integer or tuple/list of 2 integers, specifying the strides of the
+        convolution along the height and width. Can be a single integer to specify
+        the same value for all spatial dimensions. Specifying any stride value != 1
+        is incompatible with specifying any `dilation_rate` value != 1.
+    padding: one of `"valid"` or `"same"` (case-insensitive).
+    data_format: A string, one of `channels_last` (default) or `channels_first`.
+        The ordering of the dimensions in the inputs. `channels_last` corresponds to
+        inputs with shape `(batch, height, width, channels)` while `channels_first`
+        corresponds to inputs with shape `(batch, channels, height, width)`. It
+        defaults to the `image_data_format` value found in your Keras config file at
+        `~/.keras/keras.json`. If you never set it, then it will be "channels_last".
+    dilation_rate: An integer or tuple/list of 2 integers, specifying the dilation rate
+        to use for dilated convolution. Currently, specifying any `dilation_rate`
+        value != 1 is incompatible with specifying any `strides` value != 1.
+    depth_multiplier: The number of depthwise convolution output channels for each
+        input channel. The total number of depthwise convolution output channels
+        will be equal to `filters_in * depth_multiplier`.
+    activation: Activation function to use. If you don't specify anything,
+        no activation is applied (`a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    depthwise_initializer: Initializer for the depthwise kernel matrix.
+    pointwise_initializer: Initializer for the pointwise kernel matrix.
+    bias_initializer: Initializer for the bias vector.
+    depthwise_regularizer: Regularizer function applied to the depthwise kernel matrix.
+    pointwise_regularizer: Regularizer function applied to the pointwise kernel matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+        the output of the layer (its "activation").
+    depthwise_constraint: Constraint function applied to the depthwise kernel matrix.
+    pointwise_constraint: Constraint function applied to the pointwise kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
 
-    Input shape:
-        4D tensor with shape:
-        `(batch, channels, rows, cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(batch, rows, cols, channels)` if data_format='channels_last'.
+    # Input shape
+    4D tensor with shape:
+    `(batch, channels, rows, cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(batch, rows, cols, channels)` if data_format='channels_last'.
 
-    Output shape:
-        4D tensor with shape:
-        `(batch, filters, new_rows, new_cols)` if data_format='channels_first'
-        or 4D tensor with shape:
-        `(batch, new_rows, new_cols, filters)` if data_format='channels_last'.
-        `rows` and `cols` values might have changed due to padding.
+    # Output shape
+    4D tensor with shape:
+    `(batch, filters, new_rows, new_cols)` if data_format='channels_first'
+    or 4D tensor with shape:
+    `(batch, new_rows, new_cols, filters)` if data_format='channels_last'.
+    `rows` and `cols` values might have changed due to padding.
     """
 
     pass
