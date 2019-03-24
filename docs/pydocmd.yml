@@ -2,7 +2,17 @@ site_name: XQuant
 site_description: 'An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks'
 generate:
 - layers.md:
-  - xquant.layers+
+  - xquant.layers:
+    - xquant.layers.QuantDense
+    - xquant.layers.QuantConv1D
+    - xquant.layers.QuantConv2D
+    - xquant.layers.QuantConv3D
+    - xquant.layers.QuantSeparableConv1D
+    - xquant.layers.QuantSeparableConv2D
+    - xquant.layers.QuantConv2DTranspose
+    - xquant.layers.QuantConv3DTranspose
+    - xquant.layers.QuantLocallyConnected1D
+    - xquant.layers.QuantLocallyConnected2D
 pages:
 - Home: index.md << ../README.md
 - Quantized Layers: layers.md
