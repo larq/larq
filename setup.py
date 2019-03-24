@@ -17,6 +17,18 @@ setup(
     url="https://github.com/lgeiger/xquant",
     packages=find_packages(),
     license="Apache 2.0",
+    extras_require={
+        "tensorflow": ["tensorflow>=1.13.1"],
+        "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
+        "test": [
+            "numpy >= 1.15.4, < 2.0",
+            "absl-py>=0.7.0",
+            "pytest>=4.3.1",
+            "pydoc-markdown@https://github.com/lgeiger/pydoc-markdown/archive/master.zip",
+            "mkdocs-material>=4.1.0",
+            "pymdown-extensions>=6.0",
+        ],
+    },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
