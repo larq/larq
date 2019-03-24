@@ -27,6 +27,7 @@ setup(
             "pydoc-markdown@https://github.com/lgeiger/pydoc-markdown/archive/master.zip",
             "mkdocs-material>=4.1.0",
             "pymdown-extensions>=6.0",
+            "mknotebooks>=0.1.5",
         ],
     },
     classifiers=[
