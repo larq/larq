@@ -26,6 +26,9 @@ pages:
 - Activations: activations.md
 - Examples:
   - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
+- Library Development:
+  - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
+  - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
 
 headers: markdown
 repo_url: https://github.com/lgeiger/xquant
