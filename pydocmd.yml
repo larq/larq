@@ -13,9 +13,17 @@ generate:
     - xquant.layers.QuantConv3DTranspose
     - xquant.layers.QuantLocallyConnected1D
     - xquant.layers.QuantLocallyConnected2D
+- activations.md:
+  - xquant.activations+
+- quantizers.md:
+  - xquant.quantizers:
+    - xquant.quantizers.ste_sign
+    - xquant.quantizers.approx_sign
 pages:
 - Home: index.md << README.md
 - Quantized Layers: layers.md
+- Quantizers: quantizers.md
+- Activations: activations.md
 - Examples:
   - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
 
@@ -36,8 +44,12 @@ markdown_extensions:
   - admonition
   - codehilite
   - pymdownx.superfences
+  - pymdownx.arithmatex
   - toc:
       permalink: true
+
+extra_javascript:
+  - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML'
 
 plugins:
   - mknotebooks:
