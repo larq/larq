@@ -4,7 +4,25 @@ from xquant import utils
 
 @utils.register_keras_custom_object
 @tf.custom_gradient
-def sign_ste(x):
+def ste_sign(x):
+    r"""
+    Sign binarization function.
+    \\[q(x) = \mathrm{Sign}(x)\\]
+
+    The gradient is estimated using the Straight-Through Estimator.
+    \\[\frac{\partial q(x)}{\partial x} = x\\]
+
+    # Arguments
+    x: Input tensor.
+
+    # Returns
+    Binarized tensor.
+
+    # References
+    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
+      Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+    """
+
     def grad(dy):
         return dy
 
@@ -14,20 +32,29 @@ def sign_ste(x):
 @utils.register_keras_custom_object
 @tf.custom_gradient
 def approx_sign(x):
+    r"""
+    Sign binarization function.
+    \\[q(x) = \mathrm{Sign}(x)\\]
+
+    The gradient is estimated using the ApproxSign method.
+    \\[\frac{\partial q(x)}{\partial x} = (2 - 2 \left|x\right|))\\]
+
+    # Arguments
+    x: Input tensor.
+
+    # Returns
+    Binarized tensor.
+
+    # References
+    - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
+      Representational Capability and Advanced
+      Training Algorithm](http://arxiv.org/abs/1808.00278)
+    """
+
     def grad(dy):
         return (1 - tf.abs(x)) * 2 * dy
 
     return tf.sign(x), grad
-
-
-@utils.register_keras_custom_object
-def approx_sign_clip(x):
-    return approx_sign(tf.clip_by_value(x, -1, 1))
-
-
-@utils.register_keras_custom_object
-def sign_clip_ste(x):
-    return sign_ste(tf.clip_by_value(x, -1, 1))
 
 
 def serialize(initializer):

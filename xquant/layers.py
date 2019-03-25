@@ -113,8 +113,8 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
         model.add(
             QuantDense(
                 32,
-                input_quantizer="sign_clip_ste",
-                kernel_quantizer="sign_clip_ste",
+                input_quantizer="ste_sign",
+                kernel_quantizer="ste_sign",
                 input_shape=(16,),
             )
         )
@@ -126,8 +126,8 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
         model.add(
             QuantDense(
                 32,
-                input_quantizer="sign_clip_ste",
-                kernel_quantizer="sign_clip_ste",
+                input_quantizer="ste_sign",
+                kernel_quantizer="ste_sign",
             )
         )
         ```

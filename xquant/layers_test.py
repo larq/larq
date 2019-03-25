@@ -80,8 +80,8 @@ class LayersTest(keras_parameterized.TestCase):
             quantized_layer,
             kwargs=dict(
                 **kwargs,
-                kernel_quantizer="sign_ste",
-                input_quantizer="sign_ste",
+                kernel_quantizer="ste_sign",
+                input_quantizer="ste_sign",
                 kernel_initializer=tf.keras.initializers.constant(random_weight),
             ),
             input_data=input_data,
@@ -124,9 +124,9 @@ class LayersTest(keras_parameterized.TestCase):
             kwargs=dict(
                 filters=3,
                 kernel_size=3,
-                depthwise_quantizer="sign_ste",
-                pointwise_quantizer="sign_ste",
-                input_quantizer="sign_ste",
+                depthwise_quantizer="ste_sign",
+                pointwise_quantizer="ste_sign",
+                input_quantizer="ste_sign",
                 depthwise_initializer=tf.keras.initializers.constant(random_d_kernel),
                 pointwise_initializer=tf.keras.initializers.constant(random_p_kernel),
             ),
