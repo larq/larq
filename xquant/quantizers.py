@@ -12,7 +12,12 @@ def sign(x):
 def ste_sign(x):
     r"""
     Sign binarization function.
-    \\[q(x) = \mathrm{Sign}(x)\\]
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+   \end{cases}
+   \\]
 
     The gradient is estimated using the Straight-Through Estimator.
     \\[\frac{\partial q(x)}{\partial x} = x\\]
@@ -39,7 +44,12 @@ def ste_sign(x):
 def approx_sign(x):
     r"""
     Sign binarization function.
-    \\[q(x) = \mathrm{Sign}(x)\\]
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+   \end{cases}
+   \\]
 
     The gradient is estimated using the ApproxSign method.
     \\[\frac{\partial q(x)}{\partial x} = (2 - 2 \left|x\right|))\\]
