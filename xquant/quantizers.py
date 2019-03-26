@@ -2,12 +2,22 @@ import tensorflow as tf
 from xquant import utils
 
 
+def sign(x):
+    """A sign function that will never be zero"""
+    return tf.sign(tf.sign(x) + 1e-10)
+
+
 @utils.register_keras_custom_object
 @tf.custom_gradient
 def ste_sign(x):
     r"""
     Sign binarization function.
-    \\[q(x) = \mathrm{Sign}(x)\\]
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+   \end{cases}
+   \\]
 
     The gradient is estimated using the Straight-Through Estimator.
     \\[\frac{\partial q(x)}{\partial x} = x\\]
@@ -26,7 +36,7 @@ def ste_sign(x):
     def grad(dy):
         return dy
 
-    return tf.sign(x), grad
+    return sign(x), grad
 
 
 @utils.register_keras_custom_object
@@ -34,7 +44,12 @@ def ste_sign(x):
 def approx_sign(x):
     r"""
     Sign binarization function.
-    \\[q(x) = \mathrm{Sign}(x)\\]
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+   \end{cases}
+   \\]
 
     The gradient is estimated using the ApproxSign method.
     \\[\frac{\partial q(x)}{\partial x} = (2 - 2 \left|x\right|))\\]
@@ -54,7 +69,7 @@ def approx_sign(x):
     def grad(dy):
         return (1 - tf.abs(x)) * 2 * dy
 
-    return tf.sign(x), grad
+    return sign(x), grad
 
 
 def serialize(initializer):
