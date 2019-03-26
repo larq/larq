@@ -4,7 +4,7 @@ from xquant import utils
 
 def sign(x):
     """A sign function that will never be zero"""
-    return tf.sign(tf.sign(x) + 1e-10)
+    return tf.sign(tf.sign(x) + 0.1)
 
 
 @utils.register_keras_custom_object
