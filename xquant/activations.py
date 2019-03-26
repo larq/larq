@@ -12,5 +12,5 @@ def hard_tanh(x):
 
     # Returns
     Hard tanh activation.
-  """
+    """
     return tf.clip_by_value(x, -1, 1)
