@@ -2,6 +2,11 @@ import tensorflow as tf
 from xquant import utils
 
 
+def sign(x):
+    """A sign function that will never be zero"""
+    return tf.sign(tf.sign(x) + 1e-10)
+
+
 @utils.register_keras_custom_object
 @tf.custom_gradient
 def ste_sign(x):
@@ -26,7 +31,7 @@ def ste_sign(x):
     def grad(dy):
         return dy
 
-    return tf.sign(x), grad
+    return sign(x), grad
 
 
 @utils.register_keras_custom_object
@@ -54,7 +59,7 @@ def approx_sign(x):
     def grad(dy):
         return (1 - tf.abs(x)) * 2 * dy
 
-    return tf.sign(x), grad
+    return sign(x), grad
 
 
 def serialize(initializer):
