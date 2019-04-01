@@ -127,7 +127,7 @@ model.compile(
 
 model.fit(
     train_data,
-    epochs=100,
+    epochs=5, #Test amount of epochs, before was 100
     steps_per_epoch=50000 // batch_size,
     validation_data=eval_data,
     validation_steps=10000 // batch_size,
