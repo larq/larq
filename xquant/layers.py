@@ -15,6 +15,12 @@ class QuantizerBase(tf.keras.layers.Layer):
         super().__init__(*args, **kwargs)
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
+        self.quantized_weights = []
+
+    def build(self, input_shape):
+        super().build(input_shape)
+        if self.kernel_quantizer:
+            self.quantized_weights.append(self.kernel_quantizer(self.kernel))
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -60,6 +66,18 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
+        self.quantized_weights = []
+
+    def build(self, input_shape):
+        super().build(input_shape)
+        if self.depthwise_quantizer:
+            self.quantized_weights.append(
+                self.depthwise_quantizer(self.depthwise_kernel)
+            )
+        if self.pointwise_quantizer:
+            self.quantized_weights.append(
+                self.pointwise_quantizer(self.pointwise_kernel)
+            )
 
     def call(self, inputs):
         if self.input_quantizer:
