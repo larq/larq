@@ -33,18 +33,27 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
         self.update_freq = update_freq if update_freq != "batch" else 1
 
     def on_batch_end(self, batch, logs=None):
-        ops = []
-        op_names = []
-        for layer in self.model.layers:
-            if hasattr(layer, "quantized_weights"):
-                for weight in layer.quantized_weights:
-                    ops.append(weight)
-                    op_names.append(weight.name)
+        should_log = batch > 0 and batch % self.update_freq == 0
+        should_store = (batch + 1) % self.update_freq == 0
 
-        for key, value in zip(op_names, tf.keras.backend.batch_get_value(ops)):
-            if batch > 0 and batch % self.update_freq == 0:
-                logs[
-                    f"changed_quantization_ration/{key.replace(':', '_')}"
-                ] = 1 - np.mean(value == self.previous_weights[key])
-            if (batch + 1) % self.update_freq == 0:
-                self.previous_weights[key] = value
+        if should_log or should_store:
+            ops = []
+            op_names = []
+            for layer in self.model.layers:
+                if hasattr(layer, "quantized_weights"):
+                    for weight in layer.quantized_weights:
+                        ops.append(weight)
+                        op_names.append(weight.name)
+
+            for key, value in zip(op_names, tf.keras.backend.batch_get_value(ops)):
+                if should_log:
+                    logs[f"changed_quantization_ration/{key.replace(':', '_')}"] = 1 - (
+                        np.count_nonzero(value == self.previous_weights[key])
+                        / value.size
+                    )
+                if should_store:
+                    self.previous_weights[key] = value
+
+            if should_log and not should_store:
+                # We don't need it in the next batch anymore
+                self.previous_weights = {}
