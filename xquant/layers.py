@@ -2,6 +2,10 @@ import tensorflow as tf
 from xquant import utils
 from xquant import quantizers
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class QuantizerBase(tf.keras.layers.Layer):
     """Base class for defining quantized layers
@@ -13,8 +17,17 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
+
+        if kernel_quantizer and not self.kernel_constraint:
+            log.warning(
+                "Using a quantizer on the weights without setting "
+                "kernel_constraint may result in starved weights (where "
+                "the gradient is always zero)"
+            )
+
         self.quantized_weights = []
 
     def build(self, input_shape):
@@ -67,6 +80,13 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
         self.quantized_weights = []
+
+        if (depthwise_quantizer or pointwise_quantizer) and not self.kernel_constraint:
+            log.warning(
+                "Using a quantizer on the weights without setting "
+                "kernel_constraint may result in starved weights (where "
+                "the gradient is always zero)"
+            )
 
     def build(self, input_shape):
         super().build(input_shape)
