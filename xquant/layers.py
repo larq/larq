@@ -21,9 +21,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
 
-        if kernel_quantizer is not None and (
-            "kernel_constraint" not in kwargs.keys() and len(args) < 14
-        ):
+        if kernel_quantizer and not self.kernel_constraint:
             log.warning(
                 "Using a quantizer on the weights without setting "
                 "kernel_constraint may result in starved weights (where "
@@ -82,6 +80,13 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
         self.quantized_weights = []
+
+        if (depthwise_quantizer or pointwise_quantizer) and not self.kernel_constraint:
+            log.warning(
+                "Using a quantizer on the weights without setting "
+                "kernel_constraint may result in starved weights (where "
+                "the gradient is always zero)"
+            )
 
     def build(self, input_shape):
         super().build(input_shape)
