@@ -7,8 +7,23 @@ def sign(x):
     return tf.sign(tf.sign(x) + 0.1)
 
 
-@utils.register_keras_custom_object
 @tf.custom_gradient
+def _binarize_with_identity_grad(x):
+    def grad(dy):
+        return dy
+
+    return sign(x), grad
+
+
+@tf.custom_gradient
+def _binarize_with_weighted_grad(x):
+    def grad(dy):
+        return (1 - tf.abs(x)) * 2 * dy
+
+    return sign(x), grad
+
+
+@utils.register_keras_custom_object
 def ste_sign(x):
     r"""
     Sign binarization function.
@@ -16,11 +31,16 @@ def ste_sign(x):
     q(x) = \begin{cases}
       -1 & x < 0 \\\
       1 & x \geq 0
-   \end{cases}
-   \\]
+    \end{cases}
+    \\]
 
-    The gradient is estimated using the Straight-Through Estimator.
-    \\[\frac{\partial q(x)}{\partial x} = x\\]
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+      1 & \left|x\right| \leq 1 \\\
+      0 & \left|x\right| > 1
+    \end{cases}\\]
 
     # Arguments
     x: Input tensor.
@@ -33,14 +53,12 @@ def ste_sign(x):
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    def grad(dy):
-        return dy
+    x = tf.clip_by_value(x, -1, 1)
 
-    return sign(x), grad
+    return _binarize_with_identity_grad(x)
 
 
 @utils.register_keras_custom_object
-@tf.custom_gradient
 def approx_sign(x):
     r"""
     Sign binarization function.
@@ -52,7 +70,11 @@ def approx_sign(x):
    \\]
 
     The gradient is estimated using the ApproxSign method.
-    \\[\frac{\partial q(x)}{\partial x} = (2 - 2 \left|x\right|))\\]
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+      (2 - 2 \left|x\right|) & \left|x\right| \leq 1 \\\
+      0 & \left|x\right| > 1
+    \end{cases}
+    \\]
 
     # Arguments
     x: Input tensor.
@@ -66,10 +88,9 @@ def approx_sign(x):
       Training Algorithm](http://arxiv.org/abs/1808.00278)
     """
 
-    def grad(dy):
-        return (1 - tf.abs(x)) * 2 * dy
+    x = tf.clip_by_value(x, -1, 1)
 
-    return sign(x), grad
+    return _binarize_with_weighted_grad(x)
 
 
 def serialize(initializer):
