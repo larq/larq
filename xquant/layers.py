@@ -29,11 +29,13 @@ class QuantizerBase(tf.keras.layers.Layer):
             )
 
         self.quantized_weights = []
+        self.quantized_latent_weights = []
 
     def build(self, input_shape):
         super().build(input_shape)
         if self.kernel_quantizer:
             self.quantized_weights.append(self.kernel_quantizer(self.kernel))
+            self.quantized_latent_weights.append(self.kernel)
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -80,6 +82,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
         self.quantized_weights = []
+        self.quantized_latent_weights = []
 
         if (depthwise_quantizer or pointwise_quantizer) and not self.kernel_constraint:
             log.warning(
@@ -91,10 +94,12 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
     def build(self, input_shape):
         super().build(input_shape)
         if self.depthwise_quantizer:
+            self.quantized_latent_weights.append(self.depthwise_kernel)
             self.quantized_weights.append(
                 self.depthwise_quantizer(self.depthwise_kernel)
             )
         if self.pointwise_quantizer:
+            self.quantized_latent_weights.append(self.pointwise_kernel)
             self.quantized_weights.append(
                 self.pointwise_quantizer(self.pointwise_kernel)
             )
