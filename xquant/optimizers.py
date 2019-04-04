@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
@@ -13,7 +14,17 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
                     self.multipliers[weight.name] = self.get_lr_multiplier(weight)
 
     def get_lr_multiplier(self, weight):
-        return 1
+        shape = weight.get_shape().as_list()
+        n_input = shape[-2]
+        n_output = shape[-1]
+        if len(shape) == 4:
+            kernelsize = np.prod(shape[:-2])
+            coeff = 1.0 / np.sqrt(1.5 / ((kernelsize * (n_input + n_output))))
+        elif len(shape) == 2:
+            coeff = 1.0 / np.sqrt(1.5 / ((1.0 * (n_input + n_output))))
+        else:
+            raise NotImplementedError()
+        return coeff
 
     def get_updates(self, loss, params):
         mult_lr_params = [p for p in params if p.name in self.multipliers]
