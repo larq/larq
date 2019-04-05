@@ -1,54 +1,59 @@
 site_name: XQuant
-site_description: 'An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks'
+site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
 generate:
-- layers.md:
-  - xquant.layers:
-    - xquant.layers.QuantDense
-    - xquant.layers.QuantConv1D
-    - xquant.layers.QuantConv2D
-    - xquant.layers.QuantConv3D
-    - xquant.layers.QuantSeparableConv1D
-    - xquant.layers.QuantSeparableConv2D
-    - xquant.layers.QuantConv2DTranspose
-    - xquant.layers.QuantConv3DTranspose
-    - xquant.layers.QuantLocallyConnected1D
-    - xquant.layers.QuantLocallyConnected2D
-- activations.md:
-  - xquant.activations+
-- callbacks.md:
-  - xquant.callbacks+
-- constraints.md:
-  - xquant.constraints+
-- quantizers.md:
-  - xquant.quantizers:
-    - xquant.quantizers.ste_sign
-    - xquant.quantizers.approx_sign
+  - layers.md:
+      - xquant.layers:
+          - xquant.layers.QuantDense
+          - xquant.layers.QuantConv1D
+          - xquant.layers.QuantConv2D
+          - xquant.layers.QuantConv3D
+          - xquant.layers.QuantSeparableConv1D
+          - xquant.layers.QuantSeparableConv2D
+          - xquant.layers.QuantConv2DTranspose
+          - xquant.layers.QuantConv3DTranspose
+          - xquant.layers.QuantLocallyConnected1D
+          - xquant.layers.QuantLocallyConnected2D
+  - activations.md:
+      - xquant.activations+
+  - callbacks.md:
+      - xquant.callbacks+
+  - constraints.md:
+      - xquant.constraints+
+  - quantizers.md:
+      - xquant.quantizers:
+          - xquant.quantizers.ste_sign
+          - xquant.quantizers.approx_sign
 
 pages:
-- Home: index.md << README.md
-- Quantized Layers: layers.md
-- Quantizers: quantizers.md
-- Activations: activations.md
-- Constraints: constraints.md
-- Callbacks: callbacks.md
-- Examples:
-  - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
-- Library Development:
-  - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
-  - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
+  - Home: index.md << README.md
+  - Quantized Layers: layers.md
+  - Quantizers: quantizers.md
+  - Activations: activations.md
+  - Constraints: constraints.md
+  - Callbacks: callbacks.md
+  - Examples:
+      - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
+  - Library Development:
+      - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
+      - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
 
 headers: markdown
 repo_url: https://github.com/lgeiger/xquant
-theme: material
+theme:
+  name: material
+  logo:
+    icon: developer_board
+  feature:
+    tabs: false
 
 extra:
   social:
-    - type: 'github'
-      link: 'https://github.com/plumerai'
-    - type: 'twitter'
-      link: 'https://twitter.com/PlumeraiLab'
-    - type: 'linkedin'
-      link: 'https://www.linkedin.com/company/plumerai/'
+    - type: "github"
+      link: "https://github.com/plumerai"
+    - type: "twitter"
+      link: "https://twitter.com/PlumeraiLab"
+    - type: "linkedin"
+      link: "https://www.linkedin.com/company/plumerai/"
 
 markdown_extensions:
   - admonition
@@ -59,8 +64,9 @@ markdown_extensions:
       permalink: true
 
 extra_javascript:
-  - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML'
+  - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML"
 
 plugins:
+  - search
   - mknotebooks:
       execute: false
