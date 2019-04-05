@@ -114,5 +114,5 @@ def get(identifier):
     if callable(identifier):
         return identifier
     raise ValueError(
-        "Could not interpret quantization function identifier:", identifier
+        f"Could not interpret quantization function identifier: {identifier}"
     )

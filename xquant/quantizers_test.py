@@ -17,6 +17,13 @@ def test_serialization(name):
     assert fn == ref_fn
 
 
+def test_invalid_usage():
+    with pytest.raises(ValueError):
+        xq.quantizers.get(42)
+    with pytest.raises(ValueError):
+        xq.quantizers.get("unknown")
+
+
 @pytest.mark.parametrize("name", ["ste_sign", "approx_sign"])
 def test_binarization(name):
     x = tf.keras.backend.placeholder(ndim=2)
