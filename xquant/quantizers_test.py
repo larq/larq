@@ -13,6 +13,8 @@ def test_serialization(name):
     config = xq.quantizers.serialize(fn)
     fn = xq.quantizers.deserialize(config)
     assert fn == ref_fn
+    fn = xq.quantizers.get(ref_fn)
+    assert fn == ref_fn
 
 
 @pytest.mark.parametrize("name", ["ste_sign", "approx_sign"])
