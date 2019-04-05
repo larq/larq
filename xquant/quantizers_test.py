@@ -32,6 +32,9 @@ def test_binarization(name):
 
 class GradientTests(tf.test.TestCase):
     def test_ste_grad(self):
+        if tf.executing_eagerly():
+            return
+
         @np.vectorize
         def ste_grad(x):
             if np.abs(x) <= 1:
@@ -44,6 +47,9 @@ class GradientTests(tf.test.TestCase):
         self.assertAllClose(grad, ste_grad(x))
 
     def test_approx_sign_grad(self):
+        if tf.executing_eagerly():
+            return
+
         @np.vectorize
         def approx_sign_grad(x):
             if np.abs(x) <= 1:
