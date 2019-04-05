@@ -32,12 +32,11 @@ def test_binarization(name):
 
 class GradientTests(tf.test.TestCase):
     def test_ste_grad(self):
-        def ref_ste_grad(x):
+        @np.vectorize
+        def ste_grad(x):
             if np.abs(x) <= 1:
                 return 1.0
             return 0.0
-
-        ste_grad = np.vectorize(ref_ste_grad)
 
         x = np.random.uniform(-2, 2, (8, 3, 3, 16))
         tf_x = tf.constant(x, dtype=tf.float32)
@@ -45,12 +44,11 @@ class GradientTests(tf.test.TestCase):
         self.assertAllClose(grad, ste_grad(x))
 
     def test_approx_sign_grad(self):
-        def ref_approx_sign_grad(x):
+        @np.vectorize
+        def approx_sign_grad(x):
             if np.abs(x) <= 1:
                 return 2 - 2 * np.abs(x)
             return 0.0
-
-        approx_sign_grad = np.vectorize(ref_approx_sign_grad)
 
         x = np.random.uniform(-2, 2, (8, 3, 3, 16))
         tf_x = tf.constant(x, dtype=tf.float32)
