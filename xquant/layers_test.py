@@ -149,3 +149,37 @@ class LayersTest(keras_parameterized.TestCase):
         )
 
         self.assertAllClose(quant_output, fp_output)
+
+
+def test_layer_warns(caplog):
+    xq.layers.QuantDense(5, kernel_quantizer="ste_sign")
+    assert len(caplog.records) == 1
+    assert "kernel_constraint" in caplog.text
+
+
+def test_layer_does_not_warn(caplog):
+    xq.layers.QuantDense(
+        5, kernel_quantizer="ste_sign", kernel_constraint="weight_clip"
+    )
+    assert caplog.records == []
+
+
+def test_separable_layer_warns(caplog):
+    xq.layers.QuantSeparableConv2D(
+        3, 3, depthwise_quantizer="ste_sign", pointwise_quantizer="ste_sign"
+    )
+    assert len(caplog.records) == 2
+    assert "depthwise_constraint" in caplog.text
+    assert "pointwise_constraint" in caplog.text
+
+
+def test_separable_layer_does_not_warn(caplog):
+    xq.layers.QuantSeparableConv2D(
+        3,
+        3,
+        depthwise_quantizer="ste_sign",
+        pointwise_quantizer="ste_sign",
+        depthwise_constraint="weight_clip",
+        pointwise_constraint="weight_clip",
+    )
+    assert caplog.records == []
