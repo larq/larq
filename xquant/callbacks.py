@@ -41,9 +41,9 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
             op_names = []
             for layer in self.model.layers:
                 if hasattr(layer, "quantized_weights"):
-                    for weight in layer.quantized_weights:
+                    for i, weight in enumerate(layer.quantized_weights):
                         ops.append(weight)
-                        op_names.append(weight.name)
+                        op_names.append(layer.name if i == 0 else f"{layer.name}_{i}")
 
             for key, value in zip(op_names, tf.keras.backend.batch_get_value(ops)):
                 if should_log:
