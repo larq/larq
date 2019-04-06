@@ -25,6 +25,7 @@ class LayersTest(keras_parameterized.TestCase):
                     pointwise_quantizer="ste_sign",
                     input_shape=(3, 3),
                 ),
+                tf.keras.layers.Flatten(),
                 xq.layers.QuantDense(2, kernel_quantizer="ste_sign"),
             ]
         )
