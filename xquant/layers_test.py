@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 from absl.testing import parameterized
 import xquant as xq
+import pytest
+import inspect
 
 from tensorflow.python.keras import keras_parameterized
 from tensorflow.python.keras import testing_utils
@@ -183,3 +185,39 @@ def test_separable_layer_does_not_warn(caplog):
         pointwise_constraint="weight_clip",
     )
     assert caplog.records == []
+
+
+@pytest.mark.parametrize(
+    "quant_layer,layer",
+    [
+        (xq.layers.QuantDense, tf.keras.layers.Dense),
+        (xq.layers.QuantConv1D, tf.keras.layers.Conv1D),
+        (xq.layers.QuantConv2D, tf.keras.layers.Conv2D),
+        (xq.layers.QuantConv3D, tf.keras.layers.Conv3D),
+        (xq.layers.QuantConv2DTranspose, tf.keras.layers.Conv2DTranspose),
+        (xq.layers.QuantConv3DTranspose, tf.keras.layers.Conv3DTranspose),
+        (xq.layers.QuantLocallyConnected1D, tf.keras.layers.LocallyConnected1D),
+        (xq.layers.QuantLocallyConnected2D, tf.keras.layers.LocallyConnected2D),
+    ],
+)
+def test_layer_kwargs(quant_layer, layer):
+    quant_params = inspect.signature(quant_layer).parameters
+    params = inspect.signature(layer).parameters
+
+    quant_params_list = list(quant_params.keys())
+    params_list = list(params.keys())
+
+    for p in (
+        "input_quantizer",
+        "kernel_quantizer",
+        "depthwise_quantizer",
+        "pointwise_quantizer",
+    ):
+        try:
+            quant_params_list.remove(p)
+        except:
+            pass
+    assert quant_params_list == params_list
+
+    for param in params_list:
+        assert quant_params.get(param).default == params.get(param).default

@@ -174,11 +174,11 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
 
     # Arguments
     units: Positive integer, dimensionality of the output space.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -197,7 +197,37 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     shape `(batch_size, input_dim)`, the output would have shape `(batch_size, units)`.
     """
 
-    pass
+    def __init__(
+        self,
+        units,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            units,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -222,8 +252,6 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
         (i.e. the number of output filters in the convolution).
     kernel_size: An integer or tuple/list of a single integer,
         specifying the length of the 1D convolution window.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of a single integer, specifying the stride
         length of the convolution. Specifying any stride value != 1 is incompatible
         with specifying any `dilation_rate` value != 1.
@@ -239,6 +267,8 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     activation: Activation function to use. If you don't specify anything, no activation
         is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -256,7 +286,47 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     `steps` value might have changed due to padding or strides.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=1,
+        padding="valid",
+        data_format="channels_last",
+        dilation_rate=1,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -282,8 +352,6 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     kernel_size: An integer or tuple/list of 2 integers, specifying the
         height and width of the 2D convolution window. Can be a single integer
         to specify the same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of 2 integers, specifying the strides of
         the convolution along the height and width. Can be a single integer to
         specify the same value for all spatial dimensions. Specifying any stride
@@ -302,6 +370,8 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -325,7 +395,47 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     `rows` and `cols` values might have changed due to padding.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=(1, 1),
+        padding="valid",
+        data_format=None,
+        dilation_rate=(1, 1),
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -351,8 +461,6 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     kernel_size: An integer or tuple/list of 3 integers, specifying the
         depth, height and width of the 3D convolution window. Can be a single
         integer to specify the same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of 3 integers, specifying the strides of the
         convolution along each spatial dimension. Can be a single integer to specify the
         same value for all spatial dimensions. Specifying any stride value != 1 is
@@ -372,6 +480,8 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -400,7 +510,47 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         changed due to padding.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=(1, 1, 1),
+        padding="valid",
+        data_format=None,
+        dilation_rate=(1, 1, 1),
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -419,9 +569,6 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     filters: Integer, the dimensionality of the output space (i.e. the number
         of filters in the convolution).
     kernel_size: A single integer specifying the spatial dimensions of the filters.
-    input_quantizer: Quantization function applied to the input of the layer.
-    depthwise_quantizer: Quantization function applied to the depthwise kernel.
-    pointwise_quantizer: Quantization function applied to the pointwise kernel.
     strides: A single integer specifying the strides of the convolution.
         Specifying any `stride` value != 1 is incompatible with specifying
         any `dilation_rate` value != 1.
@@ -438,6 +585,9 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         channels will be equal to `num_filters_in * depth_multiplier`.
     activation: Activation function. Set it to None to maintain a linear activation.
     use_bias: Boolean, whether the layer uses a bias.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the depthwise kernel.
+    pointwise_quantizer: Quantization function applied to the pointwise kernel.
     depthwise_initializer: An initializer for the depthwise convolution kernel.
     pointwise_initializer: An initializer for the pointwise convolution kernel.
     bias_initializer: An initializer for the bias vector. If None, the default
@@ -461,7 +611,57 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     name: A string, the name of the layer.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=1,
+        padding="valid",
+        data_format=None,
+        dilation_rate=1,
+        depth_multiplier=1,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        depthwise_quantizer=None,
+        pointwise_quantizer=None,
+        depthwise_initializer="glorot_uniform",
+        pointwise_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        depthwise_regularizer=None,
+        pointwise_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        depthwise_constraint=None,
+        pointwise_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            depth_multiplier=depth_multiplier,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            depthwise_quantizer=depthwise_quantizer,
+            pointwise_quantizer=pointwise_quantizer,
+            depthwise_initializer=depthwise_initializer,
+            pointwise_initializer=pointwise_initializer,
+            bias_initializer=bias_initializer,
+            depthwise_regularizer=depthwise_regularizer,
+            pointwise_regularizer=pointwise_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            depthwise_constraint=depthwise_constraint,
+            pointwise_constraint=pointwise_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -489,9 +689,6 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     kernel_size: An integer or tuple/list of 2 integers, specifying the height and
         width of the 2D convolution window. Can be a single integer to specify the
         same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    depthwise_quantizer: Quantization function applied to the depthwise kernel matrix.
-    pointwise_quantizer: Quantization function applied to the pointwise kernel matrix.
     strides: An integer or tuple/list of 2 integers, specifying the strides of the
         convolution along the height and width. Can be a single integer to specify
         the same value for all spatial dimensions. Specifying any stride value != 1
@@ -512,6 +709,9 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the depthwise kernel matrix.
+    pointwise_quantizer: Quantization function applied to the pointwise kernel matrix.
     depthwise_initializer: Initializer for the depthwise kernel matrix.
     pointwise_initializer: Initializer for the pointwise kernel matrix.
     bias_initializer: Initializer for the bias vector.
@@ -538,7 +738,57 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     `rows` and `cols` values might have changed due to padding.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=(1, 1),
+        padding="valid",
+        data_format=None,
+        dilation_rate=(1, 1),
+        depth_multiplier=1,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        depthwise_quantizer=None,
+        pointwise_quantizer=None,
+        depthwise_initializer="glorot_uniform",
+        pointwise_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        depthwise_regularizer=None,
+        pointwise_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        depthwise_constraint=None,
+        pointwise_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            depth_multiplier=depth_multiplier,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            depthwise_quantizer=depthwise_quantizer,
+            pointwise_quantizer=pointwise_quantizer,
+            depthwise_initializer=depthwise_initializer,
+            pointwise_initializer=pointwise_initializer,
+            bias_initializer=bias_initializer,
+            depthwise_regularizer=depthwise_regularizer,
+            pointwise_regularizer=pointwise_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            depthwise_constraint=depthwise_constraint,
+            pointwise_constraint=pointwise_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -564,8 +814,6 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     kernel_size: An integer or tuple/list of 2 integers, specifying the
         height and width of the 2D convolution window. Can be a single integer
         to specify the same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of 2 integers, specifying the strides of
         the convolution along the height and width. Can be a single integer to
         specify the same value for all spatial dimensions. Specifying any stride
@@ -590,6 +838,8 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -619,7 +869,48 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
       Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=(1, 1),
+        padding="valid",
+        output_padding=None,
+        data_format=None,
+        dilation_rate=(1, 1),
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -646,8 +937,6 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     kernel_size: An integer or tuple/list of 3 integers, specifying the depth, height
         and width of the 3D convolution window. Can be a single integer to specify the
         same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of 3 integers, specifying the strides of the
         convolution along the depth, height and width. Can be a single integer to
         specify the same value for all spatial dimensions. Specifying any stride
@@ -671,6 +960,8 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -700,7 +991,46 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
       Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=(1, 1, 1),
+        padding="valid",
+        output_padding=None,
+        data_format=None,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -730,8 +1060,6 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
         (i.e. the number of output filters in the convolution).
     kernel_size: An integer or tuple/list of a single integer,
         specifying the length of the 1D convolution window.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of a single integer, specifying the stride
         length of the convolution. Specifying any stride value != 1 is incompatible
         with specifying any `dilation_rate` value != 1.
@@ -746,6 +1074,8 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -786,7 +1116,47 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
     `steps` value might have changed due to padding or strides.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=1,
+        padding="valid",
+        data_format=None,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        implementation=1,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            implementation=implementation,
+            **kwargs
+        )
 
 
 @utils.register_keras_custom_object
@@ -821,8 +1191,6 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     kernel_size: An integer or tuple/list of 2 integers, specifying the
         width and height of the 2D convolution window. Can be a single integer to
         specify the same value for all spatial dimensions.
-    input_quantizer: Quantization function applied to the input of the layer.
-    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     strides: An integer or tuple/list of 2 integers, specifying the strides of the
         convolution along the width and height. Can be a single integer to specify
         the same value for all spatial dimensions.
@@ -837,6 +1205,8 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     activation: Activation function to use. If you don't specify anything,
         no activation is applied (`a(x) = x`).
     use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    kernel_quantizer: Quantization function applied to the `kernel` weights matrix.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -883,4 +1253,44 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     `rows` and `cols` values might have changed due to padding.
     """
 
-    pass
+    def __init__(
+        self,
+        filters,
+        kernel_size,
+        strides=(1, 1),
+        padding="valid",
+        data_format=None,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        implementation=1,
+        **kwargs
+    ):
+        super().__init__(
+            filters,
+            kernel_size,
+            strides=strides,
+            padding=padding,
+            data_format=data_format,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint,
+            implementation=implementation,
+            **kwargs
+        )
