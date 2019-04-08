@@ -33,8 +33,8 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
         self.update_freq = update_freq if update_freq != "batch" else 1
 
     def on_batch_end(self, batch, logs=None):
-        should_log = batch > 0 and batch % self.update_freq == 0
-        should_store = (batch + 1) % self.update_freq == 0
+        should_log = batch > 0 and (batch + 1) % self.update_freq == 0
+        should_store = (batch + 2) % self.update_freq == 0
 
         if should_log or should_store:
             ops = []
