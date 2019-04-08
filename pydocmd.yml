@@ -30,14 +30,14 @@ pages:
       - Library Development:
           - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
           - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
+  - Examples:
+      - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
   - Documenation:
       - Quantized Layers: layers.md
       - Quantizers: quantizers.md
       - Activations: activations.md
       - Constraints: constraints.md
       - Callbacks: callbacks.md
-  - Examples:
-      - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
 
 headers: markdown
 repo_url: https://github.com/lgeiger/xquant
