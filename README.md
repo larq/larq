@@ -2,11 +2,11 @@
 
 [![Azure DevOps builds](https://img.shields.io/azure-devops/build/plumerai/xquant/4.svg?logo=azure-devops)](https://plumerai.visualstudio.com/xquant/_build/latest?definitionId=4&branchName=master) [![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/plumerai/xquant/4.svg?logo=azure-devops)](https://plumerai.visualstudio.com/xquant/_build/latest?definitionId=4&branchName=master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-XQuant is an Open Source Machine Learning Library for Training Super Quantized Neural Networks (SQNNs). Existing Deep Neural Networks tend to be large, slow and power-hungry, prohibiting many applications in resource-constrained environments. XQuant is designed to provide an easy to use, composable way to train SQNNs (e.g. Binarized Neural Networks) based on the `tf.keras` interface.
+XQuant is an open source machine learning library for training Quantized Neural Networks (QNNs) with extremely low precision weights and activations (e.g. 1-bit). Existing Deep Neural Networks tend to be large, slow and power-hungry, prohibiting many applications in resource-constrained environments. XQuant is designed to provide an easy to use, composable way to train QNNs (e.g. Binarized Neural Networks) based on the `tf.keras` interface.
 
 ## Getting Started
 
-To build a SQNN XQuant introduces the concept of _Quantized Layers_ and _Quantizers_. A _Quantizer_ defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each _Quantized Layer_ requires a `input_quantizer` and `kernel_quantizer` that describes the way of quantizing the activation of the previous layer and the weights respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
+To build a QNN XQuant introduces the concept of _Quantized Layers_ and _Quantizers_. A _Quantizer_ defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each _Quantized Layer_ requires a `input_quantizer` and `kernel_quantizer` that describes the way of quantizing the activation of the previous layer and the weights respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
 You can define a binarized densly-connected using the Straight-Through Estimator the following way:
 
