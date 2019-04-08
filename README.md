@@ -23,14 +23,16 @@ This layer can be used inside a [keras model](https://www.tensorflow.org/alpha/g
 
 Checkout our Example on how to train a Binarized Neural Network in just a few lines of code.
 
-## Installation
+## Requirements
 
 Before installing XQuant, please install:
 
 - [Python](https://python.org) version `3.6` or `3.7`
 - [Tensorflow](https://www.tensorflow.org/install) version `1.13+` or `2.0.0`
 
-Then, you can install XQuant with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
+## Installation
+
+You can install XQuant with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
 
 ```shell
 pip install xquant
