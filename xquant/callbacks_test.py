@@ -37,7 +37,7 @@ class LayersTest(keras_parameterized.TestCase):
         logger = xq.callbacks.QuantizationLogger(update_freq=5)
         history = LogHistory()
 
-        x = np.ones((26, 3, 3))
-        y = np.zeros((26, 2))
+        x = np.ones((25, 3, 3))
+        y = np.zeros((25, 2))
         model.fit(x, y, batch_size=1, epochs=1, callbacks=[logger, history])
-        assert history.logs == [5, 10, 15, 20, 25]
+        assert history.logs == [4, 9, 14, 19, 24]
