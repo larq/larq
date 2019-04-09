@@ -8,7 +8,7 @@ XQuant is an open source machine learning library for training Quantized Neural 
 
 To build a QNN XQuant introduces the concept of _Quantized Layers_ and _Quantizers_. A _Quantizer_ defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each _Quantized Layer_ requires a `input_quantizer` and `kernel_quantizer` that describes the way of quantizing the activation of the previous layer and the weights respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
-You can define a binarized densly-connected using the Straight-Through Estimator the following way:
+You can define a binarized densely-connected layer using the Straight-Through Estimator the following way:
 
 ```python
 xquant.layers.QuantDense(
@@ -21,7 +21,11 @@ xquant.layers.QuantDense(
 
 This layer can be used inside a [keras model](https://www.tensorflow.org/alpha/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/alpha/guide/keras/overview#model_subclassing).
 
-Checkout our Example on how to train a Binarized Neural Network in just a few lines of code.
+## Examples
+
+Checkout our [examples](https://github.com/plumerai/xquant/tree/master/examples) on how to train a Binarized Neural Network in just a few lines of code:
+
+- [MNIST Convolutional BNN](https://github.com/plumerai/xquant/blob/master/examples/mnist.ipynb)
 
 ## Requirements
 
