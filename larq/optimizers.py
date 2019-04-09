@@ -5,13 +5,27 @@ from larq import utils
 
 @utils.register_keras_custom_object
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
-    """
-    Xavier Learning Rate Scaling
+    """Optimizer wrapper for Xavier Learning Rate Scaling
 
-    Scale the weights learning rates respectively with the Weights initialisation
+    Scale the weights learning rates respectively with the weights initialization
+
+    !!! note ""
+        This is a wrapper and does not implement any optimization algorithm.
+
+    !!! example
+        ```python
+        optimizer = lq.optimizers.XavierLearningRateScaling(
+            tf.keras.optimizers.Adam(0.01), model
+        )
+        ```
+
+    # Arguments
+    optimizer: A `tf.keras.optimizers.Optimizer`
+    model: A `tf.keras.Model`
 
     # References
-    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+    - [BinaryConnect: Training Deep Neural Networks with binary weights during
+      propagations](https://arxiv.org/abs/1511.00363)
     """
 
     def __init__(self, optimizer, model):
