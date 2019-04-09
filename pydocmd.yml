@@ -31,7 +31,8 @@ pages:
           - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
           - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
   - Examples:
-      - MNIST: examples/mnist.ipynb << examples/mnist.ipynb
+      - Introduction to XQuant: examples/mnist.ipynb << examples/mnist.ipynb
+      - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb << examples/binarynet_cifar10.ipynb
   - Documenation:
       - Quantized Layers: layers.md
       - Quantizers: quantizers.md
