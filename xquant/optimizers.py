@@ -32,7 +32,7 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
         elif len(shape) == 2:
             coeff = 1.0 / np.sqrt(1.5 / ((1.0 * (n_input + n_output))))
         else:
-            raise NotImplementedError()
+            raise NotImplementedError("Xavier Learning rate scaling not implimented for this kernalsize")
         return coeff
 
     def get_updates(self, loss, params):
