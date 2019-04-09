@@ -3,6 +3,15 @@ import numpy as np
 
 
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
+    r"""
+    Xavier Learning Rate Scaling
+
+    Scale the weights learning rates respectively with the Weights initialisation
+
+    # References
+    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+    """
+
     def __init__(self, model, optimizer, **kwargs):
         self._class = optimizer
         self._optimizer = optimizer(**kwargs)
