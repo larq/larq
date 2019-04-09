@@ -7,8 +7,8 @@ def readme():
 
 
 setup(
-    name="pl-larq",
-    version="0.0.0",
+    name="larq",
+    version="0.1.0",
     author="Plumerai",
     author_email="lukas@plumerai.co.uk",
     description="An Open Source Machine Learning Library for Training Binarized Neural Networks",
@@ -30,7 +30,7 @@ setup(
         ],
     },
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
