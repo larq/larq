@@ -3,7 +3,7 @@ import numpy as np
 
 
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
-    r"""
+    """
     Xavier Learning Rate Scaling
 
     Scale the weights learning rates respectively with the Weights initialisation
