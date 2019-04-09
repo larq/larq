@@ -11,15 +11,15 @@ These layers expose 2 keyword arguments:
 - `bias_constraint` for the bias.
 
 ```python
-import xquant as xq
+import larq as lq
 
-xq.layers.QuantDense(64, kernel_constraint="weight_clip")
-xq.layers.QuantDense(64, kernel_constraint=xq.constraints.WeightClip(2.))
+lq.layers.QuantDense(64, kernel_constraint="weight_clip")
+lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.))
 ```
 """
 
 import tensorflow as tf
-from xquant import utils
+from larq import utils
 
 
 @utils.register_keras_custom_object

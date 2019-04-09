@@ -36,7 +36,7 @@ jobs:
         displayName: "pytest"
         condition: ne(variables['coverage'], 'true')
 
-      - script: pytest . --junitxml=junit/test-results.xml --cov=xquant --cov-report=xml --cov-report=html --cov-config=.coveragerc
+      - script: pytest . --junitxml=junit/test-results.xml --cov=larq --cov-report=xml --cov-report=html --cov-config=.coveragerc
         displayName: "pytest coverage"
         condition: eq(variables['coverage'], 'true')
 

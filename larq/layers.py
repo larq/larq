@@ -8,8 +8,8 @@ is equivalent to a full precision layer.
 
 import logging
 import tensorflow as tf
-from xquant import utils
-from xquant import quantizers
+from larq import utils
+from larq import quantizers
 
 log = logging.getLogger(__name__)
 

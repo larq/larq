@@ -3,27 +3,27 @@
 
 ```python
 import tensorflow as tf
-import xquant as xq
+import larq as lq
 
-model.add(xq.layers.QuantDense(64))
+model.add(lq.layers.QuantDense(64))
 model.add(tf.keras.layers.Activation('hard_tanh'))
 ```
 
 This is equivalent to:
 
 ```python
-model.add(xq.layers.QuantDense(64, activation='hard_tanh'))
+model.add(lq.layers.QuantDense(64, activation='hard_tanh'))
 ```
 
 You can also pass an element-wise TensorFlow function as an activation:
 
 ```python
-model.add(xq.layers.QuantDense(64, activation=xq.activations.hard_tanh))
+model.add(lq.layers.QuantDense(64, activation=lq.activations.hard_tanh))
 ```
 """
 
 import tensorflow as tf
-from xquant import utils
+from larq import utils
 
 
 @utils.register_keras_custom_object
