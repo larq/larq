@@ -1,7 +1,9 @@
 import tensorflow as tf
 import numpy as np
+from larq import utils
 
 
+@utils.register_keras_custom_object
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
     """
     Xavier Learning Rate Scaling
@@ -12,15 +14,23 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    def __init__(self, model, optimizer, **kwargs):
-        self._class = optimizer
-        self._optimizer = optimizer(**kwargs)
+    def __init__(self, optimizer, model):
+        if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
+            raise ValueError(
+                f"Expected tf.keras.optimizers.Optimizer, received {type(optimizer)}."
+            )
+        self.optimizer = optimizer
 
-        self.multipliers = {}
-        for layer in model.layers:
-            if hasattr(layer, "quantized_latent_weights"):
-                for weight in layer.quantized_latent_weights:
-                    self.multipliers[weight.name] = self.get_lr_multiplier(weight)
+        if isinstance(model, tf.keras.Model):
+            self.multipliers = {}
+            for layer in model.layers:
+                if hasattr(layer, "quantized_latent_weights"):
+                    for weight in layer.quantized_latent_weights:
+                        self.multipliers[weight.name] = self.get_lr_multiplier(weight)
+        elif isinstance(model, dict):
+            self.multipliers = model
+        else:
+            raise ValueError(f"Expected tf.keras.Model or dict, received {type(model)}")
 
     def get_lr_multiplier(self, weight):
         shape = weight.get_shape().as_list()
@@ -42,12 +52,31 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
         base_lr_params = [p for p in params if p.name not in self.multipliers]
 
         updates = []
-        base_lr = self._optimizer.lr
+        base_lr = self.optimizer.lr
         for param in mult_lr_params:
-            self._optimizer.lr = base_lr * self.multipliers[param.name]
-            updates.extend(self._optimizer.get_updates(loss, [param]))
+            self.optimizer.lr = base_lr * self.multipliers[param.name]
+            updates.extend(self.optimizer.get_updates(loss, [param]))
 
-        self._optimizer.lr = base_lr
-        updates.extend(self._optimizer.get_updates(loss, base_lr_params))
+        self.optimizer.lr = base_lr
+        updates.extend(self.optimizer.get_updates(loss, base_lr_params))
 
         return updates
+
+    def __getattr__(self, name):
+        return getattr(self.optimizer, name)
+
+    def get_config(self):
+        return {
+            "optimizer": {
+                "class_name": self.optimizer.__class__.__name__,
+                "config": self.optimizer.get_config(),
+            },
+            "multipliers": self.multipliers,
+        }
+
+    @classmethod
+    def from_config(cls, config, custom_objects=None):
+        optimizer = tf.keras.optimizers.deserialize(
+            config.pop("optimizer"), custom_objects=custom_objects
+        )
+        return cls(optimizer, config["multipliers"])
