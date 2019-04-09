@@ -7,14 +7,14 @@ def readme():
 
 
 setup(
-    name="pl-xquant",
+    name="pl-larq",
     version="0.0.0",
     author="Plumerai",
     author_email="lukas@plumerai.co.uk",
-    description="An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks",
+    description="An Open Source Machine Learning Library for Training Binarized Neural Networks",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/lgeiger/xquant",
+    url="https://github.com/plumerai/larq",
     packages=find_packages(),
     license="Apache 2.0",
     install_requires=["numpy >= 1.15.4, < 2.0"],

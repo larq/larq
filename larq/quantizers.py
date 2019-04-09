@@ -2,7 +2,7 @@
 quantized output and the pseudo-gradient method used for the backwards pass."""
 
 import tensorflow as tf
-from xquant import utils
+from larq import utils
 
 
 def sign(x):

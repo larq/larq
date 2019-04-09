@@ -1,28 +1,28 @@
-site_name: XQuant
+site_name: larq
 site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
 generate:
   - layers.md:
-      - xquant.layers:
-          - xquant.layers.QuantDense
-          - xquant.layers.QuantConv1D
-          - xquant.layers.QuantConv2D
-          - xquant.layers.QuantConv3D
-          - xquant.layers.QuantSeparableConv1D
-          - xquant.layers.QuantSeparableConv2D
-          - xquant.layers.QuantConv2DTranspose
-          - xquant.layers.QuantConv3DTranspose
-          - xquant.layers.QuantLocallyConnected1D
-          - xquant.layers.QuantLocallyConnected2D
+      - larq.layers:
+          - larq.layers.QuantDense
+          - larq.layers.QuantConv1D
+          - larq.layers.QuantConv2D
+          - larq.layers.QuantConv3D
+          - larq.layers.QuantSeparableConv1D
+          - larq.layers.QuantSeparableConv2D
+          - larq.layers.QuantConv2DTranspose
+          - larq.layers.QuantConv3DTranspose
+          - larq.layers.QuantLocallyConnected1D
+          - larq.layers.QuantLocallyConnected2D
   - activations.md:
-      - xquant.activations+
+      - larq.activations+
   - callbacks.md:
-      - xquant.callbacks+
+      - larq.callbacks+
   - constraints.md:
-      - xquant.constraints+
+      - larq.constraints+
   - quantizers.md:
-      - xquant.quantizers:
-          - xquant.quantizers.ste_sign
-          - xquant.quantizers.approx_sign
+      - larq.quantizers:
+          - larq.quantizers.ste_sign
+          - larq.quantizers.approx_sign
 
 pages:
   - Home:
@@ -31,7 +31,7 @@ pages:
           - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
           - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
   - Examples:
-      - Introduction to XQuant: examples/mnist.ipynb << examples/mnist.ipynb
+      - Introduction to Larq: examples/mnist.ipynb << examples/mnist.ipynb
       - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb << examples/binarynet_cifar10.ipynb
   - Documenation:
       - Quantized Layers: layers.md
@@ -41,7 +41,7 @@ pages:
       - Callbacks: callbacks.md
 
 headers: markdown
-repo_url: https://github.com/lgeiger/xquant
+repo_url: https://github.com/plumerai/larq
 theme:
   name: material
   logo:

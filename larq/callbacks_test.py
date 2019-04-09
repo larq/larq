@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import xquant as xq
+import larq as lq
 from tensorflow.python.keras import keras_parameterized
 
 
@@ -21,7 +21,7 @@ class LayersTest(keras_parameterized.TestCase):
             return
         model = tf.keras.models.Sequential(
             [
-                xq.layers.QuantSeparableConv1D(
+                lq.layers.QuantSeparableConv1D(
                     1,
                     1,
                     depthwise_quantizer="ste_sign",
@@ -29,12 +29,12 @@ class LayersTest(keras_parameterized.TestCase):
                     input_shape=(3, 3),
                 ),
                 tf.keras.layers.Flatten(),
-                xq.layers.QuantDense(2, kernel_quantizer="ste_sign"),
+                lq.layers.QuantDense(2, kernel_quantizer="ste_sign"),
             ]
         )
         model.compile(loss="mse", optimizer="sgd")
 
-        logger = xq.callbacks.QuantizationLogger(update_freq=5)
+        logger = lq.callbacks.QuantizationLogger(update_freq=5)
         history = LogHistory()
 
         x = np.ones((25, 3, 3))
