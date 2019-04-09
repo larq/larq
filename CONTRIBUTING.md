@@ -1,6 +1,6 @@
 # Contributing to XQuant
 
-👍 🎉  First off, thanks for taking the time to contribute! 👍 🎉 
+👍 🎉 First off, thanks for taking the time to contribute! 👍 🎉
 
 **Working on your first Pull Request?** You can learn how from this _free_ series
 [How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github).
@@ -36,6 +36,7 @@ pytest .
 Inside the project directory run:
 
 ```shell
+pip install -e .[docs] # Installs dependencies for building the docs
 pydocmd serve
 ```
 

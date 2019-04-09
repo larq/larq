@@ -1,3 +1,11 @@
+"""Each Quantized Layer requires a `input_quantizer` and `kernel_quantizer` that
+describes the way of quantizing the activation of the previous layer and the weights
+respectively.
+
+If both `input_quantizer` and `kernel_quantizer` are `None` the layer
+is equivalent to a full precision layer.
+"""
+
 import logging
 import tensorflow as tf
 from xquant import utils
@@ -155,6 +163,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
                 32,
                 input_quantizer="ste_sign",
                 kernel_quantizer="ste_sign",
+                kernel_constraint="weight_clip",
                 input_shape=(16,),
             )
         )
@@ -168,6 +177,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
                 32,
                 input_quantizer="ste_sign",
                 kernel_quantizer="ste_sign",
+                kernel_constraint="weight_clip",
             )
         )
         ```
