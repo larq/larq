@@ -25,7 +25,8 @@ This layer can be used inside a [keras model](https://www.tensorflow.org/alpha/g
 
 Checkout our [examples](https://github.com/plumerai/xquant/tree/master/examples) on how to train a Binarized Neural Network in just a few lines of code:
 
-- [MNIST Convolutional BNN](https://github.com/plumerai/xquant/blob/master/examples/mnist.ipynb)
+- [Introduction to XQuant](https://github.com/plumerai/xquant/blob/master/examples/mnist.ipynb)
+- [Binarynet on CIFAR10](https://github.com/plumerai/xquant/blob/master/examples/binarynet_cifar10.ipynb)
 
 ## Requirements
 
