@@ -36,6 +36,7 @@ pytest .
 Inside the project directory run:
 
 ```shell
+pip install git+https://github.com/lgeiger/pydoc-markdown.git
 pip install -e .[docs] # Installs dependencies for building the docs
 pydocmd serve
 ```

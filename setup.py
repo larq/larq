@@ -23,7 +23,6 @@ setup(
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
         "test": ["absl-py>=0.7.0", "pytest>=4.3.1", "pytest-cov>=2.6.1"],
         "docs": [
-            "pydoc-markdown@https://github.com/lgeiger/pydoc-markdown/archive/master.zip",
             "mkdocs-material>=4.1.0",
             "pymdown-extensions>=6.0",
             "mknotebooks>=0.1.5",
