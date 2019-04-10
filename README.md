@@ -1,6 +1,6 @@
 # Larq
 
-[![Azure DevOps builds](https://img.shields.io/azure-devops/build/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Azure DevOps builds](https://img.shields.io/azure-devops/build/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black) [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/larq)
 
 Larq is an open source machine learning library for training Quantized Neural Networks (QNNs) with extremely low precision weights and activations (e.g. 1-bit). Existing Deep Neural Networks tend to be large, slow and power-hungry, prohibiting many applications in resource-constrained environments. Larq is designed to provide an easy to use, composable way to train QNNs (e.g. Binarized Neural Networks) based on the `tf.keras` interface.
 
