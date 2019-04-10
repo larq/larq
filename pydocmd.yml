@@ -1,4 +1,4 @@
-site_name: larq
+site_name: Larq
 site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
 generate:
   - layers.md:
@@ -48,6 +48,7 @@ pages:
 
 headers: markdown
 repo_url: https://github.com/plumerai/larq
+edit_uri: ""
 theme:
   name: material
   logo:
