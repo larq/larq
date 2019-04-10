@@ -1,6 +1,8 @@
 # Larq
 
-[![Azure DevOps builds](https://img.shields.io/azure-devops/build/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black) [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/larq)
+[![Azure DevOps builds](https://img.shields.io/azure-devops/build/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) [![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/plumerai/larq/5.svg?logo=azure-devops)](https://plumerai.visualstudio.com/larq/_build/latest?definitionId=5&branchName=master) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/larq.svg) ![PyPI](https://img.shields.io/pypi/v/larq.svg) ![PyPI - License](https://img.shields.io/pypi/l/larq.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/plumerai/larq/master?filepath=examples) [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/larq)
 
 Larq is an open source machine learning library for training Quantized Neural Networks (QNNs) with extremely low precision weights and activations (e.g. 1-bit). Existing Deep Neural Networks tend to be large, slow and power-hungry, prohibiting many applications in resource-constrained environments. Larq is designed to provide an easy to use, composable way to train QNNs (e.g. Binarized Neural Networks) based on the `tf.keras` interface.
 
@@ -23,10 +25,10 @@ This layer can be used inside a [keras model](https://www.tensorflow.org/alpha/g
 
 ## Examples
 
-Checkout our [examples](https://github.com/plumerai/larq/tree/master/examples) on how to train a Binarized Neural Network in just a few lines of code:
+Checkout our [examples](https://plumerai.github.io/larq/examples/mnist/) on how to train a Binarized Neural Network in just a few lines of code:
 
-- [Introduction to Larq](https://github.com/plumerai/larq/blob/master/examples/mnist.ipynb)
-- [Binarynet on CIFAR10](https://github.com/plumerai/larq/blob/master/examples/binarynet_cifar10.ipynb)
+- [Introduction to Larq](https://plumerai.github.io/larq/examples/mnist/)
+- [Binarynet on CIFAR10](https://plumerai.github.io/larq/examples/binarynet_cifar10/)
 
 ## Requirements
 
