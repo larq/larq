@@ -3,6 +3,9 @@ import numpy as np
 import tensorflow as tf
 import larq as lq
 
+if int(tf.__version__[0]) == 2:
+    pytest.skip("This wrapper is not supported by TF 2", allow_module_level=True)
+
 
 def assert_weights(weights, expected):
     for w, e in zip(weights, expected):

@@ -29,6 +29,11 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
     """
 
     def __init__(self, optimizer, model):
+        if int(tf.__version__[0]) == 2:
+            raise NotImplementedError(
+                "XavierLearningRateScaling is not supported by Tensorflow 2.0."
+            )
+
         if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
             raise ValueError(
                 f"Expected tf.keras.optimizers.Optimizer, received {type(optimizer)}."
