@@ -37,7 +37,7 @@ pages:
   - Examples:
       - Introduction to Larq: examples/mnist.ipynb << examples/mnist.ipynb
       - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb << examples/binarynet_cifar10.ipynb
-  - Documenation:
+  - Documentation:
       - Quantized Layers: layers.md
       - Quantizers: quantizers.md
       - Activations: activations.md
@@ -48,6 +48,7 @@ pages:
 
 headers: markdown
 repo_url: https://github.com/plumerai/larq
+repo_name: plumerai/larq
 edit_uri: ""
 theme:
   name: material
