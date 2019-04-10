@@ -41,7 +41,7 @@ def _count_fp_weights(layer):
     return layer.count_params()
 
 
-def summary(model, tablefmt="simple", print_fn=print):
+def summary(model, tablefmt="simple", print_fn=None):
     """Prints a string summary of the network.
 
     # Arguments
@@ -52,6 +52,7 @@ def summary(model, tablefmt="simple", print_fn=print):
         `tsv`, `youtrac`.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
+
     # Raises
     ValueError: if called before the model is built.
     """
@@ -80,8 +81,10 @@ def summary(model, tablefmt="simple", print_fn=print):
         trainable_count = _count_params(model._collected_trainable_weights)
     else:
         trainable_count = _count_params(model.trainable_weights)
-
     non_trainable_count = _count_params(model.non_trainable_weights)
+
+    if print_fn is None:
+        print_fn = print
 
     print_fn(tabulate(table, headers=header, tablefmt=tablefmt))
     print_fn()

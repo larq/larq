@@ -21,6 +21,8 @@ generate:
       - larq.constraints+
   - optimizers.md:
       - larq.optimizers+
+  - models.md:
+      - larq.models+
   - quantizers.md:
       - larq.quantizers:
           - larq.quantizers.ste_sign
@@ -42,6 +44,7 @@ pages:
       - Constraints: constraints.md
       - Callbacks: callbacks.md
       - Optimizers: optimizers.md
+      - Models: models.md
 
 headers: markdown
 repo_url: https://github.com/plumerai/larq
