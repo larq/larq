@@ -9,7 +9,6 @@ def sign(x):
     """A sign function that will never be zero"""
     return tf.sign(tf.sign(x) + 0.1)
 
-
 @tf.custom_gradient
 def _binarize_with_identity_grad(x):
     def grad(dy):
@@ -119,3 +118,17 @@ def get(identifier):
     raise ValueError(
         f"Could not interpret quantization function identifier: {identifier}"
     )
+
+# Ternarised Research
+@tf.custom_gradient
+def _ternarize_with_identity_grad(x):
+    def grad(dy):
+        return dy
+
+    return tf.sign(x), grad
+
+@utils.register_keras_custom_object
+def ste_ternsign(x):
+    x = tf.clip_by_value(x, -1, 1)
+
+    return _ternarize_with_identity_grad(x)
