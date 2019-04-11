@@ -149,6 +149,34 @@ def _ternarize_with_identity_grad(x):
 
 @utils.register_keras_custom_object
 def ste_tern(x):
+    r"""
+    Ternarization function.
+    \\[
+    q(x) = \begin{cases}
+      +1 & x > \Delta \\\
+      0 & |x| > \Delta \\\
+      -1 & x < \Delta
+    \end{cases}
+    \\]
+
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+      1 & \left|x\right| \leq 1 \\\
+      0 & \left|x\right| > 1
+    \end{cases}\\]
+
+    # Arguments
+    x: Input tensor.
+
+    # Returns
+    Ternarized tensor.
+
+    # References
+    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
+      Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+    """
     x = tf.clip_by_value(x, -1, 1)
 
     return _ternarize_with_identity_grad(x)
