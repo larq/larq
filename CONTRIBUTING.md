@@ -41,6 +41,41 @@ pip install -e .[docs] # Installs dependencies for building the docs
 pydocmd serve
 ```
 
+To publish a new version to github pages run:
+
+```shell
+pydocmd gh-deploy --force
+```
+
 ## Code style
 
 We use [`black`](https://black.readthedocs.io/en/stable/) to format all of our code. We recommend installing it as a plugin for your favorite [code editor](https://black.readthedocs.io/en/stable/editor_integration.html).
+
+## Publish release
+
+1. Install dependencies
+
+   ```shell
+   python -m pip install --upgrade setuptools wheel twine
+   ```
+
+2. Increment the version number in `setup.py`
+
+3. Push new tag
+
+   ```shell
+   git tag <version number>
+   git push && git push --tags
+   ```
+
+4. Build wheels
+
+   ```shell
+   python setup.py sdist bdist_wheel
+   ```
+
+5. Upload release
+
+   ```shell
+   python -m twine upload dist/*
+   ```
