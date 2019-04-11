@@ -125,8 +125,14 @@ def ste_tern(x):
     \end{cases}
     \\]
 
+    The Threshold is then calculated as
+    \\[
+    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
+    \\]
+    where we assume that $W_i$ is generated from a normal distribution
+
     The gradient is estimated using the Straight-Through Estimator
-    (essentially the binarization is replaced by a clipped identity on the
+    (essentially the Ternarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
       1 & \left|x\right| \leq 1 \\\
@@ -140,8 +146,7 @@ def ste_tern(x):
     Ternarized tensor.
 
     # References
-    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
-      Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
     x = tf.clip_by_value(x, -1, 1)
 
