@@ -130,6 +130,30 @@ def approx_sign(x):
     return _binarize_with_weighted_grad(x)
 
 
+def tern(x):
+    x_sum = tf.reduce_sum(tf.abs(x), reduction_indices=None, keep_dims=False, name=None)
+    threshold = tf.div(x_sum, tf.cast(tf.size(x), tf.float32), name=None)
+    threshold = tf.multiply(0.7, threshold, name=None)
+    return tf.sign(
+        tf.add(tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold)))
+    )
+
+
+@tf.custom_gradient
+def _ternarize_with_identity_grad(x):
+    def grad(dy):
+        return dy
+
+    return tern(x), grad
+
+
+@utils.register_keras_custom_object
+def ste_tern(x):
+    x = tf.clip_by_value(x, -1, 1)
+
+    return _ternarize_with_identity_grad(x)
+
+
 def serialize(initializer):
     return tf.keras.utils.serialize_keras_object(initializer)
 
@@ -153,28 +177,3 @@ def get(identifier):
     raise ValueError(
         f"Could not interpret quantization function identifier: {identifier}"
     )
-
-
-# Ternarised Research
-def ternsign(x):
-    x_sum = tf.reduce_sum(tf.abs(x),reduction_indices= None, keep_dims =False ,name= None)
-    threshold = tf.div(x_sum,tf.cast(tf.size(x), tf.float32),name= None)
-    threshold = tf.multiply(0.7,threshold,name= None)
-    return tf.sign(
-        tf.add(tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold)))
-    )
-
-
-@tf.custom_gradient
-def _ternarize_with_identity_grad(x):
-    def grad(dy):
-        return dy
-
-    return ternsign(x), grad
-
-
-@utils.register_keras_custom_object
-def ste_ternsign(x):
-    x = tf.clip_by_value(x, -1, 1)
-
-    return _ternarize_with_identity_grad(x)
