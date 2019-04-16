@@ -35,9 +35,9 @@ pages:
           - Contributing Guide: dev/contributing.md << CONTRIBUTING.md
           - Code of Conduct: dev/code_of_conduct.md << CODE_OF_CONDUCT.md
   - Examples:
-      - Introduction to Larq: examples/mnist.ipynb << examples/mnist.ipynb
+      - Introduction to BNNs with Larq: examples/mnist.ipynb << examples/mnist.ipynb
       - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb << examples/binarynet_cifar10.ipynb
-      - Binarynet Advanced: examples/binarynet_advanced_cifar10.ipynb << examples/binarynet_advanced_cifar10.ipynb
+      - Binarynet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb << examples/binarynet_advanced_cifar10.ipynb
   - Documentation:
       - Quantized Layers: layers.md
       - Quantizers: quantizers.md
