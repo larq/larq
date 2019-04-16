@@ -33,18 +33,24 @@ pytest .
 
 ## Build documentation
 
-Inside the project directory run:
+Installs dependencies for building the docs:
 
 ```shell
 pip install git+https://github.com/lgeiger/pydoc-markdown.git
-pip install -e .[docs] # Installs dependencies for building the docs
-pydocmd serve
+pip install -e .[docs]
+```
+
+Inside the project directory run:
+
+```shell
+python generate_api_docs.py
+mkdocs serve
 ```
 
 To publish a new version to github pages run:
 
 ```shell
-pydocmd gh-deploy --force
+mkdocs gh-deploy --force
 ```
 
 ## Code style
