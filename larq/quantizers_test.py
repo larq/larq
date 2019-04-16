@@ -39,33 +39,35 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
-class GradientTests(tf.test.TestCase):
-    def test_ste_grad(self):
-        if tf.executing_eagerly():
-            return
+@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
+def test_ste_grad():
+    @np.vectorize
+    def ste_grad(x):
+        if np.abs(x) <= 1:
+            return 1.0
+        return 0.0
 
-        @np.vectorize
-        def ste_grad(x):
-            if np.abs(x) <= 1:
-                return 1.0
-            return 0.0
+    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    tf_x = tf.constant(x)
+    with tf.GradientTape() as tape:
+        tape.watch(tf_x)
+        activation = lq.quantizers.ste_sign(tf_x)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), ste_grad(x))
 
-        x = np.random.uniform(-2, 2, (8, 3, 3, 16))
-        tf_x = tf.constant(x, dtype=tf.float32)
-        grad = tf.gradients(lq.quantizers.ste_sign(tf_x), tf_x)[0]
-        self.assertAllClose(grad, ste_grad(x))
 
-    def test_approx_sign_grad(self):
-        if tf.executing_eagerly():
-            return
+@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
+def test_approx_sign_grad():
+    @np.vectorize
+    def approx_sign_grad(x):
+        if np.abs(x) <= 1:
+            return 2 - 2 * np.abs(x)
+        return 0.0
 
-        @np.vectorize
-        def approx_sign_grad(x):
-            if np.abs(x) <= 1:
-                return 2 - 2 * np.abs(x)
-            return 0.0
-
-        x = np.random.uniform(-2, 2, (8, 3, 3, 16))
-        tf_x = tf.constant(x, dtype=tf.float32)
-        grad = tf.gradients(lq.quantizers.approx_sign(tf_x), tf_x)[0]
-        self.assertAllClose(grad, approx_sign_grad(x))
+    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    tf_x = tf.constant(x)
+    with tf.GradientTape() as tape:
+        tape.watch(tf_x)
+        activation = lq.quantizers.approx_sign(tf_x)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), approx_sign_grad(x))
