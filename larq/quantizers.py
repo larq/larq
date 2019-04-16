@@ -129,11 +129,16 @@ def approx_sign(x):
 
     return _binarize_with_weighted_grad(x)
 
-
-def tern(x):
+def threshold_twn(x):
     x_sum = tf.reduce_sum(tf.abs(x), reduction_indices=None, keep_dims=False, name=None)
     threshold = tf.div(x_sum, tf.cast(tf.size(x), tf.float32), name=None)
     threshold = tf.multiply(0.7, threshold, name=None)
+    return threshold
+
+
+def tern(x):
+    #threshold=threshold_twn(x)
+    threshold=tf.constant(0.01)
     return tf.sign(
         tf.add(tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold)))
     )
@@ -146,45 +151,51 @@ def _ternarize_with_identity_grad(x):
 
     return tern(x), grad
 
-
 @utils.register_keras_custom_object
 def ste_tern(x):
-    r"""
-    Ternarization function.
-    \\[
-    q(x) = \begin{cases}
-      +1 & x > \Delta \\\
-      0 & |x| > \Delta \\\
-      -1 & x < \Delta
-    \end{cases}
-    \\]
 
-    The Threshold is then calculated as
-    \\[
-    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
-    \\]
-    where we assume that $W_i$ is generated from a normal distribution
-
-    The gradient is estimated using the Straight-Through Estimator
-    (essentially the Ternarization is replaced by a clipped identity on the
-    backward pass).
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-      1 & \left|x\right| \leq 1 \\\
-      0 & \left|x\right| > 1
-    \end{cases}\\]
-
-    # Arguments
-    x: Input tensor.
-
-    # Returns
-    Ternarized tensor.
-
-    # References
-    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
-    """
     x = tf.clip_by_value(x, -1, 1)
 
     return _ternarize_with_identity_grad(x)
+
+#@utils.register_keras_custom_object
+#def ste_tern(x):
+#    r"""
+#    Ternarization function.
+#    \\[
+#    q(x) = \begin{cases}
+#      +1 & x > \Delta \\\
+#      0 & |x| > \Delta \\\
+#      -1 & x < \Delta
+#    \end{cases}
+#    \\]
+#
+#    The Threshold is then calculated as
+#    \\[
+#    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
+#    \\]
+#    where we assume that $W_i$ is generated from a normal distribution
+#
+#    The gradient is estimated using the Straight-Through Estimator
+#    (essentially the Ternarization is replaced by a clipped identity on the
+#    backward pass).
+#    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+#      1 & \left|x\right| \leq 1 \\\
+#      0 & \left|x\right| > 1
+#    \end{cases}\\]
+#
+#    # Arguments
+#    x: Input tensor.
+#
+#    # Returns
+#    Ternarized tensor.
+#
+#    # References
+#    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
+#    """
+#    x = tf.clip_by_value(x, -1, 1)
+#
+#    return _ternarize_with_identity_grad(x)
 
 
 def serialize(initializer):
