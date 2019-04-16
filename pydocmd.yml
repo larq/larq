@@ -37,6 +37,7 @@ pages:
   - Examples:
       - Introduction to Larq: examples/mnist.ipynb << examples/mnist.ipynb
       - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb << examples/binarynet_cifar10.ipynb
+      - Binarynet Advanced: examples/binarynet_advanced_cifar10.ipynb << examples/binarynet_advanced_cifar10.ipynb
   - Documentation:
       - Quantized Layers: layers.md
       - Quantizers: quantizers.md
