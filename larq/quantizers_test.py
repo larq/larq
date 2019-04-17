@@ -48,9 +48,8 @@ def test_ste_grad():
         return 0.0
 
     x = np.random.uniform(-2, 2, (8, 3, 3, 16))
-    tf_x = tf.constant(x)
+    tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
-        tape.watch(tf_x)
         activation = lq.quantizers.ste_sign(tf_x)
     grad = tape.gradient(activation, tf_x)
     np.testing.assert_allclose(grad.numpy(), ste_grad(x))
@@ -65,9 +64,8 @@ def test_approx_sign_grad():
         return 0.0
 
     x = np.random.uniform(-2, 2, (8, 3, 3, 16))
-    tf_x = tf.constant(x)
+    tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
-        tape.watch(tf_x)
         activation = lq.quantizers.approx_sign(tf_x)
     grad = tape.gradient(activation, tf_x)
     np.testing.assert_allclose(grad.numpy(), approx_sign_grad(x))
