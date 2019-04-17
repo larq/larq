@@ -9,8 +9,8 @@ nav:
           - Code of Conduct: code_of_conduct.md
   - Examples:
       - Introduction to BNNs with Larq: examples/mnist.ipynb
-      - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb
-      - Binarynet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
+      - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
+      - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
   - Documentation:
       - Layers: api/layers.md
       - Quantizers: api/quantizers.md
