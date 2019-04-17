@@ -1,0 +1,59 @@
+site_name: Larq
+site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
+
+nav:
+  - Home:
+      - Getting Started: index.md
+      - Library Development:
+          - Contributing Guide: contributing.md
+          - Code of Conduct: code_of_conduct.md
+  - Examples:
+      - Introduction to BNNs with Larq: examples/mnist.ipynb
+      - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb
+      - Binarynet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
+  - Documentation:
+      - Layers: api/layers.md
+      - Quantizers: api/quantizers.md
+      - Activations: api/activations.md
+      - Constraints: api/constraints.md
+      - Callbacks: api/callbacks.md
+      - Optimizers: api/optimizers.md
+      - Models: api/models.md
+
+repo_url: https://github.com/plumerai/larq
+repo_name: plumerai/larq
+edit_uri: ""
+theme:
+  name: material
+  logo:
+    icon: developer_board
+  palette:
+    primary: blue
+    accent: blue
+  feature:
+    tabs: true
+
+extra:
+  social:
+    - type: "github"
+      link: "https://github.com/plumerai"
+    - type: "twitter"
+      link: "https://twitter.com/PlumeraiLab"
+    - type: "linkedin"
+      link: "https://www.linkedin.com/company/plumerai/"
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.arithmatex
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML"
+
+plugins:
+  - search
+  - mknotebooks:
+      execute: false
