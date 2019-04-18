@@ -62,6 +62,17 @@ def ste_sign(x):
 
 
 @utils.register_keras_custom_object
+def magnitude_aware_sign(x):
+    """
+    Magnitude-aware sign for birealnet.
+    """
+    scale_factor = tf.stop_gradient(
+        tf.reduce_mean(tf.abs(x), axis=list(range(len(x.shape) - 1)))
+    )
+    return tf.math.multiply(scale_factor, ste_sign(x))
+
+
+@utils.register_keras_custom_object
 def approx_sign(x):
     r"""
     Sign binarization function.

@@ -5,7 +5,7 @@ import pytest
 import larq as lq
 
 
-@pytest.mark.parametrize("name", ["ste_sign", "approx_sign"])
+@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
 def test_serialization(name):
     fn = lq.quantizers.get(name)
     ref_fn = getattr(lq.quantizers, name)
@@ -69,3 +69,32 @@ def test_approx_sign_grad():
         activation = lq.quantizers.approx_sign(tf_x)
     grad = tape.gradient(activation, tf_x)
     np.testing.assert_allclose(grad.numpy(), approx_sign_grad(x))
+
+
+@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
+def test_magnitude_aware_sign(self):
+    if tf.executing_eagerly():
+        return
+
+    a = np.random.uniform(-2, 2, (3, 2, 2, 3))
+    x = tf.constant(a, dtype=tf.float32)
+    y = lq.quantizers.magnitude_aware_sign(x)
+    grad = tf.gradients(y, x)
+
+    assert y.shape == x.shape
+
+    # check sign
+    np.testing.assert_allclose(tf.sign(y).numpy(), np.sign(a))
+
+    scale_vector = [np.mean(np.reshape(np.abs(a[:, :, :, i]))) for i in range(3)]
+
+    # check magnitude
+    np.testing.assert_allclose(
+        tf.reduce_mean(tf.abs(y), axis=[0, 1, 2]).numpy(),
+        [np.mean(np.reshape(np.abs(a[:, :, :, i]))) for i in range(3)],
+    )
+
+    # check gradient
+    np.testing.assert_allclose(
+        grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
+    )
