@@ -38,3 +38,21 @@ def hard_tanh(x):
     Hard tanh activation.
     """
     return tf.clip_by_value(x, -1, 1)
+
+
+@utils.register_keras_custom_object
+def leaky_tanh(x, leaky_slope=0.2):
+    r"""Leaky tanh activation function.
+    Similar to hard tanh, but with non-zero slopes as in leaky ReLU.
+
+    # Arguments
+    x: Input tensor.
+
+    # Returns
+    Leaky tanh activation.
+    """
+    return (
+        tf.clip_by_value(x, -1, 1)
+        + (tf.math.maximum(x, 1) - 1) * leaky_slope
+        + (tf.math.minimum(x, -1) + 1) * leaky_slope
+    )
