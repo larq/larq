@@ -45,6 +45,10 @@ def ste_sign(x):
       0 & \left|x\right| > 1
     \end{cases}\\]
 
+    ```plot-activation
+    quantizers.ste_sign
+    ```
+
     # Arguments
     x: Input tensor.
 
@@ -66,6 +70,9 @@ def magnitude_aware_sign(x):
     r"""
     Magnitude-aware sign for Bi-Real Net.
 
+    ```plot-activation
+    quantizers.magnitude_aware_sign
+    ```
 
     # Arguments
     x: Input tensor
@@ -93,8 +100,8 @@ def approx_sign(x):
     q(x) = \begin{cases}
       -1 & x < 0 \\\
       1 & x \geq 0
-   \end{cases}
-   \\]
+    \end{cases}
+    \\]
 
     The gradient is estimated using the ApproxSign method.
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
@@ -102,6 +109,10 @@ def approx_sign(x):
       0 & \left|x\right| > 1
     \end{cases}
     \\]
+
+    ```plot-activation
+    quantizers.approx_sign
+    ```
 
     # Arguments
     x: Input tensor.
