@@ -24,9 +24,12 @@ setup(
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
         "test": ["absl-py>=0.7.0", "pytest>=4.3.1", "pytest-cov>=2.6.1"],
         "docs": [
-            "mkdocs-material>=4.1.0",
+            "mkdocs>=1.0.4",
+            "mkdocs-material>=4.1.2",
             "pymdown-extensions>=6.0",
             "mknotebooks>=0.1.5",
+            "matplotlib>=3.0.3",
+            "scour>=0.37",
         ],
     },
     classifiers=[
