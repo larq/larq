@@ -4,14 +4,15 @@ site_description: "An Open Source Machine Learning Framework for Training Extrem
 nav:
   - Home:
       - Getting Started: index.md
-      - Library Development:
+      - User Guide: guide.md
+      - Developer Guide:
           - Contributing Guide: contributing.md
           - Code of Conduct: code_of_conduct.md
   - Examples:
       - Introduction to BNNs with Larq: examples/mnist.ipynb
-      - Binarynet on CIFAR10: examples/binarynet_cifar10.ipynb
-      - Binarynet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
-  - Documentation:
+      - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
+      - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
+  - API:
       - Layers: api/layers.md
       - Quantizers: api/quantizers.md
       - Activations: api/activations.md

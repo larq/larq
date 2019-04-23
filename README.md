@@ -10,17 +10,21 @@ Existing deep neural networks use 32 bits, 16 bits or 8 bits to encode each weig
 
 ## Getting Started
 
-To build a QNN, Larq introduces the concept of _Quantized Layers_ and _Quantizers_. A _Quantizer_ defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each _Quantized Layer_ requires a `kernel_quantizer` and an `input_quantizer` that describe the way of quantizing the weights of the layer and the activations of the previous layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
+To build a QNN, Larq introduces the concept of [quantized layers](https://plumerai.github.io/larq/api/layers/) and [quantizers](https://plumerai.github.io/larq/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each quantized layer requires a `kernel_quantizer` and an `input_quantizer` that describe the way of quantizing the weights of the layer and the activations of the previous layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
-You can define a binarized densely-connected layer using the Straight-Through Estimator the following way:
+You can define a simple binarized fully-connected Keras model using the [Straight-Through Estimator](https://plumerai.github.io/larq/api/quantizers/#ste_sign) the following way:
 
 ```python
-larq.layers.QuantDense(
-    512,
-    input_quantizer="ste_sign",
-    kernel_quantizer="ste_sign",
-    kernel_constraint="weight_clip",
-)
+model = tf.keras.models.Sequential([
+    tf.keras.layers.Flatten(),
+    larq.layers.QuantDense(512,
+                           kernel_quantizer="ste_sign",
+                           kernel_constraint="weight_clip"),
+    larq.layers.QuantDense(10,
+                           input_quantizer="ste_sign",
+                           kernel_quantizer="ste_sign",
+                           kernel_constraint="weight_clip",
+                           activation="softmax")])
 ```
 
 This layer can be used inside a [Keras model](https://www.tensorflow.org/alpha/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/alpha/guide/keras/overview#model_subclassing).
