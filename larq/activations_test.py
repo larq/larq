@@ -26,11 +26,11 @@ def test_leaky_tanh():
     @np.vectorize
     def leaky_tanh(x):
         if x <= -1:
-            return -1 + .2*(x+1)
+            return -1 + 0.2 * (x + 1)
         elif x <= 1:
             return x
         else:
-            return 1 + .2*(x-1)
+            return 1 + 0.2 * (x - 1)
 
     real_values = np.random.uniform(-2, 2, (3, 3, 32))
     x = tf.keras.backend.placeholder(ndim=2)
