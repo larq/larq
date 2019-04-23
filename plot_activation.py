@@ -5,6 +5,7 @@ import larq as lq
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from io import StringIO
+from scour import scour
 
 matplotlib.use("Agg")
 try:
@@ -38,4 +39,4 @@ def html_format(source, language, css_class, options, md):
     fig = plot(reduce(getattr, [lq, *source.split(".")]))
     tmp = StringIO()
     fig.savefig(tmp, format="svg", bbox_inches="tight")
-    return tmp.getvalue()
+    return scour.scourString(tmp.getvalue())
