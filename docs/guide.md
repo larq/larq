@@ -70,3 +70,25 @@ class MyModel(tf.keras.Model):
 
 model = MyModel()
 ```
+
+## Using Custom Quantizers
+
+Quantizers are functions that transform a full precision input to a quantized output. Since this transformation usually is non-differentiable it is necessary to modify the gradient in order to be able to train the resulting QNN. This can be done with the [`tf.custom_gradient`](https://www.tensorflow.org/api_docs/python/tf/custom_gradient) decorator.
+
+In this example we will define a binarization function with an identity gradient:
+
+```python
+@tf.custom_gradient
+def identity_sign(x):
+    def grad(dy):
+        return dy
+    return tf.sign(x), grad
+```
+
+This function can now be used as an `input_quantizer` or a `kernel_quantizer`:
+
+```python
+larq.layers.QuantDense(10,
+                       input_quantizer=identity_sign,
+                       kernel_quantizer=identity_sign)
+```
