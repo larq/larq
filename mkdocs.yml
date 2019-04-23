@@ -4,6 +4,7 @@ site_description: "An Open Source Machine Learning Framework for Training Extrem
 nav:
   - Home:
       - Getting Started: index.md
+      - User Guide: guide.md
       - Developer Guide:
           - Contributing Guide: contributing.md
           - Code of Conduct: code_of_conduct.md
