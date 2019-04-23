@@ -72,9 +72,7 @@ def test_approx_sign_grad():
 
 
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_magnitude_aware_sign(self):
-    if tf.executing_eagerly():
-        return
+def test_magnitude_aware_sign():
 
     a = np.random.uniform(-2, 2, (3, 2, 2, 3))
     x = tf.constant(a, dtype=tf.float32)
