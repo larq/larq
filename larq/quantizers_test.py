@@ -75,21 +75,22 @@ def test_approx_sign_grad():
 def test_magnitude_aware_sign():
 
     a = np.random.uniform(-2, 2, (3, 2, 2, 3))
-    x = tf.constant(a, dtype=tf.float32)
-    y = lq.quantizers.magnitude_aware_sign(x)
-    grad = tf.gradients(y, x)
+    x = tf.Variable(a)
+    with tf.GradientTape() as tape:
+        y = lq.quantizers.magnitude_aware_sign(x)
+    grad = tape.gradient(y, x)
 
     assert y.shape == x.shape
 
     # check sign
     np.testing.assert_allclose(tf.sign(y).numpy(), np.sign(a))
 
-    scale_vector = [np.mean(np.reshape(np.abs(a[:, :, :, i]))) for i in range(3)]
+    scale_vector = [np.mean(np.reshape(np.abs(a[:, :, :, i]), [-1])) for i in range(3)]
 
     # check magnitude
     np.testing.assert_allclose(
         tf.reduce_mean(tf.abs(y), axis=[0, 1, 2]).numpy(),
-        [np.mean(np.reshape(np.abs(a[:, :, :, i]))) for i in range(3)],
+        [np.mean(np.reshape(np.abs(a[:, :, :, i]), [-1])) for i in range(3)],
     )
 
     # check gradient
