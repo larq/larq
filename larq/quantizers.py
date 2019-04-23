@@ -64,7 +64,7 @@ def ste_sign(x):
 @utils.register_keras_custom_object
 def magnitude_aware_sign(x):
     r"""
-    Magnitude-aware sign for birealnet.
+    Magnitude-aware sign for Bi-Real Net.
 
 
     # Arguments
