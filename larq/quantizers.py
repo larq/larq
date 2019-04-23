@@ -63,13 +63,26 @@ def ste_sign(x):
 
 @utils.register_keras_custom_object
 def magnitude_aware_sign(x):
-    """
+    r"""
     Magnitude-aware sign for birealnet.
+
+
+    # Arguments
+    x: Input tensor
+
+    # Returns
+    Scaled binarized tensor (with values in $\{-a, a\}$, where $a$ is a float).
+
+    # References
+    - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
+      Representational Capability and Advanced Training
+      Algorithm](https://arxiv.org/abs/1808.00278)
+
     """
     scale_factor = tf.stop_gradient(
         tf.reduce_mean(tf.abs(x), axis=list(range(len(x.shape) - 1)))
     )
-    return tf.math.multiply(scale_factor, ste_sign(x))
+    return scale_factor * ste_sign(x)
 
 
 @utils.register_keras_custom_object
