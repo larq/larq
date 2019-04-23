@@ -16,10 +16,10 @@ jobs:
         Python37:
           python.version: "3.7"
           tensorflow.version: "1.13.1"
-          coverage: "true"
         Python37TF2:
           python.version: "3.7"
           tensorflow.version: "2.0.0-alpha0"
+          coverage: "true"
 
     steps:
       - task: UsePythonVersion@0
