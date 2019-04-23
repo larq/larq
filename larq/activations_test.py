@@ -4,7 +4,7 @@ import pytest
 import larq as lq
 
 
-@pytest.mark.parametrize("name", ["hard_tanh"])
+@pytest.mark.parametrize("name", ["hard_tanh", "leaky_tanh"])
 def test_serialization(name):
     fn = tf.keras.activations.get(name)
     ref_fn = getattr(lq.activations, name)
@@ -23,12 +23,14 @@ def test_hard_tanh():
 
 
 def test_leaky_tanh():
+    @np.vectorize
     def leaky_tanh(x):
-        return (
-            np.clip(x, -1, 1)
-            + (np.minimum(x, -1) + 1) * 0.2
-            + (np.maximum(x, 1) - 1) * 0.2
-        )
+        if x <= -1:
+            return -1 + .2*(x+1)
+        elif x <= 1:
+            return x
+        else:
+            return 1 + .2*(x-1)
 
     real_values = np.random.uniform(-2, 2, (3, 3, 32))
     x = tf.keras.backend.placeholder(ndim=2)
