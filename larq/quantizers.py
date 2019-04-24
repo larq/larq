@@ -129,6 +129,7 @@ def approx_sign(x):
 
     return _binarize_with_weighted_grad(x)
 
+
 def threshold_twn(x):
     x_sum = tf.reduce_sum(tf.abs(x), reduction_indices=None, keep_dims=False, name=None)
     threshold = tf.div(x_sum, tf.cast(tf.size(x), tf.float32), name=None)
@@ -136,30 +137,32 @@ def threshold_twn(x):
     return threshold
 
 
-def tern(x):
-    #threshold=threshold_twn(x)
-    threshold=tf.constant(0.01)
-    return tf.sign(
-        tf.add(tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold)))
-    )
-
-
-@tf.custom_gradient
-def _ternarize_with_identity_grad(x):
-    def grad(dy):
-        return dy
-
-    return tern(x), grad
-
 @utils.register_keras_custom_object
-def ste_tern(x):
+def ste_tern(x, TWN=False):
 
     x = tf.clip_by_value(x, -1, 1)
+    if TWN == True:
+        threshold = threshold_twn(x)
+    else:
+        threshold = tf.constant(0.5)
+
+    @tf.custom_gradient
+    def _ternarize_with_identity_grad(x):
+        def grad(dy):
+            return dy
+
+        return (
+            tf.sign(
+                tf.add(tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold)))
+            ),
+            grad,
+        )
 
     return _ternarize_with_identity_grad(x)
 
-#@utils.register_keras_custom_object
-#def ste_tern(x):
+
+# @utils.register_keras_custom_object
+# def ste_tern(x):
 #    r"""
 #    Ternarization function.
 #    \\[
