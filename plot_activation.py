@@ -1,13 +1,24 @@
 from functools import reduce
-import matplotlib
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 import larq as lq
 import tensorflow as tf
-import matplotlib.pyplot as plt
 from io import StringIO
 from scour import scour
 
-matplotlib.use("Agg")
+mpl.use("Agg")
+mpl.rcParams["svg.fonttype"] = "none"
+mpl.rcParams["font.size"] = 11
+mpl.rcParams["axes.titlesize"] = 12
+mpl.rcParams["font.sans-serif"] = [
+    "Roboto",
+    "Helvetica Neue",
+    "Helvetica",
+    "Arial",
+    "sans-serif",
+]
+
 try:
     tf.enable_eager_execution()
 except:
@@ -28,7 +39,9 @@ def plot(function):
     ax1.plot(x, y, color="#3f51b5")
     ax1.set_xlabel("x")
     ax1.set_ylabel("y")
+    ax1.set_title("Forward pass")
     ax2.plot(x, dy, color="#3f51b5")
+    ax2.set_title("Backward pass")
     ax2.set_xlabel("x")
     ax2.set_ylabel("dy / dx")
     fig.tight_layout(pad=0.7)
@@ -38,5 +51,5 @@ def plot(function):
 def html_format(source, language, css_class, options, md):
     fig = plot(reduce(getattr, [lq, *source.split(".")]))
     tmp = StringIO()
-    fig.savefig(tmp, format="svg", bbox_inches="tight")
+    fig.savefig(tmp, format="svg", bbox_inches="tight", pad_inches=0)
     return scour.scourString(tmp.getvalue())
