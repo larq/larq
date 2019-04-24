@@ -28,8 +28,10 @@ from larq import utils
 
 @utils.register_keras_custom_object
 def hard_tanh(x):
-    r"""Hard tanh activation function.
-    \\[\sigma(x) = \mathrm{Clip}(x, −1, 1)\\]
+    """Hard tanh activation function.
+    ```plot-activation
+    activations.hard_tanh
+    ```
 
     # Arguments
     x: Input tensor.
@@ -44,6 +46,10 @@ def hard_tanh(x):
 def leaky_tanh(x, alpha=0.2):
     r"""Leaky tanh activation function.
     Similar to hard tanh, but with non-zero slopes as in leaky ReLU.
+
+    ```plot-activation
+    activations.leaky_tanh
+    ```
 
     # Arguments
     x: Input tensor.

@@ -52,3 +52,15 @@ jobs:
           codeCoverageTool: Cobertura
           summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/coverage.xml"
           reportDirectory: "$(System.DefaultWorkingDirectory)/**/htmlcov"
+
+      - script: |
+          pip install nbconvert git+https://github.com/lgeiger/pydoc-markdown.git
+          pip install -e .[docs]
+        displayName: "Install docs dependencies"
+        condition: eq(variables['coverage'], 'true')
+
+      - script: |
+          python generate_api_docs.py
+          mkdocs build
+        displayName: "Build docs"
+        condition: eq(variables['coverage'], 'true')

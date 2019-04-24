@@ -46,7 +46,11 @@ extra:
 markdown_extensions:
   - admonition
   - codehilite
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: plot-activation
+          class: larq-activation
+          format: !!python/name:plot_activation.html_format
   - pymdownx.arithmatex
   - toc:
       permalink: true
