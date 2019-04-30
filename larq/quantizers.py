@@ -86,10 +86,9 @@ def magnitude_aware_sign(x):
       Algorithm](https://arxiv.org/abs/1808.00278)
 
     """
-    scale_factor = tf.stop_gradient(
-        tf.reduce_mean(tf.abs(x), axis=list(range(len(x.shape) - 1)))
-    )
-    return scale_factor * ste_sign(x)
+    scale_factor = tf.reduce_mean(tf.abs(x), axis=list(range(len(x.shape) - 1)))
+
+    return tf.stop_gradient(scale_factor) * ste_sign(x)
 
 
 @utils.register_keras_custom_object

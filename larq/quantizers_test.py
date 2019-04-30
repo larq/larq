@@ -17,6 +17,18 @@ def test_serialization(name):
     assert fn == ref_fn
 
 
+@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
+def test_serialization_as_activation(name):
+    fn = tf.keras.activations.get(name)
+    ref_fn = getattr(lq.quantizers, name)
+    assert fn == ref_fn
+    config = tf.keras.activations.serialize(fn)
+    fn = tf.keras.activations.deserialize(config)
+    assert fn == ref_fn
+    fn = tf.keras.activations.get(ref_fn)
+    assert fn == ref_fn
+
+
 def test_invalid_usage():
     with pytest.raises(ValueError):
         lq.quantizers.get(42)
