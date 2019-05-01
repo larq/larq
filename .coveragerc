@@ -2,4 +2,3 @@
 omit =
     *_test.py
     larq/optimizers.py
-    larq/callbacks.py
