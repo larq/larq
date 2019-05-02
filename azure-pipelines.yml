@@ -12,13 +12,13 @@ jobs:
       matrix:
         Python36:
           python.version: "3.6"
-          tensorflow.version: "1.13.1"
+          tensorflow: "tensorflow==1.13.1"
         Python37:
           python.version: "3.7"
-          tensorflow.version: "1.13.1"
+          tensorflow: "tensorflow==1.13.1"
         Python37TF2:
           python.version: "3.7"
-          tensorflow.version: "2.0.0-alpha0"
+          tensorflow: "tf-nightly-2.0-preview"
           coverage: "true"
 
     steps:
@@ -28,7 +28,7 @@ jobs:
           architecture: "x64"
 
       - script: |
-          pip install tensorflow==$(tensorflow.version)
+          pip install $(tensorflow)
           pip install -e .[test]
         displayName: "Install dependencies"
 
@@ -44,7 +44,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: "**/test-*.xml"
-          testRunTitle: "Publish test results for Python $(python.version) and TF $(tensorflow.version)"
+          testRunTitle: "Publish test results for Python $(python.version) and $(tensorflow)"
 
       - task: PublishCodeCoverageResults@1
         condition: eq(variables['coverage'], 'true')

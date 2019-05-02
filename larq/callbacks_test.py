@@ -16,9 +16,6 @@ class LogHistory(tf.keras.callbacks.Callback):
 @keras_parameterized.run_all_keras_modes
 class LayersTest(keras_parameterized.TestCase):
     def test_quantization_logger(self):
-        if int(tf.__version__[0]) == 2:
-            # tf.keras.backend.batch_get_value() currently fails in TF 2 functions
-            return
         model = tf.keras.models.Sequential(
             [
                 lq.layers.QuantSeparableConv1D(
