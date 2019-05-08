@@ -51,6 +51,27 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
+@pytest.mark.parametrize("name", ["SteTern"])
+def test_ternarization(name):
+    x = tf.keras.backend.placeholder(ndim=2)
+    test_threshold = np.random.uniform(0.01, 0.8, 1)[0]
+    fn = lq.quantizers.get(name)(threshold_value=test_threshold)
+    f = tf.keras.backend.function([x], [fn(x)])
+    real_values = np.random.uniform(-2, 2, (2, 5))
+    result = f([real_values])[0]
+    assert np.all(result[result > test_threshold] == 1)
+    assert np.all(result[result < -test_threshold] == -1)
+    assert np.all(result[np.abs(result) < test_threshold] == 0)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+
+    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
+    result = f([ternarized_values])[0]
+    np.testing.assert_allclose(result, ternarized_values)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+
+
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
 def test_ste_grad():
     @np.vectorize
