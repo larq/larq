@@ -28,17 +28,13 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
       propagations](https://arxiv.org/abs/1511.00363)
     """
 
-    def __init__(self, optimizer, model):
-        if int(tf.__version__[0]) == 2:
-            raise NotImplementedError(
-                "XavierLearningRateScaling is not supported by Tensorflow 2.0."
-            )
-
+    def __init__(self, optimizer, model, name="XavierLearningRateScaling"):
+        super().__init__()
         if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
             raise ValueError(
                 f"Expected tf.keras.optimizers.Optimizer, received {type(optimizer)}."
             )
-        self.optimizer = optimizer
+        self._optimizer = optimizer
 
         if isinstance(model, tf.keras.Model):
             self.multipliers = {}
@@ -66,29 +62,51 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
             )
         return coeff
 
-    def get_updates(self, loss, params):
-        mult_lr_params = [p for p in params if p.name in self.multipliers]
-        base_lr_params = [p for p in params if p.name not in self.multipliers]
+    # def get_updates(self, loss, params):
+    #     mult_lr_params = [p for p in params if p.name in self.multipliers]
+    #     base_lr_params = [p for p in params if p.name not in self.multipliers]
+    #
+    #     updates = []
+    #     base_lr = self._optimizer.lr
+    #     for param in mult_lr_params:
+    #         self._optimizer.lr = base_lr * self.multipliers[param.name]
+    #         updates.extend(self._optimizer.get_updates(loss, [param]))
+    #
+    #     self._optimizer.lr = base_lr
+    #     updates.extend(self._optimizer.get_updates(loss, base_lr_params))
 
-        updates = []
-        base_lr = self.optimizer.lr
-        for param in mult_lr_params:
-            self.optimizer.lr = base_lr * self.multipliers[param.name]
-            updates.extend(self.optimizer.get_updates(loss, [param]))
+    # return updates
+    def apply_gradients(self, grads_and_vars, name=None):
+        print(grads_and_vars)
+        grads_and_scaled_vars = []
+        for grad, var in grads_and_vars:
+            if var.name in self.multipliers:
+                scaled_grad = self.multipliers[var.name] * grad
+                grads_and_scaled_vars.append((scaled_grad, var))
+            else:
+                grads_and_scaled_vars.append((grad, var))
+        with tf.control_dependencies(grads_and_scaled_vars):
+            return self._optimizer.apply_gradients(grads_and_scaled_vars, name=name)
 
-        self.optimizer.lr = base_lr
-        updates.extend(self.optimizer.get_updates(loss, base_lr_params))
+    def _create_slots(self, var_list):
+        return self._optimizer._create_slots(var_list)
 
-        return updates
+    def _resource_apply_dense(self, grad, var):
+        return self._optimizer._resource_apply_dense(grad, var)
 
-    def __getattr__(self, name):
-        return getattr(self.optimizer, name)
+    def _resource_apply_sparse_duplicate_indices(self, grad, var, indices):
+        return self._optimizer._resource_apply_sparse_duplicate_indices(
+            grad, var, indices
+        )
+
+    def _resource_apply_sparse(self, grad, var, indices):
+        return self._optimizer._resource_apply_sparse(grad, var, indices)
 
     def get_config(self):
         return {
             "optimizer": {
-                "class_name": self.optimizer.__class__.__name__,
-                "config": self.optimizer.get_config(),
+                "class_name": self._optimizer.__class__.__name__,
+                "config": self._optimizer.get_config(),
             },
             "multipliers": self.multipliers,
         }
