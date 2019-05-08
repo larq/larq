@@ -148,7 +148,7 @@ class SteTern:
     \\[
     \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
     \\]
-    where we assume that $W_i$ is generated from a normal distribution
+    where we assume that $W_i$ is generated from a normal distribution.
 
     The gradient is estimated using the Straight-Through Estimator
     (essentially the Ternarization is replaced by a clipped identity on the
@@ -164,6 +164,8 @@ class SteTern:
 
     # Arguments
     x: Input tensor.
+    threshold value: The value for the threshold, $\Delta$.
+    ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation. 
 
     # Returns
     Ternarized tensor.
