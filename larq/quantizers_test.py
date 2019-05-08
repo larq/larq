@@ -51,11 +51,10 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
-@pytest.mark.parametrize("name", ["SteTern"])
-def test_ternarization(name):
+def test_ternarization():
     x = tf.keras.backend.placeholder(ndim=2)
     test_threshold = np.random.uniform(0.01, 0.8, 1)[0]
-    fn = lq.quantizers.get(name)(threshold_value=test_threshold)
+    fn = lq.quantizers.SteTern(threshold_value=test_threshold)
     f = tf.keras.backend.function([x], [fn(x)])
     real_values = np.random.uniform(-2, 2, (2, 5))
     result = f([real_values])[0]
