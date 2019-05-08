@@ -130,35 +130,52 @@ def approx_sign(x):
     return _binarize_with_weighted_grad(x)
 
 
-def threshold_twn(x):
-    x_sum = tf.reduce_sum(tf.abs(x), reduction_indices=None, keep_dims=False, name=None)
-    threshold = tf.div(x_sum, tf.cast(tf.size(x), tf.float32), name=None)
-    threshold = tf.multiply(0.7, threshold, name=None)
-    return threshold
-
-
 @utils.register_keras_custom_object
-def ste_tern(x, TWN=False):
+class SteTern:
+    def __init__(self, threshold_value=0.01, ternary_weight_networks=False):
+        self.threshold_value = threshold_value
+        self.ternary_weight_networks = ternary_weight_networks
 
-    x = tf.clip_by_value(x, -1, 1)
-    if TWN == True:
-        threshold = threshold_twn(x)
-    else:
-        threshold = tf.constant(0.5)
+    def __call__(self, x):
+        return self.ste_tern(x)
 
-    @tf.custom_gradient
-    def _ternarize_with_identity_grad(x):
-        def grad(dy):
-            return dy
+    def ste_tern(self, x):
 
-        return (
-            tf.sign(
-                tf.add(tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold)))
-            ),
-            grad,
+        x = tf.clip_by_value(x, -1, 1)
+        if self.ternary_weight_networks == True:
+            threshold = self.threshold_twn(x)
+        else:
+            threshold = tf.constant(self.threshold_value)
+
+        @tf.custom_gradient
+        def _ternarize_with_identity_grad(x):
+            def grad(dy):
+                return dy
+
+            return (
+                tf.sign(
+                    tf.add(
+                        tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold))
+                    )
+                ),
+                grad,
+            )
+
+        return _ternarize_with_identity_grad(x)
+
+    def threshold_twn(self, x):
+        x_sum = tf.reduce_sum(
+            tf.abs(x), reduction_indices=None, keep_dims=False, name=None
         )
+        threshold = tf.div(x_sum, tf.cast(tf.size(x), tf.float32), name=None)
+        threshold = tf.multiply(0.7, threshold, name=None)
+        return threshold
 
-    return _ternarize_with_identity_grad(x)
+    def get_config(self):
+        return {
+            "threshold_value": self.threshold_value,
+            "ternary_weight_networks": self.ternary_weight_networks,
+        }
 
 
 # @utils.register_keras_custom_object
