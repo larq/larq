@@ -92,7 +92,7 @@ def test_ternarization_with_custom_threshold():
 
 
 def test_ternarization_with_ternary_weight_networks():
-    x = tf.keras.backend.placeholder(ndim=2)
+    x = tf.keras.backend.placeholder(shape=(3, 5))
     fn = lq.quantizers.SteTern(ternary_weight_networks=True)
     f = tf.keras.backend.function([x], [fn(x)])
     real_values = np.random.uniform(-2, 2, (2, 5))
