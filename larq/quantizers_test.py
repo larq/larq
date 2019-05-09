@@ -53,7 +53,7 @@ def test_binarization(name):
 
 def test_ternarization():
     x = tf.keras.backend.placeholder(ndim=2)
-    test_threshold = np.random.uniform(0.01, 0.8, 1)[0]
+    test_threshold = np.random.uniform(0.01, 0.8)
     fn = lq.quantizers.SteTern(threshold_value=test_threshold)
     f = tf.keras.backend.function([x], [fn(x)])
     real_values = np.random.uniform(-2, 2, (2, 5))
