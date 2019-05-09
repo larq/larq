@@ -179,9 +179,6 @@ class SteTern:
         self.ternary_weight_networks = ternary_weight_networks
 
     def __call__(self, x):
-        return self.ste_tern(x)
-
-    def ste_tern(self, x):
 
         x = tf.clip_by_value(x, -1, 1)
         if self.ternary_weight_networks == True:
