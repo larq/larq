@@ -200,7 +200,7 @@ class SteTern:
 
     def threshold_twn(self, x):
         x_sum = tf.reduce_sum(tf.abs(x))
-        threshold = x_sum / tf.cast(tf.size(x), x.dtype)
+        threshold = x_sum / tf.cast(tf.size(x), tf.float32)
         threshold = 0.7 * threshold
         return threshold
 
