@@ -1,6 +1,7 @@
 """A Quantizer defines the way of transforming a full precision input to a
 quantized output and the pseudo-gradient method used for the backwards pass."""
 
+import numpy as np
 import tensorflow as tf
 from larq import utils
 
@@ -179,9 +180,8 @@ class SteTern:
         self.ternary_weight_networks = ternary_weight_networks
 
     def __call__(self, x):
-
         x = tf.clip_by_value(x, -1, 1)
-        if self.ternary_weight_networks == True:
+        if self.ternary_weight_networks:
             threshold = self.threshold_twn(x)
         else:
             threshold = self.threshold_value
@@ -196,10 +196,7 @@ class SteTern:
         return _ternarize_with_identity_grad(x)
 
     def threshold_twn(self, x):
-        x_sum = tf.reduce_sum(tf.abs(x))
-        threshold = x_sum / tf.cast(tf.size(x), tf.float32)
-        threshold = 0.7 * threshold
-        return threshold
+        return 0.7 * tf.reduce_sum(tf.abs(x)) / np.prod(x.shape)
 
     def get_config(self):
         return {
