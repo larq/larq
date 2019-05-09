@@ -165,7 +165,7 @@ class SteTern:
     # Arguments
     x: Input tensor.
     threshold value: The value for the threshold, $\Delta$.
-    ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation. 
+    ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation.
 
     # Returns
     Ternarized tensor.
@@ -207,8 +207,8 @@ class SteTern:
 
     def threshold_twn(self, x):
         x_sum = tf.reduce_sum(tf.abs(x))
-        threshold = tf.div(x_sum, tf.cast(tf.size(x), tf.float32))
-        threshold = tf.multiply(0.7, threshold)
+        threshold = x_sum / tf.cast(tf.size(x), x.dtype)
+        threshold = 0.7 * threshold
         return threshold
 
     def get_config(self):
