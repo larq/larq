@@ -194,14 +194,7 @@ class SteTern:
             def grad(dy):
                 return dy
 
-            return (
-                tf.sign(
-                    tf.add(
-                        tf.sign(tf.add(x, threshold)), tf.sign(tf.add(x, -threshold))
-                    )
-                ),
-                grad,
-            )
+            return (tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), grad)
 
         return _ternarize_with_identity_grad(x)
 
