@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 import larq as lq
 
+import inspect
+
 
 @pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
 def test_serialization(name):
@@ -51,7 +53,26 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
-def test_ternarization():
+def test_ternarization_with_default_threshold():
+    x = tf.keras.backend.placeholder(ndim=2)
+    fn = lq.quantizers.SteTern()
+    test_threshold = 0.1
+    f = tf.keras.backend.function([x], [fn(x)])
+    real_values = np.random.uniform(-2, 2, (2, 5))
+    result = f([real_values])[0]
+    assert np.all(result[result > test_threshold] == 1)
+    assert np.all(result[result < -test_threshold] == -1)
+    assert np.all(result[np.abs(result) < test_threshold] == 0)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
+    result = f([ternarized_values])[0]
+    np.testing.assert_allclose(result, ternarized_values)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+
+
+def test_ternarization_with_custom_threshold():
     x = tf.keras.backend.placeholder(ndim=2)
     test_threshold = np.random.uniform(0.01, 0.8)
     fn = lq.quantizers.SteTern(threshold_value=test_threshold)
@@ -63,7 +84,21 @@ def test_ternarization():
     assert np.all(result[np.abs(result) < test_threshold] == 0)
     assert not np.any(result > 1)
     assert not np.any(result < -1)
+    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
+    result = f([ternarized_values])[0]
+    np.testing.assert_allclose(result, ternarized_values)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
 
+
+def test_ternarization_with_ternary_weight_networks():
+    x = tf.keras.backend.placeholder(ndim=2)
+    fn = lq.quantizers.SteTern(ternary_weight_networks=True)
+    f = tf.keras.backend.function([x], [fn(x)])
+    real_values = np.random.uniform(-2, 2, (2, 5))
+    result = f([real_values])[0]
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
     ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
     result = f([ternarized_values])[0]
     np.testing.assert_allclose(result, ternarized_values)
