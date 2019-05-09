@@ -4,8 +4,6 @@ import numpy as np
 import pytest
 import larq as lq
 
-import inspect
-
 
 @pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
 def test_serialization(name):
