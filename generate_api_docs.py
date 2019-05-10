@@ -13,7 +13,8 @@ from pydocmd.preprocessor import Preprocessor
 
 def callable_to_source_link(obj, scope):
     path = scope.__file__.lstrip(".")
-    line = inspect.getsourcelines(obj)[-1]
+    source = inspect.getsourcelines(obj)
+    line = source[-1] + 1 if source[0][0].startswith("@") else source[-1]
     link = f"https://github.com/plumerai/larq/blob/master{path}#L{line}"
     return f'<a class="headerlink code-link" style="float:right;" href="{link}" title="Source Code"></a>'
 
