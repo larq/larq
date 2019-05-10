@@ -58,6 +58,9 @@ markdown_extensions:
 extra_javascript:
   - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML"
 
+extra_css:
+  - custom.css
+
 plugins:
   - search
   - mknotebooks:

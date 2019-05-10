@@ -1,5 +1,6 @@
 """https://github.com/NiklasRosenstein/pydoc-markdown/blob/master/pydocmd/__main__.py"""
 
+import inspect
 import os
 import sys
 import yaml
@@ -8,6 +9,23 @@ from pydocmd.document import Index
 from pydocmd.imp import dir_object
 from pydocmd.loader import PythonLoader
 from pydocmd.preprocessor import Preprocessor
+
+
+def callable_to_source_link(obj, scope):
+    path = scope.__file__.lstrip(".")
+    source = inspect.getsourcelines(obj)
+    line = source[-1] + 1 if source[0][0].startswith("@") else source[-1]
+    link = f"https://github.com/plumerai/larq/blob/master{path}#L{line}"
+    return f'<a class="headerlink code-link" style="float:right;" href="{link}" title="Source Code"></a>'
+
+
+class PythonLoaderWithSource(PythonLoader):
+    def load_section(self, section):
+        super().load_section(section)
+        obj = section.loader_context["obj"]
+        if callable(obj):
+            scope = section.loader_context["scope"]
+            section.title += callable_to_source_link(obj, scope)
 
 
 with open("apidocs.yml", "r") as stream:
@@ -54,7 +72,7 @@ for pages in api_structure:
         doc = index.new_document(fname)
         add_sections(doc, object_names)
 
-loader = PythonLoader({})
+loader = PythonLoaderWithSource({})
 preproc = Preprocessor({})
 
 preproc.link_lookup = {}
