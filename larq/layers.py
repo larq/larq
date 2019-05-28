@@ -34,14 +34,17 @@ class QuantizerBase(tf.keras.layers.Layer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-        self.quantized_weights = []
-        self.quantized_latent_weights = []
+    @property
+    def quantized_weights(self):
+        if self.kernel_quantizer and self.kernel is not None:
+            return [self.kernel_quantizer(self.kernel)]
+        return []
 
-    def build(self, input_shape):
-        super().build(input_shape)
-        if self.kernel_quantizer:
-            self.quantized_weights.append(self.kernel_quantizer(self.kernel))
-            self.quantized_latent_weights.append(self.kernel)
+    @property
+    def quantized_latent_weights(self):
+        if self.kernel_quantizer and self.kernel is not None:
+            return [self.kernel]
+        return []
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -87,8 +90,6 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
-        self.quantized_weights = []
-        self.quantized_latent_weights = []
 
         if depthwise_quantizer and not self.depthwise_constraint:
             log.warning(
@@ -101,18 +102,23 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def build(self, input_shape):
-        super().build(input_shape)
-        if self.depthwise_quantizer:
-            self.quantized_latent_weights.append(self.depthwise_kernel)
-            self.quantized_weights.append(
-                self.depthwise_quantizer(self.depthwise_kernel)
-            )
-        if self.pointwise_quantizer:
-            self.quantized_latent_weights.append(self.pointwise_kernel)
-            self.quantized_weights.append(
-                self.pointwise_quantizer(self.pointwise_kernel)
-            )
+    @property
+    def quantized_weights(self):
+        quantized_weights = []
+        if self.depthwise_quantizer and self.depthwise_kernel is not None:
+            quantized_weights.append(self.depthwise_quantizer(self.depthwise_kernel))
+        if self.pointwise_quantizer and self.pointwise_kernel is not None:
+            quantized_weights.append(self.pointwise_quantizer(self.pointwise_kernel))
+        return quantized_weights
+
+    @property
+    def quantized_latent_weights(self):
+        quantized_latent_weights = []
+        if self.depthwise_quantizer and self.depthwise_kernel is not None:
+            quantized_latent_weights.append(self.depthwise_kernel)
+        if self.pointwise_quantizer and self.pointwise_kernel is not None:
+            quantized_latent_weights.append(self.pointwise_kernel)
+        return quantized_latent_weights
 
     def call(self, inputs):
         if self.input_quantizer:
