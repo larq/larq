@@ -23,13 +23,15 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
         changed during the weight update.
 
     # Arguments
-    update_freq: `'batch'` or integer. When using `'batch'`, computes the metrics after
-        each batch. If using an integer the callback will compute the metrics every
-        `update_freq` batches. Note that computing too frequently can slow down training.
+    update_freq: `'batch'` or `'epoch'` or integer. When using `'batch'`, computes the
+        metrics after each batch. The same applies for `'epoch'`. If using an integer
+        the callback will compute the metrics every `update_freq` batches.
+        Note that computing too frequently can slow down training.
     """
 
     def __init__(self, update_freq="batch"):
         self.batch_previous_weights = {}
+        self.epoch_previous_weights = {}
         self.update_freq = update_freq if update_freq != "batch" else 1
 
     def _maybe_log_and_store(self, storage, logs, should_log=True, should_store=True):
@@ -56,9 +58,16 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
                 storage = {}
 
     def on_batch_end(self, batch, logs=None):
-        self._maybe_log_and_store(
-            self.batch_previous_weights,
-            logs,
-            should_log=batch > 0 and (batch + 1) % self.update_freq == 0,
-            should_store=(batch + 2) % self.update_freq == 0,
-        )
+        if self.update_freq != "epoch":
+            self._maybe_log_and_store(
+                self.batch_previous_weights,
+                logs,
+                should_log=batch > 0 and (batch + 1) % self.update_freq == 0,
+                should_store=(batch + 2) % self.update_freq == 0,
+            )
+
+    def on_train_begin(self, logs=None):
+        self._maybe_log_and_store(self.epoch_previous_weights, logs, should_log=False)
+
+    def on_epoch_end(self, epoch, logs=None):
+        self._maybe_log_and_store(self.epoch_previous_weights, logs)
