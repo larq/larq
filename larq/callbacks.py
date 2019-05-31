@@ -46,6 +46,7 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
                         op_names.append(layer.name if i == 0 else f"{layer.name}_{i}")
 
             for key, value in zip(op_names, tf.keras.backend.batch_get_value(ops)):
+                value = value.astype(np.int8)
                 if should_log:
                     logs[f"changed_quantization_ration/{key.replace(':', '_')}"] = 1 - (
                         np.count_nonzero(value == self.previous_weights[key])
