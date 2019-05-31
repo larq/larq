@@ -11,10 +11,7 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
 
     !!! example
         ```python
-        callbacks = [
-            QuantizationLogger(update_freq=100),
-            tf.keras.callbacks.TensorBoard(update_freq=100),
-        ]
+        callbacks = [QuantizationLogger(), tf.keras.callbacks.TensorBoard()]
         model.fit(X_train, Y_train, callbacks=callbacks)
         ```
 
@@ -29,7 +26,7 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
         Note that computing too frequently can slow down training.
     """
 
-    def __init__(self, update_freq="batch"):
+    def __init__(self, update_freq="epoch"):
         self.batch_previous_weights = {}
         self.epoch_previous_weights = {}
         self.update_freq = update_freq if update_freq != "batch" else 1
