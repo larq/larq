@@ -11,10 +11,7 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
 
     !!! example
         ```python
-        callbacks = [
-            QuantizationLogger(update_freq=100),
-            tf.keras.callbacks.TensorBoard(update_freq=100),
-        ]
+        callbacks = [QuantizationLogger(), tf.keras.callbacks.TensorBoard()]
         model.fit(X_train, Y_train, callbacks=callbacks)
         ```
 
@@ -23,19 +20,18 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
         changed during the weight update.
 
     # Arguments
-    update_freq: `'batch'` or integer. When using `'batch'`, computes the metrics after
-        each batch. If using an integer the callback will compute the metrics every
-        `update_freq` batches. Note that computing too frequently can slow down training.
+    update_freq: `'batch'` or `'epoch'` or integer. When using `'batch'`, computes the
+        metrics after each batch. The same applies for `'epoch'`. If using an integer
+        the callback will compute the metrics every `update_freq` batches.
+        Note that computing too frequently can slow down training.
     """
 
-    def __init__(self, update_freq="batch"):
-        self.previous_weights = {}
+    def __init__(self, update_freq="epoch"):
+        self.batch_previous_weights = {}
+        self.epoch_previous_weights = {}
         self.update_freq = update_freq if update_freq != "batch" else 1
 
-    def on_batch_end(self, batch, logs=None):
-        should_log = batch > 0 and (batch + 1) % self.update_freq == 0
-        should_store = (batch + 2) % self.update_freq == 0
-
+    def _maybe_log_and_store(self, storage, logs, should_log=True, should_store=True):
         if should_log or should_store:
             ops = []
             op_names = []
@@ -46,14 +42,29 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
                         op_names.append(layer.name if i == 0 else f"{layer.name}_{i}")
 
             for key, value in zip(op_names, tf.keras.backend.batch_get_value(ops)):
+                value = value.astype(np.int8)
                 if should_log:
                     logs[f"changed_quantization_ration/{key.replace(':', '_')}"] = 1 - (
-                        np.count_nonzero(value == self.previous_weights[key])
-                        / value.size
+                        np.count_nonzero(value == storage[key]) / value.size
                     )
                 if should_store:
-                    self.previous_weights[key] = value
+                    storage[key] = value
 
             if should_log and not should_store:
                 # We don't need it in the next batch anymore
-                self.previous_weights = {}
+                storage = {}
+
+    def on_batch_end(self, batch, logs=None):
+        if self.update_freq != "epoch":
+            self._maybe_log_and_store(
+                self.batch_previous_weights,
+                logs,
+                should_log=batch > 0 and (batch + 1) % self.update_freq == 0,
+                should_store=(batch + 2) % self.update_freq == 0,
+            )
+
+    def on_train_begin(self, logs=None):
+        self._maybe_log_and_store(self.epoch_previous_weights, logs, should_log=False)
+
+    def on_epoch_end(self, epoch, logs=None):
+        self._maybe_log_and_store(self.epoch_previous_weights, logs)
