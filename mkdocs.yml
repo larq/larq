@@ -2,13 +2,10 @@ site_name: Larq
 site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
 
 nav:
-  - Home:
-      - Getting Started: index.md
+  - Learn:
+      - Introduction: index.md
       - User Guide: guide.md
-      - Developer Guide:
-          - Contributing Guide: contributing.md
-          - Code of Conduct: code_of_conduct.md
-  - Examples:
+  - Tutorials:
       - Introduction to BNNs with Larq: examples/mnist.ipynb
       - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
       - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
@@ -20,6 +17,9 @@ nav:
       - Callbacks: api/callbacks.md
       - Optimizers: api/optimizers.md
       - Models: api/models.md
+  - Community:
+      - Contributing Guide: contributing.md
+      - Code of Conduct: code_of_conduct.md
 
 repo_url: https://github.com/plumerai/larq
 repo_name: plumerai/larq
