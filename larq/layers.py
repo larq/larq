@@ -8,8 +8,7 @@ is equivalent to a full precision layer.
 
 import logging
 import tensorflow as tf
-from larq import utils
-from larq import quantizers
+from larq import quantizers, utils, metrics
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +33,11 @@ class QuantizerBase(tf.keras.layers.Layer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
+    def build(self, input_shape):
+        super().build(input_shape)
+        # TODO make configurable
+        self.mean_changed_values = metrics.MeanChangedValues(self.kernel.shape)
+
     @property
     def quantized_weights(self):
         if self.kernel_quantizer and self.kernel is not None:
@@ -52,7 +56,9 @@ class QuantizerBase(tf.keras.layers.Layer):
             inputs = self.input_quantizer(inputs)
         if self.kernel_quantizer:
             full_precision_kernel = self.kernel
-            self.kernel = self.kernel_quantizer(self.kernel)
+            quantized_kernel = self.kernel_quantizer(self.kernel)
+            self.add_metric(self.mean_changed_values(quantized_kernel))
+            self.kernel = quantized_kernel
 
         output = super().call(inputs)
         if self.kernel_quantizer:
