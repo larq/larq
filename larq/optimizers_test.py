@@ -3,8 +3,10 @@ import numpy as np
 import tensorflow as tf
 import larq as lq
 
-TF_VERSION_MAJOR, TF_VERSION_MINOR, TF_VERSION_PATCH = tf.__version__.split(".", 2)
-TF_VERSION_MAJOR_MINOR = float(TF_VERSION_MAJOR + "." + TF_VERSION_MINOR)
+from larq import optimizers
+
+from tensorflow.python import keras
+from tensorflow.python.keras import testing_utils
 
 
 def assert_weights(weights, expected):
@@ -12,8 +14,56 @@ def assert_weights(weights, expected):
         np.testing.assert_allclose(np.squeeze(w), e)
 
 
+def _get_bnn_model(input_dim, num_hidden, output_dim):
+    model = keras.models.Sequential()
+    model.add(tf.keras.layers.Flatten(input_shape=(input_dim,)))
+    model.add(
+        lq.layers.QuantDense(
+            units=num_hidden,
+            kernel_quantizer="ste_sign",
+            kernel_constraint="weight_clip",
+        )
+    )
+    model.add(
+        lq.layers.QuantDense(
+            units=output_dim,
+            kernel_quantizer="ste_sign",
+            kernel_constraint="weight_clip",
+            activation="softmax",
+        )
+    )
+    return model
+
+
+def _test_optimizer(optimizer, target=0.75):
+    np.random.seed(1337)
+    (x_train, y_train), _ = testing_utils.get_test_data(
+        train_samples=1000, test_samples=200, input_shape=(10,), num_classes=2
+    )
+    y_train = keras.utils.to_categorical(y_train)
+
+    model = _get_bnn_model(x_train.shape[1], 20, y_train.shape[1])
+    model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
+    np.testing.assert_equal(keras.backend.get_value(model.optimizer.iterations), 0)
+
+    history = model.fit(x_train, y_train, epochs=2, batch_size=16, verbose=0)
+    np.testing.assert_equal(
+        keras.backend.get_value(model.optimizer.iterations), 126
+    )  # 63 steps per epoch
+
+    assert history.history["acc"][-1] >= target
+
+
+def _test_serialization(optimizer):
+    config = keras.optimizers.serialize(optimizer)
+    optim = keras.optimizers.deserialize(config)
+    new_config = keras.optimizers.serialize(optim)
+    assert config == new_config
+
+
 @pytest.mark.skipif(
-    TF_VERSION_MAJOR_MINOR > 1.13, reason="requires Tensorflow 1.13 or less"
+    lq.utils.get_tf_version_major_minor_float() > 1.13,
+    reason="current implementation requires Tensorflow 1.13 or less",
 )
 class TestXavierLearingRateScaling:
     def test_xavier_scaling(self):
@@ -54,3 +104,17 @@ class TestXavierLearingRateScaling:
         assert opt.optimizer.__class__ == ref_opt.optimizer.__class__
         assert opt.optimizer.get_config() == ref_opt.optimizer.get_config()
         assert opt.multipliers == ref_opt.multipliers
+
+
+@pytest.mark.skipif(
+    lq.utils.get_tf_version_major_minor_float() <= 1.13,
+    reason="current implementation requires Tensorflow 1.14 or more",
+)
+class TestBopOptimizer:
+    def test_bop_accuracy(self):
+        _test_optimizer(lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)))
+
+    def test_bop_serialization(self):
+        _test_serialization(
+            lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
+        )
