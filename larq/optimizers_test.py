@@ -16,19 +16,22 @@ def assert_weights(weights, expected):
 
 def _get_bnn_model(input_dim, num_hidden, output_dim):
     model = keras.models.Sequential()
-    model.add(tf.keras.layers.Flatten(input_shape=(input_dim,)))
     model.add(
         lq.layers.QuantDense(
             units=num_hidden,
             kernel_quantizer="ste_sign",
             kernel_constraint="weight_clip",
+            activation="relu",
+            input_shape=(input_dim,),
         )
     )
+    model.add(tf.keras.layers.BatchNormalization())
     model.add(
         lq.layers.QuantDense(
             units=output_dim,
             kernel_quantizer="ste_sign",
             kernel_constraint="weight_clip",
+            input_quantizer="ste_sign",
             activation="softmax",
         )
     )
@@ -106,10 +109,6 @@ class TestXavierLearingRateScaling:
         assert opt.multipliers == ref_opt.multipliers
 
 
-@pytest.mark.skipif(
-    lq.utils.get_tf_version_major_minor_float() <= 1.13,
-    reason="current implementation requires Tensorflow 1.14 or more",
-)
 class TestBopOptimizer:
     def test_bop_accuracy(self):
         _test_optimizer(lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)))

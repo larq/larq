@@ -5,6 +5,11 @@ import larq as lq
 from larq import utils
 from copy import deepcopy
 
+from tensorflow.python.keras.optimizers import *
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import random_ops
+from tensorflow.python.keras import backend as K
+
 
 @utils.register_keras_custom_object
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
@@ -114,49 +119,40 @@ class Bop(tf.keras.optimizers.Optimizer):
                 f"Expected tf.keras.optimizers.Optimizer, received {type(fp_optimizer)}."
             )
 
-        self._fp_optimizer = fp_optimizer
-        self.threshold = threshold
-        self.gamma = gamma
+        with K.name_scope(self.__class__.__name__):
 
-    def _create_slots(self, var_list):
-        for var in var_list:
-            if self.is_binary(var):
-                self.add_slot(var, "m")
-
-    def apply_gradients(self, grads_and_vars, name=None):
-        bin_grads_and_vars = [(g, v) for g, v in grads_and_vars if self.is_binary(v)]
-        fp_grads_and_vars = [(g, v) for g, v in grads_and_vars if not self.is_binary(v)]
-
-        bin_train_op = super().apply_gradients(bin_grads_and_vars, name=name)
-        fp_train_op = self._fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
-
-        return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
-
-    def _resource_apply_sparse(self, grad, var, indices):
-        raise NotImplementedError()
-
-    def _get_decayed_hyper(self, name, var_dtype):
-        hyper = self._get_hyper(name, var_dtype)
-        if isinstance(hyper, tf.keras.optimizers.schedules.LearningRateSchedule):
-            local_step = tf.cast(self.iterations, var_dtype)
-            hyper = tf.cast(hyper(local_step), var_dtype)
-        return hyper
-
-    def _resource_apply_dense(self, grad, var):
-        print(f"Applying Bop to {var}")
-        var_dtype = var.dtype.base_dtype
-        gamma = self._get_decayed_hyper("gamma", var_dtype)
-        threshold = self._get_decayed_hyper("threshold", var_dtype)
-        m = self.get_slot(var, "m")
-
-        m_t = tf.compat.v1.assign(
-            m, (1 - gamma) * m + gamma * grad, use_locking=self._use_locking
-        )
-        var_t = lq.quantizers.sign(-tf.sign(var * m_t - threshold) * var)
-        return tf.compat.v1.assign(var, var_t, use_locking=self._use_locking).op
+            self._fp_optimizer = fp_optimizer
+            self.threshold = threshold
+            self.gamma = gamma
+            self.iterations = K.variable(0, dtype="int64", name="iterations")
 
     def get_updates(self, loss, params):
-        raise NotImplementedError
+        grads = self.get_gradients(loss, params)
+        self.updates = []
+
+        ms = [K.zeros(K.int_shape(p), dtype=K.dtype(p)) for p in params]
+
+        fp_params = []
+
+        for p, g, m in zip(params, grads, ms):
+            if "/kernel" in p.name and "quant_" in p.name:
+                print("Applying Bop to %s." % p.name)
+
+                m_t = (1 - self.gamma) * m + self.gamma * g
+
+                self.updates.append(state_ops.assign(m, m_t))
+                self.updates.append(
+                    state_ops.assign(
+                        p, lq.quantizers.sign(-p * tf.sign(p * m_t - self.threshold))
+                    )
+                )
+
+            else:
+                fp_params.append(p)
+
+        self.updates.append(state_ops.assign(self.iterations, self.iterations + 1))
+
+        return self.updates + self._fp_optimizer.get_updates(loss, fp_params)
 
     @staticmethod
     def is_binary(var):
