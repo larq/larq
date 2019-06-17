@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+from larq.optimizers import Bop
+
 
 class QuantizationLogger(tf.keras.callbacks.Callback):
     """Callback that adds quantization specific metrics.
@@ -68,3 +70,47 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         self._maybe_log_and_store(self.epoch_previous_weights, logs)
+
+
+class BopLearningRateScheduler(tf.keras.callbacks.Callback):
+    """Learning rate scheduler for Boq optimizer.
+
+  Arguments:
+      schedule: a function that takes an epoch index as input
+          (integer, indexed from 0) and returns a new
+          learning rate as output (float).
+      verbose: int. 0: quiet, 1: update messages.
+  """
+
+    def __init__(self, schedule, verbose=0):
+        super(BopLearningRateScheduler, self).__init__()
+        self.schedule = schedule
+        self.verbose = verbose
+
+    def on_epoch_begin(self, epoch, logs=None):
+        if not isinstance(self.model.optimizer, Bop):
+            raise ValueError(
+                f"Expected larq.optimizers.Bop, received {type(self.model.optimizer)}."
+            )
+
+        if not hasattr(self.model.optimizer.fp_optimizer, "lr"):
+            raise ValueError('Optimizer must have a "lr" attribute.')
+        try:  # new API
+            lr = float(tf.keras.backend.get_value(self.model.optimizer.fp_optimizer.lr))
+            lr = self.schedule(epoch, lr)
+        except TypeError:  # Support for old API for backward compatibility
+            lr = self.schedule(epoch)
+        if not isinstance(lr, (float, np.float32, np.float64)):
+            raise ValueError(
+                'The output of the "schedule" function ' "should be float."
+            )
+        tf.keras.backend.set_value(self.model.optimizer.fp_optimizer.lr, lr)
+        if self.verbose > 0:
+            print(
+                "\nEpoch %05d: BoqLearningRateScheduler changing learning "
+                "rate to %s." % (epoch + 1, lr)
+            )
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        logs["lr"] = tf.keras.backend.get_value(self.model.optimizer.fp_optimizer.lr)

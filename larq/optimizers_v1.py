@@ -5,11 +5,6 @@ import larq as lq
 from larq import utils
 from copy import deepcopy
 
-from tensorflow.python.keras.optimizers import *
-from tensorflow.python.framework import ops
-from tensorflow.python.ops import random_ops
-from tensorflow.python.keras import backend as K
-
 
 @utils.register_keras_custom_object
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
@@ -119,30 +114,35 @@ class Bop(tf.keras.optimizers.Optimizer):
                 f"Expected tf.keras.optimizers.Optimizer, received {type(fp_optimizer)}."
             )
 
-        with K.name_scope(self.__class__.__name__):
+        with tf.keras.backend.name_scope(self.__class__.__name__):
 
-            self._fp_optimizer = fp_optimizer
+            self.fp_optimizer = fp_optimizer
             self.threshold = threshold
             self.gamma = gamma
-            self.iterations = K.variable(0, dtype="int64", name="iterations")
+            self.iterations = tf.keras.backend.variable(
+                0, dtype="int64", name="iterations"
+            )
 
     def get_updates(self, loss, params):
         grads = self.get_gradients(loss, params)
         self.updates = []
 
-        ms = [K.zeros(K.int_shape(p), dtype=K.dtype(p)) for p in params]
+        ms = [
+            tf.keras.backend.zeros(
+                tf.keras.backend.int_shape(p), dtype=tf.keras.backend.dtype(p)
+            )
+            for p in params
+        ]
 
         fp_params = []
 
         for p, g, m in zip(params, grads, ms):
             if "/kernel" in p.name and "quant_" in p.name:
-                print("Applying Bop to %s." % p.name)
-
                 m_t = (1 - self.gamma) * m + self.gamma * g
 
-                self.updates.append(state_ops.assign(m, m_t))
+                self.updates.append(tf.assign(m, m_t))
                 self.updates.append(
-                    state_ops.assign(
+                    tf.assign(
                         p, lq.quantizers.sign(-p * tf.sign(p * m_t - self.threshold))
                     )
                 )
@@ -150,21 +150,21 @@ class Bop(tf.keras.optimizers.Optimizer):
             else:
                 fp_params.append(p)
 
-        self.updates.append(state_ops.assign(self.iterations, self.iterations + 1))
+        self.updates.append(tf.assign(self.iterations, self.iterations + 1))
 
-        return self.updates + self._fp_optimizer.get_updates(loss, fp_params)
+        return self.updates + self.fp_optimizer.get_updates(loss, fp_params)
 
     @staticmethod
     def is_binary(var):
         return "/kernel" in var.name and "quant_" in var.name
 
     def get_config(self):
-        fp_optimizer_config = self._fp_optimizer.get_config()
+        fp_optimizer_config = self.fp_optimizer.get_config()
         config = {
             "threshold": self.threshold,
             "gamma": self.gamma,
             "fp_optimizer": {
-                "class_name": self._fp_optimizer.__class__.__name__,
+                "class_name": self.fp_optimizer.__class__.__name__,
                 "config": fp_optimizer_config,
             },
         }

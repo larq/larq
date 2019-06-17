@@ -16,7 +16,7 @@ class Bop(tf.keras.optimizers.Optimizer):
                 f"Expected tf.keras.optimizers.Optimizer, received {type(fp_optimizer)}."
             )
 
-        self._fp_optimizer = fp_optimizer
+        self.fp_optimizer = fp_optimizer
         self._set_hyper("threshold", threshold)
         self._set_hyper("gamma", gamma)
 
@@ -30,7 +30,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         fp_grads_and_vars = [(g, v) for g, v in grads_and_vars if not self.is_binary(v)]
 
         bin_train_op = super().apply_gradients(bin_grads_and_vars, name=name)
-        fp_train_op = self._fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
+        fp_train_op = self.fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
 
         return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
 
@@ -45,7 +45,6 @@ class Bop(tf.keras.optimizers.Optimizer):
         return hyper
 
     def _resource_apply_dense(self, grad, var):
-        print(f"Applying Bop to {var}")
         var_dtype = var.dtype.base_dtype
         gamma = self._get_decayed_hyper("gamma", var_dtype)
         threshold = self._get_decayed_hyper("threshold", var_dtype)
@@ -62,7 +61,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         return "/kernel" in var.name and "quant_" in var.name
 
     def get_config(self):
-        fp_optimizer_config = self._fp_optimizer.get_config()
+        fp_optimizer_config = self.fp_optimizer.get_config()
         config = {
             "threshold": self._serialize_hyperparameter("threshold"),
             "gamma": self._serialize_hyperparameter("gamma"),

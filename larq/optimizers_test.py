@@ -2,40 +2,17 @@ import pytest
 import numpy as np
 import tensorflow as tf
 import larq as lq
+import distutils.version
 
 from larq import optimizers
-
-from tensorflow.python import keras
+from larq import testing_utils as lq_testing_utils
+from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
 
 def assert_weights(weights, expected):
     for w, e in zip(weights, expected):
         np.testing.assert_allclose(np.squeeze(w), e)
-
-
-def _get_bnn_model(input_dim, num_hidden, output_dim):
-    model = keras.models.Sequential()
-    model.add(
-        lq.layers.QuantDense(
-            units=num_hidden,
-            kernel_quantizer="ste_sign",
-            kernel_constraint="weight_clip",
-            activation="relu",
-            input_shape=(input_dim,),
-        )
-    )
-    model.add(tf.keras.layers.BatchNormalization())
-    model.add(
-        lq.layers.QuantDense(
-            units=output_dim,
-            kernel_quantizer="ste_sign",
-            kernel_constraint="weight_clip",
-            input_quantizer="ste_sign",
-            activation="softmax",
-        )
-    )
-    return model
 
 
 def _test_optimizer(optimizer, target=0.75):
@@ -45,7 +22,7 @@ def _test_optimizer(optimizer, target=0.75):
     )
     y_train = keras.utils.to_categorical(y_train)
 
-    model = _get_bnn_model(x_train.shape[1], 20, y_train.shape[1])
+    model = lq_testing_utils.get_small_bnn_model(x_train.shape[1], 20, y_train.shape[1])
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
     np.testing.assert_equal(keras.backend.get_value(model.optimizer.iterations), 0)
 
@@ -65,7 +42,8 @@ def _test_serialization(optimizer):
 
 
 @pytest.mark.skipif(
-    lq.utils.get_tf_version_major_minor_float() > 1.13,
+    distutils.version.LooseVersion(tf.__version__)
+    >= distutils.version.LooseVersion("1.14"),
     reason="current implementation requires Tensorflow 1.13 or less",
 )
 class TestXavierLearingRateScaling:
