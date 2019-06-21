@@ -1,14 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import larq as lq
-
-
-from larq import testing_utils as lq_testing_utils
-from larq.callbacks import BopLearningRateScheduler
-
-from tensorflow import keras
 from tensorflow.python.keras import keras_parameterized
-from tensorflow.python.keras import testing_utils
 
 
 class LogHistory(tf.keras.callbacks.Callback):
@@ -53,42 +46,3 @@ class LayersTest(keras_parameterized.TestCase):
         model.fit(x, y, batch_size=1, epochs=3, callbacks=[logger, history])
         assert history.batches == [4, 9, 14, 19] * 3
         assert history.epochs == [0, 1, 2]
-
-
-class TestBopLearningRateScheduler:
-    def test_bop_learningrate_scheduler(self):
-        np.random.seed(1337)
-        (x_train, y_train), (x_test, y_test) = testing_utils.get_test_data(
-            train_samples=1000, test_samples=200, input_shape=(10,), num_classes=2
-        )
-
-        y_test = keras.utils.to_categorical(y_test)
-        y_train = keras.utils.to_categorical(y_train)
-
-        model = lq_testing_utils.get_small_bnn_model(
-            x_train.shape[1], 20, y_train.shape[1]
-        )
-        bop_optimizer = lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
-        model.compile(
-            loss="categorical_crossentropy",
-            optimizer=bop_optimizer,
-            metrics=["accuracy"],
-        )
-
-        scheduler = lambda x: 1.0 / (1.0 + x)
-        cbks = [BopLearningRateScheduler(scheduler)]
-        num_epochs = 10
-        model.fit(
-            x_train,
-            y_train,
-            epochs=num_epochs,
-            batch_size=16,
-            validation_data=(x_test, y_test),
-            callbacks=cbks,
-            verbose=0,
-        )
-        np.testing.assert_almost_equal(
-            float(keras.backend.get_value(model.optimizer.fp_optimizer.lr)),
-            scheduler(num_epochs - 1),
-            decimal=8,
-        )
