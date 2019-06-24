@@ -4,10 +4,19 @@ import tensorflow as tf
 import larq as lq
 import distutils.version
 
-from larq import optimizers
 from larq import testing_utils as lq_testing_utils
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
+
+
+class AssertLRCallback(keras.callbacks.Callback):
+    def __init__(self, schedule):
+        self.schedule = schedule
+        super().__init__()
+
+    def on_epoch_end(self, epoch, logs=None):
+        learning_rate = keras.backend.get_value(self.model.optimizer.lr)
+        np.testing.assert_allclose(learning_rate, self.schedule(epoch))
 
 
 def assert_weights(weights, expected):
@@ -18,7 +27,7 @@ def assert_weights(weights, expected):
 def _test_optimizer(optimizer, target=0.75):
     np.random.seed(1337)
     (x_train, y_train), _ = testing_utils.get_test_data(
-        train_samples=1000, test_samples=200, input_shape=(10,), num_classes=2
+        train_samples=1000, test_samples=0, input_shape=(10,), num_classes=2
     )
     y_train = keras.utils.to_categorical(y_train)
 
@@ -89,6 +98,35 @@ class TestXavierLearingRateScaling:
 class TestBopOptimizer:
     def test_bop_accuracy(self):
         _test_optimizer(lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)))
+
+    def test_bop_lr_scheduler(self):
+        (x_train, y_train), _ = testing_utils.get_test_data(
+            train_samples=100, test_samples=0, input_shape=(10,), num_classes=2
+        )
+        y_train = keras.utils.to_categorical(y_train)
+
+        model = lq_testing_utils.get_small_bnn_model(
+            x_train.shape[1], 10, y_train.shape[1]
+        )
+        model.compile(
+            loss="categorical_crossentropy",
+            optimizer=lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
+        )
+
+        def schedule(epoch):
+            return 1 / (1 + epoch)
+
+        model.fit(
+            x_train,
+            y_train,
+            epochs=4,
+            callbacks=[
+                tf.keras.callbacks.LearningRateScheduler(schedule),
+                AssertLRCallback(schedule),
+            ],
+            batch_size=8,
+            verbose=0,
+        )
 
     def test_bop_serialization(self):
         _test_serialization(

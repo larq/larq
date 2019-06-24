@@ -173,6 +173,11 @@ class Bop(tf.keras.optimizers.Optimizer):
     def is_binary(var):
         return "/kernel" in var.name and "quant_" in var.name
 
+    def __getattr__(self, name):
+        if name == "lr":
+            return self.fp_optimizer.lr
+        return super().__getattr__(name)
+
     def get_config(self):
         fp_optimizer_config = self.fp_optimizer.get_config()
         config = {

@@ -55,6 +55,11 @@ class Bop(tf.keras.optimizers.Optimizer):
     def _resource_apply_sparse(self, grad, var, indices):
         raise NotImplementedError()
 
+    def __getattr__(self, name):
+        if name == "lr":
+            return self.fp_optimizer.lr
+        return super().__getattr__(name)
+
     def _get_decayed_hyper(self, name, var_dtype):
         hyper = self._get_hyper(name, var_dtype)
         if isinstance(hyper, tf.keras.optimizers.schedules.LearningRateSchedule):
