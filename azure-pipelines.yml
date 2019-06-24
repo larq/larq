@@ -18,7 +18,7 @@ jobs:
           tensorflow: "tensorflow==1.13.1"
         Python37TF2:
           python.version: "3.7"
-          tensorflow: "tf-nightly-2.0-preview"
+          tensorflow: "tensorflow==2.0.0b0"
           coverage: "true"
 
     steps:

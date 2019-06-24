@@ -37,7 +37,8 @@ class QuantizerBase(tf.keras.layers.Layer):
     @property
     def quantized_weights(self):
         if self.kernel_quantizer and self.kernel is not None:
-            return [self.kernel_quantizer(self.kernel)]
+            with tf.name_scope(self.name):
+                return [self.kernel_quantizer(self.kernel)]
         return []
 
     @property
@@ -104,12 +105,17 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
 
     @property
     def quantized_weights(self):
-        quantized_weights = []
-        if self.depthwise_quantizer and self.depthwise_kernel is not None:
-            quantized_weights.append(self.depthwise_quantizer(self.depthwise_kernel))
-        if self.pointwise_quantizer and self.pointwise_kernel is not None:
-            quantized_weights.append(self.pointwise_quantizer(self.pointwise_kernel))
-        return quantized_weights
+        with tf.name_scope(self.name):
+            quantized_weights = []
+            if self.depthwise_quantizer and self.depthwise_kernel is not None:
+                quantized_weights.append(
+                    self.depthwise_quantizer(self.depthwise_kernel)
+                )
+            if self.pointwise_quantizer and self.pointwise_kernel is not None:
+                quantized_weights.append(
+                    self.pointwise_quantizer(self.pointwise_kernel)
+                )
+            return quantized_weights
 
     @property
     def quantized_latent_weights(self):

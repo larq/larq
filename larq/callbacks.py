@@ -27,21 +27,27 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
     """
 
     def __init__(self, update_freq="epoch"):
+        super().__init__()
         self.batch_previous_weights = {}
         self.epoch_previous_weights = {}
         self.update_freq = update_freq if update_freq != "batch" else 1
+        self._quantized_weights = []
+        self._quantized_weight_names = []
+
+    def set_model(self, model):
+        super().set_model(model)
+        for layer in model.layers:
+            if hasattr(layer, "quantized_weights"):
+                for i, weight in enumerate(layer.quantized_weights):
+                    self._quantized_weights.append(weight)
+                    self._quantized_weight_names.append(
+                        layer.name if i == 0 else f"{layer.name}_{i}"
+                    )
 
     def _maybe_log_and_store(self, storage, logs, should_log=True, should_store=True):
         if should_log or should_store:
-            ops = []
-            op_names = []
-            for layer in self.model.layers:
-                if hasattr(layer, "quantized_weights"):
-                    for i, weight in enumerate(layer.quantized_weights):
-                        ops.append(weight)
-                        op_names.append(layer.name if i == 0 else f"{layer.name}_{i}")
-
-            for key, value in zip(op_names, tf.keras.backend.batch_get_value(ops)):
+            values = tf.keras.backend.batch_get_value(self._quantized_weights)
+            for key, value in zip(self._quantized_weight_names, values):
                 value = value.astype(np.int8)
                 if should_log:
                     logs[f"changed_quantization_ration/{key.replace(':', '_')}"] = 1 - (
