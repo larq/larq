@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 import larq as lq
 
 from larq import utils
