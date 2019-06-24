@@ -113,16 +113,13 @@ class TestBopOptimizer:
             optimizer=lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
         )
 
-        def schedule(epoch):
-            return 1 / (1 + epoch)
-
         model.fit(
             x_train,
             y_train,
             epochs=4,
             callbacks=[
-                tf.keras.callbacks.LearningRateScheduler(schedule),
-                AssertLRCallback(schedule),
+                tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1 / (1 + epoch)),
+                AssertLRCallback(lambda epoch: 1 / (1 + epoch)),
             ],
             batch_size=8,
             verbose=0,
