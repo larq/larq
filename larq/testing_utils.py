@@ -12,6 +12,7 @@ def get_small_bnn_model(input_dim, num_hidden, output_dim):
             kernel_constraint="weight_clip",
             activation="relu",
             input_shape=(input_dim,),
+            use_bias=False,
         )
     )
     model.add(keras.layers.BatchNormalization())
@@ -22,6 +23,7 @@ def get_small_bnn_model(input_dim, num_hidden, output_dim):
             kernel_constraint="weight_clip",
             input_quantizer="ste_sign",
             activation="softmax",
+            use_bias=False,
         )
     )
     return model

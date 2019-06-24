@@ -106,6 +106,26 @@ class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
 
 @utils.register_keras_custom_object
 class Bop(tf.keras.optimizers.Optimizer):
+    """Binary optimizer (Bop).
+
+    Bop is a latent-free optimizer for Binarized Neural Networks (BNNs).
+
+    !!! example
+        ```python
+        optimizer = lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
+
+        ```
+
+    # Arguments
+    fp_optimizer: a `tf.keras.optimizers.Optimizer`.
+    threshold: determines to whether to flip each weight.
+    gamma: the adaptivity rate.
+    name: name of the optimizer.
+
+    # References
+    - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://arxiv.org/abs/1906.02107)
+    """
+
     def __init__(self, fp_optimizer, threshold=1e-5, gamma=1e-2, name="Bop", **kwargs):
         super().__init__(**kwargs)
 
@@ -119,9 +139,6 @@ class Bop(tf.keras.optimizers.Optimizer):
             self.fp_optimizer = fp_optimizer
             self.threshold = threshold
             self.gamma = gamma
-            self.iterations = tf.keras.backend.variable(
-                0, dtype="int64", name="iterations"
-            )
 
     def get_updates(self, loss, params):
         grads = self.get_gradients(loss, params)
@@ -137,7 +154,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         fp_params = []
 
         for p, g, m in zip(params, grads, ms):
-            if "/kernel" in p.name and "quant_" in p.name:
+            if self.is_binary(p):
                 m_t = (1 - self.gamma) * m + self.gamma * g
 
                 self.updates.append(tf.assign(m, m_t))
@@ -149,8 +166,6 @@ class Bop(tf.keras.optimizers.Optimizer):
 
             else:
                 fp_params.append(p)
-
-        self.updates.append(tf.assign(self.iterations, self.iterations + 1))
 
         return self.updates + self.fp_optimizer.get_updates(loss, fp_params)
 

@@ -24,12 +24,11 @@ def _test_optimizer(optimizer, target=0.75):
 
     model = lq_testing_utils.get_small_bnn_model(x_train.shape[1], 20, y_train.shape[1])
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
-    np.testing.assert_equal(keras.backend.get_value(model.optimizer.iterations), 0)
-
     history = model.fit(x_train, y_train, epochs=2, batch_size=16, verbose=0)
-    np.testing.assert_equal(
-        keras.backend.get_value(model.optimizer.iterations), 126
-    )  # 63 steps per epoch
+
+    for layer in model.layers:
+        if "quant" in layer.name:
+            assert np.all(np.isin(layer.get_weights(), [-1, 1]))
 
     assert history.history["acc"][-1] >= target
 
