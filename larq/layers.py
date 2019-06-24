@@ -21,9 +21,17 @@ class QuantizerBase(tf.keras.layers.Layer):
     equivalent to `Layer`.
     """
 
-    def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        metrics=["mean_changed_values"],
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
+        self._custom_metrics = metrics
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
 
@@ -35,8 +43,8 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         super().build(input_shape)
-        # TODO make configurable
-        self.mean_changed_values = metrics.MeanChangedValues(self.kernel.shape)
+        if "mean_changed_values" in self._custom_metrics:
+            self.mean_changed_values = metrics.MeanChangedValues(self.kernel.shape)
 
     @property
     def quantized_weights(self):
@@ -57,7 +65,8 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             full_precision_kernel = self.kernel
             quantized_kernel = self.kernel_quantizer(self.kernel)
-            self.add_metric(self.mean_changed_values(quantized_kernel))
+            if "mean_changed_values" in self._custom_metrics:
+                self.add_metric(self.mean_changed_values(quantized_kernel))
             self.kernel = quantized_kernel
 
         output = super().call(inputs)
