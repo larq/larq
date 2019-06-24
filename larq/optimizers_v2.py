@@ -14,7 +14,6 @@ class Bop(tf.keras.optimizers.Optimizer):
     !!! example
         ```python
         optimizer = lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
-
         ```
 
     # Arguments
