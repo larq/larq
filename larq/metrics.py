@@ -1,5 +1,5 @@
 import tensorflow as tf
-import distutils.version as version
+from distutils.version import LooseVersion
 import numpy as np
 
 
@@ -38,7 +38,7 @@ class MeanChangedValues(tf.keras.metrics.Mean):
         initializer=None,
         dtype=None,
     ):
-        if version.LooseVersion(tf.__version__) < version.LooseVersion("1.14.0"):
+        if LooseVersion(tf.__version__) < LooseVersion("1.14.0"):
             return tf.keras.layers.Layer.add_weight(
                 self,
                 name=name,
