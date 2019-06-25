@@ -98,11 +98,14 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         pointwise_quantizer=None,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        # This is currently undocumented until we have explored better options
+        self._custom_metrics = kwargs.pop("metrics", ["mean_changed_values"])
+
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
 
+        super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
             log.warning(
                 "Using `depthwise_quantizer` without setting `depthwise_constraint` "
@@ -113,6 +116,20 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
                 "Using `pointwise_quantizer` without setting `pointwise_constraint` "
                 "may result in starved weights (where the gradient is always zero)."
             )
+
+    def build(self, input_shape):
+        super().build(input_shape)
+        if "mean_changed_values" in self._custom_metrics:
+            if self.depthwise_quantizer:
+                self.depthwise_mean_changed_values = metrics.MeanChangedValues(
+                    self.depthwise_kernel.shape,
+                    name=f"{self.name}/depthwise_mean_changed_values",
+                )
+            if self.pointwise_quantizer:
+                self.pointwise_mean_changed_values = metrics.MeanChangedValues(
+                    self.pointwise_kernel.shape,
+                    name=f"{self.name}/pointwise_mean_changed_values",
+                )
 
     @property
     def quantized_weights(self):
@@ -142,10 +159,20 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
             inputs = self.input_quantizer(inputs)
         if self.depthwise_quantizer:
             full_precision_depthwise_kernel = self.depthwise_kernel
-            self.depthwise_kernel = self.depthwise_quantizer(self.depthwise_kernel)
+            depthwise_quantized_kernel = self.depthwise_quantizer(self.depthwise_kernel)
+            if "mean_changed_values" in self._custom_metrics:
+                self.add_metric(
+                    self.depthwise_mean_changed_values(depthwise_quantized_kernel)
+                )
+            self.depthwise_kernel = depthwise_quantized_kernel
         if self.pointwise_quantizer:
             full_precision_pointwise_kernel = self.pointwise_kernel
-            self.pointwise_kernel = self.pointwise_quantizer(self.pointwise_kernel)
+            pointwise_quantized_kernel = self.pointwise_quantizer(self.pointwise_kernel)
+            if "mean_changed_values" in self._custom_metrics:
+                self.add_metric(
+                    self.pointwise_mean_changed_values(pointwise_quantized_kernel)
+                )
+            self.pointwise_kernel = pointwise_quantized_kernel
 
         output = super().call(inputs)
         # Reset the full precision kernel to make keras eager tests pass.
