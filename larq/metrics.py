@@ -18,7 +18,7 @@ class MeanChangedValues(tf.keras.metrics.Mean):
 
     def update_state(self, values, sample_weight=None):
         values = tf.cast(values, self._values_dtype)
-        changed_values = tf.count_nonzero(tf.equal(self._previous_values, values))
+        changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
         metric_update_op = super().update_state(changed_values / self._size)
         with tf.control_dependencies([metric_update_op]):
             return self._previous_values.assign(values)
