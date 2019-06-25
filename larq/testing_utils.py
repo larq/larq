@@ -158,9 +158,10 @@ def layer_test(
                 weighted_metrics=["acc"],
                 run_eagerly=should_run_eagerly(),
             )
+            model.train_on_batch(input_data, actual_output)
     else:
         model.compile("rmsprop", "mse", weighted_metrics=["acc"])
-    model.train_on_batch(input_data, actual_output)
+        model.train_on_batch(input_data, actual_output)
 
     # test as first layer in Sequential API
     layer_config = layer.get_config()
