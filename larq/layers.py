@@ -7,10 +7,19 @@ is equivalent to a full precision layer.
 """
 
 import logging
+from distutils.version import LooseVersion
 import tensorflow as tf
 from larq import quantizers, utils, metrics
 
 log = logging.getLogger(__name__)
+
+
+def _supports_metrics():
+    # TensorFlow 1.13 does not support adding an aggregated metric tensor in
+    # `tf.keras.layers.Layer.call` in eager execution.
+    return not (
+        LooseVersion(tf.__version__) < LooseVersion("1.14.0") and tf.executing_eagerly()
+    )
 
 
 class QuantizerBase(tf.keras.layers.Layer):
@@ -37,7 +46,11 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         super().build(input_shape)
-        if self.kernel_quantizer and "mean_changed_values" in self._custom_metrics:
+        if (
+            self.kernel_quantizer
+            and "mean_changed_values" in self._custom_metrics
+            and _supports_metrics()
+        ):
             self.mean_changed_values = metrics.MeanChangedValues(
                 self.kernel.shape, name=f"{self.name}/mean_changed_values"
             )
@@ -61,7 +74,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             full_precision_kernel = self.kernel
             quantized_kernel = self.kernel_quantizer(self.kernel)
-            if "mean_changed_values" in self._custom_metrics:
+            if "mean_changed_values" in self._custom_metrics and _supports_metrics():
                 self.add_metric(self.mean_changed_values(quantized_kernel))
             self.kernel = quantized_kernel
 
