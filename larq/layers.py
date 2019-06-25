@@ -44,7 +44,9 @@ class QuantizerBase(tf.keras.layers.Layer):
     def build(self, input_shape):
         super().build(input_shape)
         if "mean_changed_values" in self._custom_metrics:
-            self.mean_changed_values = metrics.MeanChangedValues(self.kernel.shape)
+            self.mean_changed_values = metrics.MeanChangedValues(
+                self.kernel.shape, name=f"{self.name}/mean_changed_values"
+            )
 
     @property
     def quantized_weights(self):
