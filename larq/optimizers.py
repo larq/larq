@@ -1,7 +1,6 @@
-import tensorflow as tf
-from distutils.version import LooseVersion
+from larq import utils
 
-if LooseVersion(tf.__version__) >= LooseVersion("1.14.0"):
+if utils.tf_1_14_or_newer():
     from larq.optimizers_v2 import Bop
 
     __all__ = ["Bop"]

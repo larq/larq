@@ -2,9 +2,8 @@ import pytest
 import numpy as np
 import tensorflow as tf
 import larq as lq
-from distutils.version import LooseVersion
 
-from larq import testing_utils as lq_testing_utils
+from larq import utils, testing_utils as lq_testing_utils
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
@@ -54,7 +53,7 @@ def _test_serialization(optimizer):
 
 
 @pytest.mark.skipif(
-    LooseVersion(tf.__version__) >= LooseVersion("1.14"),
+    utils.tf_1_14_or_newer(),
     reason="current implementation requires Tensorflow 1.13 or less",
 )
 class TestXavierLearingRateScaling:
