@@ -150,12 +150,14 @@ def layer_test(
     # See b/120160788 for more details. This should be mitigated after 2.0.
     model = tf.keras.models.Model(x, layer(x))
     if _thread_local_data.run_eagerly is not None:
-        # Use tf.train.Optimizer in eager mode for legacy TensorFlow versions
-        # due to compatibility issues
-        opt = "rmsprop" if utils.tf_1_14_or_newer() else tf.train.RMSPropOptimizer(0.01)
-        model.compile(
-            opt, "mse", weighted_metrics=["acc"], run_eagerly=should_run_eagerly()
-        )
+        # TensorFlow < 1.14 + eager is broken, skip the test
+        if utils.tf_1_14_or_newer():
+            model.compile(
+                "rmsprop",
+                "mse",
+                weighted_metrics=["acc"],
+                run_eagerly=should_run_eagerly(),
+            )
     else:
         model.compile("rmsprop", "mse", weighted_metrics=["acc"])
     model.train_on_batch(input_data, actual_output)
