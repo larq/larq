@@ -24,7 +24,7 @@ def assert_weights(weights, expected):
         np.testing.assert_allclose(np.squeeze(w), e)
 
 
-def _test_optimizer(optimizer, target=0.75):
+def _test_optimizer(optimizer, target=0.75, test_kernels_are_binary=True):
     np.random.seed(1337)
     (x_train, y_train), _ = testing_utils.get_test_data(
         train_samples=1000, test_samples=0, input_shape=(10,), num_classes=2
@@ -35,9 +35,12 @@ def _test_optimizer(optimizer, target=0.75):
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
     history = model.fit(x_train, y_train, epochs=2, batch_size=16, verbose=0)
 
-    for layer in model.layers:
-        if "quant" in layer.name:
-            assert np.all(np.isin(layer.get_weights(), [-1, 1]))
+    # Note that when kernels are treated as latent weights they need not be
+    # binary (see https://arxiv.org/abs/1906.02107 for further discussion)
+    if test_kernels_are_binary:
+        for layer in model.layers:
+            if "quant" in layer.name:
+                assert np.all(np.isin(layer.get_weights(), [-1, 1]))
 
     assert history.history["acc"][-1] >= target
 
@@ -97,7 +100,10 @@ class TestXavierLearingRateScaling:
 
 class TestBopOptimizer:
     def test_bop_accuracy(self):
-        _test_optimizer(lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)))
+        _test_optimizer(
+            lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
+            test_kernels_are_binary=True,
+        )
 
     def test_bop_lr_scheduler(self):
         (x_train, y_train), _ = testing_utils.get_test_data(
