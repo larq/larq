@@ -1,4 +1,5 @@
 import tensorflow as tf
+import distutils.version as version
 import numpy as np
 
 
@@ -26,4 +27,34 @@ class MeanChangedValues(tf.keras.metrics.Mean):
     def reset_states(self):
         tf.keras.backend.batch_set_value(
             [(v, 0) for v in self.variables if v != self._previous_values]
+        )
+
+    def add_weight(
+        self,
+        name,
+        shape=(),
+        aggregation=tf.VariableAggregation.SUM,
+        synchronization=tf.VariableSynchronization.ON_READ,
+        initializer=None,
+        dtype=None,
+    ):
+        if version.LooseVersion(tf.__version__) < version.LooseVersion("1.14.0"):
+            return tf.keras.layers.Layer.add_weight(
+                self,
+                name=name,
+                shape=shape,
+                dtype=self._dtype if dtype is None else dtype,
+                trainable=False,
+                initializer=initializer,
+                collections=[],
+                synchronization=synchronization,
+                aggregation=aggregation,
+            )
+        return super().add_weight(
+            name=name,
+            shape=shape,
+            aggregation=aggregation,
+            synchronization=synchronization,
+            initializer=initializer,
+            dtype=dtype,
         )
