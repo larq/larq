@@ -10,16 +10,16 @@ jobs:
       vmImage: "Ubuntu-16.04"
     strategy:
       matrix:
-        Python36:
+        Python36_TF113:
           python.version: "3.6"
-          tensorflow: "tensorflow==1.13.1"
-        Python37:
+          tensorflow.version: "1.13.1"
+        Python37_TF114:
           python.version: "3.7"
-          tensorflow: "tensorflow==1.13.1"
-        Python37TF2:
-          python.version: "3.7"
-          tensorflow: "tensorflow==2.0.0b0"
+          tensorflow.version: "1.14.0"
           coverage: "true"
+        Python37_TF2:
+          python.version: "3.7"
+          tensorflow.version: "2.0.0-beta1"
 
     steps:
       - task: UsePythonVersion@0
@@ -28,7 +28,7 @@ jobs:
           architecture: "x64"
 
       - script: |
-          pip install $(tensorflow)
+          pip install tensorflow==$(tensorflow.version)
           pip install -e .[test]
         displayName: "Install dependencies"
 

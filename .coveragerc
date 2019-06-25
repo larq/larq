@@ -2,3 +2,5 @@
 omit =
     *_test.py
     larq/optimizers.py
+    larq/optimizers_v1.py
+    larq/testing_utils.py
