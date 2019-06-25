@@ -7,7 +7,6 @@ from larq.callbacks import HyperparameterScheduler
 
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
-from tensorflow.python.keras import keras_parameterized
 
 
 class LogHistory(tf.keras.callbacks.Callback):
@@ -26,8 +25,7 @@ class LogHistory(tf.keras.callbacks.Callback):
         self._store_logs(self.epochs, epoch, logs)
 
 
-@keras_parameterized.run_all_keras_modes
-class LayersTest(keras_parameterized.TestCase):
+class TestQuantizationLogger:
     def test_quantization_logger(self):
         model = tf.keras.models.Sequential(
             [
