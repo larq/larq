@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+from tensorflow import keras
+
 
 class QuantizationLogger(tf.keras.callbacks.Callback):
     """Callback that adds quantization specific metrics.
@@ -74,3 +76,53 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         self._maybe_log_and_store(self.epoch_previous_weights, logs)
+
+
+class HyperparameterScheduler(tf.keras.callbacks.Callback):
+    """Generic hyperparameter scheduler.
+
+  Arguments:
+      schedule: a function that takes an epoch index as input
+          (integer, indexed from 0) and returns a new
+          hyperparameter as output.
+      hyperparameter: str. the name of the hyperparameter to be scheduled.
+      verbose: int. 0: quiet, 1: update messages.
+  """
+
+    def __init__(self, schedule, hyperparameter, verbose=0):
+        super(HyperparameterScheduler, self).__init__()
+        self.schedule = schedule
+        self.hyperparameter = hyperparameter
+        self.verbose = verbose
+
+    def on_epoch_begin(self, epoch, logs=None):
+        if not hasattr(self.model.optimizer, self.hyperparameter):
+            raise ValueError(
+                f'Optimizer must have a "{self.hyperparameter}" attribute.'
+            )
+
+        hp = getattr(self.model.optimizer, self.hyperparameter)
+        try:  # new API
+            hyperparameter_val = keras.backend.get_value(hp)
+            hyperparameter_val = self.schedule(epoch, hyperparameter_val)
+        except TypeError:  # Support for old API for backward compatibility
+            hyperparameter_val = self.schedule(epoch)
+
+        # if not isinstance(hyperparameter_val, type(keras.backend.get_value(hp))):
+        #     raise ValueError(
+        #         f"The output of the 'schedule' function should be "
+        #         f"{type(keras.backend.get_value(hp))},  received "
+        #         f"{type(hyperparameter_val)}."
+        #     )
+
+        keras.backend.set_value(hp, hyperparameter_val)
+        if self.verbose > 0:
+            print(
+                "\nEpoch %05d: %s changning to %s."
+                % (epoch + 1, self.hyperparameter, hyperparameter_val)
+            )
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        hp = getattr(self.model.optimizer, self.hyperparameter)
+        logs[self.hyperparameter] = keras.backend.get_value(hp)
