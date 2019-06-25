@@ -1,6 +1,7 @@
 import larq as lq
 import numpy as np
 import inspect
+from distutils.version import LooseVersion
 import tensorflow as tf
 
 # We should find a better solution without relying on private objects
@@ -149,8 +150,15 @@ def layer_test(
     # See b/120160788 for more details. This should be mitigated after 2.0.
     model = tf.keras.models.Model(x, layer(x))
     if _thread_local_data.run_eagerly is not None:
+        # Use tf.train.Optimizer in eager mode for legacy TensorFlow versions
+        # due to compatibility issues
+        optimizer = (
+            "rmsprop"
+            if LooseVersion(tf.__version__) >= LooseVersion("1.14.0")
+            else tf.train.RMSPropOptimizer(0.01)
+        )
         model.compile(
-            "rmsprop", "mse", weighted_metrics=["acc"], run_eagerly=should_run_eagerly()
+            optimizer, "mse", weighted_metrics=["acc"], run_eagerly=should_run_eagerly()
         )
     else:
         model.compile("rmsprop", "mse", weighted_metrics=["acc"])
