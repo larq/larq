@@ -141,6 +141,8 @@ def layer_test(
         output = recovered_model.predict(input_data)
         np.testing.assert_allclose(output, actual_output, rtol=2e-3)
 
+    # Recreate layer to prevent layer metrics from being configured multiple times.
+    layer = layer_cls(**kwargs)
     # test training mode (e.g. useful for dropout tests)
     # Rebuild the model to avoid the graph being reused between predict() and
     # train(). This was causing some error for layer with Defun as it body.
