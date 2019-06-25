@@ -102,7 +102,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         input_quantizer=None,
         depthwise_quantizer=None,
         pointwise_quantizer=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.input_quantizer = quantizers.get(input_quantizer)
@@ -255,7 +255,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             units,
@@ -270,7 +270,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -349,7 +349,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -369,7 +369,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -458,7 +458,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -478,7 +478,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -573,7 +573,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -593,7 +593,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -679,7 +679,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         depthwise_constraint=None,
         pointwise_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -704,7 +704,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
             depthwise_constraint=depthwise_constraint,
             pointwise_constraint=pointwise_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -806,7 +806,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         depthwise_constraint=None,
         pointwise_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -831,7 +831,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
             depthwise_constraint=depthwise_constraint,
             pointwise_constraint=pointwise_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -933,7 +933,7 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -953,7 +953,7 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1054,7 +1054,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -1073,7 +1073,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1179,7 +1179,7 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
         kernel_constraint=None,
         bias_constraint=None,
         implementation=1,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -1199,7 +1199,7 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
             implementation=implementation,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -1316,7 +1316,7 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
         kernel_constraint=None,
         bias_constraint=None,
         implementation=1,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             filters,
@@ -1336,5 +1336,5 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
             implementation=implementation,
-            **kwargs
+            **kwargs,
         )
