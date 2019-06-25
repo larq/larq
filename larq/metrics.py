@@ -1,5 +1,5 @@
 import tensorflow as tf
-from distutils.version import LooseVersion
+from larq import utils
 import numpy as np
 
 
@@ -38,7 +38,18 @@ class MeanChangedValues(tf.keras.metrics.Mean):
         initializer=None,
         dtype=None,
     ):
-        if LooseVersion(tf.__version__) < LooseVersion("1.14.0"):
+        if utils.tf_1_14_or_newer():
+            return super().add_weight(
+                name=name,
+                shape=shape,
+                aggregation=aggregation,
+                synchronization=synchronization,
+                initializer=initializer,
+                dtype=dtype,
+            )
+        else:
+            # Call explicitely tf.keras.layers.Layer.add_weight because TF 1.13
+            # doesn't support setting a custom dtype
             return tf.keras.layers.Layer.add_weight(
                 self,
                 name=name,
@@ -50,11 +61,3 @@ class MeanChangedValues(tf.keras.metrics.Mean):
                 synchronization=synchronization,
                 aggregation=aggregation,
             )
-        return super().add_weight(
-            name=name,
-            shape=shape,
-            aggregation=aggregation,
-            synchronization=synchronization,
-            initializer=initializer,
-            dtype=dtype,
-        )

@@ -7,7 +7,6 @@ is equivalent to a full precision layer.
 """
 
 import logging
-from distutils.version import LooseVersion
 import tensorflow as tf
 from larq import quantizers, utils, metrics
 
@@ -17,9 +16,7 @@ log = logging.getLogger(__name__)
 def _supports_metrics():
     # TensorFlow 1.13 does not support adding an aggregated metric tensor in
     # `tf.keras.layers.Layer.call` in eager execution.
-    return not (
-        LooseVersion(tf.__version__) < LooseVersion("1.14.0") and tf.executing_eagerly()
-    )
+    return utils.tf_1_14_or_newer() or not tf.executing_eagerly()
 
 
 class QuantizerBase(tf.keras.layers.Layer):
