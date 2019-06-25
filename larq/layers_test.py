@@ -4,9 +4,8 @@ from absl.testing import parameterized
 import larq as lq
 import pytest
 import inspect
-
+from larq import testing_utils
 from tensorflow.python.keras import keras_parameterized
-from tensorflow.python.keras import testing_utils
 
 
 def random_input(shape):
