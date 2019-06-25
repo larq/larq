@@ -21,20 +21,14 @@ class QuantizerBase(tf.keras.layers.Layer):
     equivalent to `Layer`.
     """
 
-    def __init__(
-        self,
-        *args,
-        input_quantizer=None,
-        kernel_quantizer=None,
-        metrics=["mean_changed_values"],
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
+        # This is currently undocumented until we have explored better options
+        self._custom_metrics = kwargs.pop("metrics", ["mean_changed_values"])
 
-        self._custom_metrics = metrics
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
 
+        super().__init__(*args, **kwargs)
         if kernel_quantizer and not self.kernel_constraint:
             log.warning(
                 "Using a weight quantizer without setting `kernel_constraint` "
