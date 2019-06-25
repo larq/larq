@@ -40,7 +40,8 @@ def _test_optimizer(optimizer, target=0.75, test_kernels_are_binary=True):
     if test_kernels_are_binary:
         for layer in model.layers:
             if "quant" in layer.name:
-                assert np.all(np.isin(layer.get_weights(), [-1, 1]))
+                for weight in layer.trainable_weights:
+                    assert np.all(np.isin(tf.keras.backend.get_value(weight), [-1, 1]))
 
     assert history.history["acc"][-1] >= target
 
