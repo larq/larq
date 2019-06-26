@@ -71,7 +71,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             full_precision_kernel = self.kernel
             quantized_kernel = self.kernel_quantizer(self.kernel)
-            if "mean_changed_values" in self._custom_metrics and _supports_metrics():
+            if hasattr(self, "mean_changed_values"):
                 self.add_metric(self.mean_changed_values(quantized_kernel))
             self.kernel = quantized_kernel
 
@@ -170,7 +170,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if self.depthwise_quantizer:
             full_precision_depthwise_kernel = self.depthwise_kernel
             depthwise_quantized_kernel = self.depthwise_quantizer(self.depthwise_kernel)
-            if "mean_changed_values" in self._custom_metrics:
+            if hasattr(self, "depthwise_mean_changed_values"):
                 self.add_metric(
                     self.depthwise_mean_changed_values(depthwise_quantized_kernel)
                 )
@@ -178,7 +178,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if self.pointwise_quantizer:
             full_precision_pointwise_kernel = self.pointwise_kernel
             pointwise_quantized_kernel = self.pointwise_quantizer(self.pointwise_kernel)
-            if "mean_changed_values" in self._custom_metrics:
+            if hasattr(self, "pointwise_mean_changed_values"):
                 self.add_metric(
                     self.pointwise_mean_changed_values(pointwise_quantized_kernel)
                 )
