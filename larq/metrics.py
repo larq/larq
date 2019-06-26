@@ -4,6 +4,25 @@ import numpy as np
 
 
 class MeanChangedValues(tf.keras.metrics.Mean):
+    """Computes the mean ration of changed values in a given tensor.
+
+    !!! example
+        ```python
+        m = metrics.MeanChangedValues()
+        m.update_state(1)
+        m.reset_states()
+        m.update_state(2)
+        m.update_state(1)
+        print('Final result: ', m.result().numpy())  # Final result: 0.5
+        ```
+
+    # Arguments
+    values_shape: Shape of the tensor for which to track changes.
+    values_dtype: Data type of the tensor for which to track changes.
+    name: Name of the metric.
+    dtype: Data type of the moving mean.
+    """
+
     def __init__(
         self,
         values_shape=(),
