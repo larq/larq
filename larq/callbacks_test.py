@@ -54,34 +54,37 @@ class LayersTest(keras_parameterized.TestCase):
         assert history.epochs == [0, 1, 2]
 
 
-class TestHyperParameterScheduler:
+class TestHyperparameterScheduler:
     def test_hyper_parameter_scheduler(self):
         np.random.seed(1337)
         (x_train, y_train), (x_test, y_test) = testing_utils.get_test_data(
-            train_samples=1000, test_samples=200, input_shape=(10,), num_classes=2
+            train_samples=1000, test_samples=0, input_shape=(10,), num_classes=2
         )
 
-        y_test = keras.utils.to_categorical(y_test)
         y_train = keras.utils.to_categorical(y_train)
 
         model = lq_testing_utils.get_small_bnn_model(
             x_train.shape[1], 20, y_train.shape[1]
         )
-        bop_optimizer = lq.optimizers.Bop(
-            gamma=0.01, fp_optimizer=tf.keras.optimizers.Adam(0.01)
-        )
+        bop_optimizer = lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
         model.compile(
             loss="categorical_crossentropy",
             optimizer=bop_optimizer,
             metrics=["accuracy"],
         )
 
-        scheduler = lambda x: 1.0 / (1.0 + x)
-        cbk_gamma_scheduler = HyperparameterScheduler(scheduler, hyperparameter="gamma")
-        cbk_threshold_scheduler = HyperparameterScheduler(
-            scheduler, hyperparameter="threshold"
+        def scheduler(x):
+            return 1.0 / (1.0 + x)
+
+        cbk_gamma_scheduler = HyperparameterScheduler(
+            scheduler, hyperparameter="gamma", verbose=1
         )
-        cbk_lr_scheduler = HyperparameterScheduler(scheduler, hyperparameter="lr")
+        cbk_threshold_scheduler = HyperparameterScheduler(
+            scheduler, hyperparameter="threshold", verbose=1
+        )
+        cbk_lr_scheduler = HyperparameterScheduler(
+            scheduler, hyperparameter="lr", verbose=1
+        )
 
         num_epochs = 10
         model.fit(
@@ -89,7 +92,6 @@ class TestHyperParameterScheduler:
             y_train,
             epochs=num_epochs,
             batch_size=16,
-            validation_data=(x_test, y_test),
             callbacks=[cbk_gamma_scheduler, cbk_lr_scheduler, cbk_threshold_scheduler],
             verbose=0,
         )
