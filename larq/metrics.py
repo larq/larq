@@ -6,7 +6,7 @@ import numpy as np
 class MeanChangedValues(tf.keras.metrics.Mean):
     def __init__(
         self,
-        values_shape=None,
+        values_shape=(),
         values_dtype="int8",
         name="mean_changed_values",
         dtype=None,
@@ -25,7 +25,9 @@ class MeanChangedValues(tf.keras.metrics.Mean):
     def update_state(self, values, sample_weight=None):
         values = tf.cast(values, self.values_dtype)
         changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
-        metric_update_op = super().update_state(changed_values / self._size)
+        metric_update_op = super().update_state(
+            1 - (tf.cast(changed_values, tf.float32) / self._size)
+        )
         with tf.control_dependencies([metric_update_op]):
             return self._previous_values.assign(values)
 

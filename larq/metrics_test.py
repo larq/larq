@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.python.framework import test_util
 from larq import metrics
 
 
@@ -19,3 +20,36 @@ class MeanChangedValuesTest(tf.test.TestCase):
         self.assertEqual(mcv2.dtype, tf.float16)
         self.assertEqual(mcv2.values_dtype, tf.int16)
         self.assertEqual(mcv2.values_shape, [3, 3])
+
+    @test_util.run_in_graph_and_eager_modes
+    def test_metric(self):
+        mcv = metrics.MeanChangedValues([2])
+        self.evaluate(tf.variables_initializer(mcv.variables))
+
+        self.assertAllClose(0, mcv.result())
+        self.assertAllClose(0, self.evaluate(mcv.total))
+        self.assertAllClose(0, self.evaluate(mcv.count))
+
+        self.evaluate(mcv.update_state([1, 1]))
+        self.assertAllClose([1, 1], self.evaluate(mcv._previous_values))
+        self.assertAllClose(1, self.evaluate(mcv.total))
+        self.assertAllClose(1, self.evaluate(mcv.count))
+        self.assertAllClose(1, mcv.result())
+
+        self.evaluate(mcv.update_state([1, 1]))
+        self.assertAllClose([1, 1], self.evaluate(mcv._previous_values))
+        self.assertAllClose(1, self.evaluate(mcv.total))
+        self.assertAllClose(2, self.evaluate(mcv.count))
+        self.assertAllClose(0.5, mcv.result())
+
+        self.evaluate(mcv.update_state([1, 1]))
+        self.assertAllClose([1, 1], self.evaluate(mcv._previous_values))
+        self.assertAllClose(1, self.evaluate(mcv.total))
+        self.assertAllClose(3, self.evaluate(mcv.count))
+        self.assertAllClose(1 / 3, mcv.result())
+
+        self.evaluate(mcv.update_state([1, 2]))
+        self.assertAllClose([1, 2], self.evaluate(mcv._previous_values))
+        self.assertAllClose(1.5, self.evaluate(mcv.total))
+        self.assertAllClose(4, self.evaluate(mcv.count))
+        self.assertAllClose(1.5 / 4, mcv.result())
