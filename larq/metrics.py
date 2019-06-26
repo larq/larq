@@ -10,9 +10,8 @@ class MeanChangedValues(tf.keras.metrics.Mean):
         ```python
         m = metrics.MeanChangedValues()
         m.update_state(1)
-        m.reset_states()
         m.update_state(2)
-        m.update_state(1)
+        m.update_state(2)
         print('Final result: ', m.result().numpy())  # Final result: 0.5
         ```
 
@@ -40,11 +39,15 @@ class MeanChangedValues(tf.keras.metrics.Mean):
             initializer=tf.keras.initializers.zeros,
         )
         self._size = np.prod(self.values_shape)
+        self._built = False
 
     def update_state(self, values, sample_weight=None):
         values = tf.cast(values, self.values_dtype)
+        if not self._built:
+            self._built = True
+            return self._previous_values.assign(values)
         changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
-        metric_update_op = super().update_state(
+        metric_update_op = super(MeanChangedValues, self).update_state(
             1 - (tf.cast(changed_values, tf.float32) / self._size)
         )
         with tf.control_dependencies([metric_update_op]):
