@@ -49,7 +49,7 @@ class QuantizerBase(tf.keras.layers.Layer):
             and _supports_metrics()
         ):
             self.mean_changed_values = metrics.MeanChangedValues(
-                self.kernel.shape, name=f"{self.name}/mean_changed_values"
+                values_shape=self.kernel.shape, name=f"{self.name}/mean_changed_values"
             )
 
     @property
@@ -132,12 +132,12 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if "mean_changed_values" in self._custom_metrics:
             if self.depthwise_quantizer:
                 self.depthwise_mean_changed_values = metrics.MeanChangedValues(
-                    self.depthwise_kernel.shape,
+                    values_shape=self.depthwise_kernel.shape,
                     name=f"{self.name}/depthwise_mean_changed_values",
                 )
             if self.pointwise_quantizer:
                 self.pointwise_mean_changed_values = metrics.MeanChangedValues(
-                    self.pointwise_kernel.shape,
+                    values_shape=self.pointwise_kernel.shape,
                     name=f"{self.name}/pointwise_mean_changed_values",
                 )
 
