@@ -137,8 +137,8 @@ class Bop(tf.keras.optimizers.Optimizer):
         with tf.keras.backend.name_scope(self.__class__.__name__):
 
             self.fp_optimizer = fp_optimizer
-            self.threshold = threshold
-            self.gamma = gamma
+            self.threshold = tf.keras.backend.variable(threshold, name="threshold")
+            self.gamma = tf.keras.backend.variable(gamma, name="gamma")
 
     def get_updates(self, loss, params):
         grads = self.get_gradients(loss, params)
@@ -181,8 +181,8 @@ class Bop(tf.keras.optimizers.Optimizer):
     def get_config(self):
         fp_optimizer_config = self.fp_optimizer.get_config()
         config = {
-            "threshold": self.threshold,
-            "gamma": self.gamma,
+            "threshold": float(tf.keras.backend.get_value(self.threshold)),
+            "gamma": float(tf.keras.backend.get_value(self.gamma)),
             "fp_optimizer": {
                 "class_name": self.fp_optimizer.__class__.__name__,
                 "config": fp_optimizer_config,
