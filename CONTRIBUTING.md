@@ -77,6 +77,7 @@ We use [`black`](https://black.readthedocs.io/en/stable/) to format all of our c
 4. Build wheels
 
    ```shell
+   rm -r build/* dist/*
    python setup.py sdist bdist_wheel
    ```
 
