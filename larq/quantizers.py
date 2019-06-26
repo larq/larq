@@ -2,7 +2,6 @@
 quantized output and the pseudo-gradient method used for the backwards pass."""
 
 import tensorflow as tf
-import larq as lq
 from larq import utils, math
 
 

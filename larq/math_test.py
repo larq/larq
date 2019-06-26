@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import larq as lq
-import pytest
 
 
 def test_sign():
