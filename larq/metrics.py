@@ -8,11 +8,11 @@ class MeanChangedValues(tf.keras.metrics.Mean):
 
     !!! example
         ```python
-        m = metrics.MeanChangedValues()
-        m.update_state(1)
-        m.update_state(2)
-        m.update_state(2)
-        print('Final result: ', m.result().numpy())  # Final result: 0.5
+        m = metrics.MeanChangedValues(values_shape=(2,))
+        m.update_state((1, 1))  # result: 0
+        m.update_state((2, 2))  # result: 1
+        m.update_state((1, 2))  # result: 0.75
+        print('Final result: ', m.result().numpy())  # Final result: 0.75
         ```
 
     # Arguments
