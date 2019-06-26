@@ -2,12 +2,7 @@
 quantized output and the pseudo-gradient method used for the backwards pass."""
 
 import tensorflow as tf
-from larq import utils
-
-
-def sign(x):
-    """A sign function that will never be zero"""
-    return tf.sign(tf.sign(x) + 0.1)
+from larq import utils, math
 
 
 @tf.custom_gradient
@@ -15,7 +10,7 @@ def _binarize_with_identity_grad(x):
     def grad(dy):
         return dy
 
-    return sign(x), grad
+    return math.sign(x), grad
 
 
 @tf.custom_gradient
@@ -23,7 +18,7 @@ def _binarize_with_weighted_grad(x):
     def grad(dy):
         return (1 - tf.abs(x)) * 2 * dy
 
-    return sign(x), grad
+    return math.sign(x), grad
 
 
 @utils.register_keras_custom_object

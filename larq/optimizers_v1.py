@@ -159,9 +159,7 @@ class Bop(tf.keras.optimizers.Optimizer):
 
                 self.updates.append(tf.assign(m, m_t))
                 self.updates.append(
-                    tf.assign(
-                        p, lq.quantizers.sign(-p * tf.sign(p * m_t - self.threshold))
-                    )
+                    tf.assign(p, lq.math.sign(-p * tf.sign(p * m_t - self.threshold)))
                 )
 
             else:

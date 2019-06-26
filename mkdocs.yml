@@ -16,6 +16,7 @@ nav:
       - Constraints: api/constraints.md
       - Callbacks: api/callbacks.md
       - Optimizers: api/optimizers.md
+      - Math: api/math.md
       - Models: api/models.md
   - Community:
       - Contributing Guide: contributing.md

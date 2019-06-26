@@ -76,7 +76,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         m_t = tf.compat.v1.assign(
             m, (1 - gamma) * m + gamma * grad, use_locking=self._use_locking
         )
-        var_t = lq.quantizers.sign(-tf.sign(var * m_t - threshold) * var)
+        var_t = lq.math.sign(-tf.sign(var * m_t - threshold) * var)
         return tf.compat.v1.assign(var, var_t, use_locking=self._use_locking).op
 
     @staticmethod
