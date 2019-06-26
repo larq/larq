@@ -3,6 +3,7 @@ quantized output and the pseudo-gradient method used for the backwards pass."""
 
 import tensorflow as tf
 import larq as lq
+from larq import utils, math
 
 
 @tf.custom_gradient
@@ -10,7 +11,7 @@ def _binarize_with_identity_grad(x):
     def grad(dy):
         return dy
 
-    return lq.math.sign(x), grad
+    return math.sign(x), grad
 
 
 @tf.custom_gradient
@@ -18,10 +19,10 @@ def _binarize_with_weighted_grad(x):
     def grad(dy):
         return (1 - tf.abs(x)) * 2 * dy
 
-    return lq.math.sign(x), grad
+    return math.sign(x), grad
 
 
-@lq.utils.register_keras_custom_object
+@utils.register_keras_custom_object
 def ste_sign(x):
     r"""
     Sign binarization function.
@@ -60,7 +61,7 @@ def ste_sign(x):
     return _binarize_with_identity_grad(x)
 
 
-@lq.utils.register_keras_custom_object
+@utils.register_keras_custom_object
 def magnitude_aware_sign(x):
     r"""
     Magnitude-aware sign for Bi-Real Net.
@@ -86,7 +87,7 @@ def magnitude_aware_sign(x):
     return tf.stop_gradient(scale_factor) * ste_sign(x)
 
 
-@lq.utils.register_keras_custom_object
+@utils.register_keras_custom_object
 def approx_sign(x):
     r"""
     Sign binarization function.
@@ -125,7 +126,7 @@ def approx_sign(x):
     return _binarize_with_weighted_grad(x)
 
 
-@lq.utils.register_keras_custom_object
+@utils.register_keras_custom_object
 class SteTern:
     r"""
     Ternarization function.

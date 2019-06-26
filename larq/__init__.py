@@ -12,6 +12,7 @@ __all__ = [
     "activations",
     "callbacks",
     "constraints",
+    "math",
     "models",
     "quantizers",
     "optimizers",
