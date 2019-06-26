@@ -1,9 +1,9 @@
 import tensorflow as tf
-from tensorflow.python.framework import test_util
 from larq import metrics
+from tensorflow.python.keras import keras_parameterized
 
 
-class MeanChangedValuesTest(tf.test.TestCase):
+class MeanChangedValuesTest(keras_parameterized.TestCase):
     def test_config(self):
         mcv = metrics.MeanChangedValues(
             values_shape=[3, 3], values_dtype="int16", name="mcv", dtype=tf.float16
@@ -21,7 +21,6 @@ class MeanChangedValuesTest(tf.test.TestCase):
         self.assertEqual(mcv2.values_dtype, tf.int16)
         self.assertEqual(mcv2.values_shape, [3, 3])
 
-    @test_util.run_in_graph_and_eager_modes
     def test_metric(self):
         mcv = metrics.MeanChangedValues([2])
         self.evaluate(tf.compat.v1.variables_initializer(mcv.variables))
