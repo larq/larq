@@ -5,20 +5,25 @@ import numpy as np
 
 class MeanChangedValues(tf.keras.metrics.Mean):
     def __init__(
-        self, values_shape, values_dtype="int8", name="mean_changed_values", dtype=None
+        self,
+        values_shape=None,
+        values_dtype="int8",
+        name="mean_changed_values",
+        dtype=None,
     ):
         super().__init__(name=name, dtype=dtype)
-        self._values_dtype = tf.as_dtype(values_dtype).name
+        self.values_dtype = tf.as_dtype(values_dtype)
+        self.values_shape = tf.TensorShape(values_shape).as_list()
         self._previous_values = self.add_weight(
             "previous_values",
             shape=values_shape,
-            dtype=self._values_dtype,
+            dtype=self.values_dtype,
             initializer=tf.keras.initializers.zeros,
         )
-        self._size = np.prod(tf.TensorShape(values_shape).as_list())
+        self._size = np.prod(self.values_shape)
 
     def update_state(self, values, sample_weight=None):
-        values = tf.cast(values, self._values_dtype)
+        values = tf.cast(values, self.values_dtype)
         changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
         metric_update_op = super().update_state(changed_values / self._size)
         with tf.control_dependencies([metric_update_op]):
@@ -28,6 +33,13 @@ class MeanChangedValues(tf.keras.metrics.Mean):
         tf.keras.backend.batch_set_value(
             [(v, 0) for v in self.variables if v != self._previous_values]
         )
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            "values_shape": self.values_shape,
+            "values_dtype": self.values_dtype.name,
+        }
 
     def add_weight(
         self,
