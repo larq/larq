@@ -32,12 +32,13 @@ class MeanChangedValues(tf.keras.metrics.Mean):
         super().__init__(name=name, dtype=dtype)
         self.values_dtype = tf.as_dtype(values_dtype)
         self.values_shape = tf.TensorShape(values_shape).as_list()
-        self._previous_values = self.add_weight(
-            "previous_values",
-            shape=values_shape,
-            dtype=self.values_dtype,
-            initializer=tf.keras.initializers.zeros,
-        )
+        with tf.name_scope(name):
+            self._previous_values = self.add_weight(
+                "previous_values",
+                shape=values_shape,
+                dtype=self.values_dtype,
+                initializer=tf.keras.initializers.zeros,
+            )
         self._size = np.prod(self.values_shape)
         self._built = False
 
