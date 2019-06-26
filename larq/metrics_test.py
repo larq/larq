@@ -24,7 +24,7 @@ class MeanChangedValuesTest(tf.test.TestCase):
     @test_util.run_in_graph_and_eager_modes
     def test_metric(self):
         mcv = metrics.MeanChangedValues([2])
-        self.evaluate(tf.variables_initializer(mcv.variables))
+        self.evaluate(tf.compat.v1.variables_initializer(mcv.variables))
 
         self.assertAllClose(0, mcv.result())
         self.assertAllClose(0, self.evaluate(mcv.total))
