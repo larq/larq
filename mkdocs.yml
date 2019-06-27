@@ -19,6 +19,7 @@ nav:
       - Math: api/math.md
       - Models: api/models.md
   - Community:
+      - Papers using Larq: papers.md
       - Contributing Guide: contributing.md
       - Code of Conduct: code_of_conduct.md
 
