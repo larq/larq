@@ -1,6 +1,6 @@
 # User Guide
 
-To build a Quantized Neural Network (QNN), Larq introduces the concept of [quantized layers](https://plumerai.github.io/larq/api/layers/) and [quantizers](https://plumerai.github.io/larq/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+To build a Quantized Neural Network (QNN), Larq introduces the concept of [quantized layers](https://larq.dev/api/layers/) and [quantizers](https://larq.dev/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
 
 Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
@@ -57,7 +57,7 @@ model = tf.keras.models.Sequential([
 ])
 ```
 
-A simple fully-connected Binarized Neural Network (BNN) using the [Straight-Through Estimator](https://plumerai.github.io/larq/api/quantizers/#ste_sign) can be defined in just a few lines of code using either the Keras sequential, functional or model subclassing APIs:
+A simple fully-connected Binarized Neural Network (BNN) using the [Straight-Through Estimator](https://larq.dev/api/quantizers/#ste_sign) can be defined in just a few lines of code using either the Keras sequential, functional or model subclassing APIs:
 
 ```python tab="Larq 1-bit model"
 model = tf.keras.models.Sequential([

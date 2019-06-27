@@ -15,7 +15,7 @@ setup(
     description="An Open Source Machine Learning Library for Training Binarized Neural Networks",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    url="https://plumerai.github.io/larq/",
+    url="https://larq.dev/",
     packages=find_packages(),
     license="Apache 2.0",
     install_requires=["numpy >= 1.15.4, < 2.0", "tabulate >= 0.8.3"],
