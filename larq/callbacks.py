@@ -79,7 +79,7 @@ class QuantizationLogger(tf.keras.callbacks.Callback):
 class HyperparameterScheduler(tf.keras.callbacks.Callback):
     """Generic hyperparameter scheduler.
 
-    # Arguments:
+    # Arguments
     schedule: a function that takes an epoch index as input
         (integer, indexed from 0) and returns a new hyperparameter as output.
     hyperparameter: str. the name of the hyperparameter to be scheduled.

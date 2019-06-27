@@ -1,4 +1,4 @@
-"""Math operations that specific to extremely quantized networks."""
+"""Math operations that are specific to extremely quantized networks."""
 
 import tensorflow as tf
 
@@ -13,9 +13,9 @@ def sign(x):
     \\]
 
     # Arguments
-    `x`: Input `tensor`
+    `x`: Input Tensor
 
     # Returns
-    A `tensor` with same type as `x`.
+    A Tensor with same type as `x`.
     """
     return tf.sign(tf.sign(x) + 0.1)
