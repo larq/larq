@@ -41,6 +41,16 @@ def _count_fp_weights(layer):
     return layer.count_params()
 
 
+def _memory_weights(layer):
+    fp_params = _count_fp_weights(layer)
+    b_params = _count_binarized_weights(layer)
+    bittobyte = 0.125
+    fp32 = 32
+    mbconverter = 1000000
+    memory = ((fp_params * fp32) + (b_params)) * bittobyte
+    return memory / mbconverter
+
+
 def summary(model, tablefmt="simple", print_fn=None):
     """Prints a string summary of the network.
 
@@ -64,17 +74,23 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit")
+    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (Mb)")
     table = [
         [
             layer.name,
             _get_output_shape(layer),
             _count_binarized_weights(layer),
             _count_fp_weights(layer),
+            _memory_weights(layer),
         ]
         for layer in model.layers
     ]
-    table.append(["Total", None, sum(r[2] for r in table), sum(r[3] for r in table)])
+
+    amount_binarized = sum(r[2] for r in table)
+    amount_full_precision = sum(r[3] for r in table)
+    total_memory = sum(r[4] for r in table)
+
+    table.append(["Total", None, amount_binarized, amount_full_precision, total_memory])
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -91,3 +107,10 @@ def summary(model, tablefmt="simple", print_fn=None):
     print_fn(f"Total params: {trainable_count + non_trainable_count}")
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
+
+    float32_equiv = (amount_binarized + amount_full_precision) * 0.125 * 32 / 1000000
+    compression_ratio = total_memory / (float32_equiv)
+
+    print_fn("Float32 Equivalent: " + str(float32_equiv) + " Mb")
+    print_fn("Compression of Memory: " + str(compression_ratio))
+    print_fn()
