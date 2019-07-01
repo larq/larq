@@ -74,7 +74,7 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (Mb)")
+    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (MB)")
     table = [
         [
             layer.name,
