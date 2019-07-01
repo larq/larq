@@ -67,5 +67,7 @@ extra_css:
 
 plugins:
   - search
+  - minify:
+      minify_html: true
   - mknotebooks:
       execute: false

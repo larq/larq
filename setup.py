@@ -30,6 +30,7 @@ setup(
             "mknotebooks>=0.1.5",
             "matplotlib>=3.0.3",
             "scour>=0.37",
+            "mkdocs-minify-plugin>=0.2.1",
         ],
     },
     classifiers=[
