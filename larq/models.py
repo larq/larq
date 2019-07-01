@@ -112,5 +112,5 @@ def summary(model, tablefmt="simple", print_fn=None):
     compression_ratio = total_memory / (float32_equiv)
 
     print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} MB")
-    print_fn("Compression of Memory: " + str(compression_ratio))
+    print_fn(f"Compression of Memory: {compression_ratio:.2f}")
     print_fn()
