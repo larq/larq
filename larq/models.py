@@ -111,6 +111,6 @@ def summary(model, tablefmt="simple", print_fn=None):
     float32_equiv = (amount_binarized + amount_full_precision) * 0.125 * 32 / 1000000
     compression_ratio = total_memory / (float32_equiv)
 
-    print_fn("Float32 Equivalent: " + str(float32_equiv) + " Mb")
+    print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} MB")
     print_fn("Compression of Memory: " + str(compression_ratio))
     print_fn()
