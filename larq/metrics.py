@@ -3,12 +3,12 @@ from larq import utils
 import numpy as np
 
 
-class MeanChangedValues(tf.keras.metrics.Mean):
+class FlipRatio(tf.keras.metrics.Mean):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example
         ```python
-        m = metrics.MeanChangedValues(values_shape=(2,))
+        m = metrics.FlipRatio(values_shape=(2,))
         m.update_state((1, 1))  # result: 0
         m.update_state((2, 2))  # result: 1
         m.update_state((1, 2))  # result: 0.75
@@ -23,11 +23,7 @@ class MeanChangedValues(tf.keras.metrics.Mean):
     """
 
     def __init__(
-        self,
-        values_shape=(),
-        values_dtype="int8",
-        name="mean_changed_values",
-        dtype=None,
+        self, values_shape=(), values_dtype="int8", name="flip_ratio", dtype=None
     ):
         super().__init__(name=name, dtype=dtype)
         self.values_dtype = tf.as_dtype(values_dtype)
@@ -48,7 +44,7 @@ class MeanChangedValues(tf.keras.metrics.Mean):
             self._built = True
             return self._previous_values.assign(values)
         changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
-        metric_update_op = super(MeanChangedValues, self).update_state(
+        metric_update_op = super(FlipRatio, self).update_state(
             1 - (tf.cast(changed_values, self.dtype) / self._size)
         )
         with tf.control_dependencies([metric_update_op]):

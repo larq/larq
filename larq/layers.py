@@ -29,7 +29,7 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
         # This is currently undocumented until we have explored better options
-        self._custom_metrics = kwargs.pop("metrics", ["mean_changed_values"])
+        self._custom_metrics = kwargs.pop("metrics", ["flip_ratio"])
 
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
@@ -45,11 +45,11 @@ class QuantizerBase(tf.keras.layers.Layer):
         super().build(input_shape)
         if (
             self.kernel_quantizer
-            and "mean_changed_values" in self._custom_metrics
+            and "flip_ratio" in self._custom_metrics
             and _supports_metrics()
         ):
-            self.mean_changed_values = metrics.MeanChangedValues(
-                values_shape=self.kernel.shape, name=f"{self.name}/mean_changed_values"
+            self.flip_ratio = metrics.FlipRatio(
+                values_shape=self.kernel.shape, name=f"{self.name}/flip_ratio"
             )
 
     @property
@@ -71,8 +71,8 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             full_precision_kernel = self.kernel
             quantized_kernel = self.kernel_quantizer(self.kernel)
-            if hasattr(self, "mean_changed_values"):
-                self.add_metric(self.mean_changed_values(quantized_kernel))
+            if hasattr(self, "flip_ratio"):
+                self.add_metric(self.flip_ratio(quantized_kernel))
             self.kernel = quantized_kernel
 
         output = super().call(inputs)
@@ -109,7 +109,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         **kwargs,
     ):
         # This is currently undocumented until we have explored better options
-        self._custom_metrics = kwargs.pop("metrics", ["mean_changed_values"])
+        self._custom_metrics = kwargs.pop("metrics", ["flip_ratio"])
 
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
@@ -129,16 +129,16 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         super().build(input_shape)
-        if "mean_changed_values" in self._custom_metrics:
+        if "flip_ratio" in self._custom_metrics:
             if self.depthwise_quantizer:
-                self.depthwise_mean_changed_values = metrics.MeanChangedValues(
+                self.depthwise_flip_ratio = metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
-                    name=f"{self.name}/depthwise_mean_changed_values",
+                    name=f"{self.name}/depthwise_flip_ratio",
                 )
             if self.pointwise_quantizer:
-                self.pointwise_mean_changed_values = metrics.MeanChangedValues(
+                self.pointwise_flip_ratio = metrics.FlipRatio(
                     values_shape=self.pointwise_kernel.shape,
-                    name=f"{self.name}/pointwise_mean_changed_values",
+                    name=f"{self.name}/pointwise_flip_ratio",
                 )
 
     @property
@@ -170,18 +170,14 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if self.depthwise_quantizer:
             full_precision_depthwise_kernel = self.depthwise_kernel
             depthwise_quantized_kernel = self.depthwise_quantizer(self.depthwise_kernel)
-            if hasattr(self, "depthwise_mean_changed_values"):
-                self.add_metric(
-                    self.depthwise_mean_changed_values(depthwise_quantized_kernel)
-                )
+            if hasattr(self, "depthwise_flip_ratio"):
+                self.add_metric(self.depthwise_flip_ratio(depthwise_quantized_kernel))
             self.depthwise_kernel = depthwise_quantized_kernel
         if self.pointwise_quantizer:
             full_precision_pointwise_kernel = self.pointwise_kernel
             pointwise_quantized_kernel = self.pointwise_quantizer(self.pointwise_kernel)
-            if hasattr(self, "pointwise_mean_changed_values"):
-                self.add_metric(
-                    self.pointwise_mean_changed_values(pointwise_quantized_kernel)
-                )
+            if hasattr(self, "pointwise_flip_ratio"):
+                self.add_metric(self.pointwise_flip_ratio(pointwise_quantized_kernel))
             self.pointwise_kernel = pointwise_quantized_kernel
 
         output = super().call(inputs)
