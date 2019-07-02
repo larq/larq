@@ -60,7 +60,7 @@ class FlipRatio(Metric):
                 return self._previous_values.assign(values)
 
     def result(self):
-        return tf.div_no_nan(self.total, self.count - 1)
+        return tf.compat.v1.div_no_nan(self.total, self.count - 1)
 
     def reset_states(self):
         tf.keras.backend.batch_set_value(
