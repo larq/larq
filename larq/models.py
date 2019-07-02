@@ -54,7 +54,7 @@ def _memory_weights(layer):
     num_binarized_params = _count_binarized_weights(layer)
     fp32 = 32  # Multiply float32 params by 32 to get bit value
     total_layer_mem_in_bits = (num_fp_params * fp32) + (num_binarized_params)
-    return _bit_to_MB(memory_bits)
+    return _bit_to_MB(total_layer_mem_in_bits)
 
 
 def summary(model, tablefmt="simple", print_fn=None):
