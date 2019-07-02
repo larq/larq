@@ -3,7 +3,7 @@ from larq import utils
 import numpy as np
 
 
-class FlipRatio(tf.keras.metrics.Mean):
+class FlipRatio(tf.keras.metrics.Metric):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example
@@ -28,27 +28,34 @@ class FlipRatio(tf.keras.metrics.Mean):
         super().__init__(name=name, dtype=dtype)
         self.values_dtype = tf.as_dtype(values_dtype)
         self.values_shape = tf.TensorShape(values_shape).as_list()
-        with tf.name_scope(name):
+        with tf.init_scope():
             self._previous_values = self.add_weight(
                 "previous_values",
                 shape=values_shape,
                 dtype=self.values_dtype,
                 initializer=tf.keras.initializers.zeros,
             )
+            self.total = self.add_weight(
+                "total", initializer=tf.keras.initializers.zeros
+            )
+            self.count = self.add_weight(
+                "count", initializer=tf.keras.initializers.zeros
+            )
         self._size = np.prod(self.values_shape)
-        self._built = False
 
     def update_state(self, values, sample_weight=None):
         values = tf.cast(values, self.values_dtype)
-        if not self._built:
-            self._built = True
-            return self._previous_values.assign(values)
         changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
-        metric_update_op = super(FlipRatio, self).update_state(
-            1 - (tf.cast(changed_values, self.dtype) / self._size)
-        )
-        with tf.control_dependencies([metric_update_op]):
-            return self._previous_values.assign(values)
+        flip_ratio = 1 - (tf.cast(changed_values, self.dtype) / self._size)
+
+        update_total_op = self.total.assign_add(flip_ratio * tf.sign(self.count))
+        with tf.control_dependencies([update_total_op]):
+            update_count_op = self.count.assign_add(1)
+            with tf.control_dependencies([update_count_op]):
+                return self._previous_values.assign(values)
+
+    def result(self):
+        return tf.div_no_nan(self.total, self.count - 1)
 
     def reset_states(self):
         tf.keras.backend.batch_set_value(

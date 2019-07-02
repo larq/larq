@@ -29,21 +29,20 @@ class FlipRatioTest(keras_parameterized.TestCase):
         self.assertAllClose(0, self.evaluate(mcv.total))
         self.assertAllClose(0, self.evaluate(mcv.count))
 
-        # Ignore the first update since it is used to setup the previous_values
         self.evaluate(mcv.update_state([1, 1]))
         self.assertAllClose([1, 1], self.evaluate(mcv._previous_values))
         self.assertAllClose(0, self.evaluate(mcv.total))
-        self.assertAllClose(0, self.evaluate(mcv.count))
+        self.assertAllClose(1, self.evaluate(mcv.count))
         self.assertAllClose(0, mcv.result())
 
         self.evaluate(mcv.update_state([2, 2]))
         self.assertAllClose([2, 2], self.evaluate(mcv._previous_values))
         self.assertAllClose(1, self.evaluate(mcv.total))
-        self.assertAllClose(1, self.evaluate(mcv.count))
+        self.assertAllClose(2, self.evaluate(mcv.count))
         self.assertAllClose(1, mcv.result())
 
         self.evaluate(mcv.update_state([1, 2]))
         self.assertAllClose([1, 2], self.evaluate(mcv._previous_values))
         self.assertAllClose(1.5, self.evaluate(mcv.total))
-        self.assertAllClose(2, self.evaluate(mcv.count))
+        self.assertAllClose(3, self.evaluate(mcv.count))
         self.assertAllClose(1.5 / 2, mcv.result())
