@@ -22,15 +22,15 @@ setup(
     extras_require={
         "tensorflow": ["tensorflow>=1.13.1"],
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
-        "test": ["absl-py>=0.7.0", "pytest>=4.3.1", "pytest-cov>=2.6.1"],
+        "test": ["absl-py==0.7.1", "pytest==5.0.0", "pytest-cov==2.7.1"],
         "docs": [
-            "mkdocs>=1.0.4",
-            "mkdocs-material>=4.1.2",
-            "pymdown-extensions>=6.0",
-            "mknotebooks>=0.1.5",
-            "matplotlib>=3.0.3",
-            "scour>=0.37",
-            "mkdocs-minify-plugin>=0.2.1",
+            "mkdocs==1.0.4",
+            "mkdocs-material==4.4.0",
+            "pymdown-extensions==6.0",
+            "mknotebooks==0.1.6",
+            "matplotlib==3.0.3",
+            "scour==0.37",
+            "mkdocs-minify-plugin==0.2.1",
         ],
     },
     classifiers=[
