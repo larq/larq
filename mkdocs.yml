@@ -1,5 +1,7 @@
 site_name: Larq
 site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
+site_author: "Plumerai"
+site_url: "https://larq.dev/"
 
 nav:
   - Learn:
@@ -41,7 +43,7 @@ extra:
     - type: "github"
       link: "https://github.com/plumerai"
     - type: "twitter"
-      link: "https://twitter.com/PlumeraiLab"
+      link: "https://twitter.com/PlumeraiHQ"
     - type: "linkedin"
       link: "https://www.linkedin.com/company/plumerai/"
 
@@ -65,5 +67,7 @@ extra_css:
 
 plugins:
   - search
+  - minify:
+      minify_html: true
   - mknotebooks:
       execute: false
