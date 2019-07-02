@@ -44,7 +44,7 @@ def _count_fp_weights(layer):
 def _memory_weights(layer):
     fp_params = _count_fp_weights(layer)
     b_params = _count_binarized_weights(layer)
-    bittobyte = 0.125
+    bittobyte = 1.0 / 8.0
     fp32 = 32
     mbconverter = 1000000
     memory = ((fp_params * fp32) + (b_params)) * bittobyte
