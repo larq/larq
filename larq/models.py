@@ -1,5 +1,4 @@
 import numpy as np
-from tabulate import tabulate
 
 
 def _count_params(weights):
@@ -53,15 +52,15 @@ def _memory_weights(layer):
     return _bit_to_kB(total_layer_mem_in_bits)
 
 
-def summary(model, tablefmt="simple", print_fn=None):
+def summary(model, line_length=None, positions=None, print_fn=None):
     """Prints a string summary of the network.
 
     # Arguments
     model: `tf.keras` model instance.
-    tablefmt: Supported table formats are: `fancy_grid`, `github`, `grid`, `html`,
-        `jira`, `latex`, `latex_booktabs`, `latex_raw`, `mediawiki`, `moinmoin`,
-        `orgtbl`, `pipe`, `plain`, `presto`, `psql`, `rst`, `simple`, `textile`,
-        `tsv`, `youtrac`.
+    line_length: Total length of printed lines
+        (e.g. set this to adapt the display to different terminal window sizes).
+    positions: Relative or absolute positions of log elements in each line.
+        If not provided, defaults to `[.33, .55, .67, 1.]`.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
 
@@ -76,23 +75,7 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)")
-    table = [
-        [
-            layer.name,
-            _get_output_shape(layer),
-            _count_binarized_weights(layer),
-            _count_fp_weights(layer),
-            _memory_weights(layer),
-        ]
-        for layer in model.layers
-    ]
-
-    amount_binarized = sum(r[2] for r in table)
-    amount_full_precision = sum(r[3] for r in table)
-    total_memory = sum(r[4] for r in table)
-
-    table.append(["Total", None, amount_binarized, amount_full_precision, total_memory])
+    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Mem (kB)")
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -104,8 +87,40 @@ def summary(model, tablefmt="simple", print_fn=None):
     if print_fn is None:
         print_fn = print
 
-    print_fn(tabulate(table, headers=header, tablefmt=tablefmt, floatfmt=".2f"))
-    print_fn()
+    line_length = line_length or 79
+    positions = positions or [0.36, 0.65, 0.76, 0.89, 1.0]
+    if positions[-1] <= 1:
+        positions = [int(line_length * p) for p in positions]
+
+    def print_row(fields, positions):
+        line = ""
+        for i, (field, position) in enumerate(zip(fields, positions)):
+            if i > 0:
+                line = line[:-1] + " "
+            line += f"{field:.2f}" if type(field) == float else str(field)
+            line = line[:position]
+            line += " " * (position - len(line))
+        print_fn(line)
+
+    print_fn(f'Model: "{model.name}"')
+    print_fn("=" * line_length)
+    print_row(header, positions)
+    print_fn("-" * line_length)
+
+    amount_binarized = amount_full_precision = total_memory = 0
+    for layer in model.layers:
+        n_bin = _count_binarized_weights(layer)
+        n_fp = _count_fp_weights(layer)
+        memory = _memory_weights(layer)
+        amount_binarized += n_bin
+        amount_full_precision += n_fp
+        total_memory += memory
+        print_row(
+            (layer.name, _get_output_shape(layer), n_bin, n_fp, memory), positions
+        )
+
+    # print_fn(tabulate(table, headers=header, tablefmt=tablefmt, floatfmt=".2f"))
+    print_fn("-" * line_length)
     print_fn(f"Total params: {trainable_count + non_trainable_count}")
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
@@ -113,6 +128,7 @@ def summary(model, tablefmt="simple", print_fn=None):
     float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
     compression_ratio = float32_equiv / total_memory
 
+    print_fn("-" * line_length)
     print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} kB")
     print_fn(f"Compression of Memory: {compression_ratio:.2f}")
-    print_fn()
+    print_fn("=" * line_length)
