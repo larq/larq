@@ -50,7 +50,7 @@ def _bit_to_MB(bit_value):
 def _memory_weights(layer):
     fp_params = _count_fp_weights(layer)
     b_params = _count_binarized_weights(layer)
-    fp32 = 32
+    fp32 = 32  # Multiply float32 params by 32 to get bit value
     memory_bits = (fp_params * fp32) + (b_params)
     return _bit_to_MB(memory_bits)
 
@@ -112,8 +112,8 @@ def summary(model, tablefmt="simple", print_fn=None):
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
 
-    float32_equiv = (amount_binarized + amount_full_precision) * 0.125 * 32 / 1000000
-    compression_ratio = total_memory / (float32_equiv)
+    float32_equiv = _bit_to_MB((amount_binarized + amount_full_precision) * 32)
+    compression_ratio = float32_equiv / total_memory
 
     print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} MB")
     print_fn(f"Compression of Memory: {compression_ratio:.2f}")
