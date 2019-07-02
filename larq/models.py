@@ -43,7 +43,7 @@ def _count_fp_weights(layer):
 
 def _bit_to_MB(bit_value):
     bittobyte = 1.0 / 8.0
-    mbconverter = 1000000
+    mbconverter = 1024 ** 2
     return bit_value * bittobyte / mbconverter
 
 
