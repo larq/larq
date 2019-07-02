@@ -41,14 +41,18 @@ def _count_fp_weights(layer):
     return layer.count_params()
 
 
+def _bit_to_MB(bit_value):
+    bittobyte = 1.0 / 8.0
+    mbconverter = 1000000
+    return bit_value * bittobyte / mbconverter
+
+
 def _memory_weights(layer):
     fp_params = _count_fp_weights(layer)
     b_params = _count_binarized_weights(layer)
-    bittobyte = 1.0 / 8.0
     fp32 = 32
-    mbconverter = 1000000
-    memory = ((fp_params * fp32) + (b_params)) * bittobyte
-    return memory / mbconverter
+    memory_bits = (fp_params * fp32) + (b_params)
+    return _bit_to_MB(memory_bits)
 
 
 def summary(model, tablefmt="simple", print_fn=None):
