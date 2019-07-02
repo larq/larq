@@ -41,6 +41,20 @@ def _count_fp_weights(layer):
     return layer.count_params()
 
 
+def _bit_to_MB(bit_value):
+    bit_to_byte_ratio = 1.0 / 8.0
+    byte_to_mega_bytes_ratio = 1.0 / (1024 ** 2)
+    return bit_value * bit_to_byte_ratio * byte_to_mega_bytes_ratio
+
+
+def _memory_weights(layer):
+    num_fp_params = _count_fp_weights(layer)
+    num_binarized_params = _count_binarized_weights(layer)
+    fp32 = 32  # Multiply float32 params by 32 to get bit value
+    total_layer_mem_in_bits = (num_fp_params * fp32) + (num_binarized_params)
+    return _bit_to_MB(total_layer_mem_in_bits)
+
+
 def summary(model, tablefmt="simple", print_fn=None):
     """Prints a string summary of the network.
 
@@ -64,17 +78,23 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit")
+    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (MB)")
     table = [
         [
             layer.name,
             _get_output_shape(layer),
             _count_binarized_weights(layer),
             _count_fp_weights(layer),
+            _memory_weights(layer),
         ]
         for layer in model.layers
     ]
-    table.append(["Total", None, sum(r[2] for r in table), sum(r[3] for r in table)])
+
+    amount_binarized = sum(r[2] for r in table)
+    amount_full_precision = sum(r[3] for r in table)
+    total_memory = sum(r[4] for r in table)
+
+    table.append(["Total", None, amount_binarized, amount_full_precision, total_memory])
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -91,3 +111,10 @@ def summary(model, tablefmt="simple", print_fn=None):
     print_fn(f"Total params: {trainable_count + non_trainable_count}")
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
+
+    float32_equiv = _bit_to_MB((amount_binarized + amount_full_precision) * 32)
+    compression_ratio = float32_equiv / total_memory
+
+    print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} MB")
+    print_fn(f"Compression of Memory: {compression_ratio:.2f}")
+    print_fn()
