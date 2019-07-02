@@ -67,6 +67,13 @@ parameterized_all_layers = parameterized.named_parameters(
         (8, 6, 10, 4),
         dict(filters=3, kernel_size=3),
     ),
+    (
+        "QuantDepthwiseConv2D",
+        lq.layers.QuantDepthwiseConv2D,
+        tf.keras.layers.DepthwiseConv2D,
+        (2, 3, 7, 6),
+        dict(kernel_size=3),
+    ),
 )
 
 
@@ -197,6 +204,7 @@ def test_separable_layer_does_not_warn(caplog):
         (lq.layers.QuantConv3DTranspose, tf.keras.layers.Conv3DTranspose),
         (lq.layers.QuantLocallyConnected1D, tf.keras.layers.LocallyConnected1D),
         (lq.layers.QuantLocallyConnected2D, tf.keras.layers.LocallyConnected2D),
+        (lq.layers.QuantDepthwiseConv2D, tf.keras.layers.DepthwiseConv2D),
     ],
 )
 def test_layer_kwargs(quant_layer, layer):

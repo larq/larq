@@ -1346,7 +1346,8 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
         )
 
 
-class DepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
+@utils.register_keras_custom_object
+class QuantDepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
     def __init__(
         self,
         kernel_size,
