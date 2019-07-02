@@ -1344,3 +1344,45 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
             implementation=implementation,
             **kwargs,
         )
+
+
+class DepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
+    def __init__(
+        self,
+        kernel_size,
+        strides=(1, 1),
+        padding="valid",
+        depth_multiplier=1,
+        data_format=None,
+        activation=None,
+        use_bias=True,
+        input_quantizer=None,
+        kernel_quantizer=None,
+        depthwise_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        depthwise_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        depthwise_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            depth_multiplier=depth_multiplier,
+            data_format=data_format,
+            activation=activation,
+            use_bias=use_bias,
+            input_quantizer=input_quantizer,
+            kernel_quantizer=kernel_quantizer,
+            depthwise_initializer=depthwise_initializer,
+            bias_initializer=bias_initializer,
+            depthwise_regularizer=depthwise_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            depthwise_constraint=depthwise_constraint,
+            bias_constraint=bias_constraint,
+            **kwargs
+        )
