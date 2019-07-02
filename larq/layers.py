@@ -51,6 +51,18 @@ class QuantizerBase(tf.keras.layers.Layer):
                     values_shape=self.kernel.shape, name=f"{self.name}/flip_ratio"
                 )
 
+    def _get_kernel(self):
+        if isinstance(self, tf.keras.layers.DepthwiseConv2D):
+            return self.depthwise_kernel
+        else:
+            return self.kernel
+
+    def _set_kernel(self, x):
+        if isinstance(self, tf.keras.layers.DepthwiseConv2D):
+            self.depthwise_kernel = x
+        else:
+            self.kernel = x
+
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
@@ -65,7 +77,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             # Reset the full precision kernel to make keras eager tests pass.
             # Is this a problem with our unit tests or a real bug?
-            self.kernel = full_precision_kernel
+            self._set_kernel(full_precision_kernel)
         return output
 
     def get_config(self):
