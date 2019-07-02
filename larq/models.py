@@ -45,7 +45,9 @@ def _bit_to_MB(bit_value):
     bittobyte = 1.0 / 8.0
     mbconverter = 1024 ** 2
     return bit_value * bittobyte / mbconverter
-
+bit_to_byte_ratio = 1.0 / 8.0
+byte_to_mega_bytes_ratio = 1.0 / (1024**2)
+return bit_value * bit_to_byte_ratio * byte_to_mega_bytes_ratio
 
 def _memory_weights(layer):
     fp_params = _count_fp_weights(layer)
