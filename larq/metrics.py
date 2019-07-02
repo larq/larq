@@ -2,8 +2,13 @@ import tensorflow as tf
 from larq import utils
 import numpy as np
 
+try:
+    from tensorflow.keras.metrics import Metric
+except:  # TensorFlow 1.13 doesn't export this as a public API
+    from tensorflow.python.keras.metrics import Metric
 
-class FlipRatio(tf.keras.metrics.Metric):
+
+class FlipRatio(Metric):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example
