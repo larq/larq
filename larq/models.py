@@ -35,10 +35,8 @@ def _count_fp_weights(layer, ignore=[]):
     return _count_params(layer.weights, ignored_weights)
 
 
-def _bit_to_MB(bit_value):
-    bit_to_byte_ratio = 1.0 / 8.0
-    byte_to_mega_bytes_ratio = 1.0 / (1024 ** 2)
-    return bit_value * bit_to_byte_ratio * byte_to_mega_bytes_ratio
+def _bit_to_kB(bit_value):
+    return bit_value / 8 / 1024
 
 
 def _memory_weights(layer, ignore=[]):
@@ -46,7 +44,7 @@ def _memory_weights(layer, ignore=[]):
     num_binarized_params = _count_binarized_weights(layer)
     fp32 = 32  # Multiply float32 params by 32 to get bit value
     total_layer_mem_in_bits = (num_fp_params * fp32) + (num_binarized_params)
-    return _bit_to_MB(total_layer_mem_in_bits)
+    return _bit_to_kB(total_layer_mem_in_bits)
 
 
 def summary(model, tablefmt="simple", print_fn=None):
@@ -72,7 +70,7 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (MB)")
+    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)")
     metrics_weights = [weight for metric in model.metrics for weight in metric.weights]
     table = [
         [
@@ -103,15 +101,15 @@ def summary(model, tablefmt="simple", print_fn=None):
     if print_fn is None:
         print_fn = print
 
-    print_fn(tabulate(table, headers=header, tablefmt=tablefmt))
+    print_fn(tabulate(table, headers=header, tablefmt=tablefmt, floatfmt=".2f"))
     print_fn()
     print_fn(f"Total params: {trainable_count + non_trainable_count}")
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
 
-    float32_equiv = _bit_to_MB((amount_binarized + amount_full_precision) * 32)
+    float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
     compression_ratio = float32_equiv / total_memory
 
-    print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} MB")
+    print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} kB")
     print_fn(f"Compression of Memory: {compression_ratio:.2f}")
     print_fn()
