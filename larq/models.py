@@ -1,4 +1,15 @@
+from sys import stdout
 import numpy as np
+
+
+def _terminal_supports_unicode():
+    return hasattr(stdout, "encoding") and stdout.encoding in ("utf-8", "UTF-8", "UTF8")
+
+
+def _get_delimiter(type_="thin"):
+    if _terminal_supports_unicode():
+        return "━" if type_ == "thick" else "─"
+    return "=" if type_ == "thick" else "-"
 
 
 def _count_params(weights):
@@ -87,8 +98,8 @@ def summary(model, line_length=None, positions=None, print_fn=None):
     if print_fn is None:
         print_fn = print
 
-    line_length = line_length or 79
-    positions = positions or [0.36, 0.65, 0.76, 0.89, 1.0]
+    line_length = line_length or 88
+    positions = positions or [0.36, 0.63, 0.75, 0.89, 1.0]
     if positions[-1] <= 1:
         positions = [int(line_length * p) for p in positions]
 
@@ -102,10 +113,9 @@ def summary(model, line_length=None, positions=None, print_fn=None):
             line += " " * (position - len(line))
         print_fn(line)
 
-    print_fn(f'Model: "{model.name}"')
-    print_fn("=" * line_length)
+    print_fn(_get_delimiter("thick") * line_length)
     print_row(header, positions)
-    print_fn("-" * line_length)
+    print_fn(_get_delimiter() * line_length)
 
     amount_binarized = amount_full_precision = total_memory = 0
     for layer in model.layers:
@@ -118,9 +128,11 @@ def summary(model, line_length=None, positions=None, print_fn=None):
         print_row(
             (layer.name, _get_output_shape(layer), n_bin, n_fp, memory), positions
         )
-
-    # print_fn(tabulate(table, headers=header, tablefmt=tablefmt, floatfmt=".2f"))
-    print_fn("-" * line_length)
+    print_fn(_get_delimiter() * line_length)
+    print_row(
+        ("Total", "", amount_binarized, amount_full_precision, total_memory), positions
+    )
+    print_fn(_get_delimiter("thick") * line_length)
     print_fn(f"Total params: {trainable_count + non_trainable_count}")
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
@@ -128,7 +140,7 @@ def summary(model, line_length=None, positions=None, print_fn=None):
     float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
     compression_ratio = float32_equiv / total_memory
 
-    print_fn("-" * line_length)
+    print_fn(_get_delimiter() * line_length)
     print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} kB")
     print_fn(f"Compression of Memory: {compression_ratio:.2f}")
-    print_fn("=" * line_length)
+    print_fn(_get_delimiter("thick") * line_length)
