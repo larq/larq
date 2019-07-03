@@ -145,6 +145,6 @@ def summary(model, line_length=None, positions=None, print_fn=None):
     compression_ratio = float32_equiv / total_memory
 
     print_fn(_get_delimiter() * line_length)
-    print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} kB")
+    print_fn(f"Float-32 Equivalent: {float32_equiv / 1024:.2f} MB")
     print_fn(f"Compression of Memory: {compression_ratio:.2f}")
     print_fn(_get_delimiter("thick") * line_length)
