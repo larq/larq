@@ -1,6 +1,7 @@
 import tensorflow as tf
 from larq import metrics
 from tensorflow.python.keras import keras_parameterized
+import pytest
 
 
 class FlipRatioTest(keras_parameterized.TestCase):
@@ -46,3 +47,27 @@ class FlipRatioTest(keras_parameterized.TestCase):
         self.assertAllClose(1.5, self.evaluate(mcv.total))
         self.assertAllClose(3, self.evaluate(mcv.count))
         self.assertAllClose(1.5 / 2, mcv.result())
+
+    @pytest.mark.skipif(tf.executing_eagerly(), reason="only applies to graph mode")
+    def test_metric_in_graph_mode(self):
+        mcv = metrics.FlipRatio([2])
+
+        new_state = tf.compat.v1.placeholder(dtype=tf.float32, shape=[2])
+        update_state_op = mcv.update_state(new_state)
+        metric_value = mcv.result()
+
+        with tf.compat.v1.Session() as sess:
+            sess.run(tf.compat.v1.variables_initializer(mcv.variables))
+
+            sess.run(update_state_op, feed_dict={new_state: [1, 1]})
+            sess.run(update_state_op, feed_dict={new_state: [2, 2]})
+            sess.run(update_state_op, feed_dict={new_state: [1, 2]})
+
+            previous, total, count, result = sess.run(
+                [mcv._previous_values, mcv.total, mcv.count, metric_value]
+            )
+
+        self.assertAllClose([1, 2], previous)
+        self.assertAllClose(1.5, total)
+        self.assertAllClose(3, count)
+        self.assertAllClose(1.5 / 2, result)
