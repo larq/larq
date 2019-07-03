@@ -1,6 +1,7 @@
 import tensorflow as tf
 from larq import metrics
 from tensorflow.python.keras import keras_parameterized
+import pytest
 
 
 class FlipRatioTest(keras_parameterized.TestCase):
@@ -51,11 +52,11 @@ class FlipRatioTest(keras_parameterized.TestCase):
     def test_metric_in_graph_mode(self):
         mcv = metrics.FlipRatio([2])
 
-        new_state = tf.placeholder(dtype=tf.float32, shape=[2])
+        new_state = tf.compat.v1.placeholder(dtype=tf.float32, shape=[2])
         update_state_op = mcv.update_state(new_state)
         metric_value = mcv.result()
 
-        with tf.Session() as sess:
+        with tf.compat.v1.Session() as sess:
             sess.run(tf.compat.v1.variables_initializer(mcv.variables))
 
             sess.run(update_state_op, feed_dict={new_state: [1, 1]})
