@@ -71,7 +71,7 @@ def summary(model, line_length=None, positions=None, print_fn=None):
     line_length: Total length of printed lines
         (e.g. set this to adapt the display to different terminal window sizes).
     positions: Relative or absolute positions of log elements in each line.
-        If not provided, defaults to `[.33, .55, .67, 1.]`.
+        If not provided, defaults to `[0.38, 0.62, 0.74, 0.88, 1.0]`.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
 
@@ -99,18 +99,22 @@ def summary(model, line_length=None, positions=None, print_fn=None):
         print_fn = print
 
     line_length = line_length or 88
-    positions = positions or [0.36, 0.63, 0.75, 0.89, 1.0]
+    positions = positions or [0.38, 0.62, 0.74, 0.88, 1.0]
     if positions[-1] <= 1:
         positions = [int(line_length * p) for p in positions]
 
     def print_row(fields, positions):
         line = ""
         for i, (field, position) in enumerate(zip(fields, positions)):
-            if i > 0:
-                line = line[:-1] + " "
-            line += f"{field:.2f}" if type(field) == float else str(field)
-            line = line[:position]
-            line += " " * (position - len(line))
+            field = f"{field:.2f}" if type(field) == float else str(field)
+            if i == 0:
+                line += field
+                line += " " * (position - len(line))
+                line = line[: position - 1] + " "
+            else:
+                line += " " * (position - len(line) - len(field)) + field
+                line = line[:position]
+
         print_fn(line)
 
     print_fn(_get_delimiter("thick") * line_length)
