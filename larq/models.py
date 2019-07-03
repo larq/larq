@@ -1,5 +1,15 @@
+from sys import stdout
 import numpy as np
-from tabulate import tabulate
+
+
+def _terminal_supports_unicode():
+    return hasattr(stdout, "encoding") and stdout.encoding in ("utf-8", "UTF-8", "UTF8")
+
+
+def _get_delimiter(type_="thin"):
+    if _terminal_supports_unicode():
+        return "━" if type_ == "thick" else "─"
+    return "=" if type_ == "thick" else "-"
 
 
 def _count_params(weights):
@@ -41,10 +51,8 @@ def _count_fp_weights(layer):
     return layer.count_params()
 
 
-def _bit_to_MB(bit_value):
-    bit_to_byte_ratio = 1.0 / 8.0
-    byte_to_mega_bytes_ratio = 1.0 / (1024 ** 2)
-    return bit_value * bit_to_byte_ratio * byte_to_mega_bytes_ratio
+def _bit_to_kB(bit_value):
+    return bit_value / 8 / 1024
 
 
 def _memory_weights(layer):
@@ -52,18 +60,18 @@ def _memory_weights(layer):
     num_binarized_params = _count_binarized_weights(layer)
     fp32 = 32  # Multiply float32 params by 32 to get bit value
     total_layer_mem_in_bits = (num_fp_params * fp32) + (num_binarized_params)
-    return _bit_to_MB(total_layer_mem_in_bits)
+    return _bit_to_kB(total_layer_mem_in_bits)
 
 
-def summary(model, tablefmt="simple", print_fn=None):
+def summary(model, line_length=None, positions=None, print_fn=None):
     """Prints a string summary of the network.
 
     # Arguments
     model: `tf.keras` model instance.
-    tablefmt: Supported table formats are: `fancy_grid`, `github`, `grid`, `html`,
-        `jira`, `latex`, `latex_booktabs`, `latex_raw`, `mediawiki`, `moinmoin`,
-        `orgtbl`, `pipe`, `plain`, `presto`, `psql`, `rst`, `simple`, `textile`,
-        `tsv`, `youtrac`.
+    line_length: Total length of printed lines
+        (e.g. set this to adapt the display to different terminal window sizes).
+    positions: Relative or absolute positions of log elements in each line.
+        If not provided, defaults to `[0.38, 0.62, 0.74, 0.88, 1.0]`.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
 
@@ -78,23 +86,7 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (MB)")
-    table = [
-        [
-            layer.name,
-            _get_output_shape(layer),
-            _count_binarized_weights(layer),
-            _count_fp_weights(layer),
-            _memory_weights(layer),
-        ]
-        for layer in model.layers
-    ]
-
-    amount_binarized = sum(r[2] for r in table)
-    amount_full_precision = sum(r[3] for r in table)
-    total_memory = sum(r[4] for r in table)
-
-    table.append(["Total", None, amount_binarized, amount_full_precision, total_memory])
+    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Mem (kB)")
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -106,15 +98,53 @@ def summary(model, tablefmt="simple", print_fn=None):
     if print_fn is None:
         print_fn = print
 
-    print_fn(tabulate(table, headers=header, tablefmt=tablefmt))
-    print_fn()
+    line_length = line_length or 88
+    positions = positions or [0.38, 0.62, 0.74, 0.88, 1.0]
+    if positions[-1] <= 1:
+        positions = [int(line_length * p) for p in positions]
+
+    def print_row(fields, positions):
+        line = ""
+        for i, (field, position) in enumerate(zip(fields, positions)):
+            field = f"{field:.2f}" if type(field) == float else str(field)
+            if i == 0:
+                line += field
+                line += " " * (position - len(line))
+                line = line[: position - 1] + " "
+            else:
+                line += " " * (position - len(line) - len(field)) + field
+                line = line[:position]
+
+        print_fn(line)
+
+    print_fn(_get_delimiter("thick") * line_length)
+    print_row(header, positions)
+    print_fn(_get_delimiter() * line_length)
+
+    amount_binarized = amount_full_precision = total_memory = 0
+    for layer in model.layers:
+        n_bin = _count_binarized_weights(layer)
+        n_fp = _count_fp_weights(layer)
+        memory = _memory_weights(layer)
+        amount_binarized += n_bin
+        amount_full_precision += n_fp
+        total_memory += memory
+        print_row(
+            (layer.name, _get_output_shape(layer), n_bin, n_fp, memory), positions
+        )
+    print_fn(_get_delimiter() * line_length)
+    print_row(
+        ("Total", "", amount_binarized, amount_full_precision, total_memory), positions
+    )
+    print_fn(_get_delimiter("thick") * line_length)
     print_fn(f"Total params: {trainable_count + non_trainable_count}")
     print_fn(f"Trainable params: {trainable_count}")
     print_fn(f"Non-trainable params: {non_trainable_count}")
 
-    float32_equiv = _bit_to_MB((amount_binarized + amount_full_precision) * 32)
+    float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
     compression_ratio = float32_equiv / total_memory
 
-    print_fn(f"Float-32 Equivalent: {float32_equiv:.2f} MB")
+    print_fn(_get_delimiter() * line_length)
+    print_fn(f"Float-32 Equivalent: {float32_equiv / 1024:.2f} MB")
     print_fn(f"Compression of Memory: {compression_ratio:.2f}")
-    print_fn()
+    print_fn(_get_delimiter("thick") * line_length)
