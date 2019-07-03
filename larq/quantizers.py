@@ -22,6 +22,7 @@ def _binarize_with_weighted_grad(x):
 
 
 @utils.register_keras_custom_object
+@utils.set_precision(1)
 def ste_sign(x):
     r"""
     Sign binarization function.
@@ -61,6 +62,7 @@ def ste_sign(x):
 
 
 @utils.register_keras_custom_object
+@utils.set_precision(1)
 def magnitude_aware_sign(x):
     r"""
     Magnitude-aware sign for Bi-Real Net.
@@ -87,6 +89,7 @@ def magnitude_aware_sign(x):
 
 
 @utils.register_keras_custom_object
+@utils.set_precision(1)
 def approx_sign(x):
     r"""
     Sign binarization function.
@@ -126,6 +129,7 @@ def approx_sign(x):
 
 
 @utils.register_keras_custom_object
+@utils.set_precision(2)
 class SteTern:
     r"""
     Ternarization function.

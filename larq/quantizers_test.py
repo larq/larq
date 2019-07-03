@@ -10,11 +10,14 @@ def test_serialization(name):
     fn = lq.quantizers.get(name)
     ref_fn = getattr(lq.quantizers, name)
     assert fn == ref_fn
+    assert type(fn.precision) == int
     config = lq.quantizers.serialize(fn)
     fn = lq.quantizers.deserialize(config)
     assert fn == ref_fn
+    assert type(fn.precision) == int
     fn = lq.quantizers.get(ref_fn)
     assert fn == ref_fn
+    assert type(fn.precision) == int
 
 
 @pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])

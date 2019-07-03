@@ -11,3 +11,11 @@ def register_keras_custom_object(cls):
 
 def tf_1_14_or_newer():
     return LooseVersion(tf.__version__) >= LooseVersion("1.14.0")
+
+
+def set_precision(precision=32):
+    def decorator(function):
+        setattr(function, "precision", precision)
+        return function
+
+    return decorator
