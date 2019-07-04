@@ -18,7 +18,7 @@ setup(
     url="https://larq.dev/",
     packages=find_packages(),
     license="Apache 2.0",
-    install_requires=["numpy >= 1.15.4, < 2.0"],
+    install_requires=["numpy >= 1.15.4, < 2.0", "tabulate >= 0.8.3"],
     extras_require={
         "tensorflow": ["tensorflow>=1.13.1"],
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
