@@ -33,6 +33,7 @@ class QuantizerBase(tf.keras.layers.Layer):
 
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
+        self.quantized_latent_weights = []
 
         super().__init__(*args, **kwargs)
         if kernel_quantizer and not self.kernel_constraint:
@@ -43,27 +44,12 @@ class QuantizerBase(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         super().build(input_shape)
-        if (
-            self.kernel_quantizer
-            and "flip_ratio" in self._custom_metrics
-            and _supports_metrics()
-        ):
-            self.flip_ratio = metrics.FlipRatio(
-                values_shape=self.kernel.shape, name=f"{self.name}/flip_ratio"
-            )
-
-    @property
-    def quantized_weights(self):
-        if self.kernel_quantizer and self.kernel is not None:
-            with tf.name_scope(self.name):
-                return [self.kernel_quantizer(self.kernel)]
-        return []
-
-    @property
-    def quantized_latent_weights(self):
-        if self.kernel_quantizer and self.kernel is not None:
-            return [self.kernel]
-        return []
+        if self.kernel_quantizer:
+            self.quantized_latent_weights.append(self.kernel)
+            if "flip_ratio" in self._custom_metrics and _supports_metrics():
+                self.flip_ratio = metrics.FlipRatio(
+                    values_shape=self.kernel.shape, name=f"{self.name}/flip_ratio"
+                )
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -114,6 +100,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
+        self.quantized_latent_weights = []
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
@@ -129,40 +116,20 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         super().build(input_shape)
-        if "flip_ratio" in self._custom_metrics:
-            if self.depthwise_quantizer:
+        if self.depthwise_quantizer:
+            self.quantized_latent_weights.append(self.depthwise_kernel)
+            if "flip_ratio" in self._custom_metrics:
                 self.depthwise_flip_ratio = metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
                     name=f"{self.name}/depthwise_flip_ratio",
                 )
-            if self.pointwise_quantizer:
+        if self.pointwise_quantizer:
+            self.quantized_latent_weights.append(self.pointwise_kernel)
+            if "flip_ratio" in self._custom_metrics:
                 self.pointwise_flip_ratio = metrics.FlipRatio(
                     values_shape=self.pointwise_kernel.shape,
                     name=f"{self.name}/pointwise_flip_ratio",
                 )
-
-    @property
-    def quantized_weights(self):
-        with tf.name_scope(self.name):
-            quantized_weights = []
-            if self.depthwise_quantizer and self.depthwise_kernel is not None:
-                quantized_weights.append(
-                    self.depthwise_quantizer(self.depthwise_kernel)
-                )
-            if self.pointwise_quantizer and self.pointwise_kernel is not None:
-                quantized_weights.append(
-                    self.pointwise_quantizer(self.pointwise_kernel)
-                )
-            return quantized_weights
-
-    @property
-    def quantized_latent_weights(self):
-        quantized_latent_weights = []
-        if self.depthwise_quantizer and self.depthwise_kernel is not None:
-            quantized_latent_weights.append(self.depthwise_kernel)
-        if self.pointwise_quantizer and self.pointwise_kernel is not None:
-            quantized_latent_weights.append(self.pointwise_kernel)
-        return quantized_latent_weights
 
     def call(self, inputs):
         if self.input_quantizer:

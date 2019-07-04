@@ -25,33 +25,6 @@ class LogHistory(tf.keras.callbacks.Callback):
         self._store_logs(self.epochs, epoch, logs)
 
 
-class TestQuantizationLogger:
-    def test_quantization_logger(self):
-        model = tf.keras.models.Sequential(
-            [
-                lq.layers.QuantSeparableConv1D(
-                    1,
-                    1,
-                    depthwise_quantizer="ste_sign",
-                    pointwise_quantizer="ste_sign",
-                    input_shape=(3, 3),
-                ),
-                tf.keras.layers.Flatten(),
-                lq.layers.QuantDense(2, kernel_quantizer="ste_sign"),
-            ]
-        )
-        model.compile(loss="mse", optimizer="sgd")
-
-        logger = lq.callbacks.QuantizationLogger(update_freq=5)
-        history = LogHistory()
-
-        x = np.ones((20, 3, 3))
-        y = np.zeros((20, 2))
-        model.fit(x, y, batch_size=1, epochs=3, callbacks=[logger, history])
-        assert history.batches == [4, 9, 14, 19] * 3
-        assert history.epochs == [0, 1, 2]
-
-
 class TestHyperparameterScheduler:
     def test_hyper_parameter_scheduler(self):
         np.random.seed(1337)
