@@ -51,18 +51,6 @@ class QuantizerBase(tf.keras.layers.Layer):
                     values_shape=self.kernel.shape, name=f"{self.name}/flip_ratio"
                 )
 
-    def _get_kernel(self):
-        if isinstance(self, tf.keras.layers.DepthwiseConv2D):
-            return self.depthwise_kernel
-        else:
-            return self.kernel
-
-    def _set_kernel(self, x):
-        if isinstance(self, tf.keras.layers.DepthwiseConv2D):
-            self.depthwise_kernel = x
-        else:
-            self.kernel = x
-
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
@@ -77,13 +65,71 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             # Reset the full precision kernel to make keras eager tests pass.
             # Is this a problem with our unit tests or a real bug?
-            self._set_kernel(full_precision_kernel)
+            self.kernel = full_precision_kernel
         return output
 
     def get_config(self):
         config = {
             "input_quantizer": quantizers.serialize(self.input_quantizer),
             "kernel_quantizer": quantizers.serialize(self.kernel_quantizer),
+        }
+        return {**super().get_config(), **config}
+
+
+class QuantizerDepthwiseBase(tf.keras.layers.Layer):
+    """Base class for defining quantized layers
+
+    `input_quantizer` and `kernel_quantizer` are the element-wise quantization
+    functions to use. If both quantization functions are `None` this layer is
+    equivalent to `Layer`.
+    """
+
+    def __init__(self, *args, input_quantizer=None, depthwise_quantizer=None, **kwargs):
+        # This is currently undocumented until we have explored better options
+        self._custom_metrics = kwargs.pop("metrics", ["flip_ratio"])
+
+        self.input_quantizer = quantizers.get(input_quantizer)
+        self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
+        self.quantized_latent_weights = []
+
+        super().__init__(*args, **kwargs)
+        if depthwise_quantizer and not self.depthwise_constraint:
+            log.warning(
+                "Using a weight quantizer without setting `depthwise_constraint` "
+                "may result in starved weights (where the gradient is always zero)."
+            )
+
+    def build(self, input_shape):
+        super().build(input_shape)
+        if self.depthwise_quantizer:
+            self.quantized_latent_weights.append(self.depthwise_kernel)
+            if "flip_ratio" in self._custom_metrics and _supports_metrics():
+                self.flip_ratio = metrics.FlipRatio(
+                    values_shape=self.depthwise_kernel.shape,
+                    name=f"{self.name}/flip_ratio",
+                )
+
+    def call(self, inputs):
+        if self.input_quantizer:
+            inputs = self.input_quantizer(inputs)
+        if self.depthwise_quantizer:
+            full_precision_depthwise = self.depthwise_kernel
+            quantized_depthwise = self.depthwise_quantizer(self.depthwise_kernel)
+            if hasattr(self, "flip_ratio"):
+                self.add_metric(self.flip_ratio(quantized_depthwise))
+            self.depthwise_kernel = quantized_depthwise
+
+        output = super().call(inputs)
+        if self.depthwise_quantizer:
+            # Reset the full precision depthwise kernel to make keras eager tests pass.
+            # Is this a problem with our unit tests or a real bug?
+            self.depthwise_kernel = full_precision_depthwise
+        return output
+
+    def get_config(self):
+        config = {
+            "input_quantizer": quantizers.serialize(self.input_quantizer),
+            "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
         }
         return {**super().get_config(), **config}
 
@@ -1347,7 +1393,68 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
 
 
 @utils.register_keras_custom_object
-class QuantDepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
+class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv2D):
+    """""Quantized depthwise separable 2D convolution.
+  Depthwise Separable convolutions consists in performing
+  just the first step in a depthwise spatial convolution
+  (which acts on each input channel separately).
+  The `depth_multiplier` argument controls how many
+  output channels are generated per input channel in the depthwise step.
+  Arguments:
+    kernel_size: An integer or tuple/list of 2 integers, specifying the
+      height and width of the 2D convolution window.
+      Can be a single integer to specify the same value for
+      all spatial dimensions.
+    strides: An integer or tuple/list of 2 integers,
+      specifying the strides of the convolution along the height and width.
+      Can be a single integer to specify the same value for
+      all spatial dimensions.
+      Specifying any stride value != 1 is incompatible with specifying
+      any `dilation_rate` value != 1.
+    padding: one of `'valid'` or `'same'` (case-insensitive).
+    depth_multiplier: The number of depthwise convolution output channels
+      for each input channel.
+      The total number of depthwise convolution output
+      channels will be equal to `filters_in * depth_multiplier`.
+    data_format: A string,
+      one of `channels_last` (default) or `channels_first`.
+      The ordering of the dimensions in the inputs.
+      `channels_last` corresponds to inputs with shape
+      `(batch, height, width, channels)` while `channels_first`
+      corresponds to inputs with shape
+      `(batch, channels, height, width)`.
+      It defaults to the `image_data_format` value found in your
+      Keras config file at `~/.keras/keras.json`.
+      If you never set it, then it will be 'channels_last'.
+    activation: Activation function to use.
+      If you don't specify anything, no activation is applied
+      (ie. 'linear' activation: `a(x) = x`).
+    use_bias: Boolean, whether the layer uses a bias vector.
+    input_quantizer: Quantization function applied to the input of the layer.
+    depthwise_quantizer: Quantization function applied to the `depthwise_kernel` weights matrix.
+    depthwise_initializer: Initializer for the depthwise kernel matrix.
+    bias_initializer: Initializer for the bias vector.
+    depthwise_regularizer: Regularizer function applied to
+      the depthwise kernel matrix.
+    bias_regularizer: Regularizer function applied to the bias vector.
+    activity_regularizer: Regularizer function applied to
+      the output of the layer (its 'activation').
+    depthwise_constraint: Constraint function applied to
+      the depthwise kernel matrix.
+    bias_constraint: Constraint function applied to the bias vector.
+  Input shape:
+    4D tensor with shape:
+    `[batch, channels, rows, cols]` if data_format='channels_first'
+    or 4D tensor with shape:
+    `[batch, rows, cols, channels]` if data_format='channels_last'.
+  Output shape:
+    4D tensor with shape:
+    `[batch, filters, new_rows, new_cols]` if data_format='channels_first'
+    or 4D tensor with shape:
+    `[batch, new_rows, new_cols, filters]` if data_format='channels_last'.
+    `rows` and `cols` values might have changed due to padding.
+  """
+
     def __init__(
         self,
         kernel_size,
@@ -1358,7 +1465,7 @@ class QuantDepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
         activation=None,
         use_bias=True,
         input_quantizer=None,
-        kernel_quantizer=None,
+        depthwise_quantizer=None,
         depthwise_initializer="glorot_uniform",
         bias_initializer="zeros",
         depthwise_regularizer=None,
@@ -1366,7 +1473,7 @@ class QuantDepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
         activity_regularizer=None,
         depthwise_constraint=None,
         bias_constraint=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             kernel_size=kernel_size,
@@ -1377,7 +1484,7 @@ class QuantDepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
             activation=activation,
             use_bias=use_bias,
             input_quantizer=input_quantizer,
-            kernel_quantizer=kernel_quantizer,
+            depthwise_quantizer=depthwise_quantizer,
             depthwise_initializer=depthwise_initializer,
             bias_initializer=bias_initializer,
             depthwise_regularizer=depthwise_regularizer,
@@ -1385,5 +1492,5 @@ class QuantDepthwiseConv2D(QuantizerBase, tf.keras.layers.DepthwiseConv2D):
             activity_regularizer=activity_regularizer,
             depthwise_constraint=depthwise_constraint,
             bias_constraint=bias_constraint,
-            **kwargs
+            **kwargs,
         )

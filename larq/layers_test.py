@@ -118,7 +118,7 @@ class LayersTest(keras_parameterized.TestCase):
             quantized_layer,
             kwargs=dict(
                 **kwargs,
-                kernel_quantizer="ste_sign",
+                depthwise_quantizer="ste_sign",
                 input_quantizer="ste_sign",
                 depthwise_initializer=tf.keras.initializers.constant(random_weight),
             ),
@@ -198,6 +198,19 @@ def test_layer_warns(caplog):
 def test_layer_does_not_warn(caplog):
     lq.layers.QuantDense(
         5, kernel_quantizer="ste_sign", kernel_constraint="weight_clip"
+    )
+    assert caplog.records == []
+
+
+def test_depthwise_layer_warns(caplog):
+    lq.layers.QuantDepthwiseConv2D(5, depthwise_quantizer="ste_sign")
+    assert len(caplog.records) == 1
+    assert "kernel_constraint" in caplog.text
+
+
+def test_depthwise_layer_does_not_warn(caplog):
+    lq.layers.QuantDepthwiseConv2D(
+        5, depthwise_quantizer="ste_sign", depthwise_constraint="weight_clip"
     )
     assert caplog.records == []
 
