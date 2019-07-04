@@ -28,7 +28,7 @@ setup(
             "mkdocs-material==4.4.0",
             "pymdown-extensions==6.0",
             "mknotebooks==0.1.6",
-            "matplotlib==3.0.3",
+            "matplotlib==3.1.1",
             "scour==0.37",
             "mkdocs-minify-plugin==0.2.1",
         ],
