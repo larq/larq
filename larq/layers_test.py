@@ -205,7 +205,7 @@ def test_layer_does_not_warn(caplog):
 def test_depthwise_layer_warns(caplog):
     lq.layers.QuantDepthwiseConv2D(5, depthwise_quantizer="ste_sign")
     assert len(caplog.records) == 1
-    assert "kernel_constraint" in caplog.text
+    assert "depthwise_constraint" in caplog.text
 
 
 def test_depthwise_layer_does_not_warn(caplog):
