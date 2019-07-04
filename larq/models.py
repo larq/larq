@@ -12,16 +12,17 @@ def _get_delimiter(type_="thin"):
     return "=" if type_ == "thick" else "-"
 
 
-def _count_params(weights):
+def _count_params(weights, ignore=[]):
     """Count the total number of scalars composing the weights.
 
     # Arguments
     weights: An iterable containing the weights on which to compute params
+    ignore: A list of weights to ignore
 
     # Returns
     The total number of scalars composing the weights
     """
-    return int(sum(np.prod(w.shape.as_list()) for w in weights))
+    return int(sum(np.prod(w.shape.as_list()) for w in weights if w not in ignore))
 
 
 def _get_output_shape(layer):
@@ -39,24 +40,17 @@ def _count_binarized_weights(layer):
     return 0
 
 
-def _count_fp_weights(layer):
-    if hasattr(layer, "quantized_latent_weights"):
-        return int(
-            sum(
-                np.prod(w.shape.as_list())
-                for w in layer.weights
-                if w not in layer.quantized_latent_weights
-            )
-        )
-    return layer.count_params()
+def _count_fp_weights(layer, ignore=[]):
+    ignored_weights = getattr(layer, "quantized_latent_weights", []) + ignore
+    return _count_params(layer.weights, ignored_weights)
 
 
 def _bit_to_kB(bit_value):
     return bit_value / 8 / 1024
 
 
-def _memory_weights(layer):
-    num_fp_params = _count_fp_weights(layer)
+def _memory_weights(layer, ignore=[]):
+    num_fp_params = _count_fp_weights(layer, ignore=ignore)
     num_binarized_params = _count_binarized_weights(layer)
     fp32 = 32  # Multiply float32 params by 32 to get bit value
     total_layer_mem_in_bits = (num_fp_params * fp32) + (num_binarized_params)
@@ -87,13 +81,21 @@ def summary(model, line_length=None, positions=None, print_fn=None):
         )
 
     header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Mem (kB)")
+    metrics_weights = [
+        weight
+        for layer in model.layers
+        for metric in layer.metrics
+        for weight in metric.weights
+    ]
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
-        trainable_count = _count_params(model._collected_trainable_weights)
+        trainable_count = _count_params(
+            model._collected_trainable_weights, ignore=metrics_weights
+        )
     else:
-        trainable_count = _count_params(model.trainable_weights)
-    non_trainable_count = _count_params(model.non_trainable_weights)
+        trainable_count = _count_params(model.trainable_weights, ignore=metrics_weights)
+    non_trainable_count = _count_params(model.non_trainable_weights, metrics_weights)
 
     if print_fn is None:
         print_fn = print
@@ -124,8 +126,8 @@ def summary(model, line_length=None, positions=None, print_fn=None):
     amount_binarized = amount_full_precision = total_memory = 0
     for layer in model.layers:
         n_bin = _count_binarized_weights(layer)
-        n_fp = _count_fp_weights(layer)
-        memory = _memory_weights(layer)
+        n_fp = _count_fp_weights(layer, ignore=metrics_weights)
+        memory = _memory_weights(layer, ignore=metrics_weights)
         amount_binarized += n_bin
         amount_full_precision += n_fp
         total_memory += memory
