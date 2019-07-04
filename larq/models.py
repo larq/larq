@@ -2,6 +2,10 @@ import numpy as np
 from terminaltables import AsciiTable
 
 
+def sanitize_table(table_data):
+    return [[f"{v:.2f}" if type(v) == float else v for v in row] for row in table_data]
+
+
 class LayersTable(AsciiTable):
     def __init__(self, table_data, title=None):
         super().__init__(table_data, title=title)
@@ -128,6 +132,8 @@ def summary(model, tablefmt="simple", print_fn=None):
         ["Compression of Memory", compression_ratio],
     ]
 
-    print_fn(LayersTable(table, title=f"{model.name} stats").table)
-    print_fn(SummaryTable(summary_table, title=f"{model.name} summary").table)
+    print_fn(LayersTable(sanitize_table(table), title=f"{model.name} stats").table)
+    print_fn(
+        SummaryTable(sanitize_table(summary_table), title=f"{model.name} summary").table
+    )
     print_fn()
