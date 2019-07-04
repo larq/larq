@@ -1,5 +1,20 @@
 import numpy as np
-from tabulate import tabulate
+from terminaltables import AsciiTable
+
+
+class LayersTable(AsciiTable):
+    def __init__(self, table_data, title=None):
+        super().__init__(table_data, title=title)
+        self.inner_column_border = False
+        self.inner_footing_row_border = True
+        self.inner_heading_row_border = True
+
+
+class SummaryTable(AsciiTable):
+    def __init__(self, table_data, title=None):
+        super().__init__(table_data, title=title)
+        self.inner_column_border = False
+        self.inner_heading_row_border = False
 
 
 def _count_params(weights, ignore=[]):
@@ -70,15 +85,14 @@ def summary(model, tablefmt="simple", print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)")
     metrics_weights = [weight for metric in model.metrics for weight in metric.weights]
     table = [
         [
             layer.name,
             _get_output_shape(layer),
             _count_binarized_weights(layer),
-            _count_fp_weights(layer),
-            _memory_weights(layer),
+            _count_fp_weights(layer, ignore=metrics_weights),
+            _memory_weights(layer, ignore=metrics_weights),
         ]
         for layer in model.layers
     ]
@@ -86,8 +100,8 @@ def summary(model, tablefmt="simple", print_fn=None):
     amount_binarized = sum(r[2] for r in table)
     amount_full_precision = sum(r[3] for r in table)
     total_memory = sum(r[4] for r in table)
-
-    table.append(["Total", None, amount_binarized, amount_full_precision, total_memory])
+    table.insert(0, ["Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)"])
+    table.append(["Total", "", amount_binarized, amount_full_precision, total_memory])
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -96,20 +110,24 @@ def summary(model, tablefmt="simple", print_fn=None):
         )
     else:
         trainable_count = _count_params(model.trainable_weights, ignore=metrics_weights)
-    non_trainable_count = _count_params(model.non_trainable_weights, metrics_weights)
+    non_trainable_count = _count_params(
+        model.non_trainable_weights, ignore=metrics_weights
+    )
 
     if print_fn is None:
         print_fn = print
 
-    print_fn(tabulate(table, headers=header, tablefmt=tablefmt, floatfmt=".2f"))
-    print_fn()
-    print_fn(f"Total params: {trainable_count + non_trainable_count}")
-    print_fn(f"Trainable params: {trainable_count}")
-    print_fn(f"Non-trainable params: {non_trainable_count}")
-
     float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
     compression_ratio = float32_equiv / total_memory
 
-    print_fn(f"Float-32 Equivalent: {float32_equiv / 1024:.2f} MB")
-    print_fn(f"Compression of Memory: {compression_ratio:.2f}")
+    summary_table = [
+        ["Total params", trainable_count + non_trainable_count],
+        ["Trainable params", trainable_count],
+        ["Non-trainable params", non_trainable_count],
+        ["Float-32 Equivalent", f"{float32_equiv / 1024:.2f} MB"],
+        ["Compression of Memory", compression_ratio],
+    ]
+
+    print_fn(LayersTable(table, title=f"{model.name} stats").table)
+    print_fn(SummaryTable(summary_table, title=f"{model.name} summary").table)
     print_fn()
