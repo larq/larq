@@ -7,7 +7,9 @@ def sanitize_table(table_data):
 
 
 class LayersTable(AsciiTable):
-    def __init__(self, table_data, title=None):
+    def __init__(self, table_data, title=None, header=None):
+        if header:
+            table_data.insert(0, header)
         super().__init__(table_data, title=title)
         self.inner_column_border = False
         self.justify_columns = {
@@ -107,7 +109,6 @@ def summary(model, tablefmt="simple", print_fn=None):
     amount_binarized = sum(r[2] for r in table)
     amount_full_precision = sum(r[3] for r in table)
     total_memory = sum(r[4] for r in table)
-    table.insert(0, ["Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)"])
     table.append(["Total", "", amount_binarized, amount_full_precision, total_memory])
 
     model._check_trainable_weights_consistency()
@@ -135,7 +136,13 @@ def summary(model, tablefmt="simple", print_fn=None):
         ["Compression of Memory", compression_ratio],
     ]
 
-    print_fn(LayersTable(sanitize_table(table), title=f"{model.name} stats").table)
+    print_fn(
+        LayersTable(
+            sanitize_table(table),
+            title=f"{model.name} stats",
+            header=["Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)"],
+        ).table
+    )
     print_fn(
         SummaryTable(sanitize_table(summary_table), title=f"{model.name} summary").table
     )
