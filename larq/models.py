@@ -10,6 +10,9 @@ class LayersTable(AsciiTable):
     def __init__(self, table_data, title=None):
         super().__init__(table_data, title=title)
         self.inner_column_border = False
+        self.justify_columns = {
+            i: "left" if i == 0 else "right" for i in range(len(table_data[0]))
+        }
         self.inner_footing_row_border = True
         self.inner_heading_row_border = True
 
