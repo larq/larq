@@ -81,12 +81,7 @@ def summary(model, line_length=None, positions=None, print_fn=None):
         )
 
     header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Mem (kB)")
-    metrics_weights = [
-        weight
-        for layer in model.layers
-        for metric in layer.metrics
-        for weight in metric.weights
-    ]
+    metrics_weights = [weight for metric in model.metrics for weight in metric.weights]
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
