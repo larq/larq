@@ -3,7 +3,7 @@ import tensorflow as tf
 import larq as lq
 
 
-def test_summary():
+def test_summary(snapshot, capsys):
     model = tf.keras.models.Sequential(
         [
             lq.layers.QuantConv2D(
@@ -14,6 +14,8 @@ def test_summary():
         ]
     )
     lq.models.summary(model)
+    captured = capsys.readouterr()
+    snapshot.assert_match(captured.out)
 
 
 def test_summary_invalid_model():
