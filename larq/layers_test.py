@@ -101,6 +101,34 @@ class LayersTest(keras_parameterized.TestCase):
 
         self.assertAllClose(quant_output, fp_output)
 
+    def test_depthwise_layers(self):
+        input_data = random_input((2, 3, 7, 6))
+        random_weight = np.random.random() - 0.5
+
+        quant_output = testing_utils.layer_test(
+            lq.layers.QuantDepthwiseConv2D,
+            kwargs=dict(
+                kernel_size=3,
+                depthwise_quantizer="ste_sign",
+                input_quantizer="ste_sign",
+                depthwise_initializer=tf.keras.initializers.constant(random_weight),
+            ),
+            input_data=input_data,
+        )
+
+        fp_output = testing_utils.layer_test(
+            tf.keras.layers.DepthwiseConv2D,
+            kwargs=dict(
+                kernel_size=3,
+                depthwise_initializer=tf.keras.initializers.constant(
+                    np.sign(random_weight)
+                ),
+            ),
+            input_data=np.sign(input_data),
+        )
+
+        self.assertAllClose(quant_output, fp_output)
+
     @parameterized.named_parameters(
         (
             "QuantSeparableConv1D",
@@ -165,6 +193,19 @@ def test_layer_does_not_warn(caplog):
     assert caplog.records == []
 
 
+def test_depthwise_layer_warns(caplog):
+    lq.layers.QuantDepthwiseConv2D(5, depthwise_quantizer="ste_sign")
+    assert len(caplog.records) == 1
+    assert "depthwise_constraint" in caplog.text
+
+
+def test_depthwise_layer_does_not_warn(caplog):
+    lq.layers.QuantDepthwiseConv2D(
+        5, depthwise_quantizer="ste_sign", depthwise_constraint="weight_clip"
+    )
+    assert caplog.records == []
+
+
 def test_separable_layer_warns(caplog):
     lq.layers.QuantSeparableConv2D(
         3, 3, depthwise_quantizer="ste_sign", pointwise_quantizer="ste_sign"
@@ -197,6 +238,7 @@ def test_separable_layer_does_not_warn(caplog):
         (lq.layers.QuantConv3DTranspose, tf.keras.layers.Conv3DTranspose),
         (lq.layers.QuantLocallyConnected1D, tf.keras.layers.LocallyConnected1D),
         (lq.layers.QuantLocallyConnected2D, tf.keras.layers.LocallyConnected2D),
+        (lq.layers.QuantDepthwiseConv2D, tf.keras.layers.DepthwiseConv2D),
     ],
 )
 def test_layer_kwargs(quant_layer, layer):

@@ -6,6 +6,7 @@
         - larq.layers.QuantConv3D
         - larq.layers.QuantSeparableConv1D
         - larq.layers.QuantSeparableConv2D
+        - larq.layers.QuantDepthwiseConv2D
         - larq.layers.QuantConv2DTranspose
         - larq.layers.QuantConv3DTranspose
         - larq.layers.QuantLocallyConnected1D
