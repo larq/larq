@@ -19,6 +19,9 @@ def _supports_metrics():
     return utils.tf_1_14_or_newer() or not tf.executing_eagerly()
 
 
+# TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
+
+
 class QuantizerBase(tf.keras.layers.Layer):
     """Base class for defining quantized layers
 
@@ -79,7 +82,7 @@ class QuantizerBase(tf.keras.layers.Layer):
 class QuantizerDepthwiseBase(tf.keras.layers.Layer):
     """Base class for defining quantized layers
 
-    `input_quantizer` and `kernel_quantizer` are the element-wise quantization
+    `input_quantizer` and `depthwise_quantizer` are the element-wise quantization
     functions to use. If both quantization functions are `None` this layer is
     equivalent to `Layer`.
     """

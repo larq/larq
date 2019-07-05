@@ -101,23 +101,14 @@ class LayersTest(keras_parameterized.TestCase):
 
         self.assertAllClose(quant_output, fp_output)
 
-    @parameterized.named_parameters(
-        (
-            "QuantDepthwiseConv2D",
-            lq.layers.QuantDepthwiseConv2D,
-            tf.keras.layers.DepthwiseConv2D,
-            (2, 3, 7, 6),
-            dict(kernel_size=3),
-        )
-    )
-    def test_depthwise_layers(self, quantized_layer, layer, input_shape, kwargs):
-        input_data = random_input(input_shape)
+    def test_depthwise_layers(self):
+        input_data = random_input((2, 3, 7, 6))
         random_weight = np.random.random() - 0.5
 
         quant_output = testing_utils.layer_test(
-            quantized_layer,
+            lq.layers.QuantDepthwiseConv2D,
             kwargs=dict(
-                **kwargs,
+                kernel_size=3,
                 depthwise_quantizer="ste_sign",
                 input_quantizer="ste_sign",
                 depthwise_initializer=tf.keras.initializers.constant(random_weight),
@@ -126,9 +117,9 @@ class LayersTest(keras_parameterized.TestCase):
         )
 
         fp_output = testing_utils.layer_test(
-            layer,
+            tf.keras.layers.DepthwiseConv2D,
             kwargs=dict(
-                **kwargs,
+                kernel_size=3,
                 depthwise_initializer=tf.keras.initializers.constant(
                     np.sign(random_weight)
                 ),
