@@ -16,13 +16,18 @@ setup(
     long_description=readme(),
     long_description_content_type="text/markdown",
     url="https://larq.dev/",
-    packages=find_packages(),
+    packages=find_packages(exclude=["larq.snapshots"]),
     license="Apache 2.0",
     install_requires=["numpy >= 1.15.4, < 2.0", "terminaltables>=3.1.0"],
     extras_require={
         "tensorflow": ["tensorflow>=1.13.1"],
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
-        "test": ["absl-py==0.7.1", "pytest==5.0.1", "pytest-cov==2.7.1"],
+        "test": [
+            "absl-py==0.7.1",
+            "pytest==5.0.1",
+            "pytest-cov==2.7.1",
+            "snapshottest==0.5.0",
+        ],
         "docs": [
             "mkdocs==1.0.4",
             "mkdocs-material==4.4.0",
