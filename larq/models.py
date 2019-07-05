@@ -1,15 +1,29 @@
-from sys import stdout
 import numpy as np
+from terminaltables import AsciiTable
 
 
-def _terminal_supports_unicode():
-    return hasattr(stdout, "encoding") and stdout.encoding in ("utf-8", "UTF-8", "UTF8")
+def sanitize_table(table_data):
+    return [[f"{v:.2f}" if type(v) == float else v for v in row] for row in table_data]
 
 
-def _get_delimiter(type_="thin"):
-    if _terminal_supports_unicode():
-        return "━" if type_ == "thick" else "─"
-    return "=" if type_ == "thick" else "-"
+class LayersTable(AsciiTable):
+    def __init__(self, table_data, title=None, header=None):
+        if header:
+            table_data.insert(0, header)
+        super().__init__(table_data, title=title)
+        self.inner_column_border = False
+        self.justify_columns = {
+            i: "left" if i == 0 else "right" for i in range(len(table_data[0]))
+        }
+        self.inner_footing_row_border = True
+        self.inner_heading_row_border = True
+
+
+class SummaryTable(AsciiTable):
+    def __init__(self, table_data, title=None):
+        super().__init__(table_data, title=title)
+        self.inner_column_border = False
+        self.inner_heading_row_border = False
 
 
 def _count_params(weights, ignore=[]):
@@ -57,15 +71,15 @@ def _memory_weights(layer, ignore=[]):
     return _bit_to_kB(total_layer_mem_in_bits)
 
 
-def summary(model, line_length=None, positions=None, print_fn=None):
+def summary(model, tablefmt="simple", print_fn=None):
     """Prints a string summary of the network.
 
     # Arguments
     model: `tf.keras` model instance.
-    line_length: Total length of printed lines
-        (e.g. set this to adapt the display to different terminal window sizes).
-    positions: Relative or absolute positions of log elements in each line.
-        If not provided, defaults to `[0.38, 0.62, 0.74, 0.88, 1.0]`.
+    tablefmt: Supported table formats are: `fancy_grid`, `github`, `grid`, `html`,
+        `jira`, `latex`, `latex_booktabs`, `latex_raw`, `mediawiki`, `moinmoin`,
+        `orgtbl`, `pipe`, `plain`, `presto`, `psql`, `rst`, `simple`, `textile`,
+        `tsv`, `youtrac`.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
 
@@ -80,8 +94,22 @@ def summary(model, line_length=None, positions=None, print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    header = ("Layer", "Outputs", "# 1-bit", "# 32-bit", "Mem (kB)")
     metrics_weights = [weight for metric in model.metrics for weight in metric.weights]
+    table = [
+        [
+            layer.name,
+            _get_output_shape(layer),
+            _count_binarized_weights(layer),
+            _count_fp_weights(layer, ignore=metrics_weights),
+            _memory_weights(layer, ignore=metrics_weights),
+        ]
+        for layer in model.layers
+    ]
+
+    amount_binarized = sum(r[2] for r in table)
+    amount_full_precision = sum(r[3] for r in table)
+    total_memory = sum(r[4] for r in table)
+    table.append(["Total", "", amount_binarized, amount_full_precision, total_memory])
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -90,58 +118,32 @@ def summary(model, line_length=None, positions=None, print_fn=None):
         )
     else:
         trainable_count = _count_params(model.trainable_weights, ignore=metrics_weights)
-    non_trainable_count = _count_params(model.non_trainable_weights, metrics_weights)
+    non_trainable_count = _count_params(
+        model.non_trainable_weights, ignore=metrics_weights
+    )
 
     if print_fn is None:
         print_fn = print
 
-    line_length = line_length or 88
-    positions = positions or [0.38, 0.62, 0.74, 0.88, 1.0]
-    if positions[-1] <= 1:
-        positions = [int(line_length * p) for p in positions]
-
-    def print_row(fields, positions):
-        line = ""
-        for i, (field, position) in enumerate(zip(fields, positions)):
-            field = f"{field:.2f}" if type(field) == float else str(field)
-            if i == 0:
-                line += field
-                line += " " * (position - len(line))
-                line = line[: position - 1] + " "
-            else:
-                line += " " * (position - len(line) - len(field)) + field
-                line = line[:position]
-
-        print_fn(line)
-
-    print_fn(_get_delimiter("thick") * line_length)
-    print_row(header, positions)
-    print_fn(_get_delimiter() * line_length)
-
-    amount_binarized = amount_full_precision = total_memory = 0
-    for layer in model.layers:
-        n_bin = _count_binarized_weights(layer)
-        n_fp = _count_fp_weights(layer, ignore=metrics_weights)
-        memory = _memory_weights(layer, ignore=metrics_weights)
-        amount_binarized += n_bin
-        amount_full_precision += n_fp
-        total_memory += memory
-        print_row(
-            (layer.name, _get_output_shape(layer), n_bin, n_fp, memory), positions
-        )
-    print_fn(_get_delimiter() * line_length)
-    print_row(
-        ("Total", "", amount_binarized, amount_full_precision, total_memory), positions
-    )
-    print_fn(_get_delimiter("thick") * line_length)
-    print_fn(f"Total params: {trainable_count + non_trainable_count}")
-    print_fn(f"Trainable params: {trainable_count}")
-    print_fn(f"Non-trainable params: {non_trainable_count}")
-
     float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
     compression_ratio = float32_equiv / total_memory
 
-    print_fn(_get_delimiter() * line_length)
-    print_fn(f"Float-32 Equivalent: {float32_equiv / 1024:.2f} MB")
-    print_fn(f"Compression of Memory: {compression_ratio:.2f}")
-    print_fn(_get_delimiter("thick") * line_length)
+    summary_table = [
+        ["Total params", trainable_count + non_trainable_count],
+        ["Trainable params", trainable_count],
+        ["Non-trainable params", non_trainable_count],
+        ["Float-32 Equivalent", f"{float32_equiv / 1024:.2f} MB"],
+        ["Compression of Memory", compression_ratio],
+    ]
+
+    print_fn(
+        LayersTable(
+            sanitize_table(table),
+            title=f"{model.name} stats",
+            header=["Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)"],
+        ).table
+    )
+    print_fn(
+        SummaryTable(sanitize_table(summary_table), title=f"{model.name} summary").table
+    )
+    print_fn()
