@@ -23,5 +23,4 @@ snapshots['test_summary 1'] = '''+sequential stats------------------------------
 | Float-32 Equivalent    0.00 MB |
 | Compression of Memory  2.65    |
 +--------------------------------+
-
 '''

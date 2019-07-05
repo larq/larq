@@ -146,4 +146,3 @@ def summary(model, tablefmt="simple", print_fn=None):
     print_fn(
         SummaryTable(sanitize_table(summary_table), title=f"{model.name} summary").table
     )
-    print_fn()
