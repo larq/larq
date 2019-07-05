@@ -104,6 +104,24 @@ class TestBopOptimizer:
             test_kernels_are_binary=True,
         )
 
+    @pytest.mark.skipif(
+        utils.tf_1_14_or_newer() is False,
+        reason="tf.keras.optimizers.schedules only exists in TensorFlow 1.14",
+    )
+    def test_bop_tf_1_14_schedules(self):
+        _test_optimizer(
+            lq.optimizers.Bop(
+                threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
+                    3.0, decay_steps=1.0, decay_rate=0.5
+                ),
+                gamma=tf.keras.optimizers.schedules.InverseTimeDecay(
+                    3.0, decay_steps=1.0, decay_rate=0.5
+                ),
+                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+            ),
+            test_kernels_are_binary=True,
+        )
+
     def test_bop_lr_scheduler(self):
         (x_train, y_train), _ = testing_utils.get_test_data(
             train_samples=100, test_samples=0, input_shape=(10,), num_classes=2
