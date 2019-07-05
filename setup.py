@@ -22,7 +22,7 @@ setup(
     extras_require={
         "tensorflow": ["tensorflow>=1.13.1"],
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
-        "test": ["absl-py==0.7.1", "pytest==5.0.0", "pytest-cov==2.7.1"],
+        "test": ["absl-py==0.7.1", "pytest==5.0.1", "pytest-cov==2.7.1"],
         "docs": [
             "mkdocs==1.0.4",
             "mkdocs-material==4.4.0",
