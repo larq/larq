@@ -83,7 +83,7 @@ def _get_input_precision(layer):
     try:
         return layer.input_quantizer.precision
     except:
-        return "?"
+        return "-"
 
 
 def _generate_table(model, ignore=[]):
