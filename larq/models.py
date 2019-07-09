@@ -79,6 +79,13 @@ def _row_from_stats(stats, summed_stats):
     return (stats.get(key, 0) for key in sorted(summed_stats))
 
 
+def _get_input_precision(layer):
+    try:
+        return layer.input_quantizer.precision
+    except:
+        return "-"
+
+
 def _generate_table(model, ignore=[]):
     layer_stats = [_parse_params(l, ignore=ignore) for l in model.layers]
     summed_stat = _sum_params(layer_stats)
@@ -86,15 +93,17 @@ def _generate_table(model, ignore=[]):
     table = [
         [
             "Layer",
+            "Input prec.\n(bit)",
             "Outputs",
             *(f"# {i}-bit" for i in sorted(summed_stat)),
-            "Memory (kB)",
+            "Memory\n(kB)",
         ]
     ]
     for layer, stats in zip(model.layers, layer_stats):
         table.append(
             [
                 layer.name,
+                _get_input_precision(layer),
                 _get_output_shape(layer),
                 *_row_from_stats(stats, summed_stat),
                 _compute_memory(stats),
@@ -103,6 +112,7 @@ def _generate_table(model, ignore=[]):
     table.append(
         [
             "Total",
+            "",
             "",
             *_row_from_stats(summed_stat, summed_stat),
             _compute_memory(summed_stat),

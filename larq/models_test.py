@@ -15,11 +15,16 @@ def test_summary(snapshot, capsys):
             ),
             tf.keras.layers.MaxPooling2D((2, 2)),
             lq.layers.QuantDepthwiseConv2D(
-                32, (3, 3), depthwise_quantizer=lq.quantizers.SteTern(), padding="same"
+                32,
+                (3, 3),
+                input_quantizer=lq.quantizers.SteTern(),
+                depthwise_quantizer=lq.quantizers.SteTern(),
+                padding="same",
             ),
             lq.layers.QuantSeparableConv2D(
                 32,
                 (3, 3),
+                input_quantizer="ste_sign",
                 depthwise_quantizer="ste_sign",
                 pointwise_quantizer="ste_sign",
                 padding="same",
