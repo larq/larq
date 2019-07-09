@@ -7,9 +7,7 @@ def sanitize_table(table_data):
 
 
 class LayersTable(AsciiTable):
-    def __init__(self, table_data, title=None, header=None):
-        if header:
-            table_data.insert(0, header)
+    def __init__(self, table_data, title=None):
         super().__init__(table_data, title=title)
         self.inner_column_border = False
         self.justify_columns = {
@@ -46,6 +44,71 @@ def _get_output_shape(layer):
         return "multiple"
     except RuntimeError:  # output_shape unknown in Eager mode.
         return "?"
+
+
+def _compute_memory(layer_stat):
+    mem_in_bits = sum(precision * number for precision, number in layer_stat.items())
+    return _bit_to_kB(mem_in_bits)
+
+
+def _parse_params(layer, ignore=[]):
+    if hasattr(layer, "quantized_latent_weights"):
+        params = {}
+        for quantizer, weight in zip(layer.quantizers, layer.quantized_latent_weights):
+            if weight not in ignore:
+                precision = getattr(quantizer, "precision", 32)
+                params[precision] = params.get(precision, 0) + int(
+                    np.prod(weight.shape.as_list())
+                )
+        for weight in layer.weights:
+            if weight not in layer.quantized_latent_weights and weight not in ignore:
+                params[32] = params.get(32, 0) + int(np.prod(weight.shape.as_list()))
+        return params
+    return {32: layer.count_params()}
+
+
+def _sum_params(layer_stats):
+    params = {}
+    for layer_stat in layer_stats:
+        for key, value in layer_stat.items():
+            params[key] = params.get(key, 0) + value
+    return params
+
+
+def _row_from_stats(stats, summed_stats):
+    return (stats.get(key, 0) for key in sorted(summed_stats))
+
+
+def _generate_table(model, ignore=[]):
+    layer_stats = [_parse_params(l, ignore=ignore) for l in model.layers]
+    summed_stat = _sum_params(layer_stats)
+
+    table = [
+        [
+            "Layer",
+            "Outputs",
+            *(f"# {i}-bit" for i in sorted(summed_stat)),
+            "Memory (kB)",
+        ]
+    ]
+    for layer, stats in zip(model.layers, layer_stats):
+        table.append(
+            [
+                layer.name,
+                _get_output_shape(layer),
+                *_row_from_stats(stats, summed_stat),
+                _compute_memory(stats),
+            ]
+        )
+    table.append(
+        [
+            "Total",
+            "",
+            *_row_from_stats(summed_stat, summed_stat),
+            _compute_memory(summed_stat),
+        ]
+    )
+    return table
 
 
 def _count_binarized_weights(layer):
@@ -95,21 +158,7 @@ def summary(model, tablefmt="simple", print_fn=None):
         )
 
     metrics_weights = [weight for metric in model.metrics for weight in metric.weights]
-    table = [
-        [
-            layer.name,
-            _get_output_shape(layer),
-            _count_binarized_weights(layer),
-            _count_fp_weights(layer, ignore=metrics_weights),
-            _memory_weights(layer, ignore=metrics_weights),
-        ]
-        for layer in model.layers
-    ]
-
-    amount_binarized = sum(r[2] for r in table)
-    amount_full_precision = sum(r[3] for r in table)
-    total_memory = sum(r[4] for r in table)
-    table.append(["Total", "", amount_binarized, amount_full_precision, total_memory])
+    table = _generate_table(model, ignore=metrics_weights)
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
@@ -125,24 +174,19 @@ def summary(model, tablefmt="simple", print_fn=None):
     if print_fn is None:
         print_fn = print
 
-    float32_equiv = _bit_to_kB((amount_binarized + amount_full_precision) * 32)
-    compression_ratio = float32_equiv / total_memory
+    total_params = trainable_count + non_trainable_count
+    float_32_memory_equiv = _bit_to_kB(total_params * 32)
+    compression_ratio = float_32_memory_equiv / table[-1][-1]
 
     summary_table = [
-        ["Total params", trainable_count + non_trainable_count],
+        ["Total params", total_params],
         ["Trainable params", trainable_count],
         ["Non-trainable params", non_trainable_count],
-        ["Float-32 Equivalent", f"{float32_equiv / 1024:.2f} MB"],
+        ["Float-32 Equivalent", f"{float_32_memory_equiv / 1024:.2f} MB"],
         ["Compression of Memory", compression_ratio],
     ]
 
-    print_fn(
-        LayersTable(
-            sanitize_table(table),
-            title=f"{model.name} stats",
-            header=["Layer", "Outputs", "# 1-bit", "# 32-bit", "Memory (kB)"],
-        ).table
-    )
+    print_fn(LayersTable(sanitize_table(table), title=f"{model.name} stats").table)
     print_fn(
         SummaryTable(sanitize_table(summary_table), title=f"{model.name} summary").table
     )
