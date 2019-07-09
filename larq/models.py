@@ -111,27 +111,8 @@ def _generate_table(model, ignore=[]):
     return table
 
 
-def _count_binarized_weights(layer):
-    if hasattr(layer, "quantized_latent_weights"):
-        return _count_params(layer.quantized_latent_weights)
-    return 0
-
-
-def _count_fp_weights(layer, ignore=[]):
-    ignored_weights = getattr(layer, "quantized_latent_weights", []) + ignore
-    return _count_params(layer.weights, ignored_weights)
-
-
 def _bit_to_kB(bit_value):
     return bit_value / 8 / 1024
-
-
-def _memory_weights(layer, ignore=[]):
-    num_fp_params = _count_fp_weights(layer, ignore=ignore)
-    num_binarized_params = _count_binarized_weights(layer)
-    fp32 = 32  # Multiply float32 params by 32 to get bit value
-    total_layer_mem_in_bits = (num_fp_params * fp32) + (num_binarized_params)
-    return _bit_to_kB(total_layer_mem_in_bits)
 
 
 def summary(model, tablefmt="simple", print_fn=None):
