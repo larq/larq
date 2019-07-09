@@ -159,7 +159,7 @@ class SteTern:
 
     # Arguments
     x: Input tensor.
-    threshold value: The value for the threshold, $\Delta$.
+    threshold_value: The value for the threshold, $\Delta$.
     ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation.
 
     # Returns
