@@ -7,10 +7,23 @@ def test_summary(snapshot, capsys):
     model = tf.keras.models.Sequential(
         [
             lq.layers.QuantConv2D(
-                32, (3, 3), kernel_quantizer="ste_sign", input_shape=(28, 28, 1)
+                32,
+                (3, 3),
+                kernel_quantizer="ste_sign",
+                input_shape=(64, 64, 1),
+                padding="same",
             ),
             tf.keras.layers.MaxPooling2D((2, 2)),
-            lq.layers.QuantConv2D(32, (3, 3), kernel_quantizer=lq.quantizers.SteTern()),
+            lq.layers.QuantDepthwiseConv2D(
+                32, (3, 3), depthwise_quantizer=lq.quantizers.SteTern(), padding="same"
+            ),
+            lq.layers.QuantSeparableConv2D(
+                32,
+                (3, 3),
+                depthwise_quantizer="ste_sign",
+                pointwise_quantizer="ste_sign",
+                padding="same",
+            ),
             tf.keras.layers.Dense(10),
         ]
     )
