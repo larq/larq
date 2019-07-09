@@ -115,15 +115,11 @@ def _bit_to_kB(bit_value):
     return bit_value / 8 / 1024
 
 
-def summary(model, tablefmt="simple", print_fn=None):
+def summary(model, print_fn=None):
     """Prints a string summary of the network.
 
     # Arguments
     model: `tf.keras` model instance.
-    tablefmt: Supported table formats are: `fancy_grid`, `github`, `grid`, `html`,
-        `jira`, `latex`, `latex_booktabs`, `latex_raw`, `mediawiki`, `moinmoin`,
-        `orgtbl`, `pipe`, `plain`, `presto`, `psql`, `rst`, `simple`, `textile`,
-        `tsv`, `youtrac`.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
 
