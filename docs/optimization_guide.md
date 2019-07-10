@@ -1,6 +1,6 @@
 Once you have defined a good architecture for your BNN, you want to train it. Here we give an introduction to common training strategies and tricks that are popular in the field. After reading this guide you should have a good idea of how you can train your BNN.
 
-Below we first discuss the fundamental challenges of BNN optimization. We then explain the most common used training strategy, of using latent weights, and cover the questions, tips & tricks that tend to come up when training BNNs.
+Below we first discuss the fundamental challenges of BNN optimization. We then explain the most commonly used training strategy, of using latent weights, and cover the questions, tips & tricks that tend to come up when training BNNs.
 
 ## The Problem with SGD in BNNs
 

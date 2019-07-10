@@ -4,9 +4,9 @@ If you are new to Larq and/or Binarized Neural Networks (BNNs), this is the righ
 
 ## Quantizer
 
-The core idea of BNNs is to use binary weights and activations instead of 32-bit floating point values. A [quantizer](https://larq.dev/api/quantizers/) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+A [quantizer](https://larq.dev/api/quantizers/) defines an operation that quantizes a vector, as well as a pseudo-gradient that is used for automatic differentation. This pseudo-gradient is in general not the true gradient.
 
-Note that most layers in a neural network evaluate sums and thus output integers even if all inputs are binary. Therefore you will usually want to apply quantizers for your activations throughout the network even during inference.
+Generally you will find quantizers throughout the network to quantize activations. This is because most layers output integers, even if all inputs are binary, because they sum over multiple binary values.
 
 It is also common to apply quantizers to the weights during training. This is necessary when relying on real-valued latent-weights to accumulate non-binary update steps, a common optimization strategy for BNNs. After training is finished, the real-valued weights and associated quantization operations can be discarded.
 

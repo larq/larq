@@ -16,7 +16,7 @@ If your paper is publicly available, feel free to also add it to the list of [Pa
 
 ## Can I add my own algorithm or model to Larq?
 
-Absolutely! If you have developed a new BNN or training method that you would like to share with the community, create a PR or get in touch with us. Make sure you check out the contribution guide. For entire models with pretrained weights [`larq-zoo`](https://github.com/plumerai/larq-zoo) is the correct place, everything else can be added to [`larq`](https://github.com/plumerai/larq) directly.
+Absolutely! If you have developed a new model or training method that you would like to share with the community, create a PR or get in touch with us. Make sure you check out the contribution guide. For entire models with pretrained weights [`larq-zoo`](https://github.com/plumerai/larq-zoo) is the correct place, everything else can be added to [`larq`](https://github.com/plumerai/larq) directly.
 
 ## Why is Larq built on top of `tf.keras`?
 

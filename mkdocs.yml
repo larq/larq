@@ -9,7 +9,7 @@ nav:
       - User Guides:
           - Key Concepts: guide.md
           - Building BNNs: architecture_guide.md
-          - Optimizing BNNs: optimization_guide.md
+          - Training BNNs: optimization_guide.md
       - Examples:
           - Introduction to BNNs with Larq: examples/mnist.ipynb
           - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
