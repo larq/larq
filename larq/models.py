@@ -1,6 +1,8 @@
 import numpy as np
 from terminaltables import AsciiTable
 
+__all__ = ["summary"]
+
 
 def sanitize_table(table_data):
     return [[f"{v:.2f}" if type(v) == float else v for v in row] for row in table_data]
