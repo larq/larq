@@ -1,10 +1,10 @@
 # User Guide
 
-If you're new to Larq and/or BNNs, this is the right place to start. Below we summarize the key concepts you need to understand to work with BNNs.
+If you are new to Larq and/or Binarized Neural Networks (BNNs), this is the right place to start. Below we summarize the key concepts you need to understand to work with BNNs.
 
 ## Quantizer
 
-The core idea of BNNs is to use binary values instead of 32-bit floating point. A [quantizer](https://larq.dev/api/quantizers/) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+The core idea of BNNs is to use binary weights and activations instead of 32-bit floating point values. A [quantizer](https://larq.dev/api/quantizers/) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
 
 Note that most layers in a neural network evaluate sums and thus output integers even if all inputs are binary. Therefore you will usually want to apply quantizers for your activations throughout the network even during inference.
 
@@ -12,7 +12,7 @@ It is also common to apply quantizers to the weights during training. This is ne
 
 ### Pseudo-Gradient
 
-The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for SGD. Instead, optimization of BNN relies on what we call pseudo-gradients, which are used during back-propogation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
+The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for gradient descent. Instead, optimization of BNNs rely on what we call pseudo-gradients, which are used during back-propagation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
 
 ## Quantized Layers
 
