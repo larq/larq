@@ -6,11 +6,14 @@ site_url: "https://larq.dev/"
 nav:
   - Learn:
       - Introduction: index.md
-      - User Guide: guide.md
-  - Tutorials:
-      - Introduction to BNNs with Larq: examples/mnist.ipynb
-      - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
-      - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
+      - User Guides:
+          - Key Concepts: guide.md
+          - Building BNNs: architecture_guide.md
+          - Optimizing BNNs: optimization_guide.md
+      - Examples:
+          - Introduction to BNNs with Larq: examples/mnist.ipynb
+          - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
+          - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
   - API:
       - Layers: api/layers.md
       - Quantizers: api/quantizers.md
@@ -24,6 +27,9 @@ nav:
       - Papers using Larq: papers.md
       - Contributing Guide: contributing.md
       - Code of Conduct: code_of_conduct.md
+  - Why Larq?:
+      - About: about.md
+      - FAQ: faq.md
 
 repo_url: https://github.com/plumerai/larq
 repo_name: plumerai/larq

@@ -1,8 +1,22 @@
 # User Guide
 
-To build a Quantized Neural Network (QNN), Larq introduces the concept of [quantized layers](https://larq.dev/api/layers/) and [quantizers](https://larq.dev/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+If you're new to Larq and/or BNNs, this is the right place to start. Below we summarize the key concepts you need to understand to work with BNNs.
 
-Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
+## Quantizer
+
+The core idea of BNNs is to use binary values instead of 32-bit floating point. A [quantizer](https://larq.dev/api/quantizers/) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+
+Note that most layers in a neural network evaluate sums and thus output integers even if all inputs are binary. Therefore you will usually want to apply quantizers for your activations throughout the network even during inference.
+
+It is also common to apply quantizers to the weights during training. This is necessary when relying on real-valued latent-weights to accumulate non-binary update steps, a common optimization strategy for BNNs. After training is finished, the real-valued weights and associated quantization operations can be discarded.
+
+### Pseudo-Gradient
+
+The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for SGD. Instead, optimization of BNN relies on what we call pseudo-gradients, which are used during back-propogation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
+
+## Quantized Layers
+
+Each [quantized layers](https://larq.dev/api/layers/) requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
 A quantized layer computes
 
