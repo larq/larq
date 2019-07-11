@@ -2,9 +2,9 @@ Here you will find a quick overview of the best practices that have evolved in t
 
 ## Binarizing a Single Layer
 
-Any layer has two types of inputs: parameters, such as kernels and biases, and incoming activations.
+Any layer has two types of inputs: the layer parameters, such as a weight matrix and biases, and incoming activations.
 
-We can reduce the memory footprint of the model by binarizing parameters. In Larq, this can be done by passing a `kernel_quantizer` from [`larq.quantizers`](/api/quantizers) when instantiating a [`larq.layer`](/api/layers) object, or by using a custom BNN optimizer such as [Bop](/api/optimizers/#bop).
+We can reduce the memory footprint of the model by binarizing parameters. In Larq, this can be done by passing a `kernel_quantizer` from [`larq.quantizers`](/api/quantizers) when instantiating a [`larq.layer`](/api/layers) object, or by using a custom BNN optimizer such as [Bop](/api/optimizers/#bop) (note that by default Bop only targets kernels of layers in [`larq.layers`](/api/layers)).
 
 To get the efficiency of binary computations, the incoming activations need to be binary as well. This can be done by setting a `input_quantizer`.
 
@@ -18,7 +18,7 @@ A typical binarized layer looks something like:
 import larq as lq
 ...
 x_out = lq.layers.QuantDense(
-    1024,
+    units=1024,
     input_quantizer=lq.quantizers.ste_sign,
     kernel_quantizer=lq.quantizers.ste_sign,
     kernel_constraint=lq.constraints.weight_clip,
@@ -27,7 +27,7 @@ x_out = lq.layers.QuantDense(
 
 ## First & Last Layer
 
-Binarizing the first and last layers hurts accuracy much more than binarizing other layers in the network. Meanwhile, the number of weights and operations in these layers are relatively small. Therefore it has become standard to leave these layers in higher precision (we recommend to use 8-bit). This applies to the incoming activations as well as the weights.
+Binarizing the first and last layers hurts accuracy much more than binarizing other layers in the network. Meanwhile, the number of weights and operations in these layers are relatively small. Therefore it has become standard to leave these layers in higher precision. This applies to the incoming activations as well as the weights.
 
 ## Batch Normalization
 
@@ -45,7 +45,7 @@ Such shortcuts are relatively cheap in terms of memory footprint and computation
 
 An issue with ResNet-style shortcuts comes up when there is a dimensionality change. Currently, the most popular solution to this is to use pointwise high-precision convolutions in the residual connections if there is a dimensionality change.
 
-We have found that using 8-bit weights and activations in high-precision shortcuts is sufficient to absorb the output from convolutions; increasing the bit-width beyond that yields no further accuracy improvement. Additionally, we recommend to use as many shortcuts as you can: for example, in ResNet-style architectures it helps to bypass every single convolutional layer, instead of every two convolutional layers.
+We recommend to use as many shortcuts as you can: for example, in ResNet-style architectures it helps to bypass every single convolutional layer, instead of every two convolutional layers.
 
 An example of a convolutional block with shortcut in Larq could look something like this:
 
@@ -56,7 +56,7 @@ def conv_with_shortcut(x):
     """Convolutional block with shortcut connection.
 
     Args:
-      x: input tensor with high precision activations
+      x: input tensor with high-precision activations
       
     Returns:
       Tensor with high-precision activations
@@ -69,8 +69,8 @@ def conv_with_shortcut(x):
     
     # efficient binarized convolutions (note inputs are also binarized)
     x = lq.layers.QuantConv2D(
-        filters,
-        3,
+        filters=filters,
+        kernel_size=3,
         padding="same",
         input_quantizer=lq.quantizers.ste_sign,
         kernel_quantizer=lq.quantizers.ste_sign,
@@ -97,7 +97,7 @@ Thus, in a VGG-style network a layer could look like this:
 import larq as lq
 ...
 x = lq.layers.QuantConv2D(
-    512,
+    filters=512,
     kernel_size=3,
     padding="same",
     input_quantizer=lq.quantizers.ste_sign,

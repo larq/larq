@@ -18,11 +18,11 @@ alternative, what we call a 'pseudo-gradient'. The issue of updating can be reso
 
 ## Latent Weights
 
-Suppose we take a batch of training samples and evaluate a forward and backward pass. During the backward pass we replace the gradients with a pseudo-gradient, and we get a gradient vector on our weights. We then feed this into an optimizer like Adam, and get a vector with updates for our weights.
+Suppose we take a batch of training samples and evaluate a forward and backward pass. During the backward pass we replace the gradients with a pseudo-gradient, and we get a gradient vector on our weights. We then feed this into an optimizer, and get a vector with updates for our weights.
 
 At this point, what do we do? If we directly apply the updates to our weights, they are no longer binary. The standard solution to this problem has been to introduce real-valued **latent weights**. We apply our update step to this real-valued weight. During the forward pass, we use the binarized version of the latent weight.
 
-Beware that latent weights are [not really weights at all](https://arxiv.org/abs/1906.02107) - instead, they are best thought of as a product between the weight and a positive inertia: the higher this inertia, the stronger the signal required to make the weight flip.
+Beware that latent weights are [not really weights at all](https://arxiv.org/abs/1906.02107) - after all, changing the latent weights usually doesn't affect the behavior of the network and we throw the latent weights away after we're done training. Instead, they are best thought of as a product between the weight and a positive inertia: the higher this inertia, the stronger the signal required to make the weight flip.
 
 One implication of this is that the latent weights should be constrained: as an increase in inertia does not change the behavior of the network, it can otherwise grow indefinitely.
 
@@ -47,14 +47,14 @@ In [`larq.quantizers`](/api/quantizers) you will find a variety of quantizers th
 
 ## Choice of Optimizer
 
-When using a latent weight strategy, you can apply any optimizer you are familiar with from real-valued deep learning. However, due the different nature of BNNs your intuitions may be off. We recommend using Adam: although other optimizers can achieve similar accuracies with a lot of finetuning, we and others have found that Adam is easiest to use for most types of networks.
+When using a latent weight strategy, you can apply any optimizer you are familiar with from real-valued deep learning. However, due the different nature of BNNs your intuitions may be off. We recommend using Adam: although other optimizers can achieve similar accuracies with a lot of finetuning, we and others have found that Adam is the quickest to converge and the least sensitive to the choice of hyperparamters
+.
 
 ## Tips & Tricks
 
 Here are some general tips and tricks that you may want to keep in mind:
 
 - BNN training is more noisy due to non-continuous nature of flipping weights; therefore, we recommend setting your batch norm momentum to 0.9.
-- Similarly, we recommend using a high batch size (e.g. 512, 1024 or even higher).
 - Beware that BNNs tend to require many more epochs than real-valued networks to converge: 200+ epochs when training an AlexNet or ResNet-18 style network on ImageNet is not unusual.
 - Networks tend to train much quicker if they are initialized from a trained real-valued model. Importantly, this requires the overall architecture of the pretrained network to be as similar as possible to the BNN, including placement of the activation operation (which replaces the binarization operation). Note that although convergence is faster, pretraining does not seem to improve final accuracy.
 
