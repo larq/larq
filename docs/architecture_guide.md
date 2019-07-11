@@ -15,6 +15,8 @@ When viewing binarization as an activation function just like ReLU, one may be i
 A typical binarized layer looks something like:
 
 ```python
+import larq as lq
+...
 x_out = lq.layers.QuantDense(
     1024,
     input_quantizer=lq.quantizers.ste_sign,
@@ -48,47 +50,27 @@ We have found that using 8-bit weights and activations in high-precision shortcu
 An example of a convolutional block with shortcut in Larq could look something like this:
 
 ```python
-def residual_block(x, filters=None, strides=1):
-    """Convolutional block with shortcut connection. The shortcut uses average
-     pooling for resolution changes and a 1x1 convolution if (and only if)
-     there is a change in number of filters.
+import larq as lq
+...
+def conv_with_shortcut(x):
+    """Convolutional block with shortcut connection.
 
     Args:
       x: input tensor with high precision activations
-      filters: number of output filters (if None, use number of input filters)
-      strides: An integer or tuple/list of 2 integers, specifying the strides
-        of the convolution along the height and width. Can be a single integer
-        to specify the same value for all spatial dimensions
-
+      
     Returns:
       Tensor with high-precision activations
     """
-    # compute dimensions
-    in_filters = x.get_shape().as_list()[-1]
-    out_filters = filters or in_filters
-
+    # get number of filters
+    filters = x.get_shape().as_list()[-1]
+    
     # create shortcut that retains the high-precision information
     shortcut = x
-    if strides != 1:
-        shortcut = tf.keras.layers.AvgPool2D(
-            pool_size=strides,
-            strides=strides,
-            padding="same",
-            )(shortcut)
-    if in_filters != out_filters:
-        shortcut = tf.keras.layers.Conv2D(
-            out_filters,
-            1,
-            kernel_initializer="glorot_normal",
-            use_bias=False,
-        )(shortcut)
-        shortcut = tf.keras.layers.BatchNormalization(momentum=0.9)(shortcut)
-
+    
     # efficient binarized convolutions (note inputs are also binarized)
     x = lq.layers.QuantConv2D(
-        out_filters,
+        filters,
         3,
-        strides=strides,
         padding="same",
         input_quantizer=lq.quantizers.ste_sign,
         kernel_quantizer=lq.quantizers.ste_sign,
@@ -112,6 +94,8 @@ The [XNOR-net authors](https://arxiv.org/abs/1603.05279) found that accuracy imp
 Thus, in a VGG-style network a layer could look like this:
 
 ```python
+import larq as lq
+...
 x = lq.layers.QuantConv2D(
     512,
     kernel_size=3,
