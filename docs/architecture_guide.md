@@ -12,6 +12,17 @@ Note that the output of a binarized layer is _not_ binary. Instead the output is
 
 When viewing binarization as an activation function just like ReLU, one may be inclined to binarize the outgoing activations rather than the incoming activations. However, if the network contains batch normalization layers or residual connections, this may result in unintentional non-binary operations. Therefore we have opted for an `input_quantizer` rather than an `activation_quantizer`.
 
+A typical binarized layer looks something like:
+
+```python
+x_out = lq.layers.QuantDense(
+    1024,
+    input_quantizer=lq.quantizers.ste_sign,
+    kernel_quantizer=lq.quantizers.ste_sign,
+    kernel_constraint=lq.constraints.weight_clip,
+    )(x_in)
+```
+
 ## First & Last Layer
 
 Binarizing the first and last layers hurts accuracy much more than binarizing other layers in the network. Meanwhile, the number of weights and operations in these layers are relatively small. Therefore it has become standard to leave these layers in higher precision (we recommend to use 8-bit). This applies to the incoming activations as well as the weights.
@@ -34,9 +45,85 @@ An issue with ResNet-style shortcuts comes up when there is a dimensionality cha
 
 We have found that using 8-bit weights and activations in high-precision shortcuts is sufficient to absorb the output from convolutions; increasing the bit-width beyond that yields no further accuracy improvement. Additionally, we recommend to use as many shortcuts as you can: for example, in ResNet-style architectures it helps to bypass every single convolutional layer, instead of every two convolutional layers.
 
+An example of a convolutional block with shortcut in Larq could look something like this:
+
+```python
+def residual_block(x, filters=None, strides=1):
+    """Convolutional block with shortcut connection. The shortcut uses average
+     pooling for resolution changes and a 1x1 convolution if (and only if)
+     there is a change in number of filters.
+
+    Args:
+      x: input tensor with high precision activations
+      filters: number of output filters (if None, use number of input filters)
+      strides: An integer or tuple/list of 2 integers, specifying the strides
+        of the convolution along the height and width. Can be a single integer
+        to specify the same value for all spatial dimensions
+
+    Returns:
+      Tensor with high-precision activations
+    """
+    # compute dimensions
+    in_filters = x.get_shape().as_list()[-1]
+    out_filters = filters or in_filters
+
+    # create shortcut that retains the high-precision information
+    shortcut = x
+    if strides != 1:
+        shortcut = tf.keras.layers.AvgPool2D(
+            pool_size=strides,
+            strides=strides,
+            padding="same",
+            )(shortcut)
+    if in_filters != out_filters:
+        shortcut = tf.keras.layers.Conv2D(
+            out_filters,
+            1,
+            kernel_initializer="glorot_normal",
+            use_bias=False,
+        )(shortcut)
+        shortcut = tf.keras.layers.BatchNormalization(momentum=0.9)(shortcut)
+
+    # efficient binarized convolutions (note inputs are also binarized)
+    x = lq.layers.QuantConv2D(
+        out_filters,
+        3,
+        strides=strides,
+        padding="same",
+        input_quantizer=lq.quantizers.ste_sign,
+        kernel_quantizer=lq.quantizers.ste_sign,
+        kernel_initializer="glorot_normal",
+        kernel_constraint=lq.constraints.weight_clip,
+        use_bias=False,
+    )(x)
+
+    # normalize the (integer) output of the binary conv and merge
+    # with shortcut
+    x = tf.keras.layers.BatchNormalization(momentum=0.9)(x)
+    out = tf.keras.layers.add([x, shortcut])
+
+    return out
+```
+
 ## Pooling
 
 The [XNOR-net authors](https://arxiv.org/abs/1603.05279) found that accuracy improves when applying batch normalization after instead of before max-pooling. In general, max pooling in BNNs can be problematic as it can lead to skewed binarized activations.
+
+Thus, in a VGG-style network a layer could look like this:
+
+```python
+x = lq.layers.QuantConv2D(
+    512,
+    kernel_size=3,
+    padding="same",
+    input_quantizer=lq.quantizers.ste_sign,
+    kernel_quantizer=lq.quantizers.ste_sign,
+    kernel_constraint=lq.constraints.weight_clip,
+    use_bias=False,
+    )(x)
+x = tf.keras.layers.MaxPool2D(pool_size=3, strides=2)(x)
+x = tf.keras.layers.BatchNormalization(momentum=.9)(x)
+```
 
 ## Further References
 
