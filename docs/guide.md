@@ -1,5 +1,3 @@
-# User Guide
-
 If you are new to Larq and/or Binarized Neural Networks (BNNs), this is the right place to start. Below we summarize the key concepts you need to understand to work with BNNs.
 
 ## Quantizer
