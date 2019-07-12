@@ -25,8 +25,8 @@ nav:
       - Contributing Guide: contributing.md
       - Code of Conduct: code_of_conduct.md
 
-repo_url: https://github.com/plumerai/larq
-repo_name: plumerai/larq
+repo_url: https://github.com/larq/larq
+repo_name: larq/larq
 edit_uri: ""
 theme:
   name: material

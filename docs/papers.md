@@ -2,7 +2,7 @@
 
 One of the main focuses of Larq is to accelerate research on neural networks with extremely low precision weights and activations.
 
-If you puplish a paper using using Larq please let us know and [add it to the list below](https://github.com/plumerai/larq/edit/master/docs/papers.md). Feel free to also add the author names, abstract and links to the paper and source code.
+If you puplish a paper using using Larq please let us know and [add it to the list below](https://github.com/larq/larq/edit/master/docs/papers.md). Feel free to also add the author names, abstract and links to the paper and source code.
 
 <h2><a class="headerlink" style="float:right; opacity: 1;" href="https://github.com/plumerai/rethinking-bnn-optimization" title="Source code"><i class="md-icon">code</i></a> <a class="headerlink" style="float:right; opacity: 1;" href="https://arxiv.org/abs/1906.02107" title="arXiv paper"><i class="md-icon">library_books</i></a> Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization</h2>
 
