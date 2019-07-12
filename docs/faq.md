@@ -16,7 +16,7 @@ If your paper is publicly available, feel free to also add it to the list of [Pa
 
 ## Can I add my own algorithm or model to Larq?
 
-Absolutely! If you have developed a new model or training method that you would like to share with the community, create a PR or get in touch with us. Make sure you check out the contribution guide. For entire models with pretrained weights [`larq-zoo`](https://github.com/larq/larq-zoo) is the correct place, everything else can be added to [`larq`](https://github.com/larq/larq) directly.
+Absolutely! If you have developed a new model or training method that you would like to share with the community, create a PR or get in touch with us. Make sure you check out the contribution guide. For entire models with pretrained weights [`larq-zoo`](https://github.com/larq/zoo) is the correct place, everything else can be added to [`larq`](https://github.com/larq/larq) directly.
 
 ## Can I use Larq only for Binary Neural Networks (BNNs)?
 
@@ -31,7 +31,7 @@ We put a lot of thought into the question of which framework we should build Lar
 - We really like the Keras API for its simplicity. At the same time, it is still very flexible if you want to build complex architectures or custom training loops.
 - The TensorFlow ecosystem provides a wide range of tools for both researchers and developers. We think integration into that ecosystem will be beneficial for people working with BNNs.
 - We are big fans of [`tf.datasets`](https://www.tensorflow.org/datasets/datasets).
-- Reproducibility is a key concern to us, and our approach for [`larq-zoo`](https://github.com/larq/larq-zoo) is heavily inspired by [Keras Applications](https://keras.io/applications/).
+- Reproducibility is a key concern to us, and our approach for [`larq-zoo`](https://github.com/larq/zoo) is heavily inspired by [Keras Applications](https://keras.io/applications/).
 
 ## Will there be a `PyTorch` version of Larq?
 
