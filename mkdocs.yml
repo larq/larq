@@ -23,6 +23,10 @@ nav:
       - Optimizers: api/optimizers.md
       - Math: api/math.md
       - Models: api/models.md
+  - Models:
+      - Larq Zoo: models/index.md
+      - Examples: models/examples.md
+      - API: models/api.md
   - Community:
       - Papers using Larq: papers.md
       - Contributing Guide: contributing.md

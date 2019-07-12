@@ -36,21 +36,20 @@ pytest .
 Installs dependencies for building the docs:
 
 ```shell
-pip install git+https://github.com/lgeiger/pydoc-markdown.git
+pip install nbconvert git+https://github.com/lgeiger/pydoc-markdown.git
 pip install -e .[docs]
 ```
 
 Inside the project directory run:
 
 ```shell
-python generate_api_docs.py
-mkdocs serve
+./larqdocs.sh serve
 ```
 
 To publish a new version to github pages run:
 
 ```shell
-mkdocs gh-deploy --force
+./larqdocs.sh gh-deploy --force
 ```
 
 ## Code style
