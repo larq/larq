@@ -26,17 +26,16 @@ class SummaryTable(AsciiTable):
         self.inner_heading_row_border = False
 
 
-def _count_params(weights, ignore=[]):
+def _count_params(weights):
     """Count the total number of scalars composing the weights.
 
     # Arguments
     weights: An iterable containing the weights on which to compute params
-    ignore: A list of weights to ignore
 
     # Returns
     The total number of scalars composing the weights
     """
-    return int(sum(np.prod(w.shape.as_list()) for w in weights if w not in ignore))
+    return int(sum(np.prod(w.shape.as_list()) for w in weights))
 
 
 def _get_output_shape(layer):
@@ -53,17 +52,16 @@ def _compute_memory(layer_stat):
     return _bit_to_kB(mem_in_bits)
 
 
-def _parse_params(layer, ignore=[]):
+def _parse_params(layer):
     if hasattr(layer, "quantized_latent_weights"):
         params = {}
         for quantizer, weight in zip(layer.quantizers, layer.quantized_latent_weights):
-            if weight not in ignore:
-                precision = getattr(quantizer, "precision", 32)
-                params[precision] = params.get(precision, 0) + int(
-                    np.prod(weight.shape.as_list())
-                )
+            precision = getattr(quantizer, "precision", 32)
+            params[precision] = params.get(precision, 0) + int(
+                np.prod(weight.shape.as_list())
+            )
         for weight in layer.weights:
-            if weight not in layer.quantized_latent_weights and weight not in ignore:
+            if weight not in layer.quantized_latent_weights:
                 params[32] = params.get(32, 0) + int(np.prod(weight.shape.as_list()))
         return params
     return {32: layer.count_params()}
@@ -88,8 +86,8 @@ def _get_input_precision(layer):
         return "-"
 
 
-def _generate_table(model, ignore=[]):
-    layer_stats = [_parse_params(l, ignore=ignore) for l in model.layers]
+def _generate_table(model):
+    layer_stats = [_parse_params(l) for l in model.layers]
     summed_stat = _sum_params(layer_stats)
 
     table = [
@@ -146,19 +144,14 @@ def summary(model, print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    metrics_weights = [weight for metric in model.metrics for weight in metric.weights]
-    table = _generate_table(model, ignore=metrics_weights)
+    table = _generate_table(model)
 
     model._check_trainable_weights_consistency()
     if hasattr(model, "_collected_trainable_weights"):
-        trainable_count = _count_params(
-            model._collected_trainable_weights, ignore=metrics_weights
-        )
+        trainable_count = _count_params(model._collected_trainable_weights)
     else:
-        trainable_count = _count_params(model.trainable_weights, ignore=metrics_weights)
-    non_trainable_count = _count_params(
-        model.non_trainable_weights, ignore=metrics_weights
-    )
+        trainable_count = _count_params(model.trainable_weights)
+    non_trainable_count = _count_params(model.non_trainable_weights)
 
     if print_fn is None:
         print_fn = print
