@@ -1,5 +1,6 @@
 junit
 docs/api
+docs/models
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
