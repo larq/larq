@@ -26,7 +26,7 @@ setup(
             "absl-py==0.7.1",
             "pytest==5.0.1",
             "pytest-cov==2.7.1",
-            "snapshottest==0.5.0",
+            "snapshottest==0.5.1",
         ],
         "docs": [
             "mkdocs==1.0.4",
