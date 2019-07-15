@@ -12,6 +12,26 @@ It is also common to apply quantizers to the weights during training. This is ne
 
 The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for gradient descent. Instead, optimization of BNNs rely on what we call pseudo-gradients, which are used during back-propagation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
 
+### Using Quantizers as Activations
+
+Although quantizers are usually passed to specialized arguments (see [Quantized Layers](#quantized-layers)), they can be used just like `tf.keras` activations:
+
+```python
+# Use a quantizer als activation
+y = larq.layers.QuantDense(
+        512,
+        activation="ste_sign",
+        )(x)
+```
+
+Just like activations, quantizers can also be used on their own:
+
+```python
+# The two lines below are equivalent
+x_binarized = larq.quantizers.ste_sign(x)
+x_binarized = tf.keras.layers.Activation("ste_sign")(x)
+```
+
 ## Quantized Layers
 
 Each [quantized layers](https://larq.dev/api/layers/) requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
