@@ -137,7 +137,7 @@ class SteTern:
     q(x) = \begin{cases}
     +1 & x > \Delta \\\
     0 & |x| < \Delta \\\
-    -1 & x < \Delta
+     -1 & x < - \Delta
     \end{cases}
     \\]
 
