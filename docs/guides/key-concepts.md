@@ -18,10 +18,7 @@ Although quantizers are usually passed to specialized arguments (see [Quantized 
 
 ```python
 # Use a quantizer als activation
-y = larq.layers.QuantDense(
-        512,
-        activation="ste_sign",
-        )(x)
+y = larq.layers.QuantDense(512, activation="ste_sign")(x)
 ```
 
 Just like activations, quantizers can also be used on their own:
