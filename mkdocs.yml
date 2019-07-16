@@ -7,9 +7,9 @@ nav:
   - Learn:
       - Introduction: index.md
       - User Guides:
-          - Key Concepts: guide.md
-          - Building BNNs: architecture_guide.md
-          - Training BNNs: optimization_guide.md
+          - Key Concepts: guides/key-concepts.md
+          - Building BNNs: guides/bnn-architecture.md
+          - Training BNNs: guides/bnn-optimization.md
       - Examples:
           - Introduction to BNNs with Larq: examples/mnist.ipynb
           - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
@@ -30,7 +30,7 @@ nav:
   - Community:
       - Papers using Larq: papers.md
       - Contributing Guide: contributing.md
-      - Code of Conduct: code_of_conduct.md
+      - Code of Conduct: code-of-conduct.md
   - Why Larq?:
       - About: about.md
       - FAQ: faq.md

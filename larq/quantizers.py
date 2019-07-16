@@ -1,5 +1,39 @@
 """A Quantizer defines the way of transforming a full precision input to a
-quantized output and the pseudo-gradient method used for the backwards pass."""
+quantized output and the pseudo-gradient method used for the backwards pass.
+
+Quantizers can either be used through quantizer arguments that are supported
+for Larq layers, such as `input_quantizer` and `kernel_quantizer`; or they
+can be used similar to activations, i.e. either through an `Activation` layer,
+or through the `activation` argument supported by all forward layer:
+
+```python
+import tensorflow as tf
+import larq as lq
+...
+x = lq.layers.QuantDense(64, activation=None)(x)
+x = lq.layers.QuantDense(64, input_quantizer="ste_sign")(x)
+```
+
+is equivalent to:
+
+```python
+x = lq.layers.QuantDense(64)(x)
+x = tf.keras.layers.Activation("ste_sign")(x)
+x = lq.layers.QuantDense(64)(x)
+```
+
+as well as:
+
+```python
+x = lq.layers.QuantDense(64, activation="ste_sign")(x)
+x = lq.layers.QuantDense(64)(x)
+```
+
+We highly recommend using the first of these formulations: for the
+other two formulations, intermediate layers - like batch normalization or
+average pooling - and shortcut connections may result in non-binary input
+to the convolutions.
+"""
 
 import tensorflow as tf
 from larq import utils, math
