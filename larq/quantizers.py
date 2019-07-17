@@ -181,7 +181,9 @@ class SteTern:
     \\[
     \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
     \\]
-    where we assume that $W_i$ is generated from a normal distribution.
+    where we assume that $W_i$ is generated from a normal distribution. Note that a too high threshold may 
+    cause the ternarization to set most input values to zero and thereby prevent the network from learning. Thererfore 
+    we advise against using the default parameter and rather recommend using the given calcuation.
 
     The gradient is estimated using the Straight-Through Estimator
     (essentially the Ternarization is replaced by a clipped identity on the
