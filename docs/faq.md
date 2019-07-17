@@ -2,7 +2,7 @@
 
 We believe open research and software is the way forward for the field of Binarized Neural Network (BNN) and deep learning and general: machine learning can be a powerful engine for good, but only if it is transparent, save and widely accessible. That is why we have made Larq open-source and free to use.
 
-Larq is licensed under [Apache 2.0 licence](https://github.com/larq/larq/blob/master/LICENSE) - you are free to contribute to [https://github.com/larq/larq], fork it or build commercial applications on top of it. If you distribute a modified version of Larq, you should clearly state changes you have made.
+Larq is licensed under [Apache 2.0 licence](https://github.com/larq/larq/blob/master/LICENSE) - you are free to contribute to [Larq](https://github.com/larq/larq), fork it or build commercial applications on top of it. If you distribute a modified version of Larq, you should clearly state changes you have made and consider contributing them back.
 
 ## What is a Binarized Neural Network (BNN)?
 
