@@ -1,3 +1,17 @@
+## Are there any restrictions on using Larq?
+
+We believe open research and software is the way forward for the field of Binarized Neural Network (BNN) and deep learning and general: machine learning can be a powerful engine for good, but only if it is transparent, save and widely accessible. That is why we have made Larq open-source and free to use.
+
+Larq is licensed under [Apache 2.0 licence](https://github.com/larq/larq/blob/master/LICENSE) - you are free to contribute to [Larq](https://github.com/larq/larq), fork it or build commercial applications on top of it. If you distribute a modified version of Larq, you should clearly state changes you have made and consider contributing them back.
+
+## What is a Binarized Neural Network (BNN)?
+
+A BNN is a deep neural network in which the bulk of the computations are performed using binary values. For example, in a convolutional layer we can use weights that are either -1 or 1, and similarly binarize the activations. 
+
+Binarization enables the creation of deep learning models that are extremely efficient: storing the model only requires a single bit per weight, and evaluating the model can be done very efficiently because of the bitwise nature of the operations.
+
+Note that in BNN not everything is binary: usually higher-precision computations are still used for things like the first layer, batch-normalization and residual connections.
+
 ## How can I cite Larq?
 
 If Larq helps you in your work or research, it would be great if you can cite it as follows:
