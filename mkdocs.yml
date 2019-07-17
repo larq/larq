@@ -65,12 +65,18 @@ markdown_extensions:
         - name: plot-activation
           class: larq-activation
           format: !!python/name:plot_activation.html_format
+        - name: plot-altair
+          class: larq-altair
+          format: !!python/name:plot_altair.html_format
   - pymdownx.arithmatex
   - toc:
       permalink: true
 
 extra_javascript:
   - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML"
+  - "https://cdn.jsdelivr.net/npm/vega@5"
+  - "https://cdn.jsdelivr.net/npm/vega-lite@3"
+  - "https://cdn.jsdelivr.net/npm/vega-embed@4"
 
 extra_css:
   - custom.css
