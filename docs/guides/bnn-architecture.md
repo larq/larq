@@ -28,6 +28,11 @@ x_out = lq.layers.QuantDense(
 ## First & Last Layer
 
 Binarizing the first and last layers hurts accuracy much more than binarizing other layers in the network. Meanwhile, the number of weights and operations in these layers are relatively small. Therefore it has become standard to leave these layers in higher precision. This applies to the incoming activations as well as the weights.
+The following shows a network that was trained on CIFAR10 with different precisions for first and last layers.
+
+```plot-altair
+/plots/first_and_last_layers.vg.json
+```
 
 ## Batch Normalization
 
@@ -57,16 +62,16 @@ def conv_with_shortcut(x):
 
     Args:
       x: input tensor with high-precision activations
-      
+
     Returns:
       Tensor with high-precision activations
     """
     # get number of filters
     filters = x.get_shape().as_list()[-1]
-    
+
     # create shortcut that retains the high-precision information
     shortcut = x
-    
+
     # efficient binarized convolutions (note inputs are also binarized)
     x = lq.layers.QuantConv2D(
         filters=filters,
