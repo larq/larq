@@ -181,9 +181,7 @@ class SteTern:
     \\[
     \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
     \\]
-    where we assume that $W_i$ is generated from a normal distribution. Note that a too high threshold may 
-    cause the ternarization to set most input values to zero and thereby prevent the network from learning. Thererfore 
-    we advise against using the default parameter and rather recommend using the given calcuation.
+    where we assume that $W_i$ is generated from a normal distribution. 
 
     The gradient is estimated using the Straight-Through Estimator
     (essentially the Ternarization is replaced by a clipped identity on the
@@ -209,7 +207,7 @@ class SteTern:
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
 
-    def __init__(self, threshold_value=0.1, ternary_weight_networks=False):
+    def __init__(self, threshold_value=0.05, ternary_weight_networks=False):
         self.threshold_value = threshold_value
         self.ternary_weight_networks = ternary_weight_networks
 
