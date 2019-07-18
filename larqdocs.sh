@@ -17,5 +17,8 @@ curl -o $basedir/docs/models/index.md https://raw.githubusercontent.com/larq/zoo
 curl -o $basedir/docs/models/examples.md https://raw.githubusercontent.com/larq/zoo/master/docs/examples.md
 curl -o $basedir/docs/models/api.md https://raw.githubusercontent.com/larq/zoo/master/docs/api.md
 
+# Fetch larq-zoo plots
+curl -o $basedir/docs/plots/xnornet.vg.json https://raw.githubusercontent.com/larq/zoo/master/docs/plots/xnornet.vg.json
+
 # run mkdocs
 mkdocs $1
