@@ -13,12 +13,6 @@ from larq import quantizers, utils, metrics
 log = logging.getLogger(__name__)
 
 
-def _supports_metrics():
-    # TensorFlow 1.13 does not support adding an aggregated metric tensor in
-    # `tf.keras.layers.Layer.call` in eager execution.
-    return utils.tf_1_14_or_newer() or not tf.executing_eagerly()
-
-
 # TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
 
 
@@ -51,7 +45,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             self.quantized_latent_weights.append(self.kernel)
             self.quantizers.append(self.kernel_quantizer)
-            if "flip_ratio" in self._custom_metrics and _supports_metrics():
+            if "flip_ratio" in self._custom_metrics and utils.supports_metrics():
                 self.flip_ratio = metrics.FlipRatio(
                     values_shape=self.kernel.shape, name=f"{self.name}/flip_ratio"
                 )
@@ -67,19 +61,11 @@ class QuantizerBase(tf.keras.layers.Layer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-        if self.kernel_quantizer:
-            full_precision_kernel = self.kernel
-            quantized_kernel = self.kernel_quantizer(self.kernel)
-            if hasattr(self, "flip_ratio"):
-                self.add_metric(self.flip_ratio(quantized_kernel))
-            self.kernel = quantized_kernel
 
-        output = super().call(inputs)
-        if self.kernel_quantizer:
-            # Reset the full precision kernel to make keras eager tests pass.
-            # Is this a problem with our unit tests or a real bug?
-            self.kernel = full_precision_kernel
-        return output
+        with utils.quantize(self, "kernel", self.kernel_quantizer) as kernel:
+            if hasattr(self, "flip_ratio"):
+                self.add_metric(self.flip_ratio(kernel))
+            return super().call(inputs)
 
     def get_config(self):
         config = {
@@ -118,7 +104,7 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
         if self.depthwise_quantizer:
             self.quantized_latent_weights.append(self.depthwise_kernel)
             self.quantizers.append(self.depthwise_quantizer)
-            if "flip_ratio" in self._custom_metrics and _supports_metrics():
+            if "flip_ratio" in self._custom_metrics and utils.supports_metrics():
                 self.flip_ratio = metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
                     name=f"{self.name}/flip_ratio",
@@ -135,19 +121,13 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-        if self.depthwise_quantizer:
-            full_precision_depthwise = self.depthwise_kernel
-            quantized_depthwise = self.depthwise_quantizer(self.depthwise_kernel)
-            if hasattr(self, "flip_ratio"):
-                self.add_metric(self.flip_ratio(quantized_depthwise))
-            self.depthwise_kernel = quantized_depthwise
 
-        output = super().call(inputs)
-        if self.depthwise_quantizer:
-            # Reset the full precision depthwise kernel to make keras eager tests pass.
-            # Is this a problem with our unit tests or a real bug?
-            self.depthwise_kernel = full_precision_depthwise
-        return output
+        with utils.quantize(
+            self, "depthwise_kernel", self.depthwise_quantizer
+        ) as kernel:
+            if hasattr(self, "flip_ratio"):
+                self.add_metric(self.flip_ratio(kernel))
+            return super().call(inputs)
 
     def get_config(self):
         config = {
@@ -230,27 +210,17 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-        if self.depthwise_quantizer:
-            full_precision_depthwise_kernel = self.depthwise_kernel
-            depthwise_quantized_kernel = self.depthwise_quantizer(self.depthwise_kernel)
-            if hasattr(self, "depthwise_flip_ratio"):
-                self.add_metric(self.depthwise_flip_ratio(depthwise_quantized_kernel))
-            self.depthwise_kernel = depthwise_quantized_kernel
-        if self.pointwise_quantizer:
-            full_precision_pointwise_kernel = self.pointwise_kernel
-            pointwise_quantized_kernel = self.pointwise_quantizer(self.pointwise_kernel)
-            if hasattr(self, "pointwise_flip_ratio"):
-                self.add_metric(self.pointwise_flip_ratio(pointwise_quantized_kernel))
-            self.pointwise_kernel = pointwise_quantized_kernel
 
-        output = super().call(inputs)
-        # Reset the full precision kernel to make keras eager tests pass.
-        # Is this a problem with our unit tests or a real bug?
-        if self.depthwise_quantizer:
-            self.depthwise_kernel = full_precision_depthwise_kernel
-        if self.pointwise_quantizer:
-            self.pointwise_kernel = full_precision_pointwise_kernel
-        return output
+        with utils.quantize(
+            self, "depthwise_kernel", self.depthwise_quantizer
+        ) as depthwise_kernel, utils.quantize(
+            self, "pointwise_kernel", self.pointwise_quantizer
+        ) as pointwise_kernel:
+            if hasattr(self, "depthwise_flip_ratio"):
+                self.add_metric(self.depthwise_flip_ratio(depthwise_kernel))
+            if hasattr(self, "pointwise_flip_ratio"):
+                self.add_metric(self.pointwise_flip_ratio(pointwise_kernel))
+            return super().call(inputs)
 
     def get_config(self):
         config = {
