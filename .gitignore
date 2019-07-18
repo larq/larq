@@ -1,6 +1,7 @@
 junit
 docs/api
 docs/models
+docs/plots/xnornet.vg.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
