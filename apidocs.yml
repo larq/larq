@@ -1,16 +1,5 @@
 - layers.md:
-    - larq.layers:
-        - larq.layers.QuantDense
-        - larq.layers.QuantConv1D
-        - larq.layers.QuantConv2D
-        - larq.layers.QuantConv3D
-        - larq.layers.QuantSeparableConv1D
-        - larq.layers.QuantSeparableConv2D
-        - larq.layers.QuantDepthwiseConv2D
-        - larq.layers.QuantConv2DTranspose
-        - larq.layers.QuantConv3DTranspose
-        - larq.layers.QuantLocallyConnected1D
-        - larq.layers.QuantLocallyConnected2D
+    - larq.layers+
 - activations.md:
     - larq.activations+
 - callbacks.md:
