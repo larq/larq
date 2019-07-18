@@ -7,7 +7,9 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_summary 1'] = '''+sequential stats---------------------------------------------------------------------------+
+snapshots[
+    "test_summary 1"
+] = """+sequential stats---------------------------------------------------------------------------+
 | Layer                   Input prec.           Outputs  # 1-bit  # 2-bit  # 32-bit  Memory |
 |                               (bit)                                                  (kB) |
 +-------------------------------------------------------------------------------------------+
@@ -26,4 +28,4 @@ snapshots['test_summary 1'] = '''+sequential stats------------------------------
 | Float-32 Equivalent    0.13 MB |
 | Compression of Memory  13.79   |
 +--------------------------------+
-'''
+"""
