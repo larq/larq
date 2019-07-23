@@ -1,6 +1,5 @@
 import larq as lq
 import numpy as np
-import inspect
 import tensorflow as tf
 from larq import utils
 
@@ -88,11 +87,6 @@ def layer_test(
     # test get_weights , set_weights at layer level
     weights = layer.get_weights()
     layer.set_weights(weights)
-
-    # test and instantiation from weights
-    if "weights" in inspect.getargspec(layer_cls.__init__):
-        kwargs["weights"] = weights
-        layer = layer_cls(**kwargs)
 
     # test in functional API
     x = tf.keras.layers.Input(shape=input_shape[1:], dtype=input_dtype)
