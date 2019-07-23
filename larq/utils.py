@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from distutils.version import LooseVersion
 import tensorflow as tf
 from tensorflow.keras.utils import get_custom_objects
@@ -25,3 +26,30 @@ def set_precision(precision=32):
         return function
 
     return decorator
+
+
+def supports_metrics():
+    """Checks if layer metrics are supported
+
+    TensorFlow 1.13 does not support adding an aggregated metric tensor in
+    `tf.keras.layers.Layer.call` in eager execution.
+    """
+    return tf_1_14_or_newer() or not tf.executing_eagerly()
+
+
+@contextmanager
+def quantize(layer, kernel_name, quantizer):
+    """Temporarily apply a quantizer to a kernel.
+
+    This is needed, since we do not want to mutate existing references that might
+    expect a tf.Variable instead of a tf.Tensor. This can happen in eager mode since
+    overwriting a kernel would also mutate layer.trainable_variables which breaks
+    gradient computation.
+    """
+    if quantizer is None:
+        return None
+    full_precision_kernel = getattr(layer, kernel_name)
+    quantized_kernel = quantizer(full_precision_kernel)
+    setattr(layer, kernel_name, quantized_kernel)
+    yield quantized_kernel
+    setattr(layer, kernel_name, full_precision_kernel)
