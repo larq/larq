@@ -17,7 +17,6 @@ jobs:
           python.version: "3.7"
           tensorflow.version: "1.14.0"
           pytest.args: "--cov=larq --cov-report=html --cov-config=.coveragerc"
-          docs: "true"
         Python37_TF2:
           python.version: "3.7"
           tensorflow.version: "2.0.0-beta1"
@@ -37,15 +36,24 @@ jobs:
       - script: pytest . $(pytest.args)
         displayName: "pytest"
 
+  - job: "Docs"
+    pool:
+      vmImage: "Ubuntu-16.04"
+
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.7"
+          architecture: "x64"
+
       - script: |
+          pip install tensorflow==1.14.0
           pip install nbconvert git+https://github.com/lgeiger/pydoc-markdown.git
           pip install -e .[docs]
         displayName: "Install docs dependencies"
-        condition: eq(variables['docs'], 'true')
 
       - script: ./larqdocs.sh build
         displayName: "Build docs"
-        condition: eq(variables['docs'], 'true')
 
   - job: "Lint"
     pool:
