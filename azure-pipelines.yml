@@ -41,6 +41,9 @@ jobs:
       vmImage: "Ubuntu-16.04"
 
     steps:
+      - checkout: self
+        persistCredentials: true
+
       - task: UsePythonVersion@0
         inputs:
           versionSpec: "3.7"
@@ -54,6 +57,13 @@ jobs:
 
       - script: ./larqdocs.sh build
         displayName: "Build docs"
+
+      - script: |
+          git config --local user.name "Azure Pipelines"
+          git config --local user.email "azuredevops@microsoft.com"
+          ./larqdocs.sh gh-deploy --force --remote-name https://$(github_pat)@github.com/larq/larq.git
+        displayName: "Publish GitHub Pages"
+        condition: and(succeeded(), not(eq(variables['Build.Reason'], 'PullRequest')), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
 
   - job: "Lint"
     pool:
