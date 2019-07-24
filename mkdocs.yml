@@ -1,5 +1,5 @@
 site_name: Larq
-site_description: "An Open Source Machine Learning Framework for Training Extreme Quantized Neural Networks"
+site_description: "An Open-Source Library for Training Binarized Neural Networks"
 site_author: "Plumerai"
 site_url: "https://larq.dev/"
 
