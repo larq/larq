@@ -1,3 +1,6 @@
 .code-link::before {
   content: "</>";
 }
+.md-header[data-md-state="shadow"] {
+  transition: unset;
+}

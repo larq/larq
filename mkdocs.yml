@@ -40,13 +40,12 @@ repo_name: larq/larq
 edit_uri: ""
 theme:
   name: material
+  custom_dir: docs-theme
   logo:
     icon: developer_board
   palette:
     primary: blue
     accent: blue
-  feature:
-    tabs: true
 
 extra:
   social:
