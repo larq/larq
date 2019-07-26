@@ -4,6 +4,13 @@ from tensorflow.python.keras import keras_parameterized
 import pytest
 
 
+def test_scope():
+    assert metrics.get_training_metrics() == set()
+    with metrics.scope(["flip_ratio", "new_metric"]):
+        assert metrics.get_training_metrics() == {"flip_ratio", "new_metric"}
+    assert metrics.get_training_metrics() == set()
+
+
 class FlipRatioTest(keras_parameterized.TestCase):
     def test_config(self):
         mcv = metrics.FlipRatio(

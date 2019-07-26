@@ -77,16 +77,17 @@ class LayersTest(keras_parameterized.TestCase):
         input_data = random_input(input_shape)
         random_weight = np.random.random() - 0.5
 
-        quant_output = testing_utils.layer_test(
-            quantized_layer,
-            kwargs=dict(
-                **kwargs,
-                kernel_quantizer="ste_sign",
-                input_quantizer="ste_sign",
-                kernel_initializer=tf.keras.initializers.constant(random_weight),
-            ),
-            input_data=input_data,
-        )
+        with lq.metrics.scope(["flip_ratio"]):
+            quant_output = testing_utils.layer_test(
+                quantized_layer,
+                kwargs=dict(
+                    **kwargs,
+                    kernel_quantizer="ste_sign",
+                    input_quantizer="ste_sign",
+                    kernel_initializer=tf.keras.initializers.constant(random_weight),
+                ),
+                input_data=input_data,
+            )
 
         fp_output = testing_utils.layer_test(
             layer,
@@ -105,16 +106,17 @@ class LayersTest(keras_parameterized.TestCase):
         input_data = random_input((2, 3, 7, 6))
         random_weight = np.random.random() - 0.5
 
-        quant_output = testing_utils.layer_test(
-            lq.layers.QuantDepthwiseConv2D,
-            kwargs=dict(
-                kernel_size=3,
-                depthwise_quantizer="ste_sign",
-                input_quantizer="ste_sign",
-                depthwise_initializer=tf.keras.initializers.constant(random_weight),
-            ),
-            input_data=input_data,
-        )
+        with lq.metrics.scope(["flip_ratio"]):
+            quant_output = testing_utils.layer_test(
+                lq.layers.QuantDepthwiseConv2D,
+                kwargs=dict(
+                    kernel_size=3,
+                    depthwise_quantizer="ste_sign",
+                    input_quantizer="ste_sign",
+                    depthwise_initializer=tf.keras.initializers.constant(random_weight),
+                ),
+                input_data=input_data,
+            )
 
         fp_output = testing_utils.layer_test(
             tf.keras.layers.DepthwiseConv2D,
@@ -148,19 +150,24 @@ class LayersTest(keras_parameterized.TestCase):
         random_d_kernel = np.random.random() - 0.5
         random_p_kernel = np.random.random() - 0.5
 
-        quant_output = testing_utils.layer_test(
-            quantized_layer,
-            kwargs=dict(
-                filters=3,
-                kernel_size=3,
-                depthwise_quantizer="ste_sign",
-                pointwise_quantizer="ste_sign",
-                input_quantizer="ste_sign",
-                depthwise_initializer=tf.keras.initializers.constant(random_d_kernel),
-                pointwise_initializer=tf.keras.initializers.constant(random_p_kernel),
-            ),
-            input_data=input_data,
-        )
+        with lq.metrics.scope(["flip_ratio"]):
+            quant_output = testing_utils.layer_test(
+                quantized_layer,
+                kwargs=dict(
+                    filters=3,
+                    kernel_size=3,
+                    depthwise_quantizer="ste_sign",
+                    pointwise_quantizer="ste_sign",
+                    input_quantizer="ste_sign",
+                    depthwise_initializer=tf.keras.initializers.constant(
+                        random_d_kernel
+                    ),
+                    pointwise_initializer=tf.keras.initializers.constant(
+                        random_p_kernel
+                    ),
+                ),
+                input_data=input_data,
+            )
 
         fp_output = testing_utils.layer_test(
             layer,
@@ -225,6 +232,21 @@ def test_separable_layer_does_not_warn(caplog):
         pointwise_constraint="weight_clip",
     )
     assert caplog.records == []
+
+
+def test_metrics():
+    model = tf.keras.models.Sequential(
+        [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
+    )
+    model.compile(loss="mse", optimizer="sgd")
+    assert len(model.layers[0].metrics) == 0
+
+    with lq.metrics.scope(["flip_ratio"]):
+        model = tf.keras.models.Sequential(
+            [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
+        )
+        model.compile(loss="mse", optimizer="sgd")
+    assert len(model.layers[0].metrics) == 1
 
 
 @pytest.mark.parametrize(

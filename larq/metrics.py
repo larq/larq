@@ -1,11 +1,30 @@
 import tensorflow as tf
 from larq import utils
 import numpy as np
+from contextlib import contextmanager
 
 try:
     from tensorflow.keras.metrics import Metric
 except:  # TensorFlow 1.13 doesn't export this as a public API
     from tensorflow.python.keras.metrics import Metric
+
+
+__all__ = ["scope", "get_training_metrics"]
+
+_GLOBAL_TRAINING_METRICS = set()
+
+
+@contextmanager
+def scope(metrics=[]):
+    backup = _GLOBAL_TRAINING_METRICS.copy()
+    _GLOBAL_TRAINING_METRICS.update(metrics)
+    yield _GLOBAL_TRAINING_METRICS
+    _GLOBAL_TRAINING_METRICS.clear()
+    _GLOBAL_TRAINING_METRICS.update(backup)
+
+
+def get_training_metrics():
+    return _GLOBAL_TRAINING_METRICS
 
 
 class FlipRatio(Metric):
