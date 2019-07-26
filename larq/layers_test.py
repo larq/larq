@@ -239,14 +239,14 @@ def test_metrics():
         [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
     )
     model.compile(loss="mse", optimizer="sgd")
-    assert len(model.layers[0].metrics) == 0
+    assert len(model.layers[0]._metrics) == 0
 
     with lq.metrics.scope(["flip_ratio"]):
         model = tf.keras.models.Sequential(
             [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
         )
         model.compile(loss="mse", optimizer="sgd")
-    assert len(model.layers[0].metrics) == 1
+    assert len(model.layers[0]._metrics) == 1
 
 
 @pytest.mark.parametrize(
