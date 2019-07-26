@@ -46,6 +46,8 @@ theme:
   palette:
     primary: blue
     accent: blue
+  feature:
+    tabs: true
 
 extra:
   social:
