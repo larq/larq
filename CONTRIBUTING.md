@@ -46,7 +46,11 @@ Inside the project directory run:
 ./larqdocs.sh serve
 ```
 
-A new version of the documentation will be automatically published once merged into the master branch.
+To publish a new version to github pages run:
+
+```shell
+./larqdocs.sh gh-deploy --force
+```
 
 ## Code style
 
