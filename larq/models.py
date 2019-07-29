@@ -1,6 +1,5 @@
 import numpy as np
 from terminaltables import AsciiTable
-from collections import defaultdict
 import itertools
 
 import tensorflow.keras.layers as keras_layers
@@ -124,11 +123,11 @@ class LayerProfile:
 
     @property
     def memory(self):
-        return sum([p.memory for p in self.parameter_profiles])
+        return sum(p.memory for p in self.parameter_profiles)
 
     @property
     def fp_equivalent_memory(self):
-        return sum([p.fp_equivalent_memory for p in self.parameter_profiles])
+        return sum(p.fp_equivalent_memory for p in self.parameter_profiles)
 
     def parameter_count(self, bitwidth=None, trainable=None):
         count = 0
@@ -171,7 +170,7 @@ class LayerProfile:
     @property
     def output_pixels(self):
         if len(self.output_shape) == 4:
-            return np.prod(self.output_shape[1:2])
+            return int(np.prod(self.output_shape[1:2]))
         elif len(self.output_shape) == 2:
             return 1
         else:
@@ -179,11 +178,11 @@ class LayerProfile:
 
     @property
     def unique_param_bidtwidths(self):
-        return sorted(np.unique([p.bitwidth for p in self.parameter_profiles]))
+        return sorted(set([p.bitwidth for p in self.parameter_profiles]))
 
     @property
     def unique_op_precisions(self):
-        return sorted(np.unique([op.precision for op in self.op_profiles]))
+        return sorted(set([op.precision for op in self.op_profiles]))
 
     def generate_table_row(self, table_config):
         row = [self._layer.name, self.input_precision(), self.output_shape]
@@ -219,24 +218,24 @@ class ModelProfile:
 
     @property
     def memory(self):
-        return sum([l.memory for l in self.layer_profiles])
+        return sum(l.memory for l in self.layer_profiles)
 
     @property
     def fp_equivalent_memory(self):
-        return sum([l.fp_equivalent_memory for l in self.layer_profiles])
+        return sum(l.fp_equivalent_memory for l in self.layer_profiles)
 
     def parameter_count(self, bitwidth=None, trainable=None):
         return sum(
-            [l.parameter_count(bitwidth, trainable) for l in self.layer_profiles]
+            l.parameter_count(bitwidth, trainable) for l in self.layer_profiles
         )
 
     def op_count(self, bitwidth=None, op_type=None):
-        return sum([l.op_count(bitwidth, op_type, 0) for l in self.layer_profiles])
+        return sum(l.op_count(bitwidth, op_type, 0) for l in self.layer_profiles)
 
     @property
     def unique_param_bidtwidths(self):
         return sorted(
-            np.unique(
+            set(
                 _flatten([l.unique_param_bidtwidths for l in self.layer_profiles])
             )
         )
@@ -244,7 +243,7 @@ class ModelProfile:
     @property
     def unique_op_precisions(self):
         return sorted(
-            np.unique(_flatten([l.unique_op_precisions for l in self.layer_profiles]))
+            set(_flatten([l.unique_op_precisions for l in self.layer_profiles]))
         )
 
     def _generate_table_header(self, table_config):
