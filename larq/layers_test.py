@@ -245,7 +245,7 @@ def test_metrics():
         model = tf.keras.models.Sequential(
             [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
         )
-        model.compile(loss="mse", optimizer="sgd")
+    model.compile(loss="mse", optimizer="sgd")
     assert len(model.layers[0]._metrics) == 1
 
 
