@@ -1,5 +1,4 @@
 import numpy as np
-import pdb
 from terminaltables import AsciiTable
 from collections import defaultdict
 import itertools
