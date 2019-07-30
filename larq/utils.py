@@ -46,10 +46,11 @@ def quantize(layer, kernel_name, quantizer):
     overwriting a kernel would also mutate layer.trainable_variables which breaks
     gradient computation.
     """
-    if quantizer is None:
-        return None
     full_precision_kernel = getattr(layer, kernel_name)
-    quantized_kernel = quantizer(full_precision_kernel)
-    setattr(layer, kernel_name, quantized_kernel)
-    yield quantized_kernel
-    setattr(layer, kernel_name, full_precision_kernel)
+    if quantizer is None:
+        yield full_precision_kernel
+    else:
+        quantized_kernel = quantizer(full_precision_kernel)
+        setattr(layer, kernel_name, quantized_kernel)
+        yield quantized_kernel
+        setattr(layer, kernel_name, full_precision_kernel)
