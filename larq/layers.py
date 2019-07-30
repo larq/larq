@@ -75,7 +75,8 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the `kernel` weights matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     N-D tensor with shape: `(batch_size, ..., input_dim)`. The most common situation
@@ -168,7 +169,8 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     3D tensor with shape: `(batch_size, steps, input_dim)`
@@ -274,7 +276,8 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     4D tensor with shape:
@@ -387,7 +390,8 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     5D tensor with shape:
@@ -494,7 +498,8 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
         the output of the layer (its 'activation').
     depthwise_constraint: Constraint function applied to the depthwise kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     4D tensor with shape:
@@ -606,7 +611,8 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         pointwise kernel after being updated by an `Optimizer`.
     bias_constraint: Optional projection function to be applied to the
         bias after being updated by an `Optimizer`.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+        metrics: An array of metrics to add to the layer. If `None` the metrics set in
+            `larq.metrics.scope` are used. Available metrics: `flip_ration`.
     trainable: Boolean, if `True` the weights of this layer will be marked as
         trainable (and listed in `layer.trainable_weights`).
     name: A string, the name of the layer.
@@ -726,7 +732,8 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     depthwise_constraint: Constraint function applied to the depthwise kernel matrix.
     pointwise_constraint: Constraint function applied to the pointwise kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     4D tensor with shape:
@@ -854,7 +861,8 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     4D tensor with shape:
@@ -979,7 +987,8 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
 
     # Input shape
     5D tensor with shape:
@@ -1096,7 +1105,8 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
     implementation: implementation mode, either `1` or `2`.
         `1` loops over input spatial locations to perform the forward pass.
         It is memory-efficient but performs a lot of (small) ops.
@@ -1230,7 +1240,8 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
         the output of the layer (its "activation").
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
-    metrics: An array of metrics to add to the layer. Available metrics: `flip_ration`.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Available metrics: `flip_ration`.
     implementation: implementation mode, either `1` or `2`.
         `1` loops over input spatial locations to perform the forward pass.
         It is memory-efficient but performs a lot of (small) ops.
