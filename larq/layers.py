@@ -7,7 +7,7 @@ is equivalent to a full precision layer.
 """
 
 import tensorflow as tf
-from larq import utils
+from larq import utils, metrics
 from larq.layers_base import (
     QuantizerBase,
     QuantizerDepthwiseBase,
@@ -99,6 +99,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -114,6 +115,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -193,6 +195,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -213,6 +216,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -302,6 +306,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -322,6 +327,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -417,6 +423,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -437,6 +444,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -515,6 +523,7 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
         activity_regularizer=None,
         depthwise_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -534,6 +543,7 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
             activity_regularizer=activity_regularizer,
             depthwise_constraint=depthwise_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -620,6 +630,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         depthwise_constraint=None,
         pointwise_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -645,6 +656,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
             depthwise_constraint=depthwise_constraint,
             pointwise_constraint=pointwise_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -747,6 +759,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         depthwise_constraint=None,
         pointwise_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -772,6 +785,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
             depthwise_constraint=depthwise_constraint,
             pointwise_constraint=pointwise_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -874,6 +888,7 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -894,6 +909,7 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -995,6 +1011,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         **kwargs,
     ):
         super().__init__(
@@ -1014,6 +1031,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             **kwargs,
         )
 
@@ -1119,6 +1137,7 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         implementation=1,
         **kwargs,
     ):
@@ -1139,6 +1158,7 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
+            metrics=metrics,
             implementation=implementation,
             **kwargs,
         )
@@ -1256,6 +1276,7 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
         activity_regularizer=None,
         kernel_constraint=None,
         bias_constraint=None,
+        metrics=metrics.get_training_metrics(),
         implementation=1,
         **kwargs,
     ):
@@ -1277,5 +1298,6 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
             kernel_constraint=kernel_constraint,
             bias_constraint=bias_constraint,
             implementation=implementation,
+            metrics=metrics,
             **kwargs,
         )

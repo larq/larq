@@ -275,6 +275,7 @@ def test_layer_kwargs(quant_layer, layer):
         "kernel_quantizer",
         "depthwise_quantizer",
         "pointwise_quantizer",
+        "metrics",
     ):
         try:
             quant_params_list.remove(p)
