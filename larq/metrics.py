@@ -12,10 +12,16 @@ except:  # TensorFlow 1.13 doesn't export this as a public API
 __all__ = ["scope", "get_training_metrics"]
 
 _GLOBAL_TRAINING_METRICS = set()
+_AVAILABLE_METRICS = {"flip_ratio"}
 
 
 @contextmanager
 def scope(metrics=[]):
+    for metric in metrics:
+        if metric not in _AVAILABLE_METRICS:
+            raise ValueError(
+                f"Unknown training metric '{metric}'. Available metrics: {_AVAILABLE_METRICS}."
+            )
     backup = _GLOBAL_TRAINING_METRICS.copy()
     _GLOBAL_TRAINING_METRICS.update(metrics)
     yield _GLOBAL_TRAINING_METRICS
