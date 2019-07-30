@@ -48,7 +48,7 @@ def get_training_metrics():
     """Retrieves a live reference to the training metrics in the current scope.
 
     Updating and clearing training metrics using `larq.metrics.scope` is preferred,
-    but `get_custom_objects` can be used to directly access them.
+    but `get_training_metrics` can be used to directly access them.
 
     !!! example
         ```python
