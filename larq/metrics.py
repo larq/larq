@@ -17,6 +17,21 @@ _AVAILABLE_METRICS = {"flip_ratio"}
 
 @contextmanager
 def scope(metrics=[]):
+    """A context manager to set the training metrics to be used in layers.
+
+    !!! example
+        ```python
+        with larq.metrics.scope(["flip_ratio"]):
+            model = tf.keras.models.Sequential(
+                [larq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
+            )
+        model.compile(loss="mse", optimizer="sgd")
+        ```
+
+    # Arguments
+    metrics: Iterable of metrics to add to layers defined inside this context.
+        Currently only the `flip_ration` metric is available.
+    """
     for metric in metrics:
         if metric not in _AVAILABLE_METRICS:
             raise ValueError(
@@ -30,6 +45,20 @@ def scope(metrics=[]):
 
 
 def get_training_metrics():
+    """Retrieves a live reference to the training metrics in the current scope.
+
+    Updating and clearing training metrics using `larq.metrics.scope` is preferred,
+    but `get_custom_objects` can be used to directly access them.
+
+    !!! example
+        ```python
+        get_training_metrics().clear()
+        get_training_metrics().add("flip_ratio")
+        ```
+
+    # Returns
+    A set of training metrics in the current scope.
+    """
     return _GLOBAL_TRAINING_METRICS
 
 
