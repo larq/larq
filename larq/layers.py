@@ -76,7 +76,8 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     kernel_constraint: Constraint function applied to the `kernel` weights matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     N-D tensor with shape: `(batch_size, ..., input_dim)`. The most common situation
@@ -170,7 +171,8 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     3D tensor with shape: `(batch_size, steps, input_dim)`
@@ -277,7 +279,8 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     4D tensor with shape:
@@ -391,7 +394,8 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     5D tensor with shape:
@@ -499,7 +503,8 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
     depthwise_constraint: Constraint function applied to the depthwise kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     4D tensor with shape:
@@ -612,7 +617,8 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     bias_constraint: Optional projection function to be applied to the
         bias after being updated by an `Optimizer`.
         metrics: An array of metrics to add to the layer. If `None` the metrics set in
-            `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+            `larq.metrics.scope` are used.
+            Currently only the `flip_ratio` metric is available.
     trainable: Boolean, if `True` the weights of this layer will be marked as
         trainable (and listed in `layer.trainable_weights`).
     name: A string, the name of the layer.
@@ -733,7 +739,8 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     pointwise_constraint: Constraint function applied to the pointwise kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     4D tensor with shape:
@@ -862,7 +869,8 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     4D tensor with shape:
@@ -988,7 +996,8 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
 
     # Input shape
     5D tensor with shape:
@@ -1106,7 +1115,8 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
     implementation: implementation mode, either `1` or `2`.
         `1` loops over input spatial locations to perform the forward pass.
         It is memory-efficient but performs a lot of (small) ops.
@@ -1241,7 +1251,8 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     kernel_constraint: Constraint function applied to the kernel matrix.
     bias_constraint: Constraint function applied to the bias vector.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Available metrics: `flip_ratio`.
+        `larq.metrics.scope` are used.
+        Currently only the `flip_ratio` metric is available.
     implementation: implementation mode, either `1` or `2`.
         `1` loops over input spatial locations to perform the forward pass.
         It is memory-efficient but performs a lot of (small) ops.
