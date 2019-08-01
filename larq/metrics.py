@@ -30,7 +30,7 @@ def scope(metrics=[]):
 
     # Arguments
     metrics: Iterable of metrics to add to layers defined inside this context.
-        Currently only the `flip_ration` metric is available.
+        Currently only the `flip_ratio` metric is available.
     """
     for metric in metrics:
         if metric not in _AVAILABLE_METRICS:
