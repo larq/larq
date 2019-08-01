@@ -1,6 +1,7 @@
 import numpy as np
 from terminaltables import AsciiTable
 import itertools
+from dataclasses import dataclass
 
 import tensorflow.keras.layers as keras_layers
 import larq.layers as lq_layers
@@ -62,7 +63,7 @@ def _get_output_shape(layer):
         return "?"
 
 
-class ParameterProfile:
+class _parameterProfile:
     bitwidth = None
 
     def __init__(self, parameter, bitwidth=32):
@@ -89,32 +90,31 @@ class ParameterProfile:
         return "bias" in self._parameter.name
 
 
-class OperationProfile:
-    def __init__(self, n, precision, op_type):
-        self.n = n
-        self.precision = precision
-        self.op_type = op_type
+@dataclass
+class _operationProfile:
+    n: int
+    precision: int
+    op_type: str
 
 
 class LayerProfile:
     def __init__(self, layer):
         self._layer = layer
-        self.parameter_profiles = []
+        self.parameter_profiles = [
+            _parameterProfile(weight, self._get_bitwidth(weight))
+            for weight in layer.weights
+        ]
         self.op_profiles = []
-
-        for weight in layer.weights:
-            self.parameter_profiles.append(
-                ParameterProfile(weight, self._get_bitwidth(weight))
-            )
 
         if type(layer) in mac_layers:
             # mac layers should have a kernel weight and perhaps a bias
-            assert len(self.parameter_profiles) <= 2
+            # assert len(self.parameter_profiles) <= 2 \
+            #   or ('Seperable' in str(type(layer)) and len(self.parameter_profiles) <= 3)
 
             for p in self.parameter_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
-                        OperationProfile(
+                        _operationProfile(
                             n=p.count * self.output_pixels,
                             precision=max(self.input_precision(32), p.bitwidth),
                             op_type="mac",
@@ -132,22 +132,23 @@ class LayerProfile:
     def parameter_count(self, bitwidth=None, trainable=None):
         count = 0
         for p in self.parameter_profiles:
-            if bitwidth and (p.bitwidth != bitwidth):
-                continue
-            if (trainable is not None) and (p.trainable != trainable):
-                continue
-            count += p.count
+            if (bitwidth is None or p.bitwidth == bitwidth) and (
+                trainable is None or p.trainable == trainable
+            ):
+                count += p.count
         return count
 
-    def op_count(self, precision=None, op_type=None, escape="?"):
+    def op_count(self, op_type=None, precision=None, escape="?"):
+        if op_type != "mac":
+            raise ValueError("Currently only counting of MAC-operations is supported.")
+
         if type(self._layer) in op_count_supported_layer_types:
             count = 0
             for op in self.op_profiles:
-                if precision and (op.precision != precision):
-                    continue
-                if op_type and (op.op_type != op_type):
-                    continue
-                count += op.n
+                if (precision is None or op.precision == precision) and (
+                    op_type is None or op.op_type == op_type
+                ):
+                    count += op.n
             return count
         else:
             return escape
@@ -169,8 +170,9 @@ class LayerProfile:
 
     @property
     def output_pixels(self):
+        """Number of pixels for a single feature map (1 for fully connected layers)."""
         if len(self.output_shape) == 4:
-            return int(np.prod(self.output_shape[1:2]))
+            return int(np.prod(self.output_shape[1:3]))
         elif len(self.output_shape) == 2:
             return 1
         else:
@@ -192,7 +194,7 @@ class LayerProfile:
             row.append(n)
         row.append(_format_table_entry(self.memory, table_config["memory_units"]))
         for i in table_config["mac_precisions"]:
-            n = self.op_count(i, "mac")
+            n = self.op_count("mac", i)
             n = _format_table_entry(n, table_config["mac_units"])
             row.append(n)
 
@@ -225,19 +227,15 @@ class ModelProfile:
         return sum(l.fp_equivalent_memory for l in self.layer_profiles)
 
     def parameter_count(self, bitwidth=None, trainable=None):
-        return sum(
-            l.parameter_count(bitwidth, trainable) for l in self.layer_profiles
-        )
+        return sum(l.parameter_count(bitwidth, trainable) for l in self.layer_profiles)
 
-    def op_count(self, bitwidth=None, op_type=None):
-        return sum(l.op_count(bitwidth, op_type, 0) for l in self.layer_profiles)
+    def op_count(self, op_type=None, bitwidth=None):
+        return sum(l.op_count(op_type, bitwidth, 0) for l in self.layer_profiles)
 
     @property
     def unique_param_bidtwidths(self):
         return sorted(
-            set(
-                _flatten([l.unique_param_bidtwidths for l in self.layer_profiles])
-            )
+            set(_flatten([l.unique_param_bidtwidths for l in self.layer_profiles]))
         )
 
     @property
@@ -273,7 +271,7 @@ class ModelProfile:
         row.append(_format_table_entry(self.memory, table_config["memory_units"]))
         for i in table_config["mac_precisions"]:
             row.append(
-                _format_table_entry(self.op_count(i, "mac"), table_config["mac_units"])
+                _format_table_entry(self.op_count("mac", i), table_config["mac_units"])
             )
         return row
 
@@ -311,7 +309,7 @@ class ModelProfile:
         ]
 
         if include_macs:
-            binarization_ratio = self.op_count(1, "mac") / self.op_count(op_type="mac")
+            binarization_ratio = self.op_count("mac", 1) / self.op_count(op_type="mac")
             summary.extend(
                 [
                     ["Number of MACs", self.op_count(op_type="mac")],
