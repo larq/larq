@@ -49,9 +49,13 @@ def _bitsize_as_str(bitsize):
 
 
 def _format_table_entry(x, units=1):
-    if type(x) == str or x == 0 or units == 1:
-        return x
-    return x / units
+    try:
+        assert not np.isnan(x)
+        if type(x) == str or x == 0 or units == 1:
+            return x
+        return x / units
+    except:
+        return "?"
 
 
 def _get_output_shape(layer):
@@ -104,6 +108,7 @@ class LayerProfile:
             _parameterProfile(weight, self._get_bitwidth(weight))
             for weight in layer.weights
         ]
+
         self.op_profiles = []
 
         if type(layer) in mac_layers:
@@ -342,13 +347,36 @@ class SummaryTable(AsciiTable):
         self.inner_heading_row_border = False
 
 
-def summary(model, print_fn=None):
+def summary(model, print_fn=None, include_macs=True):
     """Prints a string summary of the network.
+
+    The summary includes the following information per layer:
+
+    - input precision,
+    - output dimension,
+    - parameter count (broken down by bidtwidth),
+    - memory footprint in kilobytes (`8*1024` 1-bit weights = 1 kB),
+    - number of multiply-accumulate (MAC) operations broken down by precision (*optional & expermental*).
+
+    A single MAC operation contains both a multiplication and an addition. The precision
+    of a MAC operation is defined as the maximum bitwidth of its inputs.
+
+    Additionally, the following overall statistics for the model are supplied:
+
+    - total number of parameters,
+    - total number of trainable parameters,
+    - total number of non-trainable parameters,
+    - model size,
+    - float-32 equivalent size: memory footprint if all weights were 32 bit,
+    - compression ratio achieved by quantizing weights,
+    - total number of MAC operations,
+    - ratio of MAC operations that is binarized and can be accelated with XNOR-gates.
 
     # Arguments
     model: `tf.keras` model instance.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
+    include_macs: whether or not to include the number of MAC-operations in the summary.
 
     # Raises
     ValueError: if called before the model is built.
@@ -370,6 +398,6 @@ def summary(model, print_fn=None):
     )
     print_fn(
         SummaryTable(
-            model_profile.generate_summary(), title=f"{model.name} summary"
+            model_profile.generate_summary(include_macs), title=f"{model.name} summary"
         ).table
     )
