@@ -13,7 +13,7 @@
 - math.md:
     - larq.math+
 - models.md:
-    - larq.models+
+    - larq.models.summary
 - metrics.md:
     - larq.metrics+
 - quantizers.md:
