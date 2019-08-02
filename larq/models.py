@@ -44,7 +44,7 @@ def _bitsize_as_str(bitsize):
 
     try:
         return bitsize_names[bitsize]
-    except:
+    except KeyError:
         raise NotImplementedError()
 
 
@@ -68,7 +68,6 @@ def _get_output_shape(layer):
 
 
 class _parameterProfile:
-    bitwidth = None
 
     def __init__(self, parameter, bitwidth=32):
         self._parameter = parameter
@@ -260,7 +259,7 @@ class ModelProfile:
             ),
             f"Memory\n({_bitsize_as_str(table_config['memory_units'])})",
             *(
-                f"{i}-bit macs\n({_bitsize_as_str(table_config['mac_units'])})"
+                f"{i}-bit MACs\n({_bitsize_as_str(table_config['mac_units'])})"
                 for i in table_config["mac_precisions"]
             ),
         ]
