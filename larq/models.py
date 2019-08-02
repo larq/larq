@@ -1,7 +1,324 @@
 import numpy as np
 from terminaltables import AsciiTable
+import itertools
+from dataclasses import dataclass
+
+import tensorflow.keras.layers as keras_layers
+import larq.layers as lq_layers
 
 __all__ = ["summary"]
+
+op_count_supported_layer_types = (
+    lq_layers.QuantConv2D,
+    lq_layers.QuantSeparableConv2D,
+    lq_layers.QuantDepthwiseConv2D,
+    lq_layers.QuantDense,
+    keras_layers.Conv2D,
+    keras_layers.SeparableConv2D,
+    keras_layers.DepthwiseConv2D,
+    keras_layers.Dense,
+    keras_layers.Flatten,
+    keras_layers.BatchNormalization,
+    keras_layers.MaxPool2D,
+    keras_layers.AveragePooling2D,
+)
+
+mac_containing_layers = (
+    lq_layers.QuantConv2D,
+    lq_layers.QuantSeparableConv2D,
+    lq_layers.QuantDepthwiseConv2D,
+    lq_layers.QuantDense,
+    keras_layers.Conv2D,
+    keras_layers.SeparableConv2D,
+    keras_layers.DepthwiseConv2D,
+    keras_layers.Dense,
+)
+
+
+def _flatten(lst):
+    return list(itertools.chain.from_iterable(lst))
+
+
+def _bitsize_as_str(bitsize):
+    bitsize_names = {8: "byte", 8 * 1024: "kB"}
+
+    try:
+        return bitsize_names[bitsize]
+    except KeyError:
+        raise NotImplementedError()
+
+
+def _format_table_entry(x, units=1):
+    try:
+        assert not np.isnan(x)
+        if type(x) == str or x == 0 or units == 1:
+            return x
+        return x / units
+    except:
+        return "?"
+
+
+def _get_output_shape(layer):
+    try:
+        return tuple(dim if dim else -1 for dim in layer.output_shape)
+    except AttributeError:
+        return "multiple"
+    except RuntimeError:  # output_shape unknown in Eager mode.
+        return "?"
+
+
+class WeightProfile:
+    def __init__(self, weight, bitwidth=32):
+        self._weight = weight
+        self.bitwidth = bitwidth
+
+    @property
+    def count(self):
+        return int(np.prod(self._weight.shape.as_list()))
+
+    @property
+    def memory(self):
+        return self.bitwidth * self.count
+
+    @property
+    def fp_equivalent_memory(self):
+        return 32 * self.count
+
+    @property
+    def trainable(self):
+        return self._weight.trainable
+
+    def is_bias(self):
+        return "bias" in self._weight.name
+
+
+@dataclass
+class OperationProfile:
+    n: int
+    precision: int
+    op_type: str
+
+
+class LayerProfile:
+    def __init__(self, layer):
+        self._layer = layer
+        self.weight_profiles = [
+            WeightProfile(weight, self._get_bitwidth(weight))
+            for weight in layer.weights
+        ]
+
+        self.op_profiles = []
+
+        if isinstance(layer, mac_containing_layers):
+            for p in self.weight_profiles:
+                if not p.is_bias():
+                    self.op_profiles.append(
+                        OperationProfile(
+                            n=p.count * self.output_pixels,
+                            precision=max(self.input_precision(32), p.bitwidth),
+                            op_type="mac",
+                        )
+                    )
+
+    @property
+    def memory(self):
+        return sum(p.memory for p in self.weight_profiles)
+
+    @property
+    def fp_equivalent_memory(self):
+        return sum(p.fp_equivalent_memory for p in self.weight_profiles)
+
+    def weight_count(self, bitwidth=None, trainable=None):
+        count = 0
+        for p in self.weight_profiles:
+            if (bitwidth is None or p.bitwidth == bitwidth) and (
+                trainable is None or p.trainable == trainable
+            ):
+                count += p.count
+        return count
+
+    def op_count(self, op_type=None, precision=None, escape="?"):
+        if op_type != "mac":
+            raise ValueError("Currently only counting of MAC-operations is supported.")
+
+        if isinstance(self._layer, op_count_supported_layer_types):
+            count = 0
+            for op in self.op_profiles:
+                if (precision is None or op.precision == precision) and (
+                    op_type is None or op.op_type == op_type
+                ):
+                    count += op.n
+            return count
+        else:
+            return escape
+
+    def input_precision(self, default="-"):
+        try:
+            return self._layer.input_quantizer.precision
+        except:
+            return default
+
+    @property
+    def output_shape(self):
+        try:
+            return tuple(dim if dim else -1 for dim in self._layer.output_shape)
+        except AttributeError:
+            return "multiple"
+        except RuntimeError:  # output_shape unknown in Eager mode.
+            return "?"
+
+    @property
+    def output_pixels(self):
+        """Number of pixels for a single feature map (1 for fully connected layers)."""
+        if len(self.output_shape) == 4:
+            return int(np.prod(self.output_shape[1:3]))
+        elif len(self.output_shape) == 2:
+            return 1
+        else:
+            raise NotImplementedError()
+
+    @property
+    def unique_param_bidtwidths(self):
+        return sorted(set([p.bitwidth for p in self.weight_profiles]))
+
+    @property
+    def unique_op_precisions(self):
+        return sorted(set([op.precision for op in self.op_profiles]))
+
+    def generate_table_row(self, table_config):
+        row = [self._layer.name, self.input_precision(), self.output_shape]
+        for i in table_config["param_bidtwidths"]:
+            n = self.weight_count(i)
+            n = _format_table_entry(n, table_config["param_units"])
+            row.append(n)
+        row.append(_format_table_entry(self.memory, table_config["memory_units"]))
+        for i in table_config["mac_precisions"]:
+            n = self.op_count("mac", i)
+            n = _format_table_entry(n, table_config["mac_units"])
+            row.append(n)
+
+        return row
+
+    def _quantized_weights(self):
+        try:
+            return self._layer.quantized_latent_weights
+        except:
+            return []
+
+    def _get_bitwidth(self, weight):
+        try:
+            quantizer = self._layer.quantizers[self._quantized_weights().index(weight)]
+            return quantizer.precision
+        except:
+            return 32
+
+
+class ModelProfile(LayerProfile):
+    def __init__(self, model):
+        self.layer_profiles = [LayerProfile(l) for l in model.layers]
+
+    @property
+    def memory(self):
+        return sum(l.memory for l in self.layer_profiles)
+
+    @property
+    def fp_equivalent_memory(self):
+        return sum(l.fp_equivalent_memory for l in self.layer_profiles)
+
+    def weight_count(self, bitwidth=None, trainable=None):
+        return sum(l.weight_count(bitwidth, trainable) for l in self.layer_profiles)
+
+    def op_count(self, op_type=None, bitwidth=None):
+        return sum(l.op_count(op_type, bitwidth, 0) for l in self.layer_profiles)
+
+    @property
+    def unique_param_bidtwidths(self):
+        return sorted(
+            set(_flatten(l.unique_param_bidtwidths for l in self.layer_profiles))
+        )
+
+    @property
+    def unique_op_precisions(self):
+        return sorted(
+            set(_flatten(l.unique_op_precisions for l in self.layer_profiles))
+        )
+
+    def _generate_table_header(self, table_config):
+        return [
+            "Layer",
+            "Input prec.\n(bit)",
+            "Outputs",
+            *(
+                f"# {i}-bit\nx {table_config['param_units']}"
+                for i in table_config["param_bidtwidths"]
+            ),
+            f"Memory\n({_bitsize_as_str(table_config['memory_units'])})",
+            *(
+                f"{i}-bit MACs\n({_bitsize_as_str(table_config['mac_units'])})"
+                for i in table_config["mac_precisions"]
+            ),
+        ]
+
+    def _generate_table_total(self, table_config):
+        row = ["Total", "", ""]
+        for i in table_config["param_bidtwidths"]:
+            row.append(
+                _format_table_entry(self.weight_count(i), table_config["param_units"])
+            )
+        row.append(_format_table_entry(self.memory, table_config["memory_units"]))
+        for i in table_config["mac_precisions"]:
+            row.append(
+                _format_table_entry(self.op_count("mac", i), table_config["mac_units"])
+            )
+        return row
+
+    def generate_table(self, include_macs=True):
+        table_config = {
+            "param_bidtwidths": self.unique_param_bidtwidths,
+            "mac_precisions": self.unique_op_precisions if include_macs else [],
+            "param_units": 1,
+            "memory_units": 8 * 1024,
+            "mac_units": 8 * 1024,
+        }
+
+        table = []
+
+        table.append(self._generate_table_header(table_config))
+
+        for lp in self.layer_profiles:
+            table.append(lp.generate_table_row(table_config))
+
+        table.append(self._generate_table_total(table_config))
+
+        return table
+
+    def generate_summary(self, include_macs=True):
+        summary = [
+            ["Total params", self.weight_count()],
+            ["Trainable params", self.weight_count(trainable=True)],
+            ["Non-trainable params", self.weight_count(trainable=False)],
+            ["Model size:", f"{self.memory / (8*1024*1024):.2f} MB"],
+            [
+                "Float-32 Equivalent",
+                f"{self.fp_equivalent_memory / (8*1024*1024):.2f} MB",
+            ],
+            ["Compression Ratio of Memory", self.memory / self.fp_equivalent_memory],
+        ]
+
+        if include_macs:
+            binarization_ratio = self.op_count("mac", 1) / self.op_count(op_type="mac")
+            ternarization_ratio = self.op_count("mac", 2) / self.op_count(op_type="mac")
+            summary.append(["Number of MACs", self.op_count(op_type="mac")])
+            if binarization_ratio > 0:
+                summary.append(
+                    ["Ratio of MACs that are binarized", f"{binarization_ratio:.4f}"]
+                )
+            if ternarization_ratio > 0:
+                summary.append(
+                    ["Ratio of MACs that are ternarized", f"{ternarization_ratio:.4f}"]
+                )
+
+        return summary
 
 
 def sanitize_table(table_data):
@@ -26,112 +343,36 @@ class SummaryTable(AsciiTable):
         self.inner_heading_row_border = False
 
 
-def _count_params(weights):
-    """Count the total number of scalars composing the weights.
-
-    # Arguments
-    weights: An iterable containing the weights on which to compute params
-
-    # Returns
-    The total number of scalars composing the weights
-    """
-    return int(sum(np.prod(w.shape.as_list()) for w in weights))
-
-
-def _get_output_shape(layer):
-    try:
-        return tuple(dim if dim else -1 for dim in layer.output_shape)
-    except AttributeError:
-        return "multiple"
-    except RuntimeError:  # output_shape unknown in Eager mode.
-        return "?"
-
-
-def _compute_memory(layer_stat):
-    mem_in_bits = sum(precision * number for precision, number in layer_stat.items())
-    return _bit_to_kB(mem_in_bits)
-
-
-def _parse_params(layer):
-    if hasattr(layer, "quantized_latent_weights"):
-        params = {}
-        for quantizer, weight in zip(layer.quantizers, layer.quantized_latent_weights):
-            precision = getattr(quantizer, "precision", 32)
-            params[precision] = params.get(precision, 0) + int(
-                np.prod(weight.shape.as_list())
-            )
-        for weight in layer.weights:
-            if weight not in layer.quantized_latent_weights:
-                params[32] = params.get(32, 0) + int(np.prod(weight.shape.as_list()))
-        return params
-    return {32: layer.count_params()}
-
-
-def _sum_params(layer_stats):
-    params = {}
-    for layer_stat in layer_stats:
-        for key, value in layer_stat.items():
-            params[key] = params.get(key, 0) + value
-    return params
-
-
-def _row_from_stats(stats, summed_stats):
-    return (stats.get(key, 0) for key in sorted(summed_stats))
-
-
-def _get_input_precision(layer):
-    try:
-        return layer.input_quantizer.precision
-    except:
-        return "-"
-
-
-def _generate_table(model):
-    layer_stats = [_parse_params(l) for l in model.layers]
-    summed_stat = _sum_params(layer_stats)
-
-    table = [
-        [
-            "Layer",
-            "Input prec.\n(bit)",
-            "Outputs",
-            *(f"# {i}-bit" for i in sorted(summed_stat)),
-            "Memory\n(kB)",
-        ]
-    ]
-    for layer, stats in zip(model.layers, layer_stats):
-        table.append(
-            [
-                layer.name,
-                _get_input_precision(layer),
-                _get_output_shape(layer),
-                *_row_from_stats(stats, summed_stat),
-                _compute_memory(stats),
-            ]
-        )
-    table.append(
-        [
-            "Total",
-            "",
-            "",
-            *_row_from_stats(summed_stat, summed_stat),
-            _compute_memory(summed_stat),
-        ]
-    )
-    return table
-
-
-def _bit_to_kB(bit_value):
-    return bit_value / 8 / 1024
-
-
-def summary(model, print_fn=None):
+def summary(model, print_fn=None, include_macs=True):
     """Prints a string summary of the network.
+
+    The summary includes the following information per layer:
+
+    - input precision,
+    - output dimension,
+    - weight count (broken down by bidtwidth),
+    - memory footprint in kilobytes (`8*1024` 1-bit weights = 1 kB),
+    - number of multiply-accumulate (MAC) operations broken down by precision (*optional & expermental*).
+
+    A single MAC operation contains both a multiplication and an addition. The precision
+    of a MAC operation is defined as the maximum bitwidth of its inputs.
+
+    Additionally, the following overall statistics for the model are supplied:
+
+    - total number of weights,
+    - total number of trainable weights,
+    - total number of non-trainable weights,
+    - model size,
+    - float-32 equivalent size: memory footprint if all weights were 32 bit,
+    - compression ratio achieved by quantizing weights,
+    - total number of MAC operations,
+    - ratio of MAC operations that is binarized and can be accelated with XNOR-gates.
 
     # Arguments
     model: `tf.keras` model instance.
     print_fn: Print function to use. Defaults to `print`. You can set it to a custom
         function in order to capture the string summary.
+    include_macs: whether or not to include the number of MAC-operations in the summary.
 
     # Raises
     ValueError: if called before the model is built.
@@ -144,29 +385,15 @@ def summary(model, print_fn=None):
             "`input_shape` argument in the first layer(s) for automatic build."
         )
 
-    table = _generate_table(model)
-
-    model._check_trainable_weights_consistency()
-    if hasattr(model, "_collected_trainable_weights"):
-        trainable_count = _count_params(model._collected_trainable_weights)
-    else:
-        trainable_count = _count_params(model.trainable_weights)
-    non_trainable_count = _count_params(model.non_trainable_weights)
-
     if print_fn is None:
         print_fn = print
 
-    total_params = trainable_count + non_trainable_count
-    float_32_memory_equiv = _bit_to_kB(total_params * 32)
-    compression_ratio = float_32_memory_equiv / table[-1][-1]
-
-    summary_table = [
-        ["Total params", total_params],
-        ["Trainable params", trainable_count],
-        ["Non-trainable params", non_trainable_count],
-        ["Float-32 Equivalent", f"{float_32_memory_equiv / 1024:.2f} MB"],
-        ["Compression of Memory", compression_ratio],
-    ]
-
-    print_fn(LayersTable(table, title=f"{model.name} stats").table)
-    print_fn(SummaryTable(summary_table, title=f"{model.name} summary").table)
+    model_profile = ModelProfile(model)
+    print_fn(
+        LayersTable(model_profile.generate_table(), title=f"{model.name} stats").table
+    )
+    print_fn(
+        SummaryTable(
+            model_profile.generate_summary(include_macs), title=f"{model.name} summary"
+        ).table
+    )
