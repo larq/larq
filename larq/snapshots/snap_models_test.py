@@ -11,7 +11,7 @@ snapshots[
     "test_summary 1"
 ] = """\
 +sequential stats----------------------------------------------------------------------------------------------------------------+
-| Layer                   Input prec.           Outputs  # 1-bit  # 2-bit  # 32-bit  Memory  1-bit macs  2-bit macs  32-bit macs |
+| Layer                   Input prec.           Outputs  # 1-bit  # 2-bit  # 32-bit  Memory  1-bit MACs  2-bit MACs  32-bit MACs |
 |                               (bit)                        x 1      x 1       x 1    (kB)        (kB)        (kB)         (kB) |
 +--------------------------------------------------------------------------------------------------------------------------------+
 | quant_conv2d                      -  (-1, 64, 64, 32)      288        0        32    0.16           0           0       144.00 |
@@ -23,14 +23,15 @@ snapshots[
 +--------------------------------------------------------------------------------------------------------------------------------+
 | Total                                                     1600      288     38794  151.80       19.38        4.25       148.73 |
 +--------------------------------------------------------------------------------------------------------------------------------+
-+sequential summary-------------------------+
-| Total params                      40682   |
-| Trainable params                  40682   |
-| Non-trainable params              0       |
-| Model size:                       0.15 MB |
-| Float-32 Equivalent               0.16 MB |
-| Compression Ratio of Memory       0.96    |
-| Number of MACs                    1411968 |
-| Ratio of MACs that are binarized  0.1124  |
-+-------------------------------------------+
++sequential summary--------------------------+
+| Total params                       40682   |
+| Trainable params                   40682   |
+| Non-trainable params               0       |
+| Model size:                        0.15 MB |
+| Float-32 Equivalent                0.16 MB |
+| Compression Ratio of Memory        0.96    |
+| Number of MACs                     1411968 |
+| Ratio of MACs that are binarized   0.1124  |
+| Ratio of MACs that are ternarized  0.0247  |
++--------------------------------------------+
 """

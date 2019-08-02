@@ -89,7 +89,7 @@ def test_layer_profile():
         assert profiles[i].input_precision() == input_precision[i]
         assert profiles[i].output_shape == output_shape[i]
         assert profiles[i].output_pixels == output_pixels[i]
-        assert profiles[i].parameter_count() == param_count[i]
+        assert profiles[i].weight_count() == param_count[i]
         assert profiles[i].unique_param_bidtwidths == unique_param_bidtwidths[i]
         assert profiles[i].unique_op_precisions == unique_op_precisions[i]
         assert profiles[i].memory == memory[i]

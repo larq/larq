@@ -8,7 +8,7 @@ import larq.layers as lq_layers
 
 __all__ = ["summary"]
 
-op_count_supported_layer_types = [
+op_count_supported_layer_types = (
     lq_layers.QuantConv2D,
     lq_layers.QuantSeparableConv2D,
     lq_layers.QuantDepthwiseConv2D,
@@ -21,9 +21,9 @@ op_count_supported_layer_types = [
     keras_layers.BatchNormalization,
     keras_layers.MaxPool2D,
     keras_layers.AveragePooling2D,
-]
+)
 
-mac_layers = [
+mac_containing_layers = (
     lq_layers.QuantConv2D,
     lq_layers.QuantSeparableConv2D,
     lq_layers.QuantDepthwiseConv2D,
@@ -32,7 +32,7 @@ mac_layers = [
     keras_layers.SeparableConv2D,
     keras_layers.DepthwiseConv2D,
     keras_layers.Dense,
-]
+)
 
 
 def _flatten(lst):
@@ -67,15 +67,14 @@ def _get_output_shape(layer):
         return "?"
 
 
-class _parameterProfile:
-
-    def __init__(self, parameter, bitwidth=32):
-        self._parameter = parameter
+class WeightProfile:
+    def __init__(self, weight, bitwidth=32):
+        self._weight = weight
         self.bitwidth = bitwidth
 
     @property
     def count(self):
-        return int(np.prod(self._parameter.shape.as_list()))
+        return int(np.prod(self._weight.shape.as_list()))
 
     @property
     def memory(self):
@@ -87,14 +86,14 @@ class _parameterProfile:
 
     @property
     def trainable(self):
-        return self._parameter.trainable
+        return self._weight.trainable
 
     def is_bias(self):
-        return "bias" in self._parameter.name
+        return "bias" in self._weight.name
 
 
 @dataclass
-class _operationProfile:
+class OperationProfile:
     n: int
     precision: int
     op_type: str
@@ -103,22 +102,18 @@ class _operationProfile:
 class LayerProfile:
     def __init__(self, layer):
         self._layer = layer
-        self.parameter_profiles = [
-            _parameterProfile(weight, self._get_bitwidth(weight))
+        self.weight_profiles = [
+            WeightProfile(weight, self._get_bitwidth(weight))
             for weight in layer.weights
         ]
 
         self.op_profiles = []
 
-        if type(layer) in mac_layers:
-            # mac layers should have a kernel weight and perhaps a bias
-            # assert len(self.parameter_profiles) <= 2 \
-            #   or ('Seperable' in str(type(layer)) and len(self.parameter_profiles) <= 3)
-
-            for p in self.parameter_profiles:
+        if isinstance(layer, mac_containing_layers):
+            for p in self.weight_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
-                        _operationProfile(
+                        OperationProfile(
                             n=p.count * self.output_pixels,
                             precision=max(self.input_precision(32), p.bitwidth),
                             op_type="mac",
@@ -127,15 +122,15 @@ class LayerProfile:
 
     @property
     def memory(self):
-        return sum(p.memory for p in self.parameter_profiles)
+        return sum(p.memory for p in self.weight_profiles)
 
     @property
     def fp_equivalent_memory(self):
-        return sum(p.fp_equivalent_memory for p in self.parameter_profiles)
+        return sum(p.fp_equivalent_memory for p in self.weight_profiles)
 
-    def parameter_count(self, bitwidth=None, trainable=None):
+    def weight_count(self, bitwidth=None, trainable=None):
         count = 0
-        for p in self.parameter_profiles:
+        for p in self.weight_profiles:
             if (bitwidth is None or p.bitwidth == bitwidth) and (
                 trainable is None or p.trainable == trainable
             ):
@@ -146,7 +141,7 @@ class LayerProfile:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
-        if type(self._layer) in op_count_supported_layer_types:
+        if isinstance(self._layer, op_count_supported_layer_types):
             count = 0
             for op in self.op_profiles:
                 if (precision is None or op.precision == precision) and (
@@ -184,7 +179,7 @@ class LayerProfile:
 
     @property
     def unique_param_bidtwidths(self):
-        return sorted(set([p.bitwidth for p in self.parameter_profiles]))
+        return sorted(set([p.bitwidth for p in self.weight_profiles]))
 
     @property
     def unique_op_precisions(self):
@@ -193,7 +188,7 @@ class LayerProfile:
     def generate_table_row(self, table_config):
         row = [self._layer.name, self.input_precision(), self.output_shape]
         for i in table_config["param_bidtwidths"]:
-            n = self.parameter_count(i)
+            n = self.weight_count(i)
             n = _format_table_entry(n, table_config["param_units"])
             row.append(n)
         row.append(_format_table_entry(self.memory, table_config["memory_units"]))
@@ -218,7 +213,7 @@ class LayerProfile:
             return 32
 
 
-class ModelProfile:
+class ModelProfile(LayerProfile):
     def __init__(self, model):
         self.layer_profiles = [LayerProfile(l) for l in model.layers]
 
@@ -230,8 +225,8 @@ class ModelProfile:
     def fp_equivalent_memory(self):
         return sum(l.fp_equivalent_memory for l in self.layer_profiles)
 
-    def parameter_count(self, bitwidth=None, trainable=None):
-        return sum(l.parameter_count(bitwidth, trainable) for l in self.layer_profiles)
+    def weight_count(self, bitwidth=None, trainable=None):
+        return sum(l.weight_count(bitwidth, trainable) for l in self.layer_profiles)
 
     def op_count(self, op_type=None, bitwidth=None):
         return sum(l.op_count(op_type, bitwidth, 0) for l in self.layer_profiles)
@@ -239,13 +234,13 @@ class ModelProfile:
     @property
     def unique_param_bidtwidths(self):
         return sorted(
-            set(_flatten([l.unique_param_bidtwidths for l in self.layer_profiles]))
+            set(_flatten(l.unique_param_bidtwidths for l in self.layer_profiles))
         )
 
     @property
     def unique_op_precisions(self):
         return sorted(
-            set(_flatten([l.unique_op_precisions for l in self.layer_profiles]))
+            set(_flatten(l.unique_op_precisions for l in self.layer_profiles))
         )
 
     def _generate_table_header(self, table_config):
@@ -268,9 +263,7 @@ class ModelProfile:
         row = ["Total", "", ""]
         for i in table_config["param_bidtwidths"]:
             row.append(
-                _format_table_entry(
-                    self.parameter_count(i), table_config["param_units"]
-                )
+                _format_table_entry(self.weight_count(i), table_config["param_units"])
             )
         row.append(_format_table_entry(self.memory, table_config["memory_units"]))
         for i in table_config["mac_precisions"]:
@@ -301,9 +294,9 @@ class ModelProfile:
 
     def generate_summary(self, include_macs=True):
         summary = [
-            ["Total params", self.parameter_count()],
-            ["Trainable params", self.parameter_count(trainable=True)],
-            ["Non-trainable params", self.parameter_count(trainable=False)],
+            ["Total params", self.weight_count()],
+            ["Trainable params", self.weight_count(trainable=True)],
+            ["Non-trainable params", self.weight_count(trainable=False)],
             ["Model size:", f"{self.memory / (8*1024*1024):.2f} MB"],
             [
                 "Float-32 Equivalent",
@@ -314,12 +307,16 @@ class ModelProfile:
 
         if include_macs:
             binarization_ratio = self.op_count("mac", 1) / self.op_count(op_type="mac")
-            summary.extend(
-                [
-                    ["Number of MACs", self.op_count(op_type="mac")],
-                    ["Ratio of MACs that are binarized", f"{binarization_ratio:.4f}"],
-                ]
-            )
+            ternarization_ratio = self.op_count("mac", 2) / self.op_count(op_type="mac")
+            summary.append(["Number of MACs", self.op_count(op_type="mac")])
+            if binarization_ratio > 0:
+                summary.append(
+                    ["Ratio of MACs that are binarized", f"{binarization_ratio:.4f}"]
+                )
+            if ternarization_ratio > 0:
+                summary.append(
+                    ["Ratio of MACs that are ternarized", f"{ternarization_ratio:.4f}"]
+                )
 
         return summary
 
@@ -353,7 +350,7 @@ def summary(model, print_fn=None, include_macs=True):
 
     - input precision,
     - output dimension,
-    - parameter count (broken down by bidtwidth),
+    - weight count (broken down by bidtwidth),
     - memory footprint in kilobytes (`8*1024` 1-bit weights = 1 kB),
     - number of multiply-accumulate (MAC) operations broken down by precision (*optional & expermental*).
 
@@ -362,9 +359,9 @@ def summary(model, print_fn=None, include_macs=True):
 
     Additionally, the following overall statistics for the model are supplied:
 
-    - total number of parameters,
-    - total number of trainable parameters,
-    - total number of non-trainable parameters,
+    - total number of weights,
+    - total number of trainable weights,
+    - total number of non-trainable weights,
     - model size,
     - float-32 equivalent size: memory footprint if all weights were 32 bit,
     - compression ratio achieved by quantizing weights,
