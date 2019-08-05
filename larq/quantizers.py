@@ -35,6 +35,7 @@ average pooling - and shortcut connections may result in non-binary input
 to the convolutions.
 """
 
+from dataclasses import dataclass
 import tensorflow as tf
 from larq import utils, math
 
@@ -164,6 +165,7 @@ def approx_sign(x):
 
 @utils.register_keras_custom_object
 @utils.set_precision(2)
+@dataclass
 class SteTern:
     r"""
     Ternarization function.
@@ -181,7 +183,7 @@ class SteTern:
     \\[
     \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
     \\]
-    where we assume that $W_i$ is generated from a normal distribution. 
+    where we assume that $W_i$ is generated from a normal distribution.
 
     The gradient is estimated using the Straight-Through Estimator
     (essentially the Ternarization is replaced by a clipped identity on the
@@ -207,9 +209,8 @@ class SteTern:
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
 
-    def __init__(self, threshold_value=0.05, ternary_weight_networks=False):
-        self.threshold_value = threshold_value
-        self.ternary_weight_networks = ternary_weight_networks
+    threshold_value: float = 0.05
+    ternary_weight_networks: bool = False
 
     def __call__(self, x):
         x = tf.clip_by_value(x, -1, 1)
