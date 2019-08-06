@@ -5,31 +5,20 @@ import pytest
 import larq as lq
 
 
+@pytest.mark.parametrize("module", [lq.quantizers, tf.keras.activations])
 @pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
-def test_serialization(name):
-    fn = lq.quantizers.get(name)
+def test_serialization(module, name):
+    fn = module.get(name)
     ref_fn = getattr(lq.quantizers, name)
     assert fn == ref_fn
     assert type(fn.precision) == int
-    config = lq.quantizers.serialize(fn)
-    fn = lq.quantizers.deserialize(config)
+    config = module.serialize(fn)
+    fn = module.deserialize(config)
     assert fn == ref_fn
     assert type(fn.precision) == int
-    fn = lq.quantizers.get(ref_fn)
+    fn = module.get(ref_fn)
     assert fn == ref_fn
     assert type(fn.precision) == int
-
-
-@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
-def test_serialization_as_activation(name):
-    fn = tf.keras.activations.get(name)
-    ref_fn = getattr(lq.quantizers, name)
-    assert fn == ref_fn
-    config = tf.keras.activations.serialize(fn)
-    fn = tf.keras.activations.deserialize(config)
-    assert fn == ref_fn
-    fn = tf.keras.activations.get(ref_fn)
-    assert fn == ref_fn
 
 
 def test_invalid_usage():
