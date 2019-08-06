@@ -247,6 +247,7 @@ class SteTern:
             "ternary_weight_networks": self.ternary_weight_networks,
         }
 
+
 ste_tern = SteTern
 
 
