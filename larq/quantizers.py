@@ -167,8 +167,8 @@ def approx_sign(x):
 @utils.set_precision(2)
 @dataclass
 class SteTern:
-    r"""
-    Ternarization function.
+    r"""Instantiates a ternarization quantizer.
+
     \\[
     q(x) = \begin{cases}
     +1 & x > \Delta \\\
@@ -198,12 +198,14 @@ class SteTern:
     ```
 
     # Arguments
-    x: Input tensor.
     threshold_value: The value for the threshold, $\Delta$.
     ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation.
 
     # Returns
-    Ternarized tensor.
+    Ternarization function
+
+    # Aliases
+    - `larq.quantizers.ste_tern`
 
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
@@ -213,6 +215,14 @@ class SteTern:
     ternary_weight_networks: bool = False
 
     def __call__(self, x):
+        """Calls ternarization function.
+
+        # Arguments
+        x: Input tensor.
+
+        # Returns
+        Ternarized tensor.
+        """
         x = tf.clip_by_value(x, -1, 1)
         if self.ternary_weight_networks:
             threshold = self.threshold_twn(x)
@@ -236,6 +246,8 @@ class SteTern:
             "threshold_value": self.threshold_value,
             "ternary_weight_networks": self.ternary_weight_networks,
         }
+
+ste_tern = SteTern
 
 
 def serialize(initializer):
