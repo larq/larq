@@ -44,6 +44,4 @@ class WeightClip(tf.keras.constraints.Constraint):
 
 
 # Aliases
-@utils.register_keras_custom_object
-class weight_clip(WeightClip):
-    pass
+weight_clip = utils.register_alias(WeightClip, "weight_clip")

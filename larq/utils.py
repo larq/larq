@@ -10,6 +10,11 @@ def register_keras_custom_object(cls):
     return cls
 
 
+def register_alias(cls, name):
+    get_custom_objects()[name] = cls
+    return cls
+
+
 def tf_1_14_or_newer():
     return LooseVersion(tf.__version__) >= LooseVersion("1.14.0")
 

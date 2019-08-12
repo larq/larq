@@ -248,7 +248,7 @@ class SteTern:
         }
 
 
-ste_tern = SteTern
+ste_tern = utils.register_alias(SteTern, "ste_tern")
 
 
 def serialize(initializer):
