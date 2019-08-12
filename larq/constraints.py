@@ -20,9 +20,11 @@ lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.))
 
 import tensorflow as tf
 from larq import utils
+from dataclasses import dataclass
 
 
 @utils.register_keras_custom_object
+@dataclass
 class WeightClip(tf.keras.constraints.Constraint):
     """Weight Clip constraint
 
@@ -31,10 +33,12 @@ class WeightClip(tf.keras.constraints.Constraint):
 
     # Arguments
     clip_value: The value to clip incoming weights.
+
+    # Aliases
+    - `larq.constraints.weight_clip`
     """
 
-    def __init__(self, clip_value=1):
-        self.clip_value = clip_value
+    clip_value: float = 1.0
 
     def __call__(self, x):
         return tf.clip_by_value(x, -self.clip_value, self.clip_value)

@@ -5,7 +5,8 @@
 - callbacks.md:
     - larq.callbacks+
 - constraints.md:
-    - larq.constraints+
+    - larq.constraints:
+      - larq.constraints.WeightClip
 - optimizers.md:
     - larq.optimizers:
         - larq.optimizers_v2.Bop
