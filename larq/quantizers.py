@@ -33,6 +33,19 @@ We highly recommend using the first of these formulations: for the
 other two formulations, intermediate layers - like batch normalization or
 average pooling - and shortcut connections may result in non-binary input
 to the convolutions.
+
+Quantizers can eighter be referenced by string or called directly.
+The following usages are equivalent:
+
+```python
+lq.layers.QuantDense(64, kernel_quantizer="ste_sign")
+```
+```python
+lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.ste_sign)
+```
+```python
+lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
+```
 """
 
 import tensorflow as tf
@@ -44,7 +57,15 @@ except:
     # For compatibility with TensorFlow 1.13
     from tensorflow.python.framework.tensor_util import is_tensor
 
-__all__ = ["ste_sign", "approx_sign", "magnitude_aware_sign", "SteTern", "ste_tern"]
+__all__ = [
+    "SteSign",
+    "ste_sign",
+    "approx_sign",
+    "MagnitudeAwareSign",
+    "magnitude_aware_sign",
+    "SteTern",
+    "ste_tern",
+]
 
 
 @tf.custom_gradient
@@ -95,9 +116,9 @@ class QuantizerFunctionWrapper:
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-def ste_sign(x):
-    r"""
-    Sign binarization function.
+def ste_sign(x, clip_value=1.0):
+    r"""Sign binarization function.
+
     \\[
     q(x) = \begin{cases}
       -1 & x < 0 \\\
@@ -109,8 +130,8 @@ def ste_sign(x):
     (essentially the binarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-      1 & \left|x\right| \leq 1 \\\
-      0 & \left|x\right| > 1
+      1 & \left|x\right| \leq t_\text{clip} \\\
+      0 & \left|x\right| > t_\text{clip}
     \end{cases}\\]
 
     ```plot-activation
@@ -119,6 +140,7 @@ def ste_sign(x):
 
     # Arguments
     x: Input tensor.
+    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
 
     # Returns
     Binarized tensor.
@@ -128,14 +150,49 @@ def ste_sign(x):
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    x = tf.clip_by_value(x, -1, 1)
+    x = tf.clip_by_value(x, -clip_value, clip_value)
 
     return _binarize_with_identity_grad(x)
 
 
 @utils.register_keras_custom_object
+class SteSign(QuantizerFunctionWrapper):
+    r"""Instantiates a serializable binary quantizer.
+
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+    \end{cases}
+    \\]
+
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+      1 & \left|x\right| \leq t_\text{clip} \\\
+      0 & \left|x\right| > t_\text{clip}
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.ste_sign
+    ```
+
+    # Arguments
+    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+
+    # References
+    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
+      Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+    """
+
+    def __init__(self, clip_value=1.0):
+        super().__init__(ste_sign, clip_value=clip_value)
+
+
+@utils.register_keras_custom_object
 @utils.set_precision(1)
-def magnitude_aware_sign(x):
+def magnitude_aware_sign(x, clip_value=1.0):
     r"""
     Magnitude-aware sign for Bi-Real Net.
 
@@ -145,6 +202,7 @@ def magnitude_aware_sign(x):
 
     # Arguments
     x: Input tensor
+    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
 
     # Returns
     Scaled binarized tensor (with values in $\{-a, a\}$, where $a$ is a float).
@@ -157,7 +215,29 @@ def magnitude_aware_sign(x):
     """
     scale_factor = tf.reduce_mean(tf.abs(x), axis=list(range(len(x.shape) - 1)))
 
-    return tf.stop_gradient(scale_factor) * ste_sign(x)
+    return tf.stop_gradient(scale_factor) * ste_sign(x, clip_value=clip_value)
+
+
+@utils.register_keras_custom_object
+class MagnitudeAwareSign(QuantizerFunctionWrapper):
+    r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
+
+    ```plot-activation
+    quantizers.magnitude_aware_sign
+    ```
+
+    # Arguments
+    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+
+    # References
+    - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
+      Representational Capability and Advanced Training
+      Algorithm](https://arxiv.org/abs/1808.00278)
+
+    """
+
+    def __init__(self, clip_value=1.0):
+        super().__init__(magnitude_aware_sign, clip_value=clip_value)
 
 
 @utils.register_keras_custom_object
@@ -201,6 +281,66 @@ def approx_sign(x):
 
 
 @utils.register_keras_custom_object
+@utils.set_precision(2)
+def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0):
+    r"""Ternarization function.
+
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > \Delta \\\
+    0 & |x| < \Delta \\\
+     -1 & x < - \Delta
+    \end{cases}
+    \\]
+
+    where $\Delta$ is defined as the threshold and can be passed as an argument,
+    or can be calculated as per the Ternary Weight Networks original paper, such that
+
+    \\[
+    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
+    \\]
+    where we assume that $W_i$ is generated from a normal distribution.
+
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the Ternarization is replaced by a clipped identity on the
+    backward pass).
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 & \left|x\right| \leq t_\text{clip} \\\
+    0 & \left|x\right| > t_\text{clip}
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.ste_tern
+    ```
+
+    # Arguments
+    x: Input tensor.
+    threshold_value: The value for the threshold, $\Delta$.
+    ternary_weight_networks: Boolean of whether to use the
+        Ternary Weight Networks threshold calculation.
+    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+
+    # Returns
+    Ternarized tensor.
+
+    # References
+    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
+    """
+    x = tf.clip_by_value(x, -clip_value, clip_value)
+
+    if ternary_weight_networks:
+        threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
+    else:
+        threshold = threshold_value
+
+    @tf.custom_gradient
+    def _ternarize_with_identity_grad(x):
+        return (tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), lambda dy: dy)
+
+    return _ternarize_with_identity_grad(x)
+
+
+@utils.register_keras_custom_object
 class SteTern(QuantizerFunctionWrapper):
     r"""Instantiates a serializable ternarization quantizer.
 
@@ -224,8 +364,8 @@ class SteTern(QuantizerFunctionWrapper):
     (essentially the Ternarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 & \left|x\right| \leq 1 \\\
-    0 & \left|x\right| > 1
+    1 & \left|x\right| \leq t_\text{clip} \\\
+    0 & \left|x\right| > t_\text{clip}
     \end{cases}\\]
 
     ```plot-activation
@@ -234,79 +374,23 @@ class SteTern(QuantizerFunctionWrapper):
 
     # Arguments
     threshold_value: The value for the threshold, $\Delta$.
-    ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation.
-
-    # Returns
-    Ternarization function
+    ternary_weight_networks: Boolean of whether to use the
+        Ternary Weight Networks threshold calculation.
+    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
 
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
 
-    def __init__(self, threshold_value=0.05, ternary_weight_networks=False):
+    def __init__(
+        self, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0
+    ):
         super().__init__(
             ste_tern,
             threshold_value=threshold_value,
             ternary_weight_networks=ternary_weight_networks,
+            clip_value=clip_value,
         )
-
-
-@utils.register_keras_custom_object
-@utils.set_precision(2)
-def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False):
-    r"""Ternarization function.
-
-    \\[
-    q(x) = \begin{cases}
-    +1 & x > \Delta \\\
-    0 & |x| < \Delta \\\
-     -1 & x < - \Delta
-    \end{cases}
-    \\]
-
-    where $\Delta$ is defined as the threshold and can be passed as an argument,
-    or can be calculated as per the Ternary Weight Networks original paper, such that
-
-    \\[
-    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
-    \\]
-    where we assume that $W_i$ is generated from a normal distribution.
-
-    The gradient is estimated using the Straight-Through Estimator
-    (essentially the Ternarization is replaced by a clipped identity on the
-    backward pass).
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 & \left|x\right| \leq 1 \\\
-    0 & \left|x\right| > 1
-    \end{cases}\\]
-
-    ```plot-activation
-    quantizers.ste_tern
-    ```
-
-    # Arguments
-    x: Input tensor.
-    threshold_value: The value for the threshold, $\Delta$.
-    ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation.
-
-    # Returns
-    Ternarized tensor.
-
-    # References
-    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
-    """
-    x = tf.clip_by_value(x, -1, 1)
-
-    if ternary_weight_networks:
-        threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
-    else:
-        threshold = threshold_value
-
-    @tf.custom_gradient
-    def _ternarize_with_identity_grad(x):
-        return (tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), lambda dy: dy)
-
-    return _ternarize_with_identity_grad(x)
 
 
 def serialize(initializer):
