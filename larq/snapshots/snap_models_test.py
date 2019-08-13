@@ -7,10 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots[
-    "test_summary 1"
-] = """\
-+sequential stats----------------------------------------------------------------------------------------------------------------+
+snapshots['test_summary 1'] = '''+sequential stats----------------------------------------------------------------------------------------------------------------+
 | Layer                   Input prec.           Outputs  # 1-bit  # 2-bit  # 32-bit  Memory  1-bit MACs  2-bit MACs  32-bit MACs |
 |                               (bit)                        x 1      x 1       x 1    (kB)        (kB)        (kB)         (kB) |
 +--------------------------------------------------------------------------------------------------------------------------------+
@@ -25,8 +22,8 @@ snapshots[
 +--------------------------------------------------------------------------------------------------------------------------------+
 +sequential summary--------------------------+
 | Total params                       40682   |
-| Trainable params                   40682   |
-| Non-trainable params               0       |
+| Trainable params                   1952    |
+| Non-trainable params               38730   |
 | Model size:                        0.15 MB |
 | Float-32 Equivalent                0.16 MB |
 | Compression Ratio of Memory        0.96    |
@@ -34,4 +31,4 @@ snapshots[
 | Ratio of MACs that are binarized   0.1124  |
 | Ratio of MACs that are ternarized  0.0247  |
 +--------------------------------------------+
-"""
+'''
