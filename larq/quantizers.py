@@ -409,6 +409,8 @@ def deserialize(name, custom_objects=None):
 def get(identifier):
     if identifier is None:
         return None
+    if isinstance(identifier, dict):
+        return deserialize(identifier)
     if isinstance(identifier, str):
         return deserialize(str(identifier))
     if callable(identifier):
