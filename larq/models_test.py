@@ -33,7 +33,7 @@ def get_profile_model():
                 padding="same",
             ),
             tf.keras.layers.Flatten(),
-            tf.keras.layers.Dense(10),
+            tf.keras.layers.Dense(10, trainable=False),
         ]
     )
 

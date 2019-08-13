@@ -68,9 +68,10 @@ def _get_output_shape(layer):
 
 
 class WeightProfile:
-    def __init__(self, weight, bitwidth=32):
+    def __init__(self, weight, bitwidth=32, trainable=True):
         self._weight = weight
         self.bitwidth = bitwidth
+        self.trainable = trainable
 
     @property
     def count(self):
@@ -83,10 +84,6 @@ class WeightProfile:
     @property
     def fp_equivalent_memory(self):
         return 32 * self.count
-
-    @property
-    def trainable(self):
-        return self._weight.trainable
 
     def is_bias(self):
         return "bias" in self._weight.name
@@ -103,7 +100,11 @@ class LayerProfile:
     def __init__(self, layer):
         self._layer = layer
         self.weight_profiles = [
-            WeightProfile(weight, self._get_bitwidth(weight))
+            WeightProfile(
+                weight,
+                self._get_bitwidth(weight),
+                trainable=weight in layer.trainable_weights,
+            )
             for weight in layer.weights
         ]
 
