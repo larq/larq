@@ -38,6 +38,12 @@ to the convolutions.
 import tensorflow as tf
 from larq import utils, math
 
+try:
+    from tensorflow import is_tensor
+except:
+    # For compatibility with TensorFlow 1.13
+    from tensorflow.python.framework.tensor_util import is_tensor
+
 __all__ = ["ste_sign", "approx_sign", "magnitude_aware_sign", "SteTern", "ste_tern"]
 
 
@@ -81,7 +87,7 @@ class QuantizerFunctionWrapper:
     def get_config(self):
         return {
             k: tf.keras.backend.eval(v)
-            if tf.is_tensor(v) or isinstance(v, tf.Variable)
+            if is_tensor(v) or isinstance(v, tf.Variable)
             else v
             for k, v in self._fn_kwargs.items()
         }
