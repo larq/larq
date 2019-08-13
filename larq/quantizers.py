@@ -35,17 +35,16 @@ average pooling - and shortcut connections may result in non-binary input
 to the convolutions.
 """
 
-from dataclasses import dataclass
 import tensorflow as tf
 from larq import utils, math
+from tensorflow.python.keras.utils import tf_utils
+
+__all__ = ["ste_sign", "approx_sign", "magnitude_aware_sign", "SteTern", "ste_tern"]
 
 
 @tf.custom_gradient
 def _binarize_with_identity_grad(x):
-    def grad(dy):
-        return dy
-
-    return math.sign(x), grad
+    return math.sign(x), lambda dy: dy
 
 
 @tf.custom_gradient
@@ -54,6 +53,37 @@ def _binarize_with_weighted_grad(x):
         return (1 - tf.abs(x)) * 2 * dy
 
     return math.sign(x), grad
+
+
+class QuantizerFunctionWrapper:
+    """Wraps a quantizer function in a class that can be serialized.
+
+    # Arguments
+    fn: The quantizer function to wrap, with signature `fn(x, **kwargs)`.
+    **kwargs: The keyword arguments that are passed on to `fn`.
+    """
+
+    def __init__(self, fn, **kwargs):
+        self.fn = fn
+        self.precision = getattr(fn, "precision", 32)
+        self._fn_kwargs = kwargs
+
+    def __call__(self, x):
+        """Invokes the `QuantizerFunctionWrapper` instance.
+
+        # Arguments
+        x: Input tensor.
+
+        # Returns
+        Quantized tensor.
+        """
+        return self.fn(x, **self._fn_kwargs)
+
+    def get_config(self):
+        return {
+            k: tf.keras.backend.eval(v) if tf_utils.is_tensor_or_variable(v) else v
+            for k, v in self._fn_kwargs.items()
+        }
 
 
 @utils.register_keras_custom_object
@@ -164,10 +194,8 @@ def approx_sign(x):
 
 
 @utils.register_keras_custom_object
-@utils.set_precision(2)
-@dataclass
-class SteTern:
-    r"""Instantiates a ternarization quantizer.
+class SteTern(QuantizerFunctionWrapper):
+    r"""Instantiates a serializable ternarization quantizer.
 
     \\[
     q(x) = \begin{cases}
@@ -194,7 +222,7 @@ class SteTern:
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.SteTern
+    quantizers.ste_tern
     ```
 
     # Arguments
@@ -204,51 +232,74 @@ class SteTern:
     # Returns
     Ternarization function
 
-    # Aliases
-    - `larq.quantizers.ste_tern`
-
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
 
-    threshold_value: float = 0.05
-    ternary_weight_networks: bool = False
-
-    def __call__(self, x):
-        """Calls ternarization function.
-
-        # Arguments
-        x: Input tensor.
-
-        # Returns
-        Ternarized tensor.
-        """
-        x = tf.clip_by_value(x, -1, 1)
-        if self.ternary_weight_networks:
-            threshold = self.threshold_twn(x)
-        else:
-            threshold = self.threshold_value
-
-        @tf.custom_gradient
-        def _ternarize_with_identity_grad(x):
-            def grad(dy):
-                return dy
-
-            return (tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), grad)
-
-        return _ternarize_with_identity_grad(x)
-
-    def threshold_twn(self, x):
-        return 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
-
-    def get_config(self):
-        return {
-            "threshold_value": self.threshold_value,
-            "ternary_weight_networks": self.ternary_weight_networks,
-        }
+    def __init__(self, threshold_value=0.05, ternary_weight_networks=False):
+        super().__init__(
+            ste_tern,
+            threshold_value=threshold_value,
+            ternary_weight_networks=ternary_weight_networks,
+        )
 
 
-ste_tern = SteTern
+@utils.register_keras_custom_object
+@utils.set_precision(2)
+def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False):
+    r"""Ternarization function.
+
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > \Delta \\\
+    0 & |x| < \Delta \\\
+     -1 & x < - \Delta
+    \end{cases}
+    \\]
+
+    where $\Delta$ is defined as the threshold and can be passed as an argument,
+    or can be calculated as per the Ternary Weight Networks original paper, such that
+
+    \\[
+    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
+    \\]
+    where we assume that $W_i$ is generated from a normal distribution.
+
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the Ternarization is replaced by a clipped identity on the
+    backward pass).
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 & \left|x\right| \leq 1 \\\
+    0 & \left|x\right| > 1
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.ste_tern
+    ```
+
+    # Arguments
+    x: Input tensor.
+    threshold_value: The value for the threshold, $\Delta$.
+    ternary_weight_networks: Boolean of whether to use the Ternary Weight Networks threshold calculation.
+
+    # Returns
+    Ternarized tensor.
+
+    # References
+    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
+    """
+    x = tf.clip_by_value(x, -1, 1)
+
+    if ternary_weight_networks:
+        threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
+    else:
+        threshold = threshold_value
+
+    @tf.custom_gradient
+    def _ternarize_with_identity_grad(x):
+        return (tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), lambda dy: dy)
+
+    return _ternarize_with_identity_grad(x)
 
 
 def serialize(initializer):

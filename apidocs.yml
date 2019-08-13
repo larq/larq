@@ -18,8 +18,4 @@
 - metrics.md:
     - larq.metrics+
 - quantizers.md:
-    - larq.quantizers:
-        - larq.quantizers.ste_sign
-        - larq.quantizers.approx_sign
-        - larq.quantizers.magnitude_aware_sign
-        - larq.quantizers.SteTern
+    - larq.quantizers+
