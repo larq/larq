@@ -7,7 +7,8 @@ import larq as lq
 
 @pytest.mark.parametrize("module", [lq.quantizers, tf.keras.activations])
 @pytest.mark.parametrize(
-    "name", ["ste_sign", "approx_sign", "magnitude_aware_sign", "ste_tern"]
+    "name",
+    ["ste_sign", "approx_sign", "magnitude_aware_sign", "swish_sign", "ste_tern"],
 )
 def test_serialization(module, name):
     fn = module.get(name)
@@ -28,6 +29,7 @@ def test_serialization(module, name):
     [
         lq.quantizers.SteSign(),
         lq.quantizers.MagnitudeAwareSign(),
+        lq.quantizers.SwishSign(),
         lq.quantizers.SteTern(),
     ],
 )
@@ -45,7 +47,7 @@ def test_invalid_usage():
         lq.quantizers.get("unknown")
 
 
-@pytest.mark.parametrize("name", ["ste_sign", "approx_sign"])
+@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "swish_sign"])
 def test_binarization(name):
     x = tf.keras.backend.placeholder(ndim=2)
     f = tf.keras.backend.function([x], [lq.quantizers.get(name)(x)])
