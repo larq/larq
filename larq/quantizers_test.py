@@ -6,7 +6,9 @@ import larq as lq
 
 
 @pytest.mark.parametrize("module", [lq.quantizers, tf.keras.activations])
-@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "magnitude_aware_sign"])
+@pytest.mark.parametrize(
+    "name", ["ste_sign", "approx_sign", "magnitude_aware_sign", "ste_tern"]
+)
 def test_serialization(module, name):
     fn = module.get(name)
     ref_fn = getattr(lq.quantizers, name)
@@ -19,6 +21,14 @@ def test_serialization(module, name):
     fn = module.get(ref_fn)
     assert fn == ref_fn
     assert type(fn.precision) == int
+
+
+@pytest.mark.parametrize("ref_fn", [lq.quantizers.SteTern()])
+def test_serialization_cls(ref_fn):
+    assert type(ref_fn.precision) == int
+    config = lq.quantizers.serialize(ref_fn)
+    fn = lq.quantizers.deserialize(config)
+    assert fn.__class__ == ref_fn.__class__
 
 
 def test_invalid_usage():
@@ -43,9 +53,9 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
-def test_ternarization_with_default_threshold():
+@pytest.mark.parametrize("fn", [lq.quantizers.SteTern(), lq.quantizers.ste_tern])
+def test_ternarization_with_default_threshold(fn):
     x = tf.keras.backend.placeholder(ndim=2)
-    fn = lq.quantizers.SteTern()
     test_threshold = 0.1
     f = tf.keras.backend.function([x], [fn(x)])
     real_values = np.random.uniform(-2, 2, (2, 5))

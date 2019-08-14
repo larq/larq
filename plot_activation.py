@@ -1,5 +1,4 @@
 from functools import reduce
-import inspect
 import matplotlib as mpl
 import numpy as np
 import larq as lq
@@ -52,8 +51,6 @@ def plot(function):
 
 def html_format(source, language, css_class, options, md):
     function = reduce(getattr, [lq, *source.split(".")])
-    if inspect.isclass(function):
-        function = function()
     fig = plot(function)
     tmp = StringIO()
     fig.savefig(tmp, format="svg", bbox_inches="tight", pad_inches=0)
