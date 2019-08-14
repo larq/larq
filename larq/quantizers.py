@@ -34,7 +34,7 @@ other two formulations, intermediate layers - like batch normalization or
 average pooling - and shortcut connections may result in non-binary input
 to the convolutions.
 
-Quantizers can eighter be referenced by string or called directly.
+Quantizers can either be referenced by string or called directly.
 The following usages are equivalent:
 
 ```python
