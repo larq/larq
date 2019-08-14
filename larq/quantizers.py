@@ -130,8 +130,8 @@ def ste_sign(x, clip_value=1.0):
     (essentially the binarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-      1 & \left|x\right| \leq t_\text{clip} \\\
-      0 & \left|x\right| > t_\text{clip}
+      1 & \left|x\right| \leq \texttt{clip_value} \\\
+      0 & \left|x\right| > \texttt{clip_value}
     \end{cases}\\]
 
     ```plot-activation
@@ -140,7 +140,7 @@ def ste_sign(x, clip_value=1.0):
 
     # Arguments
     x: Input tensor.
-    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+    clip_value: Threshold for clipping gradients.
 
     # Returns
     Binarized tensor.
@@ -170,8 +170,8 @@ class SteSign(QuantizerFunctionWrapper):
     (essentially the binarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-      1 & \left|x\right| \leq t_\text{clip} \\\
-      0 & \left|x\right| > t_\text{clip}
+      1 & \left|x\right| \leq \texttt{clip_value} \\\
+      0 & \left|x\right| > \texttt{clip_value}
     \end{cases}\\]
 
     ```plot-activation
@@ -179,7 +179,7 @@ class SteSign(QuantizerFunctionWrapper):
     ```
 
     # Arguments
-    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+    clip_value: Threshold for clipping gradients.
 
     # References
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
@@ -202,7 +202,7 @@ def magnitude_aware_sign(x, clip_value=1.0):
 
     # Arguments
     x: Input tensor
-    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+    clip_value: Threshold for clipping gradients.
 
     # Returns
     Scaled binarized tensor (with values in $\{-a, a\}$, where $a$ is a float).
@@ -227,7 +227,7 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
     ```
 
     # Arguments
-    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+    clip_value: Threshold for clipping gradients.
 
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
@@ -305,8 +305,8 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     (essentially the Ternarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 & \left|x\right| \leq t_\text{clip} \\\
-    0 & \left|x\right| > t_\text{clip}
+    1 & \left|x\right| \leq \texttt{clip_value} \\\
+    0 & \left|x\right| > \texttt{clip_value}
     \end{cases}\\]
 
     ```plot-activation
@@ -318,7 +318,7 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     threshold_value: The value for the threshold, $\Delta$.
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
-    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+    clip_value: Threshold for clipping gradients.
 
     # Returns
     Ternarized tensor.
@@ -364,8 +364,8 @@ class SteTern(QuantizerFunctionWrapper):
     (essentially the Ternarization is replaced by a clipped identity on the
     backward pass).
     \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 & \left|x\right| \leq t_\text{clip} \\\
-    0 & \left|x\right| > t_\text{clip}
+    1 & \left|x\right| \leq \texttt{clip_value} \\\
+    0 & \left|x\right| > \texttt{clip_value}
     \end{cases}\\]
 
     ```plot-activation
@@ -376,7 +376,7 @@ class SteTern(QuantizerFunctionWrapper):
     threshold_value: The value for the threshold, $\Delta$.
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
-    clip_value: Threshold for clipping gradients ($t_\text{clip}$).
+    clip_value: Threshold for clipping gradients.
 
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
