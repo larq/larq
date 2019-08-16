@@ -28,7 +28,7 @@ setup(
         "tensorflow_gpu": ["tensorflow-gpu>=1.13.1"],
         "test": [
             "absl-py==0.7.1",
-            "pytest==5.0.1",
+            "pytest==5.1.0",
             "pytest-cov==2.7.1",
             "snapshottest==0.5.1",
         ],
