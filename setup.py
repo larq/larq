@@ -34,7 +34,7 @@ setup(
         ],
         "docs": [
             "mkdocs==1.0.4",
-            "mkdocs-material==4.4.1",
+            "mkdocs-material==4.4.2",
             "pymdown-extensions==6.0",
             "mknotebooks==0.1.6",
             "matplotlib==3.1.1",
