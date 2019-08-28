@@ -23,7 +23,14 @@ def test_serialization(module, name):
     assert type(fn.precision) == int
 
 
-@pytest.mark.parametrize("ref_fn", [lq.quantizers.SteTern()])
+@pytest.mark.parametrize(
+    "ref_fn",
+    [
+        lq.quantizers.SteSign(),
+        lq.quantizers.MagnitudeAwareSign(),
+        lq.quantizers.SteTern(),
+    ],
+)
 def test_serialization_cls(ref_fn):
     assert type(ref_fn.precision) == int
     config = lq.quantizers.serialize(ref_fn)
