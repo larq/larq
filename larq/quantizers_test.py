@@ -132,6 +132,21 @@ def test_ste_grad():
 
 
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
+def test_swish_grad():
+    beta = 10.0
+
+    def swish_grad(x):
+        return beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
+
+    x = np.random.uniform(-3, 3, (8, 3, 3, 16))
+    tf_x = tf.Variable(x)
+    with tf.GradientTape() as tape:
+        activation = lq.quantizers.swish_sign(tf_x, beta=beta)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), swish_grad(x))
+
+
+@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
 def test_approx_sign_grad():
     @np.vectorize
     def approx_sign_grad(x):
