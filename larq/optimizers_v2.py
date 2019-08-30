@@ -9,7 +9,21 @@ from copy import deepcopy
 class Bop(tf.keras.optimizers.Optimizer):
     """Binary optimizer (Bop).
 
-    Bop is a latent-free optimizer for Binarized Neural Networks (BNNs).
+    Bop is a latent-free optimizer for Binarized Neural Networks (BNNs) and
+    Binary Weight Networks (BWN).
+
+    Bop maintains an exponential moving average of the gradients controlled by
+    `gamma`. If this average exceeds the `threshold`, a weight is flipped.
+    Additionally, Bop accepts a regular optimizer that is applied to the
+    non-binary weights in the network.
+
+    The hyperparameter `gamma` is somewhat analogues to the learning rate in
+    SGD methods: a high `gamma` results in rapid convergence but also makes
+    training more noisy.
+
+    Note that the default `threshold` is not optimal for all situations.
+    Setting the threshold too high results in little learning, while setting it
+    too low results in overly noisy behaviour.
 
     !!! example
         ```python
@@ -26,7 +40,7 @@ class Bop(tf.keras.optimizers.Optimizer):
     - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://arxiv.org/abs/1906.02107)
     """
 
-    def __init__(self, fp_optimizer, threshold=1e-5, gamma=1e-2, name="Bop", **kwargs):
+    def __init__(self, fp_optimizer, threshold=1e-7, gamma=1e-2, name="Bop", **kwargs):
         super().__init__(name=name, **kwargs)
 
         if not isinstance(fp_optimizer, tf.keras.optimizers.Optimizer):
