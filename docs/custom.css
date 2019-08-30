@@ -8,3 +8,7 @@
   transition: unset;
   box-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
 }
+
+[data-md-color-primary=grey] .md-header, [data-md-color-primary=grey] .md-hero {
+  background-color: #0a1d3c;
+}
