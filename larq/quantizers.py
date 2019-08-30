@@ -63,6 +63,8 @@ __all__ = [
     "approx_sign",
     "MagnitudeAwareSign",
     "magnitude_aware_sign",
+    "swish_sign",
+    "SwishSign",
     "SteTern",
     "ste_tern",
 ]
@@ -281,6 +283,61 @@ def approx_sign(x):
 
 
 @utils.register_keras_custom_object
+@utils.set_precision(1)
+def swish_sign(x, beta=5.0):
+    """Sign binarization function.
+
+    The gradient is estimated using the SignSwish method.
+
+    ```plot-activation
+    quantizers.swish_sign
+    ```
+    # Arguments
+    x: Input tensor.
+    beta: Larger values result in a closer approximation to the derivative of the sign.
+
+    # Returns
+    Binarized tensor.
+
+    # References
+    - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
+    """
+
+    @tf.custom_gradient
+    def _call(x):
+        def grad(dy):
+            b_x = beta * x
+            return dy * beta * (2 - b_x * tf.tanh(b_x * 0.5)) / (1 + tf.cosh(b_x))
+
+        return math.sign(x), grad
+
+    return _call(x)
+
+
+@utils.register_keras_custom_object
+class SwishSign(QuantizerFunctionWrapper):
+    """Sign binarization function.
+
+    The gradient is estimated using the SignSwish method.
+
+    ```plot-activation
+    quantizers.swish_sign
+    ```
+    # Arguments
+    beta: Larger values result in a closer approximation to the derivative of the sign.
+
+    # Returns
+    SwishSign quantization function
+
+    # References
+    - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
+    """
+
+    def __init__(self, beta=5.0):
+        super().__init__(swish_sign, beta=beta)
+
+
+@utils.register_keras_custom_object
 @utils.set_precision(2)
 def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0):
     r"""Ternarization function.
@@ -393,8 +450,8 @@ class SteTern(QuantizerFunctionWrapper):
         )
 
 
-def serialize(initializer):
-    return tf.keras.utils.serialize_keras_object(initializer)
+def serialize(quantizer):
+    return tf.keras.utils.serialize_keras_object(quantizer)
 
 
 def deserialize(name, custom_objects=None):

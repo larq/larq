@@ -7,7 +7,8 @@ import larq as lq
 
 @pytest.mark.parametrize("module", [lq.quantizers, tf.keras.activations])
 @pytest.mark.parametrize(
-    "name", ["ste_sign", "approx_sign", "magnitude_aware_sign", "ste_tern"]
+    "name",
+    ["ste_sign", "approx_sign", "magnitude_aware_sign", "swish_sign", "ste_tern"],
 )
 def test_serialization(module, name):
     fn = module.get(name)
@@ -28,6 +29,7 @@ def test_serialization(module, name):
     [
         lq.quantizers.SteSign(),
         lq.quantizers.MagnitudeAwareSign(),
+        lq.quantizers.SwishSign(),
         lq.quantizers.SteTern(),
     ],
 )
@@ -45,7 +47,7 @@ def test_invalid_usage():
         lq.quantizers.get("unknown")
 
 
-@pytest.mark.parametrize("name", ["ste_sign", "approx_sign"])
+@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "swish_sign"])
 def test_binarization(name):
     x = tf.keras.backend.placeholder(ndim=2)
     f = tf.keras.backend.function([x], [lq.quantizers.get(name)(x)])
@@ -127,6 +129,21 @@ def test_ste_grad():
         activation = lq.quantizers.ste_sign(tf_x)
     grad = tape.gradient(activation, tf_x)
     np.testing.assert_allclose(grad.numpy(), ste_grad(x))
+
+
+@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
+def test_swish_grad():
+    beta = 10.0
+
+    def swish_grad(x):
+        return beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
+
+    x = np.random.uniform(-3, 3, (8, 3, 3, 16))
+    tf_x = tf.Variable(x)
+    with tf.GradientTape() as tape:
+        activation = lq.quantizers.swish_sign(tf_x, beta=beta)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), swish_grad(x))
 
 
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
