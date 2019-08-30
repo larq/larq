@@ -21,13 +21,13 @@ snapshots['test_summary 1'] = '''+sequential stats------------------------------
 | Total                                                     1600      288     38794  151.80       19.38        4.25       148.73 |
 +--------------------------------------------------------------------------------------------------------------------------------+
 +sequential summary--------------------------+
-| Total params                       40.68 k |
-| Trainable params                   1.952 k |
-| Non-trainable params               38.73 k |
+| Total params                       40.7 k  |
+| Trainable params                   1.95 k  |
+| Non-trainable params               38.7 k  |
 | Model size:                        0.15 MB |
 | Float-32 Equivalent                0.16 MB |
 | Compression Ratio of Memory        0.96    |
-| Number of MACs                     1.412 M |
+| Number of MACs                     1.41 M  |
 | Ratio of MACs that are binarized   0.1124  |
 | Ratio of MACs that are ternarized  0.0247  |
 +--------------------------------------------+

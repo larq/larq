@@ -51,12 +51,17 @@ def _bitsize_as_str(bitsize):
 def _number_as_readable_str(num):
     # The initial rounding here is necessary so that e.g. `999000` gets
     # formatted as `1.000 M` rather than `1000 k`
-    num = float("{:.4g}".format(num))
+    num = float("{:.3g}".format(num))
+
+    # For numbers less than 1000, output them directly, stripping any trailing
+    # zeros and decimal places.
+    if num < 1000:
+        return str(num).rstrip("0").rstrip(".")
 
     # For numbers that are at least 1000 trillion (1 quadrillion) format with
-    # scientific notation.
+    # scientific notation (3 s.f. = 2 d.p. in scientific notation).
     if num >= 1e15:
-        return "{:#.3E}".format(num)
+        return "{:#.2E}".format(num)
 
     # Count the magnitude.
     magnitude = 0
@@ -64,13 +69,11 @@ def _number_as_readable_str(num):
         magnitude += 1
         num /= 1000.0
 
-    # ':#.4g' formats the number with 4 significant figures, without stripping
+    # ':#.3g' formats the number with 3 significant figures, without stripping
     # trailing zeros.
-    num = "{:#.4g}".format(num)
+    num = "{:#.3g}".format(num).rstrip(".")
     unit = ["", " k", " M", " B", " T"][magnitude]
-
-    # The `rstrip`s ensure that integers < 1000 get formatted as-is.
-    return (num + unit).rstrip("0").rstrip(".")
+    return num + unit
 
 
 def _format_table_entry(x, units=1):
