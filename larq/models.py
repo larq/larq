@@ -48,6 +48,31 @@ def _bitsize_as_str(bitsize):
         raise NotImplementedError()
 
 
+def _number_as_readable_str(num):
+    # The initial rounding here is necessary so that e.g. `999000` gets
+    # formatted as `1.000 M` rather than `1000 k`
+    num = float("{:.4g}".format(num))
+
+    # For numbers that are at least 1000 trillion (1 quadrillion) format with
+    # scientific notation.
+    if num >= 1e15:
+        return "{:#.3E}".format(num)
+
+    # Count the magnitude.
+    magnitude = 0
+    while abs(num) >= 1000 and magnitude < 4:
+        magnitude += 1
+        num /= 1000.0
+
+    # ':#.4g' formats the number with 4 significant figures, without stripping
+    # trailing zeros.
+    num = "{:#.4g}".format(num)
+    unit = ["", " k", " M", " B", " T"][magnitude]
+
+    # The `rstrip`s ensure that integers < 1000 get formatted as-is.
+    return (num + unit).rstrip("0").rstrip(".")
+
+
 def _format_table_entry(x, units=1):
     try:
         assert not np.isnan(x)
@@ -295,9 +320,15 @@ class ModelProfile(LayerProfile):
 
     def generate_summary(self, include_macs=True):
         summary = [
-            ["Total params", self.weight_count()],
-            ["Trainable params", self.weight_count(trainable=True)],
-            ["Non-trainable params", self.weight_count(trainable=False)],
+            ["Total params", _number_as_readable_str(self.weight_count())],
+            [
+                "Trainable params",
+                _number_as_readable_str(self.weight_count(trainable=True)),
+            ],
+            [
+                "Non-trainable params",
+                _number_as_readable_str(self.weight_count(trainable=False)),
+            ],
             ["Model size:", f"{self.memory / (8*1024*1024):.2f} MB"],
             [
                 "Float-32 Equivalent",
@@ -309,7 +340,12 @@ class ModelProfile(LayerProfile):
         if include_macs:
             binarization_ratio = self.op_count("mac", 1) / self.op_count(op_type="mac")
             ternarization_ratio = self.op_count("mac", 2) / self.op_count(op_type="mac")
-            summary.append(["Number of MACs", self.op_count(op_type="mac")])
+            summary.append(
+                [
+                    "Number of MACs",
+                    _number_as_readable_str(self.op_count(op_type="mac")),
+                ]
+            )
             if binarization_ratio > 0:
                 summary.append(
                     ["Ratio of MACs that are binarized", f"{binarization_ratio:.4f}"]
