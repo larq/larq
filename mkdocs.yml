@@ -42,11 +42,11 @@ edit_uri: ""
 theme:
   name: material
   custom_dir: docs-theme
-  logo:
-    icon: developer_board
+  logo: images/logo-big-font.svg
+  favicon: images/favicon-32.png
   palette:
-    primary: blue
-    accent: blue
+    primary: grey
+    accent: green
   feature:
     tabs: true
 
