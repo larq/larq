@@ -35,7 +35,7 @@ setup(
         "docs": [
             "mkdocs==1.0.4",
             "mkdocs-material==4.4.2",
-            "pymdown-extensions==6.0",
+            "pymdown-extensions==6.1",
             "mknotebooks==0.1.6",
             "matplotlib==3.1.1",
             "scour==0.37",
