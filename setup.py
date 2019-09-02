@@ -40,7 +40,7 @@ setup(
             "matplotlib==3.1.1",
             "scour==0.37",
             "mkdocs-minify-plugin==0.2.1",
-            "larq-zoo==0.3.0",
+            "larq-zoo==0.4.0",
         ],
     },
     classifiers=[

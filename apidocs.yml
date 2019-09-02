@@ -23,6 +23,11 @@
     - larq_zoo:
         - larq_zoo.BinaryAlexNet
         - larq_zoo.BiRealNet
+        - larq_zoo.BinaryResNetE18
+        - larq_zoo.BinaryDenseNet28
+        - larq_zoo.BinaryDenseNet37
+        - larq_zoo.BinaryDenseNet37Dilated
+        - larq_zoo.BinaryDenseNet45
         - larq_zoo.XNORNet
         - larq_zoo.decode_predictions
         - larq_zoo.preprocess_input
