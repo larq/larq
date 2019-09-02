@@ -70,6 +70,9 @@ markdown_extensions:
         - name: plot-altair
           class: larq-altair
           format: !!python/name:plot_altair.html_format
+        - name: netron
+          class: larq-netron
+          format: !!python/name:netron_link.html_format
   - pymdownx.arithmatex
   - toc:
       permalink: true
