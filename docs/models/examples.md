@@ -1,15 +1,17 @@
 # Larq Zoo Examples
 
-## Classify ImageNet classes with Bi-Real Net
+## Classify ImageNet classes with BinaryDenseNet-45
+
+Before running the example below, download [this picture](https://raw.githubusercontent.com/larq/zoo/master/tests/fixtures/elephant.jpg) of an elephant to test your model.
 
 ```python
 import tensorflow as tf
 import numpy as np
 import larq_zoo as lqz
 
-model = lqz.BiRealNet(weights="imagenet")
+model = lqz.BinaryDenseNet45(weights="imagenet")
 
-img_path = "tests/fixtures/elephant.jpg"
+img_path = "path/to/elephant.jpg"
 img = tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224))
 x = tf.keras.preprocessing.image.img_to_array(img)
 x = lqz.preprocess_input(x)
@@ -22,16 +24,16 @@ print("Predicted:", lqz.decode_predictions(preds, top=3)[0])
 # Predicted: [("n01871265", "tusker", 0.7427464), ("n02504458", "African_elephant", 0.19439144), ("n02504013", "Indian_elephant", 0.058899447)]
 ```
 
-## Extract features with Bi-Real Net
+## Extract features with BinaryDenseNet-45
 
 ```python
 import tensorflow as tf
 import numpy as np
 import larq_zoo as lqz
 
-model = lqz.BiRealNet(weights="imagenet", include_top=False)
+model = lqz.BinaryDenseNet45(weights="imagenet", include_top=False)
 
-img_path = "tests/fixtures/elephant.jpg"
+img_path = "path/to/elephant.jpg"
 img = tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224))
 x = tf.keras.preprocessing.image.img_to_array(img)
 x = lqz.preprocess_input(x)
@@ -40,19 +42,19 @@ x = np.expand_dims(x, axis=0)
 features = model.predict(x)
 ```
 
-## Extract features from an arbitrary intermediate layer with Bi-Real Net
+## Extract features from an arbitrary intermediate layer with BinaryDenseNet-45
 
 ```python
 import tensorflow as tf
 import numpy as np
 import larq_zoo as lqz
 
-base_model = lqz.BiRealNet(weights="imagenet")
+base_model = lqz.BinaryDenseNet45(weights="imagenet")
 model = tf.keras.models.Model(
     inputs=base_model.input, outputs=base_model.get_layer("average_pooling2d_8").output
 )
 
-img_path = "tests/fixtures/elephant.jpg"
+img_path = "path/to/elephant.jpg"
 img = tf.keras.preprocessing.image.load_img(img_path, target_size=(224, 224))
 x = tf.keras.preprocessing.image.img_to_array(img)
 x = lqz.preprocess_input(x)
@@ -61,7 +63,7 @@ x = np.expand_dims(x, axis=0)
 average_pool_8_features = model.predict(x)
 ```
 
-## Fine-tune Bi-Real Net on a new set of classes
+## Fine-tune BinaryDenseNet-45 on a new set of classes
 
 ```python
 import tensorflow as tf
@@ -69,7 +71,7 @@ import larq as lq
 import larq_zoo as lqz
 
 # create the base pre-trained model
-base_model = lqz.BiRealNet(weights="imagenet", include_top=False)
+base_model = lqz.BinaryDenseNet45(weights="imagenet", include_top=False)
 
 # add a global spatial average pooling layer
 x = base_model.output
@@ -90,7 +92,7 @@ predictions = tf.keras.layers.Dense(200, activation="softmax")(x)
 model = tf.keras.models.Model(inputs=base_model.input, outputs=predictions)
 
 # first: train only the top layers (which were randomly initialized)
-# i.e. freeze all convolutional Bi-Real Net layers
+# i.e. freeze all convolutional BinaryDenseNet-45 layers
 for layer in base_model.layers:
     layer.trainable = False
 
@@ -101,7 +103,7 @@ model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
 model.fit(...)
 
 # at this point, the top layers are well trained and we can start fine-tuning
-# convolutional layers from Bi-Real Net. We will freeze the bottom N layers
+# convolutional layers from BinaryDenseNet-45. We will freeze the bottom N layers
 # and train the remaining top layers.
 
 # let's visualize layer names and layer indices to see how many layers
@@ -128,7 +130,7 @@ model.compile(
 model.fit(...)
 ```
 
-### Build Bi-Real Net over a custom input Tensor
+### Build BinaryDenseNet-45 over a custom input Tensor
 
 ```python
 import tensorflow as tf
@@ -137,10 +139,10 @@ import larq_zoo as lqz
 # this could also be the output a different Keras model or layer
 input_tensor = tf.keras.layers.Input(shape=(224, 224, 3))
 
-model = lqz.BiRealNet(input_tensor=input_tensor, weights="imagenet")
+model = lqz.BinaryDenseNet45(input_tensor=input_tensor, weights="imagenet")
 ```
 
-## Evaluate Bi-Real Net with TensorFlow Datasets
+## Evaluate BinaryDenseNet-45 with TensorFlow Datasets
 
 ```python
 import tensorflow_datasets as tfds
@@ -158,7 +160,7 @@ dataset = (
     .prefetch(1)
 )
 
-model = lqz.BiRealNet()
+model = lqz.BinaryDenseNet45()
 model.compile(
     optimizer="sgd",
     loss="categorical_crossentropy",
