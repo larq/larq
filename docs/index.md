@@ -1,4 +1,4 @@
-<h1><img src="/images/logo.svg" alt="logo" width="400px" style="display: block; margin-left: auto; margin-right: auto"/></h1>
+<h1><img src="/images/logo.svg" alt="logo" width="450px" style="display: block; margin-left: auto; margin-right: auto"/></h1>
 
 Larq is an open-source deep learning library for training neural networks with extremely low precision weights and activations, such as Binarized Neural Networks (BNNs).
 
