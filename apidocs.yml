@@ -19,3 +19,10 @@
     - larq.metrics+
 - quantizers.md:
     - larq.quantizers+
+- larq_zoo.md:
+    - larq_zoo:
+        - larq_zoo.BinaryAlexNet
+        - larq_zoo.BiRealNet
+        - larq_zoo.XNORNet
+        - larq_zoo.decode_predictions
+        - larq_zoo.preprocess_input

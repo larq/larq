@@ -11,11 +11,16 @@ from pydocmd.loader import PythonLoader
 from pydocmd.preprocessor import Preprocessor
 
 
-def callable_to_source_link(obj, scope):
-    path = scope.__file__.lstrip(".")
+def callable_to_source_link(obj):
+    repo = "larq/larq"
+    obj = inspect.unwrap(obj)
+    path = inspect.getfile(obj).lstrip("./")
+    if "larq_zoo" in path:
+        path = path[path.find("larq_zoo") :]
+        repo = "larq/zoo"
     source = inspect.getsourcelines(obj)
     line = source[-1] + 1 if source[0][0].startswith("@") else source[-1]
-    link = f"https://github.com/larq/larq/blob/master{path}#L{line}"
+    link = f"https://github.com/{repo}/blob/master/{path}#L{line}"
     return f'<a class="headerlink code-link" style="float:right;" href="{link}" title="Source code"></a>'
 
 
@@ -24,8 +29,7 @@ class PythonLoaderWithSource(PythonLoader):
         super().load_section(section)
         obj = section.loader_context["obj"]
         if callable(obj):
-            scope = section.loader_context["scope"]
-            section.title += callable_to_source_link(obj, scope)
+            section.title += callable_to_source_link(obj)
 
 
 with open("apidocs.yml", "r") as stream:
