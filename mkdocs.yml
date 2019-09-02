@@ -5,7 +5,7 @@ site_url: "https://larq.dev/"
 
 nav:
   - Learn:
-      - Introduction: index.md
+      - Home: index.md
       - User Guides:
           - Key Concepts: guides/key-concepts.md
           - Building BNNs: guides/bnn-architecture.md
