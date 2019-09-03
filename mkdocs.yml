@@ -45,8 +45,8 @@ theme:
   logo: images/logo-big-font.svg
   favicon: images/favicon-32.png
   palette:
-    primary: grey
-    accent: green
+    primary: larq
+    accent: larq
   feature:
     tabs: true
 
