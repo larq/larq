@@ -36,25 +36,6 @@ jobs:
       - script: pytest . $(pytest.args)
         displayName: "pytest"
 
-  - job: "Docs"
-    pool:
-      vmImage: "Ubuntu-16.04"
-
-    steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "3.7"
-          architecture: "x64"
-
-      - script: |
-          pip install tensorflow==1.14.0
-          pip install nbconvert git+https://github.com/lgeiger/pydoc-markdown.git
-          pip install -e .[docs]
-        displayName: "Install docs dependencies"
-
-      - script: ./larqdocs.sh build
-        displayName: "Build docs"
-
   - job: "Lint"
     pool:
       vmImage: "Ubuntu-16.04"
