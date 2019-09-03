@@ -54,4 +54,4 @@ def html_format(source, language, css_class, options, md):
     fig = plot(function)
     tmp = StringIO()
     fig.savefig(tmp, format="svg", bbox_inches="tight", pad_inches=0)
-    return scour.scourString(tmp.getvalue())
+    return scour.scourString(tmp.getvalue().replace("DejaVu Sans", "sans-serif"))

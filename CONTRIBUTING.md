@@ -43,14 +43,11 @@ pip install -e .[docs]
 Inside the project directory run:
 
 ```shell
-./larqdocs.sh serve
+python generate_api_docs.py
+mkdocs serve
 ```
 
-To publish a new version to github pages run:
-
-```shell
-./larqdocs.sh gh-deploy --force
-```
+A new version of the documentation will be automatically published once merged into the master branch.
 
 ## Code style
 
