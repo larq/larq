@@ -282,10 +282,7 @@ class ModelProfile(LayerProfile):
                 for i in table_config["param_bidtwidths"]
             ),
             f"Memory\n({_bitsize_as_str(table_config['memory_units'])})",
-            *(
-                f"{i}-bit MACs\n({_bitsize_as_str(table_config['mac_units'])})"
-                for i in table_config["mac_precisions"]
-            ),
+            *(f"{i}-bit MACs" for i in table_config["mac_precisions"]),
         ]
 
     def _generate_table_total(self, table_config):
@@ -307,7 +304,7 @@ class ModelProfile(LayerProfile):
             "mac_precisions": self.unique_op_precisions if include_macs else [],
             "param_units": 1,
             "memory_units": 8 * 1024,
-            "mac_units": 8 * 1024,
+            "mac_units": 1,
         }
 
         table = []
