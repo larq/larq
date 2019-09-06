@@ -131,7 +131,7 @@ class LayerProfile:
             WeightProfile(
                 weight,
                 self._get_bitwidth(weight),
-                trainable=weight in layer.trainable_weights,
+                trainable=any(weight is w for w in layer.trainable_weights),
             )
             for weight in layer.weights
         ]

@@ -48,8 +48,11 @@ class QuantizerBase(tf.keras.layers.Layer):
     def non_trainable_weights(self):
         weights = super().non_trainable_weights
         if hasattr(self, "flip_ratio"):
-            metrics_weights = self.flip_ratio.weights
-            return [weight for weight in weights if weight not in metrics_weights]
+            return [
+                weight
+                for weight in weights
+                if not any(weight is metric_w for metric_w in self.flip_ratio.weights)
+            ]
         return weights
 
     def call(self, inputs):
@@ -115,8 +118,11 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
     def non_trainable_weights(self):
         weights = super().non_trainable_weights
         if hasattr(self, "flip_ratio"):
-            metrics_weights = self.flip_ratio.weights
-            return [weight for weight in weights if weight not in metrics_weights]
+            return [
+                weight
+                for weight in weights
+                if not any(weight is metric_w for metric_w in self.flip_ratio.weights)
+            ]
         return weights
 
     def call(self, inputs):
@@ -206,7 +212,11 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if hasattr(self, "pointwise_flip_ratio"):
             metrics_weights.extend(self.pointwise_flip_ratio.weights)
         if metrics_weights:
-            return [weight for weight in weights if weight not in metrics_weights]
+            return [
+                weight
+                for weight in weights
+                if not any(weight is metric_w for metric_w in metrics_weights)
+            ]
         return weights
 
     def call(self, inputs):
