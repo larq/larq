@@ -135,7 +135,6 @@ class LayerProfile:
             )
             for weight in layer.weights
         ]
-
         self.op_profiles = []
 
         if isinstance(layer, mac_containing_layers):
@@ -236,7 +235,8 @@ class LayerProfile:
 
     def _get_bitwidth(self, weight):
         try:
-            quantizer = self._layer.quantizers[self._quantized_weights().index(weight)]
+            i = [w.name for w in self._quantized_weights()].index(weight.name)
+            quantizer = self._layer.quantizers[i]
             return quantizer.precision
         except:
             return 32

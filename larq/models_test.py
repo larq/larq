@@ -31,6 +31,7 @@ def get_profile_model():
                 depthwise_quantizer="ste_sign",
                 pointwise_quantizer="ste_sign",
                 padding="same",
+                use_bias=True,
             ),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(10, trainable=False),
