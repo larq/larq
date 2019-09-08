@@ -228,18 +228,16 @@ class LayerProfile:
 
         return row
 
-    def _quantized_weights(self):
-        try:
-            return self._layer.quantized_latent_weights
-        except:
-            return []
-
     def _get_bitwidth(self, weight):
         try:
-            quantizer = self._layer.quantizers[self._quantized_weights().index(weight)]
-            return quantizer.precision
+            for quantizer, quantized_weight in zip(
+                self._layer.quantizers, self._layer.quantized_latent_weights
+            ):
+                if quantized_weight is weight:
+                    return quantizer.precision
         except:
-            return 32
+            pass
+        return 32
 
 
 class ModelProfile(LayerProfile):
