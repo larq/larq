@@ -19,7 +19,7 @@ jobs:
           pytest.args: "--cov=larq --cov-report=html --cov-config=.coveragerc"
         Python37_TF2:
           python.version: "3.7"
-          tensorflow.version: "2.0.0-beta1"
+          tensorflow.version: "2.0.0-rc0"
 
     steps:
       - task: UsePythonVersion@0
@@ -33,7 +33,7 @@ jobs:
           pip install pytest-azurepipelines
         displayName: "Install dependencies"
 
-      - script: pytest . $(pytest.args)
+      - script: pytest . -vv $(pytest.args)
         displayName: "pytest"
 
   - job: "Lint"

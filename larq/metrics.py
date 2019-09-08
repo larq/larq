@@ -118,7 +118,7 @@ class FlipRatio(Metric):
 
     def reset_states(self):
         tf.keras.backend.batch_set_value(
-            [(v, 0) for v in self.variables if v != self._previous_values]
+            [(v, 0) for v in self.variables if v is not self._previous_values]
         )
 
     def get_config(self):
