@@ -24,17 +24,24 @@ bibliography: paper.bib
 
 # Summary
 
-Society can be transformed by utilizing the power of deep learning outside of data centers: self-driving cars, mobile-based neural networks, smart edge devices, and autonomous drones all have the potential to revolutionize everyday lives. However, existing neural networks that use 32 bits, 16 bits or 8 bits to encode each weight and activation have an energy budget which is far beyond the scope for many of these applications. Binarized Neural Networks (BNNs) have emerged as a promising solution to this problem. In these networks both weights and activations are restricted to ${−1, +1}$, resulting in models which are dramatically less computationally expensive, have a far lower memory footprint, and when executed on specialized hardware yield in a stunning reduction in energy consumption `[@Courbariaux2016]`. However, BNNs are very difficult to design and train, so their use in industry is not yet widespread. `larq` is the first step towards solving this problem.
+Society can be transformed by utilizing the power of deep learning outside of data centers: self-driving cars, mobile-based neural networks, smart edge devices, and autonomous drones all have the potential to revolutionize everyday lives.
+However, existing neural networks that use 32 bits, 16 bits or 8 bits to encode each weight and activation have an energy budget which is far beyond the scope for many of these applications.
+Binarized Neural Networks (BNNs) have emerged as a promising solution to this problem. In these networks both weights and activations are restricted to $\{−1, +1\}$, resulting in models which are dramatically less computationally expensive, have a far lower memory footprint, and when executed on specialized hardware yield in a stunning reduction in energy consumption [@Courbariaux2016].
+However, BNNs are very difficult to design and train, so their use in industry is not yet widespread. `larq` is the first step towards solving this problem.
 
-`larq` is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs). The API of `larq` is built on top of `tf.keras` `[@tensorflow2015-whitepaper, chollet2015keras]` and is designed to provide an easy to use, composable way to design and train BNNs. It aims to encourage reproducible research by providing pretrained and easy to use implementations of commonly cited networks.
+`larq` is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs).
+The API of `larq` is built on top of `tf.keras` [@tensorflow2015-whitepaper; @chollet2015keras] and is designed to provide an easy to use, composable way to design and train BNNs.
+It aims to encourage reproducible research by providing pretrained and easy to use implementations of commonly cited networks.
 `larq` is built around the concept of quantized layers that compute
 
 $$
 \sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
 $$
 
-with full precision weights $\boldsymbol{w}$, arbitrary precision input $\boldsymbol{x}$, layer operation $f$ (e.g. $f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}$ for a densely-connected layer), activation $\sigma$ and bias $b$. $q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define an operation for quantizing a kernel and inputs, respectively, and a pseudo-gradient used for automatic differentiation.
+with full precision weights $\boldsymbol{w}$, arbitrary precision input $\boldsymbol{x}$, layer operation $f$ (e.g. $f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}$ for a densely-connected layer), activation $\sigma$ and bias $b$.
+$q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define an operation for quantizing a kernel and inputs, respectively, and a pseudo-gradient used for automatic differentiation.
 
-The flexible yet easy to use API of `larq` is aimed at researchers in the field of efficient deep learning `[@2019arXiv190602107H]` as well as at beginners. We are working to expand the audience by adding support for deploying BNNs on embedded devices, making `larq` useful for real applications. By building a community-driven open source project, we hope to accelerate research in the field of BNNs and other QNNs to enable deep learning in resource-constrained environments.
+The flexible yet easy to use API of `larq` is aimed at researchers in the field of efficient deep learning [@2019arXiv190602107H] as well as at beginners.
+We are working to expand the audience by adding support for deploying BNNs on embedded devices, making `larq` useful for real applications. By building a community-driven open source project, we hope to accelerate research in the field of BNNs and other QNNs to enable deep learning in resource-constrained environments.
 
 # References
