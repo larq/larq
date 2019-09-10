@@ -13,7 +13,7 @@ authors:
   - name: Lukas Geiger
     orcid: 0000-0002-8697-9920
     affiliation: 1
-  - name: Plumerai Research Team
+  - name: Plumerai Team
     affiliation: 1
 affiliations:
   - name: Plumerai Research
