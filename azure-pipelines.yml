@@ -12,14 +12,17 @@ jobs:
       matrix:
         Python36_TF113:
           python.version: "3.6"
-          tensorflow.version: "1.13.1"
+          tensorflow: "tensorflow==1.13.1"
         Python37_TF114:
           python.version: "3.7"
-          tensorflow.version: "1.14.0"
+          tensorflow: "tensorflow==1.14.0"
           pytest.args: "--cov=larq --cov-report=html --cov-config=.coveragerc"
+        Python37_TF115:
+          python.version: "3.7"
+          tensorflow: "tensorflow-cpu==1.15.0-rc0"
         Python37_TF2:
           python.version: "3.7"
-          tensorflow.version: "2.0.0-rc0"
+          tensorflow: "tensorflow==2.0.0-rc0"
 
     steps:
       - task: UsePythonVersion@0
@@ -28,7 +31,7 @@ jobs:
           architecture: "x64"
 
       - script: |
-          pip install tensorflow==$(tensorflow.version)
+          pip install $(tensorflow)
           pip install -e .[test]
           pip install pytest-azurepipelines
         displayName: "Install dependencies"
