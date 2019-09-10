@@ -25,7 +25,7 @@ bibliography: paper.bib
 # Summary
 
 Society can be transformed by utilizing the power of deep learning outside of data centers: self-driving cars, mobile-based neural networks, smart edge devices, and autonomous drones all have the potential to revolutionize everyday lives.
-However, existing neural networks that use 32 bits, 16 bits or 8 bits to encode each weight and activation have an energy budget which is far beyond the scope for many of these applications.
+However, existing neural networks that use 32 bits, 16 bits or 8 bits to encode each weight and activation have an energy budget which is far beyond the scope of many of these applications.
 Binarized Neural Networks (BNNs) have emerged as a promising solution to this problem. In these networks both weights and activations are restricted to $\{−1, +1\}$, resulting in models which are dramatically less computationally expensive, have a far lower memory footprint, and when executed on specialized hardware yield a stunning reduction in energy consumption [@Courbariaux2016].
 However, BNNs are very difficult to design and train, so their use in industry is not yet widespread. `larq` is the first step towards solving this problem.
 
