@@ -30,8 +30,9 @@ Binarized Neural Networks (BNNs) have emerged as a promising solution to this pr
 However, BNNs are very difficult to design and train, so their use in industry is not yet widespread. `larq` is the first step towards solving this problem.
 
 `larq` is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs).
-The API of `larq` is built on top of `tf.keras` [@tensorflow2015-whitepaper; @chollet2015keras] and is designed to provide an easy to use, composable way to design and train BNNs.
-It aims to encourage reproducible research by providing pretrained and easy to use implementations of commonly cited networks.
+The API of `larq` is built on top of `tf.keras` [@tensorflow2015-whitepaper; @chollet2015keras] and is designed to provide an easy to use, composable way to design and train BNNs. It provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
+It provides well-tested implementations and pretrained weights for a variety of popular extremely quantized models. This makes the field more accessible, encourages reproducibility, and facilitates research.
+
 `larq` is built around the concept of quantized layers that compute
 
 $$
