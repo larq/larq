@@ -1,6 +1,15 @@
 import logging
 import tensorflow as tf
-from larq import quantizers, utils, metrics as lq_metrics
+from larq import (
+    quantizers,
+    utils,
+    metrics as lq_metrics,
+    quantized_scope,
+    quantized_variable,
+)
+
+from tensorflow.python.keras.engine import base_layer_utils
+from tensorflow.python.distribute import values as distribute_values
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +43,25 @@ class QuantizerBase(tf.keras.layers.Layer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
+    def add_weight(self, name=None, **kwargs):
+        if name == "kernel" and self.kernel_quantizer is not None:
+            # Wrap 'getter' with a version that returns an QuantizedVariable.
+            old_getter = kwargs.pop("getter", base_layer_utils.make_variable)
+
+            def getter(*args, **kwargs):  # pylint: disable=function-redefined
+                variable = old_getter(*args, **kwargs)
+                if isinstance(variable, distribute_values.DistributedVariable):
+                    return quantized_variable.QuantizedDistributedVariable(
+                        variable, quantizer=self.kernel_quantizer
+                    )
+                else:
+                    return quantized_variable.QuantizedVariable(
+                        variable, quantizer=self.kernel_quantizer
+                    )
+
+            return super().add_weight(name=name, getter=getter, **kwargs)
+        return super().add_weight(name=name, **kwargs)
+
     def build(self, input_shape):
         super().build(input_shape)
         if self.kernel_quantizer:
@@ -59,9 +87,12 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
 
-        with utils.quantize(self, "kernel", self.kernel_quantizer) as kernel:
+        # with utils.quantize(self, "kernel", self.kernel_quantizer) as kernel:
+        #     if hasattr(self, "flip_ratio"):
+        #         self.add_metric(self.flip_ratio(kernel))
+        with quantized_scope.scope(True):
             if hasattr(self, "flip_ratio"):
-                self.add_metric(self.flip_ratio(kernel))
+                self.add_metric(self.flip_ratio(self.kernel))
             return super().call(inputs)
 
     def get_config(self):
