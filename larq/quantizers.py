@@ -67,6 +67,8 @@ __all__ = [
     "SwishSign",
     "SteTern",
     "ste_tern",
+    "ReluSign",
+    "relu_sign",
 ]
 
 
