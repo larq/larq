@@ -472,7 +472,7 @@ class ReluSign(QuantizerFunctionWrapper):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.relu_bin
+    quantizers.relu_sign
     ```
 
     # Arguments
@@ -511,7 +511,7 @@ def relu_sign(x, threshold_value=0.0, clip_value=1.0):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.relu_bin
+    quantizers.relu_sign
     ```
 
     # Arguments
