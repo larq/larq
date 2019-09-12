@@ -62,6 +62,17 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
+@pytest.mark.parametrize("name", ["relu_sign"])
+def test_and_binarization(name):
+    x = tf.keras.backend.placeholder(ndim=2)
+    f = tf.keras.backend.function([x], [lq.quantizers.get(name)(x)])
+
+    real_values = np.random.uniform(-2, 2, (2, 5))
+    result = f([real_values])[0]
+    assert np.all(result[result <= 0] == 0)
+    assert np.all(result[result > 0] == 1)
+
+
 @pytest.mark.parametrize("fn", [lq.quantizers.SteTern(), lq.quantizers.ste_tern])
 def test_ternarization_with_default_threshold(fn):
     x = tf.keras.backend.placeholder(ndim=2)

@@ -450,6 +450,90 @@ class SteTern(QuantizerFunctionWrapper):
         )
 
 
+@utils.register_keras_custom_object
+class ReluSign(QuantizerFunctionWrapper):
+    r"""
+    Instantiates a binarization quantizer with output values 0 and 1.
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > \Delta \\\
+    0 & x \leq \Delta
+    \end{cases}
+    \\]
+
+    where $\Delta$ is defined as the threshold and can be passed as an argument.
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 & \left|x\right| \leq 1 \\\
+    0 & \left|x\right| > 1
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.relu_bin
+    ```
+
+    # Arguments
+    threshold_value: The value for the threshold, $\Delta$, default value 0.
+    clip_value: Threshold for clipping gradients.
+
+    # Returns
+    AND Binarization function
+    """
+
+    def __init__(self, threshold_value=0.0, clip_value=1.0):
+        super().__init__(relu_sign, threshold_value=threshold_value, clip_value=clip_value)
+
+
+@utils.register_keras_custom_object
+@utils.set_precision(1)
+def relu_sign(x, threshold_value=0.0, clip_value=1.0):
+    r"""
+    Binarization function with output values 0 and 1.
+
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > \Delta \\\
+    0 & x \leq \Delta
+    \end{cases}
+    \\]
+
+    where $\Delta$ is defined as the threshold and can be passed as an argument.
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 & \left|x\right| \leq 1 \\\
+    0 & \left|x\right| > 1
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.relu_bin
+    ```
+
+    # Arguments
+    x: Input tensor.
+    threshold_value: The value for the threshold, $\Delta$, default value 0.
+    clip_value: Threshold for clipping gradients.
+
+    # Returns
+    AND-binarized tensor.
+    """
+    x = tf.clip_by_value(x, -clip_value, clip_value)
+
+    @tf.custom_gradient
+    def _and_binarize_with_identity_grad(x):
+        def grad(dy):
+            return dy
+
+        return (tf.sign(tf.sign(x - threshold_value) - 0.1) + 1) / 2, grad
+
+    return _and_binarize_with_identity_grad(x)
+
+
 def serialize(quantizer):
     return tf.keras.utils.serialize_keras_object(quantizer)
 
