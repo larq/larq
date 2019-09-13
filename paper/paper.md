@@ -42,7 +42,7 @@ $$
 with full precision weights $\boldsymbol{w}$, arbitrary precision input $\boldsymbol{x}$, layer operation $f$ (e.g. $f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}$ for a densely-connected layer), activation $\sigma$ and bias $b$.
 $q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define an operation for quantizing a kernel and inputs, respectively, and a pseudo-gradient used for automatic differentiation.
 
-The flexible yet easy to use API of `larq` is aimed at researchers in the field of efficient deep learning [@2019arXiv190602107H] as well as at beginners.
+The flexible yet easy to use API of `larq` is aimed at researchers in the field of efficient deep learning [@2019arXiv190602107H] as well as at practitioners who want to explore BNNs for their application of interest. Furthermore, `larq` makes it easier for beginners and students to get started with BNNs.
 We are working to expand the audience by adding support for deploying BNNs on embedded devices, making `larq` useful for real applications. By building a community-driven open source project, we hope to accelerate research in the field of BNNs and other QNNs to enable deep learning in resource-constrained environments.
 
 # References
