@@ -527,7 +527,7 @@ def ste_heaviside(x, clip_value=1.0):
         def grad(dy):
             return dy
 
-        return (tf.sign(tf.sign(x) - 0.1) + 1) / 2, grad
+        return tf.nn.relu(tf.sign(x)), grad
 
     return _and_binarize_with_identity_grad(x)
 
