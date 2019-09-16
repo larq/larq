@@ -67,8 +67,8 @@ __all__ = [
     "SwishSign",
     "SteTern",
     "ste_tern",
-    "ReluSign",
-    "relu_sign",
+    "SteHeaviside",
+    "ste_heaviside",
 ]
 
 
@@ -453,17 +453,16 @@ class SteTern(QuantizerFunctionWrapper):
 
 
 @utils.register_keras_custom_object
-class ReluSign(QuantizerFunctionWrapper):
+class SteHeaviside(QuantizerFunctionWrapper):
     r"""
     Instantiates a binarization quantizer with output values 0 and 1.
     \\[
     q(x) = \begin{cases}
-    +1 & x > \Delta \\\
-    0 & x \leq \Delta
+    +1 & x > 0 \\\
+    0 & x \leq 0
     \end{cases}
     \\]
 
-    where $\Delta$ is defined as the threshold and can be passed as an argument.
     The gradient is estimated using the Straight-Through Estimator
     (essentially the binarization is replaced by a clipped identity on the
     backward pass).
@@ -474,35 +473,35 @@ class ReluSign(QuantizerFunctionWrapper):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.relu_sign
+    quantizers.ste_heaviside
     ```
 
     # Arguments
-    threshold_value: The value for the threshold, $\Delta$, default value 0.
     clip_value: Threshold for clipping gradients.
 
     # Returns
     AND Binarization function
     """
 
-    def __init__(self, threshold_value=0.0, clip_value=1.0):
-        super().__init__(relu_sign, threshold_value=threshold_value, clip_value=clip_value)
+    def __init__(self, clip_value=1.0):
+        super().__init__(
+            ste_heaviside, clip_value=clip_value
+        )
 
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-def relu_sign(x, threshold_value=0.0, clip_value=1.0):
+def ste_heaviside(x, clip_value=1.0):
     r"""
     Binarization function with output values 0 and 1.
 
     \\[
     q(x) = \begin{cases}
-    +1 & x > \Delta \\\
-    0 & x \leq \Delta
+    +1 & x > 0 \\\
+    0 & x \leq 0
     \end{cases}
     \\]
 
-    where $\Delta$ is defined as the threshold and can be passed as an argument.
     The gradient is estimated using the Straight-Through Estimator
     (essentially the binarization is replaced by a clipped identity on the
     backward pass).
@@ -513,12 +512,11 @@ def relu_sign(x, threshold_value=0.0, clip_value=1.0):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.relu_sign
+    quantizers.ste_heaviside
     ```
 
     # Arguments
     x: Input tensor.
-    threshold_value: The value for the threshold, $\Delta$, default value 0.
     clip_value: Threshold for clipping gradients.
 
     # Returns
@@ -531,7 +529,7 @@ def relu_sign(x, threshold_value=0.0, clip_value=1.0):
         def grad(dy):
             return dy
 
-        return (tf.sign(tf.sign(x - threshold_value) - 0.1) + 1) / 2, grad
+        return (tf.sign(tf.sign(x) - 0.1) + 1) / 2, grad
 
     return _and_binarize_with_identity_grad(x)
 

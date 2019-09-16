@@ -62,7 +62,7 @@ def test_binarization(name):
     assert np.all(result[result >= 0] == 1)
 
 
-@pytest.mark.parametrize("name", ["relu_sign"])
+@pytest.mark.parametrize("name", ["ste_heaviside"])
 def test_and_binarization(name):
     x = tf.keras.backend.placeholder(ndim=2)
     f = tf.keras.backend.function([x], [lq.quantizers.get(name)(x)])
