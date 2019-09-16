@@ -484,9 +484,7 @@ class SteHeaviside(QuantizerFunctionWrapper):
     """
 
     def __init__(self, clip_value=1.0):
-        super().__init__(
-            ste_heaviside, clip_value=clip_value
-        )
+        super().__init__(ste_heaviside, clip_value=clip_value)
 
 
 @utils.register_keras_custom_object
