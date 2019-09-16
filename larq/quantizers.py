@@ -67,6 +67,8 @@ __all__ = [
     "SwishSign",
     "SteTern",
     "ste_tern",
+    "SteHeaviside",
+    "ste_heaviside",
 ]
 
 
@@ -448,6 +450,86 @@ class SteTern(QuantizerFunctionWrapper):
             ternary_weight_networks=ternary_weight_networks,
             clip_value=clip_value,
         )
+
+
+@utils.register_keras_custom_object
+class SteHeaviside(QuantizerFunctionWrapper):
+    r"""
+    Instantiates a binarization quantizer with output values 0 and 1.
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > 0 \\\
+    0 & x \leq 0
+    \end{cases}
+    \\]
+
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 & \left|x\right| \leq 1 \\\
+    0 & \left|x\right| > 1
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.ste_heaviside
+    ```
+
+    # Arguments
+    clip_value: Threshold for clipping gradients.
+
+    # Returns
+    AND Binarization function
+    """
+
+    def __init__(self, clip_value=1.0):
+        super().__init__(ste_heaviside, clip_value=clip_value)
+
+
+@utils.register_keras_custom_object
+@utils.set_precision(1)
+def ste_heaviside(x, clip_value=1.0):
+    r"""
+    Binarization function with output values 0 and 1.
+
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > 0 \\\
+    0 & x \leq 0
+    \end{cases}
+    \\]
+
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 & \left|x\right| \leq 1 \\\
+    0 & \left|x\right| > 1
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.ste_heaviside
+    ```
+
+    # Arguments
+    x: Input tensor.
+    clip_value: Threshold for clipping gradients.
+
+    # Returns
+    AND-binarized tensor.
+    """
+    x = tf.clip_by_value(x, -clip_value, clip_value)
+
+    @tf.custom_gradient
+    def _and_binarize_with_identity_grad(x):
+        def grad(dy):
+            return dy
+
+        return tf.sign(tf.nn.relu(x)), grad
+
+    return _and_binarize_with_identity_grad(x)
 
 
 def serialize(quantizer):
