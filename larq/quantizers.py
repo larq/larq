@@ -69,7 +69,7 @@ __all__ = [
     "ste_tern",
     "SteHeaviside",
     "ste_heaviside",
-    "DorefaQuantizer"
+    "DorefaQuantizer",
 ]
 
 
@@ -535,7 +535,6 @@ def ste_heaviside(x, clip_value=1.0):
         return tf.sign(tf.nn.relu(x)), grad
 
     return _and_binarize_with_identity_grad(x)
-
 
 
 def _dorefa_k_bit_quantizer(x, k_bit=2):
