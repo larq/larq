@@ -202,3 +202,38 @@ def test_magnitude_aware_sign():
     np.testing.assert_allclose(
         grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
     )
+
+
+@pytest.mark.parametrize(
+    "fn", [lq.quantizers._dorefa_k_bit_quantizer, lq.quantizers.DorefaQuantizer(2)]
+)
+def test_dorefa_quantize(fn):
+    x = tf.keras.backend.placeholder(ndim=2)
+    f = tf.keras.backend.function([x], [fn(x)])
+    real_values = np.random.uniform(-2, 2, (2, 5))
+    result = f([real_values])[0]
+    k_bit = 2
+    n = 2 ** k_bit - 1
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+    for i in range(n + 1):
+        assert np.all(
+            result[(result > (2 * i - 1) / (2 * n)) & (result < (2 * i + 1) / (2 * n))]
+            == i / n
+        )
+
+
+@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
+def test_ste_grad_dorefa():
+    @np.vectorize
+    def ste_grad(x):
+        if x <= 1 and x >= 0:
+            return 1.0
+        return 0.0
+
+    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    tf_x = tf.Variable(x)
+    with tf.GradientTape() as tape:
+        activation = lq.quantizers.DorefaQuantizer(2)(tf_x)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), ste_grad(x))
