@@ -10,6 +10,23 @@ def register_keras_custom_object(cls):
     return cls
 
 
+def register_alias(name):
+    """A decorator to register a custom keras object under a given alias.
+    !!! example
+        ```python
+        @utils.register_alias("degeneration")
+        class Degeneration(tf.keras.metrics.Metric):
+            pass
+        ```
+    """
+
+    def register_func(cls):
+        get_custom_objects()[name] = cls
+        return cls
+
+    return register_func
+
+
 def tf_1_14_or_newer():
     return LooseVersion(tf.__version__) >= LooseVersion("1.14.0")
 

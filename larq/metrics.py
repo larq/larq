@@ -62,7 +62,47 @@ def get_training_metrics():
     return _GLOBAL_TRAINING_METRICS
 
 
-class FlipRatio(Metric):
+class _CompatibilityMetric(Metric):
+    r"""Metric with support for both 1.13 and 1.14+
+    """
+
+    def add_weight(
+        self,
+        name,
+        shape=(),
+        aggregation=tf.VariableAggregation.NONE,
+        synchronization=tf.VariableSynchronization.ON_READ,
+        initializer=None,
+        dtype=None,
+    ):
+        if utils.tf_1_14_or_newer():
+            return super().add_weight(
+                name=name,
+                shape=shape,
+                aggregation=aggregation,
+                synchronization=synchronization,
+                initializer=initializer,
+                dtype=dtype,
+            )
+        else:
+            # Call explicitely tf.keras.layers.Layer.add_weight because TF 1.13
+            # doesn't support setting a custom dtype
+            return tf.keras.layers.Layer.add_weight(
+                self,
+                name=name,
+                shape=shape,
+                dtype=self._dtype if dtype is None else dtype,
+                trainable=False,
+                initializer=initializer,
+                collections=[],
+                synchronization=synchronization,
+                aggregation=aggregation,
+            )
+
+
+@utils.register_alias("flip_ratio")
+@utils.register_keras_custom_object
+class FlipRatio(_CompatibilityMetric):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example
@@ -93,12 +133,17 @@ class FlipRatio(Metric):
                 shape=values_shape,
                 dtype=self.values_dtype,
                 initializer=tf.keras.initializers.zeros,
+                aggregation=tf.VariableAggregation.SUM,
             )
             self.total = self.add_weight(
-                "total", initializer=tf.keras.initializers.zeros
+                "total",
+                initializer=tf.keras.initializers.zeros,
+                aggregation=tf.VariableAggregation.SUM,
             )
             self.count = self.add_weight(
-                "count", initializer=tf.keras.initializers.zeros
+                "count",
+                initializer=tf.keras.initializers.zeros,
+                aggregation=tf.VariableAggregation.SUM,
             )
         self._size = np.prod(self.values_shape)
 
@@ -127,36 +172,3 @@ class FlipRatio(Metric):
             "values_shape": self.values_shape,
             "values_dtype": self.values_dtype.name,
         }
-
-    def add_weight(
-        self,
-        name,
-        shape=(),
-        aggregation=tf.VariableAggregation.SUM,
-        synchronization=tf.VariableSynchronization.ON_READ,
-        initializer=None,
-        dtype=None,
-    ):
-        if utils.tf_1_14_or_newer():
-            return super().add_weight(
-                name=name,
-                shape=shape,
-                aggregation=aggregation,
-                synchronization=synchronization,
-                initializer=initializer,
-                dtype=dtype,
-            )
-        else:
-            # Call explicitely tf.keras.layers.Layer.add_weight because TF 1.13
-            # doesn't support setting a custom dtype
-            return tf.keras.layers.Layer.add_weight(
-                self,
-                name=name,
-                shape=shape,
-                dtype=self._dtype if dtype is None else dtype,
-                trainable=False,
-                initializer=initializer,
-                collections=[],
-                synchronization=synchronization,
-                aggregation=aggregation,
-            )
