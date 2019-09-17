@@ -127,6 +127,7 @@ class FlipRatio(_CompatibilityMetric):
         super().__init__(name=name, dtype=dtype)
         self.values_dtype = tf.as_dtype(values_dtype)
         self.values_shape = tf.TensorShape(values_shape).as_list()
+        self.is_weight_metric = True
         with tf.init_scope():
             self._previous_values = self.add_weight(
                 "previous_values",
