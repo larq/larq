@@ -194,6 +194,10 @@ class SteSign(QuantizerFunctionWrapper):
         super().__init__(ste_sign, clip_value=clip_value)
 
 
+def _scaled_sign(x):
+    return 1.3 * ste_sign(x)
+
+
 @utils.register_keras_custom_object
 @utils.set_precision(1)
 def magnitude_aware_sign(x, clip_value=1.0):
@@ -201,7 +205,7 @@ def magnitude_aware_sign(x, clip_value=1.0):
     Magnitude-aware sign for Bi-Real Net.
 
     ```plot-activation
-    quantizers.magnitude_aware_sign
+    quantizers._scaled_sign
     ```
 
     # Arguments
@@ -209,7 +213,7 @@ def magnitude_aware_sign(x, clip_value=1.0):
     clip_value: Threshold for clipping gradients.
 
     # Returns
-    Scaled binarized tensor (with values in $\{-a, a\}$, where $a$ is a float).
+    Scaled binarized tensor (with values in \\(\\{-a, a\\}\\), where $a$ is a float).
 
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
@@ -227,7 +231,7 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
 
     ```plot-activation
-    quantizers.magnitude_aware_sign
+    quantizers._scaled_sign
     ```
 
     # Arguments
