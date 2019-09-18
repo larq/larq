@@ -2,15 +2,15 @@ If you are new to Larq and/or Binarized Neural Networks (BNNs), this is the righ
 
 ## Quantizer
 
-A [quantizer](https://larq.dev/api/quantizers/) defines an operation that quantizes a vector, as well as a pseudo-gradient that is used for automatic differentation. This pseudo-gradient is in general not the true gradient.
+A [quantizer](https://larq.dev/api/quantizers/) defines an operation that quantizes a vector, as well as a pseudo-gradient that is used for automatic differentiation. This pseudo-gradient is in general not the true gradient.
 
-Generally you will find quantizers throughout the network to quantize activations. This is because most layers output integers, even if all inputs are binary, because they sum over multiple binary values.
+Generally, you will find quantizers throughout the network to quantize activations. This is because most layers output integers, even if all inputs are binary, because they sum over multiple binary values.
 
 It is also common to apply quantizers to the weights during training. This is necessary when relying on real-valued latent-weights to accumulate non-binary update steps, a common optimization strategy for BNNs. After training is finished, the real-valued weights and associated quantization operations can be discarded.
 
 ### Pseudo-Gradient
 
-The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for gradient descent. Instead, optimization of BNNs rely on what we call pseudo-gradients, which are used during back-propagation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
+The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for gradient descent. Instead, the optimization of BNNs relies on what we call pseudo-gradients, which are used during back-propagation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
 
 ### Using Quantizers as Activations
 
@@ -139,7 +139,7 @@ model = MyModel()
 
 ## Using Custom Quantizers
 
-Quantizers are functions that transform a full precision input to a quantized output. Since this transformation usually is non-differentiable it is necessary to modify the gradient in order to be able to train the resulting QNN. This can be done with the [`tf.custom_gradient`](https://www.tensorflow.org/api_docs/python/tf/custom_gradient) decorator.
+Quantizers are functions that transform a full precision input to a quantized output. Since this transformation usually is non-differentiable it is necessary to modify the gradient to be able to train the resulting QNN. This can be done with the [`tf.custom_gradient`](https://www.tensorflow.org/api_docs/python/tf/custom_gradient) decorator.
 
 In this example we will define a binarization function with an identity gradient:
 
