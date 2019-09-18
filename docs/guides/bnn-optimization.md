@@ -9,7 +9,7 @@ Stochastic Gradient Descent (SGD) is used pretty much everywhere in the field De
 However, when turning to BNNs, two fundamental issues arise with SGD:
 
 - The gradient of the binarization operation is zero almost everywhere, making the gradient $\frac{\partial L}{\partial w}$ utterly uninformative.
-- SGD performs optimization through small update steps that are accumulated over time. Binary weights, meanwhile, cannot absorb small updates: they can only be left alone, or flipped.
+- SGD performs optimization through small update steps that are accumulated over time. Binary weights, meanwhile, cannot absorb small updates: they can only be left alone or flipped.
 
 Another way of putting this is that the loss landscape for BNN is very different than what you are used to for real-valued networks. Gone are the glowing hills you can simply glide down from: the loss is now a discrete function, and many of the intuitions and theories developed for continuous loss landscapes no longer apply.
 
@@ -47,14 +47,13 @@ In [`larq.quantizers`](/api/quantizers) you will find a variety of quantizers th
 
 ## Choice of Optimizer
 
-When using a latent weight strategy, you can apply any optimizer you are familiar with from real-valued deep learning. However, due the different nature of BNNs your intuitions may be off. We recommend using Adam: although other optimizers can achieve similar accuracies with a lot of finetuning, we and others have found that Adam is the quickest to converge and the least sensitive to the choice of hyperparamters
-.
+When using a latent weight strategy, you can apply any optimizer you are familiar with from real-valued deep learning. However, due to the different nature of BNNs your intuitions may be off. We recommend using Adam: although other optimizers can achieve similar accuracies with a lot of finetuning, we and others have found that Adam is the quickest to converge and the least sensitive to the choice of hyperparameters.
 
 ## Tips & Tricks
 
 Here are some general tips and tricks that you may want to keep in mind:
 
-- BNN training is more noisy due to non-continuous nature of flipping weights; therefore, we recommend setting your batch norm momentum to 0.9.
+- BNN training is noisier due to the non-continuous nature of flipping weights; therefore, we recommend setting your batch norm momentum to 0.9.
 - Beware that BNNs tend to require many more epochs than real-valued networks to converge: 200+ epochs when training an AlexNet or ResNet-18 style network on ImageNet is not unusual.
 - Networks tend to train much quicker if they are initialized from a trained real-valued model. Importantly, this requires the overall architecture of the pretrained network to be as similar as possible to the BNN, including placement of the activation operation (which replaces the binarization operation). Note that although convergence is faster, pretraining does not seem to improve final accuracy.
 

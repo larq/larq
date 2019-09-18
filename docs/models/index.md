@@ -24,7 +24,7 @@ The model definitions and the train loop are available in the [Larq Zoo reposito
 
 ## Training Models from Scratch
 
-Larq Zoo ships with a command line interface powered by [`zookeeper`](https://github.com/larq/zookeeper/), allowing you to reproduce the entire training process. If you want to improve an existing model or implement your own, we recommend to install Larq Zoo in [development mode](https://github.com/larq/zoo/blob/master/CONTRIBUTING.md#project-setup).
+Larq Zoo ships with a command-line interface powered by [`zookeeper`](https://github.com/larq/zookeeper/), allowing you to reproduce the entire training process. If you want to improve an existing model or implement your own, we recommend to installing Larq Zoo in [development mode](https://github.com/larq/zoo/blob/master/CONTRIBUTING.md#project-setup).
 
 E.g. to reproduce the training of [Binary AlexNet](/models/api/#binaryalexnet) run:
 
@@ -40,7 +40,7 @@ lqz train binary_alexnet --dataset imagenet2012 --dataset-version 5.0.0 --hparam
 
 To view a TensorBoard for the current training, replace the `lqz train` command with `lqz tensorboard`.
 
-For all available commands and options run `lqz --help` or `lqz train --help` or checkout the documentation of [`zookeeper`](https://github.com/larq/zookeeper/) if you want to implement your own model for Larq Zoo.
+For all available commands and options run `lqz --help` or `lqz train --help` or checkout the documentation of [`zookeeper`](https://github.com/larq/zookeeper/) if you want to implement your model for Larq Zoo.
 
 ## Installation
 
