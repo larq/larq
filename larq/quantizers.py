@@ -69,7 +69,8 @@ __all__ = [
     "ste_tern",
     "SteHeaviside",
     "ste_heaviside",
-    "DorefaQuantizer",
+    "DoReFaQuantizer",
+    "dorefa_quantizer",
 ]
 
 
@@ -537,7 +538,40 @@ def ste_heaviside(x, clip_value=1.0):
     return _and_binarize_with_identity_grad(x)
 
 
-def _dorefa_k_bit_quantizer(x, k_bit=2):
+def dorefa_k_bit_quantizer(x, k_bit=2):
+    r"""k_bit quantizer as in the DoReFa paper.
+
+    \\[
+    q(x) = \begin{cases}
+    0 & x < \frac{1}{2n} \\\
+    \frac{i}{n} & \frac{2i-1}{2n} < |x| < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
+     1 & \frac{2n-1}{2n} < x
+    \end{cases}
+    \\]
+
+    where \\(n = 2^{\text{k_bit}} - 1\\). The number of bits, k_bit, needs to be passed as an argument.
+    The gradient is estimated using the Straight-Through Estimator
+    (essentially the binarization is replaced by a clipped identity on the
+    backward pass).
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+    1 &  0 \leq x \leq 1 \\\
+    0 & \text{else}
+    \end{cases}\\]
+
+    ```plot-activation
+    quantizers.dorefa_k_bit_quantizer
+    ```
+
+    # Arguments
+    k_bit: number of bits for the quantization.
+
+    # Returns
+    quantized tensor
+
+    # References
+    - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks
+      with Low Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
+    """
     x = tf.clip_by_value(x, 0.0, 1.0)
 
     @tf.custom_gradient
@@ -549,7 +583,7 @@ def _dorefa_k_bit_quantizer(x, k_bit=2):
 
 
 @utils.register_keras_custom_object
-class DorefaQuantizer(QuantizerFunctionWrapper):
+class DoReFaQuantizer(QuantizerFunctionWrapper):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -568,11 +602,9 @@ class DorefaQuantizer(QuantizerFunctionWrapper):
     1 &  0 \leq x \leq 1 \\\
     0 & \text{else}
     \end{cases}\\]
-    Note that in the original tensorpack implementation the clip and
-    the quantizer are two different functions that get composed.
-
+    
     ```plot-activation
-    quantizers._dorefa_k_bit_quantizer
+    quantizers.dorefa_k_bit_quantizer
     ```
 
     # Arguments
@@ -587,7 +619,7 @@ class DorefaQuantizer(QuantizerFunctionWrapper):
     """
 
     def __init__(self, k_bit):
-        super().__init__(_dorefa_k_bit_quantizer, k_bit=k_bit)
+        super().__init__(dorefa_k_bit_quantizer, k_bit=k_bit)
         self.precision = k_bit
 
 
