@@ -65,7 +65,6 @@ def get_training_metrics():
 
 class _CompatibilityMetric(Metric):
     """Metric with support for both 1.13 and 1.14+"""
-    """
 
     def get_config(self):
         """Returns the serializable config of the metric."""
