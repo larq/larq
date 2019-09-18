@@ -64,7 +64,7 @@ def get_training_metrics():
 
 
 class _CompatibilityMetric(Metric):
-    r"""Metric with support for both 1.13 and 1.14+
+    """Metric with support for both 1.13 and 1.14+"""
     """
 
     def get_config(self):
