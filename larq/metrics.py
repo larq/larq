@@ -72,7 +72,7 @@ class _CompatibilityMetric(Metric):
         return {**super().get_config(), "name": self.name, "dtype": self.dtype}
 
     def reset_states(self):
-        return K.batch_set_value([(v, 0) for v in self.variables])
+        return tf.keras.backend.batch_set_value([(v, 0) for v in self.variables])
 
     def add_weight(
         self,
