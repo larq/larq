@@ -538,6 +538,8 @@ def ste_heaviside(x, clip_value=1.0):
     return _and_binarize_with_identity_grad(x)
 
 
+@utils.register_keras_custom_object
+@utils.set_precision(2)
 def dorefa_quantizer(x, k_bit=2):
     r"""k_bit quantizer as in the DoReFa paper.
 
