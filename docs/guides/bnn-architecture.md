@@ -8,7 +8,7 @@ We can reduce the memory footprint of the model by binarizing parameters. In Lar
 
 To get the efficiency of binary computations, the incoming activations need to be binary as well. This can be done by setting a `input_quantizer`.
 
-Note that the output of a binarized layer is _not_ binary. Instead the output is integer, due to the summation that appears in most neural network layers.
+Note that the output of a binarized layer is _not_ binary. Instead the output is an integer, due to the summation that appears in most neural network layers.
 
 When viewing binarization as an activation function just like ReLU, one may be inclined to binarize the outgoing activations rather than the incoming activations. However, if the network contains batch normalization layers or residual connections, this may result in unintentional non-binary operations. Therefore we have opted for an `input_quantizer` rather than an `activation_quantizer`.
 
@@ -28,7 +28,7 @@ x_out = lq.layers.QuantDense(
 ## First & Last Layer
 
 Binarizing the first and last layers hurts accuracy much more than binarizing other layers in the network. Meanwhile, the number of weights and operations in these layers are relatively small. Therefore it has become standard to leave these layers in higher precision. This applies to the incoming activations as well as the weights.
-The following shows a network that was trained on CIFAR10 with different precisions for first and last layers.
+The following shows a network that was trained on CIFAR10 with different precisions for the first and last layers.
 
 ```plot-altair
 /plots/first_and_last_layers.vg.json
@@ -120,5 +120,5 @@ If you would like to learn more, we recommend checking out the following papers 
 
 - [Back to Simplicity: How to Train Accurate BNNs from Scratch?](https://arxiv.org/abs/1906.08637) - This recent paper introduces Binary Densenets, demonstrating good results on ImageNet. The authors take an information-theoretic perspective on BNN architectures and give a number of recommendations for good architecture design.
 - [Structured Binary Neural Networks for Accurate Image Classification and Semantic Segmentation](https://arxiv.org/abs/1811.10413) - A thought-provoking paper that presents Group-Net. The authors question whether architectural features developed for real-valued networks are the most appropriate for BNN. Even more than the presented architecture, we find this line of thinking very interesting and hope Larq will enable people to explore novel ideas more easily.
-- [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved Representational Capability and Advanced Training Algorithm](https://arxiv.org/abs/1808.00278) - This ECCV 2018 paper introduces Bi-Real nets, one of the first binarized networks that uses high-precision shortcuts.
+- [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved Representational Capability and Advanced Training Algorithm](https://arxiv.org/abs/1808.00278) - This ECCV 2018 paper introduces Bi-Real nets, one of the first binarized networks that use high-precision shortcuts.
 - [Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1](https://arxiv.org/abs/1602.02830) - The classic BNN paper, mandatory reading for anyone working in the field. In addition to introducing many of the foundational ideas for BNNs, the paper contains an interesting discussion on batch normalization.
