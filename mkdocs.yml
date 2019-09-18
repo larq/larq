@@ -78,7 +78,7 @@ markdown_extensions:
       permalink: true
 
 extra_javascript:
-  - "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+  - "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-AMS_CHTML"
   - "https://cdn.jsdelivr.net/npm/vega@5"
   - "https://cdn.jsdelivr.net/npm/vega-lite@3"
   - "https://cdn.jsdelivr.net/npm/vega-embed@5"
