@@ -136,17 +136,17 @@ class FlipRatio(LarqMetric):
                 shape=values_shape,
                 dtype=self.values_dtype,
                 initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.SUM,
+                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
             )
             self.total = self.add_weight(
                 "total",
                 initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.SUM,
+                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
             )
             self.count = self.add_weight(
                 "count",
                 initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.SUM,
+                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
             )
         self._size = np.prod(self.values_shape)
 
