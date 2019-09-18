@@ -1,7 +1,6 @@
 import tensorflow as tf
 from larq import utils
 import numpy as np
-import tensorflow.keras.backend as K
 from contextlib import contextmanager
 
 try:
@@ -63,13 +62,8 @@ def get_training_metrics():
     return _GLOBAL_TRAINING_METRICS
 
 
-class _CompatibilityMetric(Metric):
+class LarqMetric(Metric):
     """Metric with support for both 1.13 and 1.14+"""
-    """
-
-    def get_config(self):
-        """Returns the serializable config of the metric."""
-        return {**super().get_config(), "name": self.name, "dtype": self.dtype}
 
     def reset_states(self):
         return tf.keras.backend.batch_set_value([(v, 0) for v in self.variables])
@@ -110,7 +104,7 @@ class _CompatibilityMetric(Metric):
 
 @utils.register_alias("flip_ratio")
 @utils.register_keras_custom_object
-class FlipRatio(_CompatibilityMetric):
+class FlipRatio(LarqMetric):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example
