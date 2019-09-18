@@ -1,6 +1,7 @@
 import tensorflow as tf
 from larq import utils
 import numpy as np
+import tensorflow.keras.backend as K
 from contextlib import contextmanager
 
 try:
@@ -65,6 +66,13 @@ def get_training_metrics():
 class _CompatibilityMetric(Metric):
     r"""Metric with support for both 1.13 and 1.14+
     """
+
+    def get_config(self):
+        """Returns the serializable config of the metric."""
+        return {**super().get_config(), "name": self.name, "dtype": self.dtype}
+
+    def reset_states(self):
+        return K.batch_set_value([(v, 0) for v in self.variables])
 
     def add_weight(
         self,
