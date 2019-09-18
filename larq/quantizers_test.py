@@ -215,7 +215,7 @@ def test_dorefa_quantize(fn):
     k_bit = 2
     n = 2 ** k_bit - 1
     assert not np.any(result > 1)
-    assert not np.any(result < -1)
+    assert not np.any(result < 0)
     for i in range(n + 1):
         assert np.all(
             result[(result > (2 * i - 1) / (2 * n)) & (result < (2 * i + 1) / (2 * n))]
