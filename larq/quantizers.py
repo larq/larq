@@ -538,7 +538,7 @@ def ste_heaviside(x, clip_value=1.0):
     return _and_binarize_with_identity_grad(x)
 
 
-def dorefa_k_bit_quantizer(x, k_bit=2):
+def dorefa_quantizer(x, k_bit=2):
     r"""k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -559,7 +559,7 @@ def dorefa_k_bit_quantizer(x, k_bit=2):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.dorefa_k_bit_quantizer
+    quantizers.dorefa_quantizer
     ```
 
     # Arguments
@@ -604,7 +604,7 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     \end{cases}\\]
     
     ```plot-activation
-    quantizers.dorefa_k_bit_quantizer
+    quantizers.dorefa_quantizer
     ```
 
     # Arguments
@@ -619,7 +619,7 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     """
 
     def __init__(self, k_bit):
-        super().__init__(dorefa_k_bit_quantizer, k_bit=k_bit)
+        super().__init__(dorefa_quantizer, k_bit=k_bit)
         self.precision = k_bit
 
 
