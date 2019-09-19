@@ -11,3 +11,5 @@ python3 generate_api_docs.py
 
 # run mkdocs
 python3 -m mkdocs build
+# run mkdocs a second time to make sure generated plots are copied to /site
+python3 -m mkdocs build
