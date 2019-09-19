@@ -130,7 +130,7 @@ def test_ternarization_with_ternary_weight_networks():
     "fn", [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside]
 )
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_ste_grad(fn):
+def test_identity_ste_grad(fn):
     @np.vectorize
     def constant_grad(x):
         return 1.0
@@ -147,7 +147,7 @@ def test_ste_grad(fn):
     "fn", [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside]
 )
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_identity_ste_grad(fn):
+def test_ste_grad(fn):
     @np.vectorize
     def ste_grad(x):
         if np.abs(x) <= 1:
