@@ -26,7 +26,7 @@ nav:
       - Metrics: api/metrics.md
   - Models:
       - Larq Zoo: models/index.md
-      - Examples: models/examples.md
+      - Examples: models/examples.ipynb
       - API: api/larq_zoo.md
   - Community:
       - Papers using Larq: papers.md
