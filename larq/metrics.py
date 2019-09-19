@@ -65,9 +65,6 @@ def get_training_metrics():
 class LarqMetric(Metric):
     """Metric with support for both 1.13 and 1.14+"""
 
-    def reset_states(self):
-        return tf.keras.backend.batch_set_value([(v, 0) for v in self.variables])
-
     def add_weight(
         self,
         name,
