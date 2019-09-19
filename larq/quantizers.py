@@ -156,7 +156,8 @@ def ste_sign(x, clip_value=1.0):
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    x = tf.clip_by_value(x, -clip_value, clip_value)
+    if clip_value is not None:
+        x = tf.clip_by_value(x, -clip_value, clip_value)
 
     return _binarize_with_identity_grad(x)
 
@@ -391,7 +392,8 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
-    x = tf.clip_by_value(x, -clip_value, clip_value)
+    if clip_value is not None:
+        x = tf.clip_by_value(x, -clip_value, clip_value)
 
     if ternary_weight_networks:
         threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
@@ -526,7 +528,8 @@ def ste_heaviside(x, clip_value=1.0):
     # Returns
     AND-binarized tensor.
     """
-    x = tf.clip_by_value(x, -clip_value, clip_value)
+    if clip_value is not None:
+        x = tf.clip_by_value(x, -clip_value, clip_value)
 
     @tf.custom_gradient
     def _and_binarize_with_identity_grad(x):
