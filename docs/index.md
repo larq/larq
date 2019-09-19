@@ -38,6 +38,6 @@ You can also check out one of our prebuilt [docker images](https://hub.docker.co
 
 You can install Larq with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
 
-```shel-
+```shell
 pip install larq
 ```
