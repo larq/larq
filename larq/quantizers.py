@@ -146,7 +146,7 @@ def ste_sign(x, clip_value=1.0):
 
     # Arguments
     x: Input tensor.
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # Returns
     Binarized tensor.
@@ -186,7 +186,7 @@ class SteSign(QuantizerFunctionWrapper):
     ```
 
     # Arguments
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # References
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
@@ -213,7 +213,7 @@ def magnitude_aware_sign(x, clip_value=1.0):
 
     # Arguments
     x: Input tensor
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # Returns
     Scaled binarized tensor (with values in \\(\\{-a, a\\}\\), where $a$ is a float).
@@ -238,7 +238,7 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
     ```
 
     # Arguments
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
@@ -384,7 +384,7 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     threshold_value: The value for the threshold, $\Delta$.
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # Returns
     Ternarized tensor.
@@ -443,7 +443,7 @@ class SteTern(QuantizerFunctionWrapper):
     threshold_value: The value for the threshold, $\Delta$.
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
@@ -485,7 +485,7 @@ class SteHeaviside(QuantizerFunctionWrapper):
     ```
 
     # Arguments
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # Returns
     AND Binarization function
@@ -523,7 +523,7 @@ def ste_heaviside(x, clip_value=1.0):
 
     # Arguments
     x: Input tensor.
-    clip_value: Threshold for clipping gradients.
+    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # Returns
     AND-binarized tensor.
