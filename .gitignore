@@ -1,5 +1,6 @@
 junit
 docs/api
+docs/plots/generated
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

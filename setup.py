@@ -37,10 +37,10 @@ setup(
             "mkdocs-material==4.4.2",
             "pymdown-extensions==6.1",
             "mknotebooks==0.1.6",
-            "matplotlib==3.1.1",
-            "scour==0.37",
             "mkdocs-minify-plugin==0.2.1",
             "larq-zoo==0.4.1",
+            "altair==3.2.0",
+            "pandas==0.25.1",
         ],
     },
     classifiers=[
