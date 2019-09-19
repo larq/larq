@@ -72,7 +72,7 @@ class LarqMetric(Metric):
         self,
         name,
         shape=(),
-        aggregation=tf.VariableAggregation.NONE,
+        aggregation=tf.VariableAggregation.SUM,
         synchronization=tf.VariableSynchronization.ON_READ,
         initializer=None,
         dtype=None,
