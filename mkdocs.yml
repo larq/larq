@@ -33,7 +33,7 @@ nav:
       - Contributing Guide: contributing.md
       - Code of Conduct: code-of-conduct.md
   - About:
-      - About: about.md
+      - Why Larq?: about.md
       - FAQ: faq.md
 
 repo_url: https://github.com/larq/larq
