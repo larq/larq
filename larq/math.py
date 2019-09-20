@@ -12,6 +12,10 @@ def sign(x):
     \end{cases}
     \\]
 
+    This function is similar to
+    [`tf.math.sign`](https://www.tensorflow.org/api_docs/python/tf/math/sign) but will
+    return a binary value and will never be zero.
+
     # Arguments
     `x`: Input Tensor
 
