@@ -25,16 +25,15 @@ model = tf.keras.models.Sequential([
 
 This layer can be used inside a [Keras model](https://www.tensorflow.org/alpha/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/alpha/guide/keras/overview#model_subclassing).
 
-## Requirements
+## Installation
 
 Before installing Larq, please install:
 
 - [Python](https://python.org) version `3.6` or `3.7`
-- [Tensorflow](https://www.tensorflow.org/install) version `1.13+` or `2.0.0`
-
-You can also check out one of our prebuilt [docker images](https://hub.docker.com/r/plumerai/deep-learning/tags).
-
-## Installation
+- [Tensorflow](https://www.tensorflow.org/install) version `1.13`, `1.14`, `1.15` or `2.0.0`:
+  ```shell
+  pip install tensorflow  # or tensorflow-gpu
+  ```
 
 You can install Larq with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
 
