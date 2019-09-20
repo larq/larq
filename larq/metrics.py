@@ -195,28 +195,23 @@ class GradientFlow(LarqMetric):
         self.threshold = float(threshold)
 
         with tf.init_scope():
-            self._threshold = tf.constant(self.threshold, dtype=self.dtype)
             self.total_value = self.add_weight(
                 "total_value",
                 initializer=tf.keras.initializers.zeros,
-                dtype=self.dtype,
-                aggregation=tf.VariableAggregation.SUM,
             )
             self.num_batches = self.add_weight(
                 "num_batches",
                 initializer=tf.keras.initializers.zeros,
-                dtype=tf.int32,
-                aggregation=tf.VariableAggregation.SUM,
             )
 
     def update_state(self, values):
         values = tf.cast(values, self.dtype)
 
         below_threshold = tf.math.count_nonzero(
-            tf.math.abs(values) <= self._threshold, dtype=tf.float32
+            tf.math.abs(values) <= self.threshold, dtype=self.dtype
         )
-        num_activations = tf.cast(tf.size(values), tf.float32)
-        ratio = tf.cast(below_threshold / num_activations, self.dtype)
+        num_activations = tf.cast(tf.size(values), self.dtype)
+        ratio = below_threshold / num_activations
 
         update_total_op = self.total_value.assign_add(ratio)
         with tf.control_dependencies([update_total_op]):
@@ -224,7 +219,7 @@ class GradientFlow(LarqMetric):
 
     def result(self):
         return tf.compat.v1.div_no_nan(
-            tf.cast(self.total_value, tf.float32), tf.cast(self.num_batches, tf.float32)
+            self.total_value, self.num_batches
         )
 
     def get_config(self):
