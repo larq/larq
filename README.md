@@ -36,16 +36,15 @@ Check out our examples on how to train a Binarized Neural Network in just a few 
 - [BinaryNet on CIFAR10](https://larq.dev/examples/binarynet_cifar10/)
 - [BinaryNet on CIFAR10 (Advanced)](https://larq.dev/examples/binarynet_advanced_cifar10/)
 
-## Requirements
+## Installation
 
 Before installing Larq, please install:
 
 - [Python](https://python.org) version `3.6` or `3.7`
-- [Tensorflow](https://www.tensorflow.org/install) version `1.13+` or `2.0.0`
-
-You can also check out one of our prebuilt [docker images](https://hub.docker.com/r/plumerai/deep-learning/tags).
-
-## Installation
+- [Tensorflow](https://www.tensorflow.org/install) version `1.13`, `1.14`, `1.15` or `2.0.0`:
+  ```shell
+  pip install tensorflow  # or tensorflow-gpu
+  ```
 
 You can install Larq with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
 
