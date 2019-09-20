@@ -12,7 +12,7 @@ except:  # TensorFlow 1.13 doesn't export this as a public API
 __all__ = ["scope", "get_training_metrics"]
 
 _GLOBAL_TRAINING_METRICS = set()
-_AVAILABLE_METRICS = {"flip_ratio", "gradient_flow"}
+_AVAILABLE_METRICS = {"flip_ratio"}
 
 
 @contextmanager
@@ -172,60 +172,3 @@ class FlipRatio(LarqMetric):
             "values_shape": self.values_shape,
             "values_dtype": self.values_dtype.name,
         }
-
-
-@utils.register_alias("gradient_flow")
-@utils.register_keras_custom_object
-class GradientFlow(LarqMetric):
-    r"""Indicator of gradient mismatch and saturation as described in https://arxiv.org/pdf/1904.02823.pdf.
-        Counts the ratio of activations for each neuron (i.e. pixel in a feature map) over the entire batch
-        that fall in between the HardTanh clipping boundaries ([-1, 1] by default). A neuron with a score of 0
-        did not have any activations in between the boundaries in this batch, and therefore received no gradients 
-        (i.e. saturation). A neuron with a score of 1 was always active in between the boundaries, but therefore
-        suffers from gradient mismatch. Scores are averaged over all neurons in the output.
-
-        # Arguments
-        threshold: The (absolute) clipping threshold used by the HardTanh. 1 by default.
-        name: Name of the metric.
-    """
-
-    def __init__(self, threshold=1.0, name="gradient_flow", dtype=None):
-        super().__init__(name=name, dtype=dtype)
-
-        self.threshold = float(threshold)
-
-        with tf.init_scope():
-            self._threshold = tf.constant(self.threshold, dtype=self.dtype)
-            self.total_value = self.add_weight(
-                "total_value",
-                initializer=tf.keras.initializers.zeros,
-                dtype=self.dtype,
-                aggregation=tf.VariableAggregation.SUM,
-            )
-            self.num_batches = self.add_weight(
-                "num_batches",
-                initializer=tf.keras.initializers.zeros,
-                dtype=tf.int32,
-                aggregation=tf.VariableAggregation.SUM,
-            )
-
-    def update_state(self, values):
-        values = tf.cast(values, self.dtype)
-
-        below_threshold = tf.math.count_nonzero(
-            tf.math.abs(values) <= self._threshold, dtype=tf.float32
-        )
-        num_activations = tf.cast(tf.size(values), tf.float32)
-        ratio = tf.cast(below_threshold / num_activations, self.dtype)
-
-        update_total_op = self.total_value.assign_add(ratio)
-        with tf.control_dependencies([update_total_op]):
-            return self.num_batches.assign_add(1)
-
-    def result(self):
-        return tf.compat.v1.div_no_nan(
-            tf.cast(self.total_value, tf.float32), tf.cast(self.num_batches, tf.float32)
-        )
-
-    def get_config(self):
-        return {**super().get_config(), "threshold": self.threshold}
