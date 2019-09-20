@@ -3,6 +3,8 @@
 Larq Zoo provides reference implementations of deep neural networks with extremely low precision weights and activations that are made available alongside pre-trained weights.
 These models can be used for prediction, feature extraction, and fine-tuning.
 
+The code for all models including a reproducible training pipeline is available at [`larq/zoo`](https://github.com/larq/zoo).
+
 We believe that a collection of tested implementations with pretrained weights is greatly beneficial for the field of Extremely Quantized Neural Networks. To improve reproducibility we have implemented a few commonly used models found in the literature. If you have developed or reimplemented a Binarized or other Extremely Quantized Neural Network and want to share it with the community such that future papers can build on top of your work, please add it to Larq Zoo or get in touch with us if you need any help.
 
 ## Available models
@@ -21,6 +23,16 @@ The model definitions and the train loop are available in the [Larq Zoo reposito
 | [Bi-Real Net](/api/larq_zoo/#birealnet)                           | 57.47 %        | 79.84 %        | 11 699 112 | 4.03 MB  |
 | [XNOR-Net](/api/larq_zoo/#xnornet)                                | 44.96 %        | 69.18 %        | 62 396 768 | 22.81 MB |
 | [Binary AlexNet](/api/larq_zoo/#binaryalexnet)                    | 36.30 %        | 61.53 %        | 61 859 192 | 7.49 MB  |
+
+## Installation
+
+Larq Zoo is not included in Larq by default. To start using it, you can install it with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
+
+```shell
+pip install larq-zoo
+```
+
+Weights can be downloaded automatically when instantiating a model. They are stored at `~/.larq/models/`.
 
 ## Training Models from Scratch
 
@@ -41,13 +53,3 @@ lqz train binary_alexnet --dataset imagenet2012 --dataset-version 5.0.0 --hparam
 To view a TensorBoard for the current training, replace the `lqz train` command with `lqz tensorboard`.
 
 For all available commands and options run `lqz --help` or `lqz train --help` or checkout the documentation of [`zookeeper`](https://github.com/larq/zookeeper/) if you want to implement your model for Larq Zoo.
-
-## Installation
-
-Larq Zoo is not included in Larq by default. To start using it, you can install it with Python's [pip](https://pip.pypa.io/en/stable/) package manager:
-
-```shell
-pip install larq-zoo
-```
-
-Weights can be downloaded automatically when instantiating a model. They are stored at `~/.larq/models/`.
