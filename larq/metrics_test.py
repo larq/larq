@@ -2,6 +2,7 @@ import tensorflow as tf
 from larq import metrics
 from tensorflow.python.keras import keras_parameterized
 import pytest
+import numpy as np
 
 
 def test_scope():
@@ -81,6 +82,7 @@ class FlipRatioTest(keras_parameterized.TestCase):
         self.assertAllClose(1.5, total)
         self.assertAllClose(3, count)
         self.assertAllClose(1.5 / 2, result)
+
 
 class GradientFlowTest(keras_parameterized.TestCase):
     def test_config(self):
