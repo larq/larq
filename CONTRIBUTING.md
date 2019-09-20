@@ -5,6 +5,12 @@
 **Working on your first Pull Request?** You can learn how from this _free_ series
 [How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github).
 
+## Ask a question or raise an issue
+
+If you have questions about Larq or just want to say Hi you can [chat with us on Spectrum](https://spectrum.chat/larq).
+
+If something is not working as expected, if you run into problems with Larq or if you have ideas for missing features, please open a [new issue](https://github.com/larq/larq/issues).
+
 ## Project setup
 
 To send a Pull Request it is required to fork Larq on GitHub.
@@ -71,7 +77,7 @@ We use [`black`](https://black.readthedocs.io/en/stable/) to format all of our c
    ```
 
 4. Go to the [GitHub releases](https://github.com/larq/larq/releases) and create
-a new release based on the tag you've just pushed, adding some release notes.
+   a new release based on the tag you've just pushed, adding some release notes.
 
 5. Build wheels.
 
