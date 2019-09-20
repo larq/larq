@@ -196,12 +196,10 @@ class GradientFlow(LarqMetric):
 
         with tf.init_scope():
             self.total_value = self.add_weight(
-                "total_value",
-                initializer=tf.keras.initializers.zeros,
+                "total_value", initializer=tf.keras.initializers.zeros
             )
             self.num_batches = self.add_weight(
-                "num_batches",
-                initializer=tf.keras.initializers.zeros,
+                "num_batches", initializer=tf.keras.initializers.zeros
             )
 
     def update_state(self, values):
@@ -218,9 +216,7 @@ class GradientFlow(LarqMetric):
             return self.num_batches.assign_add(1)
 
     def result(self):
-        return tf.compat.v1.div_no_nan(
-            self.total_value, self.num_batches
-        )
+        return tf.compat.v1.div_no_nan(self.total_value, self.num_batches)
 
     def get_config(self):
         return {**super().get_config(), "threshold": self.threshold}
