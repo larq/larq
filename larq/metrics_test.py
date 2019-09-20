@@ -204,3 +204,4 @@ class GradientFlowTest(keras_parameterized.TestCase):
         # 15/24 + 16/24 is 31/24, divided by two batches is 31/48
         self.assertAllClose(31.0 / 24.0, total_value)
         self.assertAllClose(31.0 / 48.0, result)
+
