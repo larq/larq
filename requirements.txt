@@ -3,4 +3,4 @@ tensorflow_datasets==1.2.0
 larq_zoo==0.4.1
 Pillow==6.1.0
 matplotlib==3.1.1
-gast==0.2.2  # See https://github.com/tensorflow/tensorflow/issues/32319
+gast==0.3.2  # See https://github.com/tensorflow/tensorflow/issues/32319
