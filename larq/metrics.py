@@ -177,7 +177,7 @@ class FlipRatio(LarqMetric):
 @utils.register_alias("gradient_flow")
 @utils.register_keras_custom_object
 class GradientFlow(LarqMetric):
-    r"""Indicator of gradient mismatch and saturation as described in https://arxiv.org/pdf/1904.02823.pdf.
+    r"""Indicator of gradient mismatch and saturation as described in [Ding et al., 2019](https://arxiv.org/pdf/1904.02823.pdf).
     Counts the ratio of activations for each neuron (i.e. pixel in a feature map) over the entire batch
     that fall in between the HardTanh clipping boundaries ([-1, 1] by default). A neuron with a score of 0
     did not have any activations in between the boundaries in this batch, and therefore received no gradients 
