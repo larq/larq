@@ -1,45 +1,42 @@
-If you are new to Larq and/or Binarized Neural Networks (BNNs), this is the right place to start. Below we summarize the key concepts you need to understand to work with BNNs.
+If you are new to Larq and/or Binarized Neural Networks (BNNs), this is the right place to start. 
+Below, we summarize the key concepts you need to understand to work with BNNs.
 
 ## Quantizer
 
-A [quantizer](https://larq.dev/api/quantizers/) defines an operation that quantizes a vector, as well as a pseudo-gradient that is used for automatic differentiation. This pseudo-gradient is in general not the true gradient.
+The transformation from high-precision Neural Networks to Quantized Neural Networks (QNNs) is achieved by [quantization](https://en.wikipedia.org/wiki/Quantization_(signal_processing)).
+This is the process of mapping a large set of, often continuous, values to a smaller countable set. 
+Binarized Neural Networks are a special case of QNNs, where the quantization output is binary.
 
-Generally, you will find quantizers throughout the network to quantize activations. This is because most layers output integers, even if all inputs are binary, because they sum over multiple binary values.
+In `larq`, A [quantizer](https://larq.dev/api/quantizers/) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+The latter is called pseudo-gradient, as it is in general not the true gradient.
 
-It is also common to apply quantizers to the weights during training. This is necessary when relying on real-valued latent-weights to accumulate non-binary update steps, a common optimization strategy for BNNs. After training is finished, the real-valued weights and associated quantization operations can be discarded.
+Generally, you will find quantizers throughout the network to quantize activations. 
+This is because most layers output integers, even if all inputs are binary, because they sum over multiple binary values.
+
+It is also common to apply quantizers to the weights during training. 
+This is necessary when relying on real-valued latent-weights to accumulate non-binary update steps, a common optimization strategy for BNNs. 
+After training is finished, the real-valued weights and associated quantization operations can be discarded.
 
 ### Pseudo-Gradient
 
-The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for gradient descent. Instead, the optimization of BNNs relies on what we call pseudo-gradients, which are used during back-propagation. In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
-
-### Using Quantizers as Activations
-
-Although quantizers are usually passed to specialized arguments (see [Quantized Layers](#quantized-layers)), they can be used just like `tf.keras` activations:
-
-```python
-# Use a quantizer als activation
-y = larq.layers.QuantDense(512, activation="ste_sign")(x)
-```
-
-Just like activations, quantizers can also be used on their own:
-
-```python
-# The two lines below are equivalent
-x_binarized = larq.quantizers.ste_sign(x)
-x_binarized = tf.keras.layers.Activation("ste_sign")(x)
-```
+The true gradient of a quantizer is in general zero almost everywhere and therefore cannot be used for gradient descent. 
+Instead, the optimization of BNNs relies on what we call pseudo-gradients, which are used during back-propagation. 
+In the documentation for each quantizer you will find the definition and a graph of the pseudo-gradient.
 
 ## Quantized Layers
 
-Each [quantized layers](https://larq.dev/api/layers/) requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
+Each [quantized layer](https://larq.dev/api/layers/) accepts an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. 
+If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
 A quantized layer computes
 
 \\[
-\sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
+\boldsymbol{y} = \sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
 \\]
 
-with full precision weights \(\boldsymbol{w}\), arbitrary precision input \(\boldsymbol{x}\), layer operation \(f\) (e.g. \(f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}\) for a densely-connected layer), activation \(\sigma\) and bias \(b\). This will result in the following computational graph:
+with full precision weights \(\boldsymbol{w}\), arbitrary precision input \(\boldsymbol{x}\), layer operation \(f\), activation \(\sigma\) and bias \(b\). 
+For a densely-connected layer \(f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}\).
+This computation will result in the following computational graph:
 
 <div style="text-align:center;">
 <svg width="50%" viewBox="0 0 249 238" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,6 +83,24 @@ model = tf.keras.models.Sequential([
 ])
 ```
 
+### Using Quantizers as Activations
+
+Although quantizers are usually passed as specialized arguments to a Quantization layer, they can be used just like `tf.keras` activations:
+
+```python
+# Use a quantizer as activation
+y = larq.layers.QuantDense(512, activation="ste_sign")(x)
+```
+
+Just like activations, quantizers can also be used on their own:
+
+```python
+# The two lines below are equivalent
+x_binarized = larq.quantizers.ste_sign(x)
+x_binarized = tf.keras.layers.Activation("ste_sign")(x)
+```
+
+### Defining a simple Binarized Neural Network
 A simple fully-connected Binarized Neural Network (BNN) using the [Straight-Through Estimator](https://larq.dev/api/quantizers/#ste_sign) can be defined in just a few lines of code using either the Keras sequential, functional or model subclassing APIs:
 
 ```python tab="Larq 1-bit model"
@@ -139,7 +154,9 @@ model = MyModel()
 
 ## Using Custom Quantizers
 
-Quantizers are functions that transform a full precision input to a quantized output. Since this transformation usually is non-differentiable it is necessary to modify the gradient to be able to train the resulting QNN. This can be done with the [`tf.custom_gradient`](https://www.tensorflow.org/api_docs/python/tf/custom_gradient) decorator.
+Quantizers are functions that transform a full-precision input to a quantized output. 
+Since this transformation usually is non-differentiable, it is necessary to modify the gradient to be able to train the resulting QNN.
+This can be done with the [`tf.custom_gradient`](https://www.tensorflow.org/api_docs/python/tf/custom_gradient) decorator.
 
 In this example we will define a binarization function with an identity gradient:
 
