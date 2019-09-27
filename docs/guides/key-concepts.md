@@ -34,7 +34,7 @@ A quantized layer computes activations \(\boldsymbol{y}\) as:
 \boldsymbol{y} = \sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
 \\]
 
-with full precision weights \(\boldsymbol{w}\), arbitrary precision input \(\boldsymbol{x}\), layer operation \(f\), activation \(\sigma\) and bias \(b\). 
+with full precision weights \(\boldsymbol{w}\), arbitrary precision input \(\boldsymbol{x}\), layer operation \(f\), activation function \(\sigma\) and bias \(b\). 
 For a densely-connected layer \(f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}\).
 This computation will result in the following computational graph:
 
