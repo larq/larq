@@ -28,7 +28,7 @@ In the documentation for each quantizer you will find the definition and a graph
 Each [quantized layer](https://larq.dev/api/layers/) accepts an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. 
 If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
-A quantized layer computes
+A quantized layer computes activations \(\boldsymbol{y}\) as:
 
 \\[
 \boldsymbol{y} = \sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
