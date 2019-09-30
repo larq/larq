@@ -22,7 +22,7 @@ jobs:
           tensorflow: "tensorflow-cpu==1.15.0-rc1"
         Python37_TF2:
           python.version: "3.7"
-          tensorflow: "tensorflow==2.0.0-rc2"
+          tensorflow: "tensorflow==2.0.0"
 
     steps:
       - task: UsePythonVersion@0
