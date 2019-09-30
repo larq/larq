@@ -28,6 +28,7 @@
         - larq_zoo.BinaryDenseNet37
         - larq_zoo.BinaryDenseNet37Dilated
         - larq_zoo.BinaryDenseNet45
+        - larq_zoo.DoReFaNet
         - larq_zoo.XNORNet
         - larq_zoo.decode_predictions
         - larq_zoo.preprocess_input
