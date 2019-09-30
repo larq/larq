@@ -204,8 +204,10 @@ def _scaled_sign(x):
 @utils.register_keras_custom_object
 @utils.set_precision(1)
 def magnitude_aware_sign(x, clip_value=1.0):
-    r"""
-    Magnitude-aware sign for Bi-Real Net.
+    r"""Magnitude-aware sign for Bi-Real Net.
+
+    A scaled sign function computed according to Section 3.3 in
+    [Zechun Liu et al](https://arxiv.org/abs/1808.00278).
 
     ```plot-activation
     quantizers._scaled_sign
@@ -232,6 +234,9 @@ def magnitude_aware_sign(x, clip_value=1.0):
 @utils.register_keras_custom_object
 class MagnitudeAwareSign(QuantizerFunctionWrapper):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
+
+    A scaled sign function computed according to Section 3.3 in
+    [Zechun Liu et al](https://arxiv.org/abs/1808.00278).
 
     ```plot-activation
     quantizers._scaled_sign
