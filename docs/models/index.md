@@ -21,6 +21,7 @@ The model definitions and the train loop are available in the [Larq Zoo reposito
 | [BinaryDenseNet28](/api/larq_zoo/#binarydensenet28)               | 60.91 %        | 82.83 %        | 5 150 504  | 4.12 MB  |
 | [BinaryResNetE18](/api/larq_zoo/#binaryresnete18)                 | 58.32 %        | 80.79 %        | 11 699 368 | 4.03 MB  |
 | [Bi-Real Net](/api/larq_zoo/#birealnet)                           | 57.47 %        | 79.84 %        | 11 699 112 | 4.03 MB  |
+| [DoReFaNet](/api/larq_zoo/#dorefanet)                             | 53.39 %        | 76.50 %        | 62 403 912 | 22.84 MB |
 | [XNOR-Net](/api/larq_zoo/#xnornet)                                | 44.96 %        | 69.18 %        | 62 396 768 | 22.81 MB |
 | [Binary AlexNet](/api/larq_zoo/#binaryalexnet)                    | 36.30 %        | 61.53 %        | 61 859 192 | 7.49 MB  |
 
