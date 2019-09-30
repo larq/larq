@@ -294,9 +294,20 @@ def approx_sign(x):
 @utils.register_keras_custom_object
 @utils.set_precision(1)
 def swish_sign(x, beta=5.0):
-    """Sign binarization function.
+    r"""Sign binarization function.
+
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+    \end{cases}
+    \\]
 
     The gradient is estimated using the SignSwish method.
+
+    \\[
+    \frac{\partial q_{\beta}(x)}{\partial x} = \frac{\beta\left\\{2-\beta x \tanh \left(\frac{\beta x}{2}\right)\right\\}}{1+\cosh (\beta x)}
+    \\]
 
     ```plot-activation
     quantizers.swish_sign
@@ -325,9 +336,20 @@ def swish_sign(x, beta=5.0):
 
 @utils.register_keras_custom_object
 class SwishSign(QuantizerFunctionWrapper):
-    """Sign binarization function.
+    r"""Sign binarization function.
+
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+    \end{cases}
+    \\]
 
     The gradient is estimated using the SignSwish method.
+
+    \\[
+    \frac{\partial q_{\beta}(x)}{\partial x} = \frac{\beta\left\\{2-\beta x \tanh \left(\frac{\beta x}{2}\right)\right\\}}{1+\cosh (\beta x)}
+    \\]
 
     ```plot-activation
     quantizers.swish_sign
@@ -607,7 +629,7 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     1 &  0 \leq x \leq 1 \\\
     0 & \text{else}
     \end{cases}\\]
-    
+
     ```plot-activation
     quantizers.dorefa_quantizer
     ```
