@@ -62,6 +62,7 @@ extra:
 markdown_extensions:
   - admonition
   - codehilite
+  - footnotes
   - pymdownx.superfences:
       custom_fences:
         - name: plot-activation
