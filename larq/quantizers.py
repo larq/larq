@@ -204,8 +204,10 @@ def _scaled_sign(x):
 @utils.register_keras_custom_object
 @utils.set_precision(1)
 def magnitude_aware_sign(x, clip_value=1.0):
-    r"""
-    Magnitude-aware sign for Bi-Real Net.
+    r"""Magnitude-aware sign for Bi-Real Net.
+
+    A scaled sign function computed according to Section 3.3 in
+    [Zechun Liu et al](https://arxiv.org/abs/1808.00278).
 
     ```plot-activation
     quantizers._scaled_sign
@@ -232,6 +234,9 @@ def magnitude_aware_sign(x, clip_value=1.0):
 @utils.register_keras_custom_object
 class MagnitudeAwareSign(QuantizerFunctionWrapper):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
+
+    A scaled sign function computed according to Section 3.3 in
+    [Zechun Liu et al](https://arxiv.org/abs/1808.00278).
 
     ```plot-activation
     quantizers._scaled_sign
@@ -294,9 +299,20 @@ def approx_sign(x):
 @utils.register_keras_custom_object
 @utils.set_precision(1)
 def swish_sign(x, beta=5.0):
-    """Sign binarization function.
+    r"""Sign binarization function.
+
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+    \end{cases}
+    \\]
 
     The gradient is estimated using the SignSwish method.
+
+    \\[
+    \frac{\partial q_{\beta}(x)}{\partial x} = \frac{\beta\left\\{2-\beta x \tanh \left(\frac{\beta x}{2}\right)\right\\}}{1+\cosh (\beta x)}
+    \\]
 
     ```plot-activation
     quantizers.swish_sign
@@ -325,9 +341,20 @@ def swish_sign(x, beta=5.0):
 
 @utils.register_keras_custom_object
 class SwishSign(QuantizerFunctionWrapper):
-    """Sign binarization function.
+    r"""Sign binarization function.
+
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+    \end{cases}
+    \\]
 
     The gradient is estimated using the SignSwish method.
+
+    \\[
+    \frac{\partial q_{\beta}(x)}{\partial x} = \frac{\beta\left\\{2-\beta x \tanh \left(\frac{\beta x}{2}\right)\right\\}}{1+\cosh (\beta x)}
+    \\]
 
     ```plot-activation
     quantizers.swish_sign
@@ -607,7 +634,7 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     1 &  0 \leq x \leq 1 \\\
     0 & \text{else}
     \end{cases}\\]
-    
+
     ```plot-activation
     quantizers.dorefa_quantizer
     ```
