@@ -41,4 +41,4 @@ You can install Larq with Python's [pip](https://pip.pypa.io/en/stable/) package
 pip install larq
 ```
 
-[^1]: Hubara, I., Courbariaux, M., Soudry, D., El-Yaniv, R., & Bengio, Y. (2016). Binarized Neural Networks. In Advances in neural information processing systems (pp. 4107-4115).
+[^1]: Hubara, I., Courbariaux, M., Soudry, D., El-Yaniv, R., & Bengio, Y. (2016). <a href="http://papers.nips.cc/paper/6573-binarized-neural-networks.pdf" target="_blank" >Binarized Neural Networks</a>. In Advances in neural information processing systems (pp. 4107-4115).
