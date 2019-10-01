@@ -1,5 +1,5 @@
 site_name: Larq
-site_description: "An Open-Source Library for Training Binarized Neural Networks"
+site_description: "Larq is an open-source deep learning library based on TensorFlow and Keras for training neural networks with extremely low-precision weights and activations, such as Binarized Neural Networks."
 site_author: "Plumerai"
 site_url: "https://larq.dev/"
 
