@@ -1,4 +1,4 @@
-tensorflow==1.14.0
+tensorflow==2.0.0
 tensorflow_datasets==1.2.0
 larq_zoo==0.4.2
 Pillow==6.1.0
