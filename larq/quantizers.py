@@ -118,7 +118,6 @@ class QuantizerFunctionWrapper:
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-@tf.custom_gradient
 def ste_sign(x, clip_value=1.0):
     r"""Sign binarization function.
 
@@ -153,10 +152,14 @@ def ste_sign(x, clip_value=1.0):
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    def grad(dy):
-        return _clipped_gradient(x, dy, clip_value)
+    @tf.custom_gradient
+    def _call(x):
+        def grad(dy):
+            return _clipped_gradient(x, dy, clip_value)
 
-    return math.sign(x), grad
+        return math.sign(x), grad
+
+    return _call(x)
 
 
 @utils.register_keras_custom_object
@@ -300,7 +303,6 @@ def approx_sign(x):
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-@tf.custom_gradient
 def swish_sign(x, beta=5.0):
     r"""Sign binarization function.
 
@@ -331,11 +333,15 @@ def swish_sign(x, beta=5.0):
     - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
     """
 
-    def grad(dy):
-        b_x = beta * x
-        return dy * beta * (2 - b_x * tf.tanh(b_x * 0.5)) / (1 + tf.cosh(b_x))
+    @tf.custom_gradient
+    def _call(x):
+        def grad(dy):
+            b_x = beta * x
+            return dy * beta * (2 - b_x * tf.tanh(b_x * 0.5)) / (1 + tf.cosh(b_x))
 
-    return math.sign(x), grad
+        return math.sign(x), grad
+
+    return _call(x)
 
 
 @utils.register_keras_custom_object
@@ -374,7 +380,6 @@ class SwishSign(QuantizerFunctionWrapper):
 
 @utils.register_keras_custom_object
 @utils.set_precision(2)
-@tf.custom_gradient
 def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0):
     r"""Ternarization function.
 
@@ -420,15 +425,19 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
 
-    if ternary_weight_networks:
-        threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
-    else:
-        threshold = threshold_value
+    @tf.custom_gradient
+    def _call(x):
+        if ternary_weight_networks:
+            threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
+        else:
+            threshold = threshold_value
 
-    def grad(dy):
-        return _clipped_gradient(x, dy, clip_value)
+        def grad(dy):
+            return _clipped_gradient(x, dy, clip_value)
 
-    return tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), grad
+        return tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), grad
+
+    return _call(x)
 
 
 @utils.register_keras_custom_object
@@ -521,7 +530,6 @@ class SteHeaviside(QuantizerFunctionWrapper):
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-@tf.custom_gradient
 def ste_heaviside(x, clip_value=1.0):
     r"""
     Binarization function with output values 0 and 1.
@@ -554,10 +562,14 @@ def ste_heaviside(x, clip_value=1.0):
     AND-binarized tensor.
     """
 
-    def grad(dy):
-        return _clipped_gradient(x, dy, clip_value)
+    @tf.custom_gradient
+    def _call(x):
+        def grad(dy):
+            return _clipped_gradient(x, dy, clip_value)
 
-    return tf.sign(tf.nn.relu(x)), grad
+        return tf.sign(tf.nn.relu(x)), grad
+
+    return _call(x)
 
 
 @utils.register_keras_custom_object
