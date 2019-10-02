@@ -74,17 +74,13 @@ __all__ = [
 ]
 
 
-@tf.custom_gradient
-def _binarize_with_identity_grad(x):
-    return math.sign(x), lambda dy: dy
+def _clipped_gradient(x, dy, clip_value):
+    if clip_value is None:
+        return dy
 
-
-@tf.custom_gradient
-def _binarize_with_weighted_grad(x):
-    def grad(dy):
-        return (1 - tf.abs(x)) * 2 * dy
-
-    return math.sign(x), grad
+    zeros = tf.zeros_like(dy)
+    mask = tf.math.less_equal(tf.math.abs(x), clip_value)
+    return tf.where(mask, dy, zeros)
 
 
 class QuantizerFunctionWrapper:
@@ -122,6 +118,7 @@ class QuantizerFunctionWrapper:
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
+@tf.custom_gradient
 def ste_sign(x, clip_value=1.0):
     r"""Sign binarization function.
 
@@ -156,10 +153,10 @@ def ste_sign(x, clip_value=1.0):
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    if clip_value is not None:
-        x = tf.clip_by_value(x, -clip_value, clip_value)
+    def grad(dy):
+        return _clipped_gradient(x, dy, clip_value)
 
-    return _binarize_with_identity_grad(x)
+    return math.sign(x), grad
 
 
 @utils.register_keras_custom_object
@@ -258,6 +255,7 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
+@tf.custom_gradient
 def approx_sign(x):
     r"""
     Sign binarization function.
@@ -291,13 +289,18 @@ def approx_sign(x):
       Training Algorithm](http://arxiv.org/abs/1808.00278)
     """
 
-    x = tf.clip_by_value(x, -1, 1)
+    def grad(dy):
+        abs_x = tf.math.abs(x)
+        zeros = tf.zeros_like(dy)
+        mask = tf.math.less_equal(abs_x, 1.0)
+        return tf.where(mask, (1 - abs_x) * 2 * dy, zeros)
 
-    return _binarize_with_weighted_grad(x)
+    return math.sign(x), grad
 
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
+@tf.custom_gradient
 def swish_sign(x, beta=5.0):
     r"""Sign binarization function.
 
@@ -328,15 +331,11 @@ def swish_sign(x, beta=5.0):
     - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
     """
 
-    @tf.custom_gradient
-    def _call(x):
-        def grad(dy):
-            b_x = beta * x
-            return dy * beta * (2 - b_x * tf.tanh(b_x * 0.5)) / (1 + tf.cosh(b_x))
+    def grad(dy):
+        b_x = beta * x
+        return dy * beta * (2 - b_x * tf.tanh(b_x * 0.5)) / (1 + tf.cosh(b_x))
 
-        return math.sign(x), grad
-
-    return _call(x)
+    return math.sign(x), grad
 
 
 @utils.register_keras_custom_object
@@ -375,6 +374,7 @@ class SwishSign(QuantizerFunctionWrapper):
 
 @utils.register_keras_custom_object
 @utils.set_precision(2)
+@tf.custom_gradient
 def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0):
     r"""Ternarization function.
 
@@ -419,19 +419,16 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
-    if clip_value is not None:
-        x = tf.clip_by_value(x, -clip_value, clip_value)
 
     if ternary_weight_networks:
         threshold = 0.7 * tf.reduce_sum(tf.abs(x)) / tf.cast(tf.size(x), x.dtype)
     else:
         threshold = threshold_value
 
-    @tf.custom_gradient
-    def _ternarize_with_identity_grad(x):
-        return (tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), lambda dy: dy)
+    def grad(dy):
+        return _clipped_gradient(x, dy, clip_value)
 
-    return _ternarize_with_identity_grad(x)
+    return tf.sign(tf.sign(x + threshold) + tf.sign(x - threshold)), grad
 
 
 @utils.register_keras_custom_object
@@ -524,6 +521,7 @@ class SteHeaviside(QuantizerFunctionWrapper):
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
+@tf.custom_gradient
 def ste_heaviside(x, clip_value=1.0):
     r"""
     Binarization function with output values 0 and 1.
@@ -555,17 +553,11 @@ def ste_heaviside(x, clip_value=1.0):
     # Returns
     AND-binarized tensor.
     """
-    if clip_value is not None:
-        x = tf.clip_by_value(x, -clip_value, clip_value)
 
-    @tf.custom_gradient
-    def _and_binarize_with_identity_grad(x):
-        def grad(dy):
-            return dy
+    def grad(dy):
+        return _clipped_gradient(x, dy, clip_value)
 
-        return tf.sign(tf.nn.relu(x)), grad
-
-    return _and_binarize_with_identity_grad(x)
+    return tf.sign(tf.nn.relu(x)), grad
 
 
 @utils.register_keras_custom_object
