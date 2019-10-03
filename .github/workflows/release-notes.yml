@@ -1,6 +1,9 @@
 name: Release Notes
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   update_draft_release:
