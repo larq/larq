@@ -1,3 +1,8 @@
+template: |
+  ## Changes
+
+  $CHANGES
+
 categories:
   - title: ":warning: Breaking Changes :warning:"
     label: "breaking-change"
@@ -11,5 +16,6 @@ categories:
     label: "internal-improvement"
   - title: ":arrow_up: Dependencies"
     label: "dependencies"
+
 exclude-labels:
   - "skip-changelog"
