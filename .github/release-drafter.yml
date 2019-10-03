@@ -1,7 +1,4 @@
-template: |
-  ## Changes
-
-  $CHANGES
+template: $CHANGES
 
 categories:
   - title: ":warning: Breaking Changes :warning:"
