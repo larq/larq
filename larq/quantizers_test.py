@@ -28,6 +28,7 @@ def test_serialization(module, name):
     "ref_fn",
     [
         lq.quantizers.SteSign(),
+        lq.quantizers.SteHeaviside(),
         lq.quantizers.MagnitudeAwareSign(),
         lq.quantizers.SwishSign(),
         lq.quantizers.SteTern(),

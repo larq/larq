@@ -5,7 +5,8 @@ from contextlib import contextmanager
 
 try:
     from tensorflow.keras.metrics import Metric
-except:  # TensorFlow 1.13 doesn't export this as a public API
+except:  # pragma: no cover
+    # TensorFlow 1.13 doesn't export this as a public API
     from tensorflow.python.keras.metrics import Metric
 
 
@@ -83,7 +84,7 @@ class LarqMetric(Metric):
                 initializer=initializer,
                 dtype=dtype,
             )
-        else:
+        else:  # pragma: no cover
             # Call explicitely tf.keras.layers.Layer.add_weight because TF 1.13
             # doesn't support setting a custom dtype
             return tf.keras.layers.Layer.add_weight(
