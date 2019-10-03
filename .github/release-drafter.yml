@@ -9,7 +9,7 @@ categories:
     label: "documentation"
   - title: ":construction_worker_man: Internal Improvements"
     label: "internal-improvement"
-  - title: ":arrow_up: Depenencies"
+  - title: ":arrow_up: Dependencies"
     label: "dependencies"
 exclude-labels:
   - "skip-changelog"
