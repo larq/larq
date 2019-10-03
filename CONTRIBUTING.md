@@ -61,33 +61,16 @@ We use [`black`](https://black.readthedocs.io/en/stable/) to format all of our c
 
 ## Publish release
 
-1. Install dependencies.
+1. Increment the version number in `setup.py`, and commit the change.
 
-   ```shell
-   python -m pip install --upgrade setuptools wheel twine
-   ```
-
-2. Increment the version number in `setup.py`, and commit the change.
-
-3. Tag the commit, and push the changes with the new tag.
+2. Tag the commit (e.g. `v0.7.0`), and push the changes with the new tag.
 
    ```shell
    git tag <version number>
    git push && git push --tags
    ```
 
-4. Go to the [GitHub releases](https://github.com/larq/larq/releases) and create
+3. Go to the [GitHub releases](https://github.com/larq/larq/releases) and create
    a new release based on the tag you've just pushed, adding some release notes.
 
-5. Build wheels.
-
-   ```shell
-   rm -r build/* dist/*
-   python setup.py sdist bdist_wheel
-   ```
-
-6. Upload the release to PyPI.
-
-   ```shell
-   python -m twine upload dist/*
-   ```
+4. A [GitHub action](https://github.com/larq/larq/actions) will automatically publish a release to [PyPI](https://pypi.org/) based on the tag.
