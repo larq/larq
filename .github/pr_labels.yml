@@ -4,7 +4,8 @@ labelRule:
   values:
     - "bug"
     - "documentation"
-    - "internal improvement"
-    - "performance"
+    - "internal-improvement"
     - "dependencies"
     - "feature"
+    - "breaking-change"
+    - "skip-changelog"
