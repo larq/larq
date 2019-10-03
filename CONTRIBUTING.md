@@ -70,7 +70,6 @@ We use [`black`](https://black.readthedocs.io/en/stable/) to format all of our c
    git push && git push --tags
    ```
 
-3. Go to the [GitHub releases](https://github.com/larq/larq/releases) and create
-   a new release based on the tag you've just pushed, adding some release notes.
+3. Go to the [GitHub releases](https://github.com/larq/larq/releases) and publish the draft based on the tag you've just pushed and edit the release notes.
 
 4. A [GitHub action](https://github.com/larq/larq/actions) will automatically publish a release to [PyPI](https://pypi.org/) based on the tag.
