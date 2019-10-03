@@ -1,6 +1,9 @@
-name: check
+name: Publish
 
-on: [push]
+on:
+  push:
+    tags:
+      - v*
 
 jobs:
   build:
@@ -14,16 +17,9 @@ jobs:
           python-version: 3.7
       - name: Upgrade setuptools
         run: pip install --upgrade setuptools wheel
-      - name: Install Lint Dependencies
-        run: pip install pyflakes==2.1.1 black==19.3b0
-      - name: Run PyFlakes
-        run: pyflakes .
-      - name: Black code style
-        run: black . --check --target-version py36 --exclude 'build/|buck-out/|dzzist/|_build/|\.git/|\.hg/|\.mypy_cache/|\.tox/|\.venv/|larq/snapshots/'
       - name: Build distribution
         run: python setup.py sdist bdist_wheel
       - name: Publish package
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
