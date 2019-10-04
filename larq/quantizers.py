@@ -53,7 +53,7 @@ from larq import utils, math
 
 try:
     from tensorflow import is_tensor
-except:
+except:  # pragma: no cover
     # For compatibility with TensorFlow 1.13
     from tensorflow.python.framework.tensor_util import is_tensor
 
@@ -162,7 +162,7 @@ def ste_sign(x, clip_value=1.0):
     return _call(x)
 
 
-def _scaled_sign(x):
+def _scaled_sign(x):  # pragma: no cover
     return 1.3 * ste_sign(x)
 
 
