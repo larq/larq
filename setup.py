@@ -29,7 +29,7 @@ setup(
         "test": [
             "absl-py==0.8.0",
             "pytest==5.2.0",
-            "pytest-cov==2.7.1",
+            "pytest-cov==2.8.0",
             "snapshottest==0.5.1",
         ],
         "docs": [
