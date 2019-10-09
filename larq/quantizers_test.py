@@ -48,7 +48,7 @@ def test_invalid_usage():
         lq.quantizers.get("unknown")
 
 
-def generate_real_values_with_zeros(low=-2, high=2, shape=(2, 5)):
+def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
     real_values = np.random.uniform(low, high, shape)
     real_values = np.insert(real_values, 1, 0, axis=1)
     return real_values
@@ -101,18 +101,34 @@ def test_and_binarization(fn):
     assert np.all(result[result <= 0] == 0)
     assert np.all(result[result > 0] == 1)
 
+@pytest.mark.parametrize("fn", ["ste_tern", lq.quantizers.SteTern(),lq.quantizers.SteTern(ternary_weight_networks=True),lq.quantizers.SteTern(threshold_value=np.random.uniform(0.01, 0.8))])
+def test_ternarization_basic(fn):
+    x = tf.keras.backend.placeholder(ndim=2)
+    f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
+
+    ternarized_values = np.random.choice([-1, 0, 1], size=(4, 10))
+    result = f([ternarized_values])[0]
+    np.testing.assert_allclose(result, ternarized_values)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+    assert np.any(result==-1)
+    assert np.any(result==1)
+    assert np.any(result==0)
+
+    real_values = generate_real_values_with_zeros()
+    result = f([real_values])[0]
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+    assert np.any(result==-1)
+    assert np.any(result==1)
+    assert np.any(result==0)
+
 
 @pytest.mark.parametrize("fn", ["ste_tern", lq.quantizers.SteTern()])
 def test_ternarization_with_default_threshold(fn):
     x = tf.keras.backend.placeholder(ndim=2)
     test_threshold = 0.1
     f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
-
-    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
-    result = f([ternarized_values])[0]
-    np.testing.assert_allclose(result, ternarized_values)
-    assert not np.any(result > 1)
-    assert not np.any(result < -1)
 
     real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
@@ -129,12 +145,6 @@ def test_ternarization_with_custom_threshold():
     fn = lq.quantizers.SteTern(threshold_value=test_threshold)
     f = tf.keras.backend.function([x], [fn(x)])
 
-    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
-    result = f([ternarized_values])[0]
-    np.testing.assert_allclose(result, ternarized_values)
-    assert not np.any(result > 1)
-    assert not np.any(result < -1)
-
     real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
     assert np.all(result[result > test_threshold] == 1)
@@ -143,23 +153,19 @@ def test_ternarization_with_custom_threshold():
     assert not np.any(result > 1)
     assert not np.any(result < -1)
 
-
 def test_ternarization_with_ternary_weight_networks():
-    x = tf.keras.backend.placeholder(shape=(3, 5))
+    x = tf.keras.backend.placeholder(ndim=2)
+    test_threshold = 0.7 # 0.7 * np.sum(np.abs(x)) / np.cast(np.size(x), x.dtype)
     fn = lq.quantizers.SteTern(ternary_weight_networks=True)
     f = tf.keras.backend.function([x], [fn(x)])
 
     real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
+    assert np.all(result[result > test_threshold] == 1)
+    assert np.all(result[result < -test_threshold] == -1)
+    assert np.all(result[np.abs(result) < test_threshold] == 0)
     assert not np.any(result > 1)
     assert not np.any(result < -1)
-
-    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
-    result = f([ternarized_values])[0]
-    np.testing.assert_allclose(result, ternarized_values)
-    assert not np.any(result > 1)
-    assert not np.any(result < -1)
-
 
 @pytest.mark.parametrize(
     "fn", [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside]
