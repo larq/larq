@@ -79,9 +79,7 @@ def test_xnor_binarization(fn):
 
     zero_values = np.zeros((2, 5))
     result = f([zero_values])[0]
-    assert np.all(result) == 1
-    assert not np.any(result) == 0
-    assert not np.any(result) == -1
+    assert np.all(result == 1)
 
 
 @pytest.mark.parametrize("fn", ["ste_heaviside", lq.quantizers.SteHeaviside()])
