@@ -48,47 +48,97 @@ def test_invalid_usage():
         lq.quantizers.get("unknown")
 
 
-@pytest.mark.parametrize("name", ["ste_sign", "approx_sign", "swish_sign"])
-def test_binarization(name):
+def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
+    real_values = np.random.uniform(low, high, shape)
+    real_values = np.insert(real_values, 1, 0, axis=1)
+    return real_values
+
+
+@pytest.mark.parametrize(
+    "fn",
+    [
+        "ste_sign",
+        lq.quantizers.SteSign(),
+        "approx_sign",
+        "swish_sign",
+        lq.quantizers.SwishSign(),
+    ],
+)
+def test_xnor_binarization(fn):
     x = tf.keras.backend.placeholder(ndim=2)
-    f = tf.keras.backend.function([x], [lq.quantizers.get(name)(x)])
+    f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
     binarized_values = np.random.choice([-1, 1], size=(2, 5))
     result = f([binarized_values])[0]
     np.testing.assert_allclose(result, binarized_values)
 
-    real_values = np.random.uniform(-2, 2, (2, 5))
+    real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
     assert not np.any(result == 0)
-    assert np.all(result[result < 0] == -1)
-    assert np.all(result[result >= 0] == 1)
+    assert np.all(result[real_values < 0] == -1)
+    assert np.all(result[real_values >= 0] == 1)
+
+    zero_values = np.zeros((2, 5))
+    result = f([zero_values])[0]
+    assert np.all(result == 1)
 
 
-@pytest.mark.parametrize("name", ["ste_heaviside"])
-def test_and_binarization(name):
+@pytest.mark.parametrize("fn", ["ste_heaviside", lq.quantizers.SteHeaviside()])
+def test_and_binarization(fn):
     x = tf.keras.backend.placeholder(ndim=2)
-    f = tf.keras.backend.function([x], [lq.quantizers.get(name)(x)])
+    f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
 
-    real_values = np.random.uniform(-2, 2, (2, 5))
+    binarized_values = np.random.choice([0, 1], size=(2, 5))
+    result = f([binarized_values])[0]
+    np.testing.assert_allclose(result, binarized_values)
+
+    real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
-    assert np.all(result[result <= 0] == 0)
-    assert np.all(result[result > 0] == 1)
+    assert np.all(result[real_values <= 0] == 0)
+    assert np.all(result[real_values > 0] == 1)
 
 
-@pytest.mark.parametrize("fn", [lq.quantizers.SteTern(), lq.quantizers.ste_tern])
-def test_ternarization_with_default_threshold(fn):
+@pytest.mark.parametrize(
+    "fn",
+    [
+        "ste_tern",
+        lq.quantizers.SteTern(),
+        lq.quantizers.SteTern(ternary_weight_networks=True),
+        lq.quantizers.SteTern(threshold_value=np.random.uniform(0.01, 0.8)),
+    ],
+)
+def test_ternarization_basic(fn):
     x = tf.keras.backend.placeholder(ndim=2)
-    test_threshold = 0.1
-    f = tf.keras.backend.function([x], [fn(x)])
-    real_values = np.random.uniform(-2, 2, (2, 5))
-    result = f([real_values])[0]
-    assert np.all(result[result > test_threshold] == 1)
-    assert np.all(result[result < -test_threshold] == -1)
-    assert np.all(result[np.abs(result) < test_threshold] == 0)
-    assert not np.any(result > 1)
-    assert not np.any(result < -1)
-    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
+    f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
+
+    ternarized_values = np.random.choice([-1, 0, 1], size=(4, 10))
     result = f([ternarized_values])[0]
     np.testing.assert_allclose(result, ternarized_values)
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+    assert np.any(result == -1)
+    assert np.any(result == 1)
+    assert np.any(result == 0)
+
+    real_values = generate_real_values_with_zeros()
+    result = f([real_values])[0]
+    assert not np.any(result > 1)
+    assert not np.any(result < -1)
+    assert np.any(result == -1)
+    assert np.any(result == 1)
+    assert np.any(result == 0)
+
+
+@pytest.mark.parametrize("fn", ["ste_tern", lq.quantizers.SteTern()])
+def test_ternarization_with_default_threshold(fn):
+    x = tf.keras.backend.placeholder(ndim=2)
+    test_threshold = 0.05  # This is the default
+    f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
+
+    real_values = generate_real_values_with_zeros()
+    result = f([real_values])[0]
+    assert np.all(result[real_values > test_threshold] == 1)
+    assert np.all(result[real_values < -test_threshold] == -1)
+    assert np.all(result[np.abs(real_values) < test_threshold] == 0)
     assert not np.any(result > 1)
     assert not np.any(result < -1)
 
@@ -98,31 +148,27 @@ def test_ternarization_with_custom_threshold():
     test_threshold = np.random.uniform(0.01, 0.8)
     fn = lq.quantizers.SteTern(threshold_value=test_threshold)
     f = tf.keras.backend.function([x], [fn(x)])
-    real_values = np.random.uniform(-2, 2, (2, 5))
+
+    real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
-    assert np.all(result[result > test_threshold] == 1)
-    assert np.all(result[result < -test_threshold] == -1)
-    assert np.all(result[np.abs(result) < test_threshold] == 0)
-    assert not np.any(result > 1)
-    assert not np.any(result < -1)
-    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
-    result = f([ternarized_values])[0]
-    np.testing.assert_allclose(result, ternarized_values)
+    assert np.all(result[real_values > test_threshold] == 1)
+    assert np.all(result[real_values < -test_threshold] == -1)
+    assert np.all(result[np.abs(real_values) < test_threshold] == 0)
     assert not np.any(result > 1)
     assert not np.any(result < -1)
 
 
 def test_ternarization_with_ternary_weight_networks():
-    x = tf.keras.backend.placeholder(shape=(3, 5))
+    x = tf.keras.backend.placeholder(ndim=2)
+    real_values = generate_real_values_with_zeros()
+    test_threshold = 0.7 * np.sum(np.abs(real_values)) / np.size(real_values)
     fn = lq.quantizers.SteTern(ternary_weight_networks=True)
     f = tf.keras.backend.function([x], [fn(x)])
-    real_values = np.random.uniform(-2, 2, (2, 5))
+
     result = f([real_values])[0]
-    assert not np.any(result > 1)
-    assert not np.any(result < -1)
-    ternarized_values = np.random.choice([-1, 0, 1], size=(2, 5))
-    result = f([ternarized_values])[0]
-    np.testing.assert_allclose(result, ternarized_values)
+    assert np.all(result[real_values > test_threshold] == 1)
+    assert np.all(result[real_values < -test_threshold] == -1)
+    assert np.all(result[np.abs(real_values) < test_threshold] == 0)
     assert not np.any(result > 1)
     assert not np.any(result < -1)
 
@@ -132,7 +178,7 @@ def test_ternarization_with_ternary_weight_networks():
 )
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
 def test_identity_ste_grad(fn):
-    x = np.random.uniform(-5, 5, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = fn(tf_x, clip_value=None)
@@ -151,7 +197,7 @@ def test_ste_grad(fn):
             return 1.0
         return 0.0
 
-    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = fn(tf_x)
@@ -159,19 +205,23 @@ def test_ste_grad(fn):
     np.testing.assert_allclose(grad.numpy(), ste_grad(x))
 
 
+# Test with and without default threshold
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
 def test_swish_grad():
-    beta = 10.0
-
-    def swish_grad(x):
+    def swish_grad(x, beta):
         return beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
 
-    x = np.random.uniform(-3, 3, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
-        activation = lq.quantizers.swish_sign(tf_x, beta=beta)
+        activation = lq.quantizers.swish_sign(tf_x)
     grad = tape.gradient(activation, tf_x)
-    np.testing.assert_allclose(grad.numpy(), swish_grad(x))
+    np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=5.0))
+
+    with tf.GradientTape() as tape:
+        activation = lq.quantizers.swish_sign(tf_x, beta=10.0)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=10.0))
 
 
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
@@ -182,7 +232,7 @@ def test_approx_sign_grad():
             return 2 - 2 * np.abs(x)
         return 0.0
 
-    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = lq.quantizers.approx_sign(tf_x)
@@ -223,7 +273,7 @@ def test_magnitude_aware_sign():
 def test_dorefa_quantize(fn):
     x = tf.keras.backend.placeholder(ndim=2)
     f = tf.keras.backend.function([x], [fn(x)])
-    real_values = np.random.uniform(-2, 2, (2, 5))
+    real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
     k_bit = 2
     n = 2 ** k_bit - 1
@@ -231,7 +281,10 @@ def test_dorefa_quantize(fn):
     assert not np.any(result < 0)
     for i in range(n + 1):
         assert np.all(
-            result[(result > (2 * i - 1) / (2 * n)) & (result < (2 * i + 1) / (2 * n))]
+            result[
+                (real_values > (2 * i - 1) / (2 * n))
+                & (real_values < (2 * i + 1) / (2 * n))
+            ]
             == i / n
         )
 
@@ -244,7 +297,7 @@ def test_ste_grad_dorefa():
             return 1.0
         return 0.0
 
-    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = lq.quantizers.DoReFaQuantizer(2)(tf_x)
