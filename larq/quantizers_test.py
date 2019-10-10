@@ -180,7 +180,7 @@ def test_ternarization_with_ternary_weight_networks():
 )
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
 def test_identity_ste_grad(fn):
-    x = np.random.uniform(-5, 5, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = fn(tf_x, clip_value=None)
@@ -199,7 +199,7 @@ def test_ste_grad(fn):
             return 1.0
         return 0.0
 
-    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = fn(tf_x)
@@ -207,19 +207,23 @@ def test_ste_grad(fn):
     np.testing.assert_allclose(grad.numpy(), ste_grad(x))
 
 
+# Test with and without default threshold
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
 def test_swish_grad():
-    beta = 10.0
-
-    def swish_grad(x):
+    def swish_grad(x, beta):
         return beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
 
-    x = np.random.uniform(-3, 3, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
-        activation = lq.quantizers.swish_sign(tf_x, beta=beta)
+        activation = lq.quantizers.swish_sign(tf_x)
     grad = tape.gradient(activation, tf_x)
-    np.testing.assert_allclose(grad.numpy(), swish_grad(x))
+    np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=5.0))
+
+    with tf.GradientTape() as tape:
+        activation = lq.quantizers.swish_sign(tf_x, beta=10.0)
+    grad = tape.gradient(activation, tf_x)
+    np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=10.0))
 
 
 @pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
@@ -230,7 +234,7 @@ def test_approx_sign_grad():
             return 2 - 2 * np.abs(x)
         return 0.0
 
-    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = lq.quantizers.approx_sign(tf_x)
@@ -271,7 +275,7 @@ def test_magnitude_aware_sign():
 def test_dorefa_quantize(fn):
     x = tf.keras.backend.placeholder(ndim=2)
     f = tf.keras.backend.function([x], [fn(x)])
-    real_values = np.random.uniform(-2, 2, (2, 5))
+    real_values = generate_real_values_with_zeros()
     result = f([real_values])[0]
     k_bit = 2
     n = 2 ** k_bit - 1
@@ -295,7 +299,7 @@ def test_ste_grad_dorefa():
             return 1.0
         return 0.0
 
-    x = np.random.uniform(-2, 2, (8, 3, 3, 16))
+    x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
         activation = lq.quantizers.DoReFaQuantizer(2)(tf_x)
