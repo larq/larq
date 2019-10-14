@@ -67,15 +67,8 @@ class Bop(tf.keras.optimizers.Optimizer):
 
         bin_train_op = super().apply_gradients(bin_grads_and_vars, name=name)
 
-        # only include real-valued update op if necessary (to avoid errors
-        # in distributed setting).
-        if fp_grads_and_vars:
-            fp_train_op = self.fp_optimizer.apply_gradients(
-                fp_grads_and_vars, name=name
-            )
-            return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
-
-        return bin_train_op
+        fp_train_op = self.fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
+        return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
 
     def _resource_apply_sparse(self, grad, var, indices):
         raise NotImplementedError()
