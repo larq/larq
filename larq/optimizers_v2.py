@@ -58,13 +58,23 @@ class Bop(tf.keras.optimizers.Optimizer):
                 self.add_slot(var, "m")
 
     def apply_gradients(self, grads_and_vars, name=None):
+        # convert from zip object so we can loop multiple times:
+        grads_and_vars = list(grads_and_vars)
+
         bin_grads_and_vars = [(g, v) for g, v in grads_and_vars if self.is_binary(v)]
         fp_grads_and_vars = [(g, v) for g, v in grads_and_vars if not self.is_binary(v)]
 
         bin_train_op = super().apply_gradients(bin_grads_and_vars, name=name)
-        fp_train_op = self.fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
 
-        return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
+        # only include real-valued update op if necessary (to avoid errors
+        # in distributed setting).
+        if fp_grads_and_vars:
+            fp_train_op = self.fp_optimizer.apply_gradients(
+                fp_grads_and_vars, name=name
+            )
+            return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
+
+        return tf.group(bin_train_op, name="train_with_bop")
 
     def _resource_apply_sparse(self, grad, var, indices):
         raise NotImplementedError()
