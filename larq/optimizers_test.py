@@ -23,16 +23,29 @@ def assert_weights(weights, expected):
         np.testing.assert_allclose(np.squeeze(w), e)
 
 
-def _test_optimizer(optimizer, target=0.75, test_kernels_are_binary=True):
+def _test_optimizer(
+    optimizer, target=0.75, test_kernels_are_binary=True, trainable_bn=True
+):
     np.random.seed(1337)
     (x_train, y_train), _ = testing_utils.get_test_data(
         train_samples=1000, test_samples=0, input_shape=(10,), num_classes=2
     )
     y_train = keras.utils.to_categorical(y_train)
 
-    model = lq_testing_utils.get_small_bnn_model(x_train.shape[1], 20, y_train.shape[1])
+    model = lq_testing_utils.get_small_bnn_model(
+        x_train.shape[1], 20, y_train.shape[1], trainable_bn=trainable_bn
+    )
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
+
+    initial_vars = [tf.keras.backend.get_value(w) for w in model.trainable_weights]
+
     history = model.fit(x_train, y_train, epochs=2, batch_size=16, verbose=0)
+
+    trained_vars = [tf.keras.backend.get_value(w) for w in model.trainable_weights]
+
+    # check all trainable variables have actually been updated
+    for v0, v1 in zip(initial_vars, trained_vars):
+        assert not np.all(v0 == v1)
 
     # Note that when kernels are treated as latent weights they need not be
     # binary (see https://arxiv.org/abs/1906.02107 for further discussion)
@@ -102,6 +115,13 @@ class TestBopOptimizer:
         _test_optimizer(
             lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
             test_kernels_are_binary=True,
+        )
+        # test optimizer on model with only binary trainable vars (low accuracy)
+        _test_optimizer(
+            lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
+            test_kernels_are_binary=True,
+            trainable_bn=False,
+            target=0,
         )
 
     @pytest.mark.skipif(
