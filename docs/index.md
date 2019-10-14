@@ -8,7 +8,7 @@ It is aimed at both researchers in the field of efficient deep learning and prac
 
 ## Getting Started
 
-To build a QNN, Larq introduces the concept of [quantized layers](https://larq.dev/api/layers/) and [quantizers](https://larq.dev/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer. This layer can be used inside a [Keras model](https://www.tensorflow.org/alpha/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/alpha/guide/keras/overview#model_subclassing).
+To build a QNN, Larq introduces the concept of [quantized layers](https://larq.dev/api/layers/) and [quantizers](https://larq.dev/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer. This layer can be used inside a [Keras model](https://www.tensorflow.org/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/guide/keras/train_and_evaluate#part_ii_writing_your_own_training_evaluation_loops_from_scratch).
 
 For a detailed explanation checkout our [user guide](https://larq.dev/guides/key-concepts/).
 
@@ -69,7 +69,7 @@ model = MyModel()
 
 Before installing Larq, please install:
 
-- [Python](https://python.org) version `3.6` or `3.7`
+- [Python](https://www.python.org) version `3.6` or `3.7`
 - [Tensorflow](https://www.tensorflow.org/install) version `1.13`, `1.14`, `1.15` or `2.0.0`:
   ```shell
   pip install tensorflow  # or tensorflow-gpu
