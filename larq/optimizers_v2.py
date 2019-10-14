@@ -74,7 +74,7 @@ class Bop(tf.keras.optimizers.Optimizer):
             )
             return tf.group(bin_train_op, fp_train_op, name="train_with_bop")
 
-        return tf.group(bin_train_op, name="train_with_bop")
+        return bin_train_op
 
     def _resource_apply_sparse(self, grad, var, indices):
         raise NotImplementedError()
