@@ -7,7 +7,7 @@ from larq import utils
 from tensorflow.python.keras.testing_utils import _thread_local_data, should_run_eagerly
 
 
-def get_small_bnn_model(input_dim, num_hidden, output_dim):
+def get_small_bnn_model(input_dim, num_hidden, output_dim, trainable_bn=True):
     model = tf.keras.models.Sequential()
     model.add(
         lq.layers.QuantDense(
@@ -19,7 +19,7 @@ def get_small_bnn_model(input_dim, num_hidden, output_dim):
             use_bias=False,
         )
     )
-    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.BatchNormalization(trainable=trainable_bn))
     model.add(
         lq.layers.QuantDense(
             units=output_dim,
