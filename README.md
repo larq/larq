@@ -1,4 +1,4 @@
-<img src="./docs/images/logo.svg" alt="logo" height="100px" align="left"/>
+<img src="https://user-images.githubusercontent.com/13285808/66865479-39c3b600-ef8f-11e9-9bd4-d47b8e432140.gif" alt="logo" height="100px" align="left"/>
 <br/>
 
 [![](https://github.com/larq/larq/workflows/Unittest/badge.svg)](https://github.com/larq/larq/actions?workflow=Unittest) [![Codecov](https://img.shields.io/codecov/c/github/larq/larq)](https://codecov.io/github/larq/larq?branch=master) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/larq.svg)](https://pypi.org/project/larq/) [![PyPI](https://img.shields.io/pypi/v/larq.svg)](https://pypi.org/project/larq/) [![PyPI - License](https://img.shields.io/pypi/l/larq.svg)](https://github.com/larq/larq/blob/master/LICENSE) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/larq/larq/master?filepath=docs%2Fexamples) [![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/larq)
