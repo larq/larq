@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import tensorflow as tf
 import larq as lq
+from larq.testing_utils import generate_real_values_with_zeros
 
 
 @pytest.mark.parametrize("name", ["weight_clip"])
@@ -15,7 +16,7 @@ def test_serialization(name):
 
 
 def test_clip():
-    real_values = np.random.uniform(-2, 2, (3, 3, 32))
+    real_values = generate_real_values_with_zeros()
     clip_instance = lq.constraints.weight_clip(clip_value=0.75)
     result = clip_instance(tf.keras.backend.variable(real_values))
     result = tf.keras.backend.eval(result)
