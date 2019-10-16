@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 import larq as lq
 from larq.testing_utils import generate_real_values_with_zeros
