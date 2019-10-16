@@ -7,6 +7,12 @@ from larq import utils
 from tensorflow.python.keras.testing_utils import _thread_local_data, should_run_eagerly
 
 
+def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
+    real_values = np.random.uniform(low, high, shape)
+    real_values = np.insert(real_values, 1, 0, axis=1)
+    return real_values
+
+
 def get_small_bnn_model(input_dim, num_hidden, output_dim, trainable_bn=True):
     model = tf.keras.models.Sequential()
     model.add(

@@ -3,6 +3,7 @@ import numpy as np
 
 import pytest
 import larq as lq
+from larq.testing_utils import generate_real_values_with_zeros
 
 
 @pytest.mark.parametrize("module", [lq.quantizers, tf.keras.activations])
@@ -46,12 +47,6 @@ def test_invalid_usage():
         lq.quantizers.get(42)
     with pytest.raises(ValueError):
         lq.quantizers.get("unknown")
-
-
-def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
-    real_values = np.random.uniform(low, high, shape)
-    real_values = np.insert(real_values, 1, 0, axis=1)
-    return real_values
 
 
 @pytest.mark.parametrize(

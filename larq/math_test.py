@@ -1,16 +1,20 @@
 import tensorflow as tf
 import numpy as np
 import larq as lq
+from larq.testing_utils import generate_real_values_with_zeros
 
 
 def test_sign():
-    # test random
-    x = np.random.rand(100) * 100 - 0.5
-    y = lq.math.sign(x)
-    np.testing.assert_allclose(
-        tf.keras.backend.get_value(y), np.array(x >= 0, dtype=np.float32) * 2 - 1
-    )
-    # test zero is mapped to one
-    np.testing.assert_almost_equal(
-        tf.keras.backend.get_value(lq.math.sign(np.zeros(10))), np.array(np.ones(10))
-    )
+    binarized_values = np.random.choice([-1, 1], size=(2, 5)).astype(np.float32)
+    result = lq.math.sign(binarized_values)
+    np.testing.assert_allclose(result, binarized_values)
+
+    real_values = generate_real_values_with_zeros()
+    result = lq.math.sign(real_values)
+    assert not np.any(result == 0)
+    assert np.all(result[real_values < 0] == -1)
+    assert np.all(result[real_values >= 0] == 1)
+
+    zero_values = np.zeros((2, 5))
+    result = lq.math.sign(zero_values)
+    assert np.all(result == 1)
