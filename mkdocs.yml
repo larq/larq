@@ -87,6 +87,10 @@ extra_javascript:
 extra_css:
   - custom.css
 
+google_analytics:
+  - "UA-144491780-1"
+  - "auto"
+
 plugins:
   - search
   - minify:
