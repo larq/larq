@@ -385,7 +385,7 @@ def ste_heaviside(x, clip_value=1.0):
         def grad(dy):
             return _clipped_gradient(x, dy, clip_value)
 
-        return tf.sign(tf.nn.relu(x)), grad
+        return math.heaviside(x), grad
 
     return _call(x)
 

@@ -23,3 +23,22 @@ def sign(x):
     A Tensor with same type as `x`.
     """
     return tf.sign(tf.sign(x) + 0.1)
+
+
+def heaviside(x):
+    r"""Heaviside step function with output values 0 and 1.
+
+    \\[
+    q(x) = \begin{cases}
+    +1 & x > 0 \\\
+    0 & x \leq 0
+    \end{cases}
+    \\]
+
+    # Arguments
+    `x`: Input Tensor
+
+    # Returns
+    A Tensor with same type as `x`.
+    """
+    return tf.sign(tf.nn.relu(x))

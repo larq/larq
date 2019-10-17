@@ -22,3 +22,17 @@ def test_sign(fn):
     zero_values = np.zeros((2, 5))
     result = f(zero_values)[0]
     assert np.all(result == 1)
+
+
+@pytest.mark.parametrize("fn", [lq.math.heaviside])
+def test_heaviside(fn):
+    x = tf.keras.backend.placeholder(ndim=2)
+    f = tf.keras.backend.function([x], [fn(x)])
+    binarized_values = np.random.choice([0, 1], size=(2, 5))
+    result = f([binarized_values])[0]
+    np.testing.assert_allclose(result, binarized_values)
+
+    real_values = generate_real_values_with_zeros()
+    result = f([real_values])[0]
+    assert np.all(result[real_values <= 0] == 0)
+    assert np.all(result[real_values > 0] == 1)
