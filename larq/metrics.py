@@ -132,10 +132,10 @@ class FlipRatio(LarqMetric):
         self, values_shape=(), values_dtype="int8", name="flip_ratio", dtype=None
     ):
         super().__init__(name=name, dtype=dtype)
-        self.values_dtype = tf.as_dtype(values_dtype)
-        self.values_shape = tf.TensorShape(values_shape).as_list()
-        self.is_weight_metric = True
         with tf.init_scope():
+            self.values_dtype = tf.as_dtype(values_dtype)
+            self.values_shape = tf.TensorShape(values_shape).as_list()
+            self.is_weight_metric = True
             self._previous_values = self.add_weight(
                 "previous_values",
                 shape=values_shape,
@@ -153,7 +153,7 @@ class FlipRatio(LarqMetric):
                 initializer=tf.keras.initializers.zeros,
                 aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
             )
-        self._size = np.prod(self.values_shape)
+            self._size = np.prod(self.values_shape)
 
     def update_state(self, values, sample_weight=None):
         values = tf.cast(values, self.values_dtype)
