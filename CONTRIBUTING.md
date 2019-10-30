@@ -24,9 +24,9 @@ Install all required dependencies for local development by running:
 
 ```shell
 cd larq # go into the directory you just cloned
-pip install -e .[tensorflow] # Installs Tensorflow for CPU
-# pip install -e .[tensorflow_gpu] # Installs Tensorflow for GPU
-pip install -e .[test] # Installs all development dependencies
+pip install -e ".[tensorflow]" # Installs Tensorflow for CPU
+# pip install -e ".[tensorflow_gpu]" # Installs Tensorflow for GPU
+pip install -e ".[test]" # Installs all development dependencies
 ```
 
 ## Run Unit tests
