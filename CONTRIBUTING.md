@@ -43,7 +43,7 @@ Installs dependencies for building the docs:
 
 ```shell
 pip install nbconvert git+https://github.com/lgeiger/pydoc-markdown.git
-pip install -e .[docs]
+pip install -e ".[docs]"
 ```
 
 Inside the project directory run:
