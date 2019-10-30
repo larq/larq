@@ -104,6 +104,14 @@ def test_summary(snapshot, capsys):
     captured = capsys.readouterr()
     snapshot.assert_match(captured.out)
 
+    # A model with no weights
+    model = tf.keras.models.Sequential(
+        [tf.keras.layers.Lambda(lambda x: tf.zeros(2), input_shape=(32, 32))]
+    )
+    lq.models.summary(model)
+    captured = capsys.readouterr()
+    snapshot.assert_match(captured.out)
+
 
 def test_summary_invalid_model():
     with pytest.raises(ValueError):

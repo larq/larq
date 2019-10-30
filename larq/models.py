@@ -332,12 +332,19 @@ class ModelProfile(LayerProfile):
                 "Float-32 Equivalent",
                 f"{self.fp_equivalent_memory / (8*1024*1024):.2f} MB",
             ],
-            ["Compression Ratio of Memory", self.memory / self.fp_equivalent_memory],
+            [
+                "Compression Ratio of Memory",
+                self.memory / max(1e-8, self.fp_equivalent_memory),
+            ],
         ]
 
         if include_macs:
-            binarization_ratio = self.op_count("mac", 1) / self.op_count(op_type="mac")
-            ternarization_ratio = self.op_count("mac", 2) / self.op_count(op_type="mac")
+            binarization_ratio = self.op_count("mac", 1) / max(
+                1, self.op_count(op_type="mac")
+            )
+            ternarization_ratio = self.op_count("mac", 2) / max(
+                1, self.op_count(op_type="mac")
+            )
             summary.append(
                 [
                     "Number of MACs",

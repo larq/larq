@@ -32,3 +32,22 @@ snapshots['test_summary 1'] = '''+sequential stats------------------------------
 | Ratio of MACs that are ternarized  0.0247  |
 +--------------------------------------------+
 '''
+
+snapshots['test_summary 2'] = '''+sequential_1 stats--------------------+
+| Layer   Input prec.  Outputs  Memory |
+|               (bit)             (kB) |
++--------------------------------------+
+| lambda            -     (2,)       0 |
++--------------------------------------+
+| Total                              0 |
++--------------------------------------+
++sequential_1 summary------------------+
+| Total params                 0       |
+| Trainable params             0       |
+| Non-trainable params         0       |
+| Model size:                  0.00 MB |
+| Float-32 Equivalent          0.00 MB |
+| Compression Ratio of Memory  0.00    |
+| Number of MACs               0       |
++--------------------------------------+
+'''
