@@ -109,3 +109,4 @@ venv.bak/
 
 # Editors
 .vscode/
+.idea/
