@@ -6,9 +6,6 @@ from larq import utils
 from copy import deepcopy
 
 
-__all__ = ["Bop", "XavierLearningRateScaling"]
-
-
 @utils.register_keras_custom_object
 class XavierLearningRateScaling(tf.keras.optimizers.Optimizer):
     """Optimizer wrapper for Xavier Learning Rate Scaling
