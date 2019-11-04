@@ -110,8 +110,8 @@ class QuantizedVariable(variables.Variable):
         assert not as_ref
         if dtype is not None and not dtype.is_compatible_with(self.dtype):
             raise ValueError(
-                "Incompatible type conversion requested to type {!r} for variable "
-                "of type {!r}".format(dtype.name, self.dtype.name)
+                f"Incompatible type conversion requested to type {dtype.name} for "
+                f"variable of type {self.dtype.name}"
             )
         val = ops.internal_convert_to_tensor(
             self._variable, self._variable.dtype, name, as_ref=False
@@ -132,8 +132,8 @@ class QuantizedVariable(variables.Variable):
             )
         return (
             f"<QuantizedVariable '{self.name}' shape={self.shape} "
-            f"dtype={self.dtype.name} quantizer={self.quantizer.__repr__()}> "
-            f"precision={self.precision}"
+            f"dtype={self.dtype.name} quantizer={self.quantizer.__repr__()} "
+            f"precision={self.precision}>"
         )
 
     # Method delegations: We delegate the following methods to self._variable.
@@ -413,11 +413,9 @@ def create_quantized_variable(variable, quantizer=None):
                 super().__init__(inner_var, quantizer=quantizer)
 
         def __repr__(self):
-            # pylint: disable=missing-format-attribute
             return (
-                "<AutoCastDistributedVariable dtype={v.dtype.name} "
-                "true_dtype={v.true_dtype.name} inner_variable={v._variable}>"
-            ).format(v=self)
-            # pylint: enable=missing-format-attribute
+                f"<AutoCastDistributedVariable dtype={self.dtype.name} "
+                f"true_dtype={self.true_dtype.name} inner_variable={self._variable}>"
+            )
 
     return QuantizedDistributedVariable(variable, quantizer=quantizer)
