@@ -117,13 +117,9 @@ class Bop(tf.keras.optimizers.Optimizer):
         self._set_hyper("threshold", threshold)
         self._set_hyper("gamma", gamma)
 
-    # TODO: Why do we need to do this here? (It gets called in apply_gradients().)
-    # TODO: Can we remove the `is_binary` check? Will this never get called with non-
-    # binary variables anyway?
     def _create_slots(self, var_list):
         for var in var_list:
-            if BNNOptimizerDuo.is_binary(var):
-                self.add_slot(var, "m")
+            self.add_slot(var, "m")
 
     def _get_decayed_hyper(self, name, var_dtype):
         hyper = self._get_hyper(name, var_dtype)
