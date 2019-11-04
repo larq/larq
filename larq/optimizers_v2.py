@@ -16,7 +16,7 @@ class OptimizerGroup(tf.keras.optimizers.Optimizer):
     def __init__(self, bin_optimizer, fp_optimizer, name="Group"):
         super().__init__(name=name)  # TODO: Do we need to pass **kwargs?
 
-        type_err_msg = "Expected tf.keras.optimizers.Optimizer for `{}`, received `{}.`
+        type_err_msg = "Expected tf.keras.optimizers.Optimizer for `{}`, received `{}.`"
         if not isinstance(bin_optimizer, tf.keras.optimizers.Optimizer):
             raise TypeError(type_err_msg.format("bin_optimizer", type(bin_optimizer)))
         if not isinstance(fp_optimizer, tf.keras.optimizers.Optimizer):
@@ -41,8 +41,8 @@ class OptimizerGroup(tf.keras.optimizers.Optimizer):
 
     def __getattr__(self, name):
         if name == "lr":
-            return self.fp_optimizer.lr if name == "lr"
-        return super().__getattr__(name)  #TODO is this still robust enough?
+            return self.fp_optimizer.lr
+        return super().__getattr__(name)  # TODO is this still robust enough?
 
     # TODO: Not sure if this needs to be here or forwarded to Bop.
     def _get_decayed_hyper(self, name, var_dtype):
