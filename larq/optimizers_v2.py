@@ -5,6 +5,9 @@ from larq import utils
 from copy import deepcopy
 
 
+__all__ = ["Bop", "OptimizerGroup"]
+
+
 @utils.register_keras_custom_object
 class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
     """Group of a full-precision and binary optimizer.
