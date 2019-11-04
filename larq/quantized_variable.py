@@ -1,4 +1,4 @@
-"""Contains QuantizedVariable, a variable which automatically casts itself."""
+"""Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
 from tensorflow.python.distribute import values as distribute_values
 from tensorflow.python.eager import context
 from tensorflow.python.framework import ops
@@ -8,28 +8,7 @@ from larq.quantized_scope import should_quantize
 
 
 class QuantizedVariable(variables.Variable):
-    """Variable that will cast itself to a different dtype in applicable contexts.
-
-  This class wraps a floating-point tf.Variable. It emulates the variable
-  interface and delegates to the wrapped variable, but it additionally will cast
-  the wrapped variable under a `Graph._enable_variable_auto_cast(dtype)` context
-  manager.
-
-  For example:
-
-  ```
-  v = tf.Variable(1.0, dtype=tf.float32)
-  v = QuantizedVariable(v)
-  print(tf.identity(v).dtype)  # tf.float32
-  with ops.get_default_graph()._enable_variable_auto_cast(tf.float16):
-    print(tf.identity(v).dtype)  # tf.float16, as v will cast itself to float16
-    print(v.dtype)  # tf.float16, as v.dtype also changes under the ctx manager.
-  ```
-
-  The purpose of this class is to allow Keras layers to create variables in
-  float32, and automatically cast them to float16 or bfloat16 when the layer is
-  called.
-  """
+    """Variable that can be quantized in the forward pass in applicable contexts."""
 
     def __init__(self, variable, quantizer=None):
         """Creates an QuantizedVariable instance.
@@ -63,7 +42,6 @@ class QuantizedVariable(variables.Variable):
 
     @property
     def dtype(self):
-        """The dtype this variable will be casted to when read."""
         return self._variable.dtype
 
     def _as_graph_element(self):
@@ -144,13 +122,12 @@ class QuantizedVariable(variables.Variable):
     # We do not define the following methods from Variable for the following
     # reasons:
     #   * 'count_up_to': This method only applies to int variables, which cannot
-    #     be wrapped with an AutoCastVariable.
+    #     be wrapped with an QuantizedVariable.
     #   * 'experimental_ref': Instead we inherit the definition from Variable.
-    #     If we defined and delegated to Variable, the ref of an AutoCastVariable
+    #     If we defined and delegated to Variable, the ref of an QuantizedVariable
     #     would be the same as the ref of the underlying variable, which would be
     #     strange as they are different Python objects.
 
-    # pylint: disable=multiple-statements
     def set_shape(self, shape):
         return self._variable.set_shape(self, shape)
 
@@ -231,7 +208,7 @@ class QuantizedVariable(variables.Variable):
 
     @property
     def _shared_name(self):
-        return self._variable._shared_name  # pylint:disable=protected-access
+        return self._variable._shared_name
 
     @property
     def initializer(self):
@@ -258,14 +235,12 @@ class QuantizedVariable(variables.Variable):
 
     def _gather_saveables_for_checkpoint(self):
         # By delegating this method to the wrapped variable, checkpoints with
-        # AutoCastVariables are identical to checkpoints with normal variables.
-        # Therefore models checkpointed with AutoCastVariables can be restored on
+        # QuantizedVariables are identical to checkpoints with normal variables.
+        # Therefore models checkpointed with QuantizedVariables can be restored on
         # models with normal variables, and vice versa.
-        return (
-            self._variable._gather_saveables_for_checkpoint()
-        )  # pylint:disable=protected-access
+        return self._variable._gather_saveables_for_checkpoint()
 
-    # TODO(reedwm): Maybe encode the fact the variable is an AutoCastVariable in
+    # TODO(reedwm): Maybe encode the fact the variable is an QuantizedVariable in
     # to_proto().
     def to_proto(self, export_scope=None):
         return self._variable.to_proto(export_scope)
@@ -393,7 +368,7 @@ def create_quantized_variable(variable, quantizer=None):
         return QuantizedVariable(variable, quantizer=quantizer)
 
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
-        """An AutoCastVariable that also subclasses from DistributedVariable."""
+        """An QuantizedVariable that also subclasses from DistributedVariable."""
 
         def __init__(self, maybe_variable, *args, quantizer=None, **kwargs):
             if not args and not kwargs:
