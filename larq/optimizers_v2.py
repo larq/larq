@@ -28,7 +28,7 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
     def __getattr__(self, name):
         if name == "lr":
             return self.fp_optimizer.lr
-        return super().__getattr__(name)  # TODO is this still robust enough?
+        return super().__getattr__(name)
 
     @staticmethod
     def is_binary(var):
@@ -64,7 +64,6 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
         }
         return {**super().get_config(), **config}
 
-    # TODO: Fix this? What does it do?
     @classmethod
     def from_config(cls, original_config, custom_objects=None):
         config = deepcopy(original_config)
@@ -149,7 +148,7 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     def get_config(self):
         config = {
-            "name": self._name,  # TODO: Check if this is correct
+            "name": self._name,
             "threshold": self._serialize_hyperparameter("threshold"),
             "gamma": self._serialize_hyperparameter("gamma"),
         }
