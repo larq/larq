@@ -53,26 +53,30 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
         bin_optimizer_config = self.bin_optimizer.get_config()
 
         config = {
-            "fp_optimizer": {
-                "class_name": fp_optimizer_config["name"],
-                "config": fp_optimizer_config,
-            },
             "bin_optimizer": {
                 "class_name": bin_optimizer_config["name"],
                 "config": bin_optimizer_config,
+            },
+            "fp_optimizer": {
+                "class_name": fp_optimizer_config["name"],
+                "config": fp_optimizer_config,
             },
         }
         return {**super().get_config(), **config}
 
     # TODO: Fix this? What does it do?
     @classmethod
-    def from_config(cls, config, custom_objects=None):
-        new_config = deepcopy(config)
-        fp_optimizer = tf.keras.optimizers.deserialize(
-            new_config["fp_optimizer"], custom_objects=custom_objects
+    def from_config(cls, original_config, custom_objects=None):
+        config = deepcopy(original_config)
+        return cls(
+            bin_optimizer=tf.keras.optimizers.deserialize(
+                config.pop("bin_optimizer"), custom_objects=custom_objects
+            ),
+            fp_optimizer=tf.keras.optimizers.deserialize(
+                config.pop("fp_optimizer"), custom_objects=custom_objects
+            ),
+            **config
         )
-        new_config.pop("fp_optimizer", None)
-        return cls(fp_optimizer, **new_config)
 
 
 @utils.register_keras_custom_object
