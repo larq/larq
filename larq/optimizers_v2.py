@@ -6,7 +6,7 @@ from copy import deepcopy
 
 
 @utils.register_keras_custom_object
-class OptimizerGroup(tf.keras.optimizers.Optimizer):
+class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
     """Group of a full-precision and binary optimizer.
 
     #TODO: Do we want to abstract this to `n` optimizers, not specifically one fp and
@@ -130,7 +130,7 @@ class Bop(tf.keras.optimizers.Optimizer):
     # binary variables anyway?
     def _create_slots(self, var_list):
         for var in var_list:
-            if OptimizerGroup.is_binary(var):
+            if BNNOptimizerDuo.is_binary(var):
                 self.add_slot(var, "m")
 
     # TODO: Not sure if this needs to be here or in OptimizerGroup.
