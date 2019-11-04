@@ -44,14 +44,6 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
             return self.fp_optimizer.lr
         return super().__getattr__(name)  # TODO is this still robust enough?
 
-    # TODO: Not sure if this needs to be here or forwarded to Bop.
-    def _get_decayed_hyper(self, name, var_dtype):
-        hyper = self._get_hyper(name, var_dtype)
-        if isinstance(hyper, tf.keras.optimizers.schedules.LearningRateSchedule):
-            local_step = tf.cast(self.iterations, var_dtype)
-            hyper = tf.cast(hyper(local_step), var_dtype)
-        return hyper
-
     @staticmethod
     def is_binary(var):
         return "/kernel" in var.name and "quant_" in var.name
@@ -133,7 +125,6 @@ class Bop(tf.keras.optimizers.Optimizer):
             if BNNOptimizerDuo.is_binary(var):
                 self.add_slot(var, "m")
 
-    # TODO: Not sure if this needs to be here or in OptimizerGroup.
     def _get_decayed_hyper(self, name, var_dtype):
         hyper = self._get_hyper(name, var_dtype)
         if isinstance(hyper, tf.keras.optimizers.schedules.LearningRateSchedule):
