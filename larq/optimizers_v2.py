@@ -25,6 +25,15 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
         self.bin_optimizer = bin_optimizer
         self.fp_optimizer = fp_optimizer
 
+    def __getattr__(self, name):
+        if name == "lr":
+            return self.fp_optimizer.lr
+        return super().__getattr__(name)  # TODO is this still robust enough?
+
+    @staticmethod
+    def is_binary(var):
+        return "/kernel" in var.name and "quant_" in var.name
+
     def apply_gradients(self, grads_and_vars, name=None):
         bin_grads_and_vars, fp_grads_and_vars = [], []
 
@@ -38,15 +47,6 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
         fp_train_op = self.fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
 
         return tf.group(bin_train_op, fp_train_op, name="train_with_group")
-
-    def __getattr__(self, name):
-        if name == "lr":
-            return self.fp_optimizer.lr
-        return super().__getattr__(name)  # TODO is this still robust enough?
-
-    @staticmethod
-    def is_binary(var):
-        return "/kernel" in var.name and "quant_" in var.name
 
     def get_config(self):
         fp_optimizer_config = self.fp_optimizer.get_config()
