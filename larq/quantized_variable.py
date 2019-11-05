@@ -44,10 +44,6 @@ class QuantizedVariable(variables.Variable):
     def dtype(self):
         return self._variable.dtype
 
-    def _as_graph_element(self):
-        """Conversion function for Graph.as_graph_element()."""
-        return self._variable
-
     def value(self):
         val = self._variable.value()
         if not self._should_quantize():
