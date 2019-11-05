@@ -5,50 +5,90 @@ from larq import utils
 from copy import deepcopy
 
 
-@utils.register_keras_custom_object
-class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
-    """Group of a full-precision and binary optimizer.
+class MaskedOptimizer:
+    """An optimizer and a mask for which weights it should train.
 
-    #TODO: Do we want to abstract this to `n` optimizers, not specifically one fp and
-    one bin? (I personally prefer the user-side simplicity of this current approach.)
+    We provide `is_binary(var)` as example mask. For layers defined using the naming
+    scheme used in the Larq Zoo, it masks which variables should be trained by a binary
+    optimizer like Bop.
+
+    !!! example
+        ```python
+        masked_bop = lq.optimizers.MaskedOptimizer(
+            optimizer=lq.optimizers.Bop(),
+            mask_fn=lq.optimizers.MaskedOptimizer.is_binary
+        )
+        ```
+    
+    # Arguments
+    optimizer: a `tf.keras.optimizers.Optimizer`.
+    mask_fb: a function which takes only a `tf.Variable` as input and returns True if 
+        this optimizer should be used to train that variable.
     """
 
-    def __init__(self, bin_optimizer, fp_optimizer, name="Group"):
-        super().__init__(name=name)  # TODO: Do we need to pass **kwargs?
+    def __init__(self, optimizer, mask_fn=None):
+        if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
+            raise TypeError(
+                f"Expected `tf.keras.optimizers.Optimizer` for `optimizer` but got `{type(optimizer)}`."
+            )
 
-        type_err_msg = "Expected tf.keras.optimizers.Optimizer for `{}`, received `{}.`"
-        if not isinstance(bin_optimizer, tf.keras.optimizers.Optimizer):
-            raise TypeError(type_err_msg.format("bin_optimizer", type(bin_optimizer)))
-        if not isinstance(fp_optimizer, tf.keras.optimizers.Optimizer):
-            raise TypeError(type_err_msg.format("fp_optimizer", type(bin_optimizer)))
-
-        self.bin_optimizer = bin_optimizer
-        self.fp_optimizer = fp_optimizer
-
-    def __getattr__(self, name):
-        if name == "lr":
-            return self.fp_optimizer.lr
-        return super().__getattr__(name)
+        self.optimizer = optimizer
+        self.mask_fn = mask_fn
 
     @staticmethod
     def is_binary(var):
         return "/kernel" in var.name and "quant_" in var.name
 
+
+@utils.register_keras_custom_object
+class OptimizerGroup(tf.keras.optimizers.Optimizer):
+    """A group of `MaskedOptimizer` that collectively train a model's variables.
+
+    The set of `mask_fn` passed through the list of `MaskedOptimizer` should partition
+    the model's variables, so that exactly one optimizer is responsible for training 
+    each variable. The last `MaskedOptimizer` in the list may have its `mask_fn` set to `None`; this is the default optimizer that will train any variables not claimed by
+    any previous optimizer.
+
+    # Arguments
+    masked_optimizers: a list of `MaskedOptimizer`
+    """
+
+    def __init__(self, masked_optimizers, name="Group"):
+        super().__init__(name=name)
+
+        for i, masked_opt in enumerate(masked_optimizers):
+            if not isinstance(masked_opt, MaskedOptimizer):
+                raise TypeError(
+                    f"Expected `MaskedOptimizer` at index {i} but got `{type(masked_opt)}`."
+                )
+
+        self.masked_optimizers = masked_optimizers
+
+    def __getattr__(self, name):
+        if name == "lr":  # TODO: Which optimizer's LR should handle this?
+            raise NotImplementedError()
+        return super().__getattr__(name)
+
     def apply_gradients(self, grads_and_vars, name=None):
-        bin_grads_and_vars, fp_grads_and_vars = [], []
+        opt_grads_and_vars = [[] for _ in range(len(self.masked_optimizers))]
 
         for grad, var in grads_and_vars:
-            if self.is_binary(var):
-                bin_grads_and_vars.append((grad, var))
-            else:
-                fp_grads_and_vars.append((grad, var))
+            for i, masked_opt in enumerate(self.masked_optimizers):
+                # TODO: Check partition condition?
+                if masked_opt.mask_fn is None or masked_opt.mask_fn(var):
+                    opt_grads_and_vars[i].append((grad, var))
 
-        bin_train_op = self.bin_optimizer.apply_gradients(bin_grads_and_vars, name=name)
-        fp_train_op = self.fp_optimizer.apply_gradients(fp_grads_and_vars, name=name)
+        train_ops = []
+        for i, masked_opt in enumerate(self.masked_optimizers):
+            train_ops.append(
+                masked_opt.optimizer.apply_gradients(opt_grads_and_vars[i], name=name)
+            )
 
-        return tf.group(bin_train_op, fp_train_op, name="train_with_group")
+        return tf.group(*train_ops, name="train_with_group")
 
+    # TODO
     def get_config(self):
+        raise NotImplementedError()
         fp_optimizer_config = self.fp_optimizer.get_config()
         bin_optimizer_config = self.bin_optimizer.get_config()
 
@@ -64,8 +104,10 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
         }
         return {**super().get_config(), **config}
 
+    # TODO
     @classmethod
     def from_config(cls, original_config, custom_objects=None):
+        raise NotImplementedError()
         config = deepcopy(original_config)
         return cls(
             bin_optimizer=tf.keras.optimizers.deserialize(
@@ -74,7 +116,7 @@ class BNNOptimizerDuo(tf.keras.optimizers.Optimizer):
             fp_optimizer=tf.keras.optimizers.deserialize(
                 config.pop("fp_optimizer"), custom_objects=custom_objects
             ),
-            **config
+            **config,
         )
 
 

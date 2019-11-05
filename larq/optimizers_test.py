@@ -115,7 +115,7 @@ class TestXavierLearingRateScaling:
 class TestBopOptimizer:
     def test_bop_accuracy(self):
         _test_optimizer(
-            lq.optimizers.BNNOptimizerDuo(
+            lq.optimizers.OptimizerGroup(
                 bin_optimizer=lq.optimizers.Bop(),
                 fp_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
@@ -123,7 +123,7 @@ class TestBopOptimizer:
         )
         # test optimizer on model with only binary trainable vars (low accuracy)
         _test_optimizer(
-            lq.optimizers.BNNOptimizerDuo(
+            lq.optimizers.OptimizerGroup(
                 bin_optimizer=lq.optimizers.Bop(),
                 fp_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
@@ -138,7 +138,7 @@ class TestBopOptimizer:
     )
     def test_bop_tf_1_14_schedules(self):
         _test_optimizer(
-            lq.optimizers.BNNOptimizerDuo(
+            lq.optimizers.OptimizerGroup(
                 bin_optimizer=lq.optimizers.Bop(
                     threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
                         3.0, decay_steps=1.0, decay_rate=0.5
@@ -163,7 +163,7 @@ class TestBopOptimizer:
         )
         model.compile(
             loss="categorical_crossentropy",
-            optimizer=lq.optimizers.BNNOptimizerDuo(
+            optimizer=lq.optimizers.OptimizerGroup(
                 bin_optimizer=lq.optimizers.Bop(),
                 fp_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
@@ -183,7 +183,7 @@ class TestBopOptimizer:
 
     def test_bop_serialization(self):
         _test_serialization(
-            lq.optimizers.BNNOptimizerDuo(
+            lq.optimizers.OptimizerGroup(
                 bin_optimizer=lq.optimizers.Bop(),
                 fp_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
