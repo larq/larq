@@ -116,16 +116,30 @@ class TestBopOptimizer:
     def test_bop_accuracy(self):
         _test_optimizer(
             lq.optimizers.OptimizerGroup(
-                bin_optimizer=lq.optimizers.Bop(),
-                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+                [
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=lq.optimizers.Bop(),
+                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
+                    ),
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
+                    ),
+                ]
             ),
             test_kernels_are_binary=True,
         )
         # test optimizer on model with only binary trainable vars (low accuracy)
         _test_optimizer(
             lq.optimizers.OptimizerGroup(
-                bin_optimizer=lq.optimizers.Bop(),
-                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+                [
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=lq.optimizers.Bop(),
+                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
+                    ),
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
+                    ),
+                ]
             ),
             test_kernels_are_binary=True,
             trainable_bn=False,
@@ -139,15 +153,22 @@ class TestBopOptimizer:
     def test_bop_tf_1_14_schedules(self):
         _test_optimizer(
             lq.optimizers.OptimizerGroup(
-                bin_optimizer=lq.optimizers.Bop(
-                    threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
-                        3.0, decay_steps=1.0, decay_rate=0.5
+                [
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=lq.optimizers.Bop(
+                            threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
+                                3.0, decay_steps=1.0, decay_rate=0.5
+                            ),
+                            gamma=tf.keras.optimizers.schedules.InverseTimeDecay(
+                                3.0, decay_steps=1.0, decay_rate=0.5
+                            ),
+                        ),
+                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
                     ),
-                    gamma=tf.keras.optimizers.schedules.InverseTimeDecay(
-                        3.0, decay_steps=1.0, decay_rate=0.5
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
                     ),
-                ),
-                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+                ]
             ),
             test_kernels_are_binary=True,
         )
@@ -164,8 +185,15 @@ class TestBopOptimizer:
         model.compile(
             loss="categorical_crossentropy",
             optimizer=lq.optimizers.OptimizerGroup(
-                bin_optimizer=lq.optimizers.Bop(),
-                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+                [
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=lq.optimizers.Bop(),
+                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
+                    ),
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
+                    ),
+                ]
             ),
         )
 
@@ -184,7 +212,14 @@ class TestBopOptimizer:
     def test_bop_serialization(self):
         _test_serialization(
             lq.optimizers.OptimizerGroup(
-                bin_optimizer=lq.optimizers.Bop(),
-                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+                [
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=lq.optimizers.Bop(),
+                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
+                    ),
+                    lq.optimizers.MaskedOptimizer(
+                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
+                    ),
+                ]
             ),
         )
