@@ -5,87 +5,74 @@ from larq import utils
 from copy import deepcopy
 
 
-class MaskedOptimizer:
-    """An optimizer and a mask for which weights it should train.
-
-    We provide `is_binary(var)` as example mask. For layers defined using the naming
-    scheme used in the Larq Zoo, it masks which variables should be trained by a binary
-    optimizer like Bop.
-
-    !!! example
-        ```python
-        masked_bop = lq.optimizers.MaskedOptimizer(
-            optimizer=lq.optimizers.Bop(),
-            mask_fn=lq.optimizers.MaskedOptimizer.is_binary
-        )
-        ```
-    
-    # Arguments
-    optimizer: a `tf.keras.optimizers.Optimizer`.
-    mask_fn: a function which takes only a `tf.Variable` as input and returns True if 
-        this optimizer should be used to train that variable.
-    """
-
-    def __init__(self, optimizer, mask_fn=None):
-        if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
-            raise TypeError(
-                f"Expected `tf.keras.optimizers.Optimizer` for `optimizer` but got `{type(optimizer)}`."
-            )
-
-        self.optimizer = optimizer
-        self.mask_fn = mask_fn
-
-    @staticmethod
-    def is_binary(var):
-        return "/kernel" in var.name and "quant_" in var.name
-
-
 @utils.register_keras_custom_object
-class OptimizerGroup(tf.keras.optimizers.Optimizer):
-    """A group of `MaskedOptimizer` that collectively train a model's variables.
+class CaseOptimizer(tf.keras.optimizers.Optimizer):
+    """A case operation for optimizers that each train a subset of a model's variables.
 
-    The set of `mask_fn` passed through the list of `MaskedOptimizer` should partition
-    the model's variables, so that exactly one optimizer is responsible for training 
-    each variable. The last `MaskedOptimizer` in the list may have its `mask_fn` set to
-    `None`; this is the default optimizer that will train any variables not claimed by
-    any previous optimizer.
+    An optimizer is used to train a variable iff its accompanying predicate evaluates to
+    `True`.
+
+    For each variable, at most one optimizer's predicate may evaluate to `True`. If no
+    optimizer's predicate evaluates to `True` for a variable, it is trained with the
+    `default` optimizer.
 
     # Arguments
-    masked_optimizers: a list of `MaskedOptimizer`
+    pred_opt_pairs: a list of `(tf.keras.optimizers.Optimzer, pred)` pairs, where `pred` 
+        takes one `tf.Variable` as argument and returns `True` if the optimizer should
+        train that variable, e.g. `pred(var) === True`.
+    default: a `tf.keras.optimizers.Optimizer` to be applied to any variable not claimed
+        by any other optimizer.
     """
 
-    def __init__(self, masked_optimizers, name="Group"):
+    def __init__(self, pred_opt_pairs, default, name="optim_case"):
         super().__init__(name=name)
 
-        for i, masked_opt in enumerate(masked_optimizers):
-            if not isinstance(masked_opt, MaskedOptimizer):
+        for i, (pred, opt) in enumerate(pred_opt_pairs):
+            if not isinstance(opt, tf.keras.optimizers.Optimizer):
                 raise TypeError(
-                    f"Expected `MaskedOptimizer` at index {i} but got `{type(masked_opt)}`."
+                    f"Expected `tf.keras.optimizers.Optimizer` at `pred_opt_pairs[{i}][1]` but got `{type(opt)}`."
                 )
+        self.pred_opt_pairs = pred_opt_pairs
 
-        self.masked_optimizers = masked_optimizers
+        if (
+            not isinstance(default, tf.keras.optimizers.Optimizer)
+            and default is not None
+        ):
+            raise TypeError(
+                f"Expected `tf.keras.optimizers.Optimizer` for `default` but got `{type(fallback_optimizer)}`."
+            )
+        self.default = default
 
     def __getattr__(self, name):
-        if name == "lr":  # TODO: Which optimizer's LR should handle this?
+        if name == "lr":  # TODO: Return list of learning rates
             raise NotImplementedError()
         return super().__getattr__(name)
 
     def apply_gradients(self, grads_and_vars, name=None):
-        opt_grads_and_vars = [[] for _ in range(len(self.masked_optimizers))]
+        opt_grads_and_vars = [[] for _ in range(len(self.pred_opt_pairs))]
+        default_grads_and_vars = []
 
         for grad, var in grads_and_vars:
-            for i, masked_opt in enumerate(self.masked_optimizers):
-                # TODO: Check partition condition?
-                if masked_opt.mask_fn is None or masked_opt.mask_fn(var):
+            num_opts = 0
+            for i, (pred, opt) in enumerate(self.pred_opt_pairs):
+                if pred(var):
                     opt_grads_and_vars[i].append((grad, var))
+                    num_opts += 1
+
+            if num_opts == 0:
+                default_grads_and_vars.append((grad, var))
+            if num_opts > 1:
+                raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
+
+        if len(default_grads_and_vars) > 0 and self.default is None:
+            raise ValueError(
+                f"No `default` provided to train variables `{default_grads_and_vars}`."
+            )
 
         train_ops = []
-        for masked_opt, grads_and_vars in zip(
-            self.masked_optimizers, opt_grads_and_vars
-        ):
-            train_ops.append(
-                masked_opt.optimizer.apply_gradients(grads_and_vars, name=name)
-            )
+        for (_, opt), grads_and_vars in zip(self.pred_opt_pairs, opt_grads_and_vars):
+            train_ops.append(opt.apply_gradients(grads_and_vars, name=name))
+        train_ops.append(self.default.apply_gradients(grads_and_vars, name=name))
 
         return tf.group(*train_ops, name="train_with_group")
 
@@ -198,3 +185,12 @@ class Bop(tf.keras.optimizers.Optimizer):
             "gamma": self._serialize_hyperparameter("gamma"),
         }
         return {**super().get_config(), **config}
+
+    @staticmethod
+    def is_binary(var):
+        """Returns True for binary variables named using the Larq Zoo naming scheme.
+        
+        # Arguments
+        var: a `tf.Variable`.
+        """
+        return "/kernel" in var.name and "quant_" in var.name

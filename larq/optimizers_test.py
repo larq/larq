@@ -115,7 +115,7 @@ class TestXavierLearingRateScaling:
 class TestBopOptimizer:
     def test_bop_accuracy(self):
         _test_optimizer(
-            lq.optimizers.OptimizerGroup(
+            lq.optimizers.CaseOptimizer(
                 [
                     lq.optimizers.MaskedOptimizer(
                         optimizer=lq.optimizers.Bop(),
@@ -130,7 +130,7 @@ class TestBopOptimizer:
         )
         # test optimizer on model with only binary trainable vars (low accuracy)
         _test_optimizer(
-            lq.optimizers.OptimizerGroup(
+            lq.optimizers.CaseOptimizer(
                 [
                     lq.optimizers.MaskedOptimizer(
                         optimizer=lq.optimizers.Bop(),
@@ -152,7 +152,7 @@ class TestBopOptimizer:
     )
     def test_bop_tf_1_14_schedules(self):
         _test_optimizer(
-            lq.optimizers.OptimizerGroup(
+            lq.optimizers.CaseOptimizer(
                 [
                     lq.optimizers.MaskedOptimizer(
                         optimizer=lq.optimizers.Bop(
@@ -184,7 +184,7 @@ class TestBopOptimizer:
         )
         model.compile(
             loss="categorical_crossentropy",
-            optimizer=lq.optimizers.OptimizerGroup(
+            optimizer=lq.optimizers.CaseOptimizer(
                 [
                     lq.optimizers.MaskedOptimizer(
                         optimizer=lq.optimizers.Bop(),
@@ -211,7 +211,7 @@ class TestBopOptimizer:
 
     def test_bop_serialization(self):
         _test_serialization(
-            lq.optimizers.OptimizerGroup(
+            lq.optimizers.CaseOptimizer(
                 [
                     lq.optimizers.MaskedOptimizer(
                         optimizer=lq.optimizers.Bop(),
