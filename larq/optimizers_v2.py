@@ -22,7 +22,7 @@ class MaskedOptimizer:
     
     # Arguments
     optimizer: a `tf.keras.optimizers.Optimizer`.
-    mask_fb: a function which takes only a `tf.Variable` as input and returns True if 
+    mask_fn: a function which takes only a `tf.Variable` as input and returns True if 
         this optimizer should be used to train that variable.
     """
 
@@ -46,7 +46,8 @@ class OptimizerGroup(tf.keras.optimizers.Optimizer):
 
     The set of `mask_fn` passed through the list of `MaskedOptimizer` should partition
     the model's variables, so that exactly one optimizer is responsible for training 
-    each variable. The last `MaskedOptimizer` in the list may have its `mask_fn` set to `None`; this is the default optimizer that will train any variables not claimed by
+    each variable. The last `MaskedOptimizer` in the list may have its `mask_fn` set to
+    `None`; this is the default optimizer that will train any variables not claimed by
     any previous optimizer.
 
     # Arguments
