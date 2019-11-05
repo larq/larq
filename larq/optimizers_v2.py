@@ -80,9 +80,11 @@ class OptimizerGroup(tf.keras.optimizers.Optimizer):
                     opt_grads_and_vars[i].append((grad, var))
 
         train_ops = []
-        for i, masked_opt in enumerate(self.masked_optimizers):
+        for masked_opt, grads_and_vars in zip(
+            self.masked_optimizers, opt_grads_and_vars
+        ):
             train_ops.append(
-                masked_opt.optimizer.apply_gradients(opt_grads_and_vars[i], name=name)
+                masked_opt.optimizer.apply_gradients(grads_and_vars, name=name)
             )
 
         return tf.group(*train_ops, name="train_with_group")
