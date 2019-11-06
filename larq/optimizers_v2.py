@@ -28,15 +28,18 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         super().__init__(name=name)
 
         for i, (pred, opt) in enumerate(pred_opt_pairs):
+            if not callable(pred):
+                raise TypeError(
+                    f"Expected callable predicate at `pred_opt_pairs[{i}][0]` but got `{type(pred)}`."
+                )
             if not isinstance(opt, tf.keras.optimizers.Optimizer):
                 raise TypeError(
                     f"Expected `tf.keras.optimizers.Optimizer` at `pred_opt_pairs[{i}][1]` but got `{type(opt)}`."
                 )
         self.pred_opt_pairs = pred_opt_pairs
 
-        if (
-            not isinstance(default, tf.keras.optimizers.Optimizer)
-            and default is not None
+        if default is not None and not isinstance(
+            default, tf.keras.optimizers.Optimizer
         ):
             raise TypeError(
                 f"Expected `tf.keras.optimizers.Optimizer` for `default` but got `{type(fallback_optimizer)}`."
