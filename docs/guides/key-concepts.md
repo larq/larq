@@ -5,12 +5,12 @@ Below, we summarize the key concepts you need to understand to work with BNNs.
 
 The transformation from high-precision Neural Networks to Quantized Neural Networks (QNNs) is achieved by [quantization](https://en.wikipedia.org/wiki/Quantization_(signal_processing)).
 This is the process of mapping a large set of, often continuous, values to a smaller countable set.
-Binarized Neural Networks are a special case of QNNs, where the quantization output \(x_q\) is binary:
+Binarized Neural Networks are a special case of QNNs, where the quantization output \\(x_q\\) is binary:
 \\[
 x_q = q(x), \quad x_q \in \\{-1, +1\\}, x \in \mathbb{R}
 \\]
 
-In `larq`, A [quantizer](https://larq.dev/api/quantizers/) \(q\) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
+In `larq`, A [quantizer](https://larq.dev/api/quantizers/) \\(q\\) defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass.
 The latter is called pseudo-gradient, as it is in general not the true gradient.
 
 Generally, you will find quantizers throughout the network to quantize activations.
@@ -31,14 +31,14 @@ In the documentation for each quantizer you will find the definition and a graph
 Each [quantized layer](https://larq.dev/api/layers/) accepts an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively.
 If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
 
-A quantized layer computes activations \(\boldsymbol{y}\) as:
+A quantized layer computes activations \\(\boldsymbol{y}\\) as:
 
 \\[
 \boldsymbol{y} = \sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
 \\]
 
-with full precision weights \(\boldsymbol{w}\), arbitrary precision input \(\boldsymbol{x}\), layer operation \(f\), activation function \(\sigma\) and bias \(b\).
-For a densely-connected layer \(f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}\).
+with full precision weights \\(\boldsymbol{w}\\), arbitrary precision input \\(\boldsymbol{x}\\), layer operation \\(f\\), activation function \\(\sigma\\) and bias \\(b\\).
+For a densely-connected layer \\(f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}\\).
 This computation will result in the following computational graph:
 
 <div style="text-align:center;">
