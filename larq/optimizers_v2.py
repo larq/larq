@@ -54,11 +54,6 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         self.var_opt_mapping = None
         self.DEFAULT_OPT_INDEX = -1
 
-    def __getattr__(self, name):
-        if name == "lr":
-            raise ValueError("No single learning rate available for CaseOptimizer.")
-        return super().__getattr__(name)
-
     def apply_gradients(self, grads_and_vars, name=None):
         """Apply gradients to variables for each optimizer.
         
