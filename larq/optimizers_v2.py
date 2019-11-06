@@ -80,35 +80,11 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     # TODO
     def get_config(self):
         raise NotImplementedError()
-        fp_optimizer_config = self.fp_optimizer.get_config()
-        bin_optimizer_config = self.bin_optimizer.get_config()
-
-        config = {
-            "bin_optimizer": {
-                "class_name": bin_optimizer_config["name"],
-                "config": bin_optimizer_config,
-            },
-            "fp_optimizer": {
-                "class_name": fp_optimizer_config["name"],
-                "config": fp_optimizer_config,
-            },
-        }
-        return {**super().get_config(), **config}
 
     # TODO
     @classmethod
     def from_config(cls, original_config, custom_objects=None):
         raise NotImplementedError()
-        config = deepcopy(original_config)
-        return cls(
-            bin_optimizer=tf.keras.optimizers.deserialize(
-                config.pop("bin_optimizer"), custom_objects=custom_objects
-            ),
-            fp_optimizer=tf.keras.optimizers.deserialize(
-                config.pop("fp_optimizer"), custom_objects=custom_objects
-            ),
-            **config,
-        )
 
     def _get_optimizer(self, var):
         """Get the optimizer for a variable."""
@@ -118,32 +94,34 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         if optimizer_index == self.DEFAULT_OPT_INDEX:
             return self.default
         else:
-            return self.pred_opt_pairs[optimizer_index][1]  # from (pred, opt) tuple
+            return self.pred_opt_pairs[optimizer_index][1]  # [1] from (pred, opt) tuple
 
     def _compute_var_opt_mapping(self, grads_and_vars):
         """Compute a unique mapping from variables to optimizers.
         
-        Also yield a new iterator for the original `grads_and_vars`, which can then be
-        used by `apply_gradients()`.
+        Also yield a new iterator for the original `grads_and_vars` so that it is not
+        depleted once `apply_gradients()` needs it.
         """
 
         self.var_opt_mapping = {}
 
         for grad, var in grads_and_vars:
-            num_opts = 0
+            num_optimizers = 0
 
+            # Find the optimizer(s) that want to claim this variable
             for optimizer_index, (predicate, _) in enumerate(self.pred_opt_pairs):
                 if predicate(var):
                     self.var_opt_mapping[var.name] = optimizer_index
-                    num_opts += 1
+                    num_optimizers += 1
 
-            if num_opts > 1:
+            if num_optimizers > 1:
                 raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
-            if num_opts == 0:
+            if num_optimizers == 0:
                 self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
                 if self.default is None:
                     warnings.warn(f"No `default` provided to train variable `{var}`.")
 
+            # Yielding a new grads_and_vars iterator for use by `apply_gradients()`
             yield ((grad, var))
 
 
@@ -222,6 +200,8 @@ class Bop(tf.keras.optimizers.Optimizer):
             "gamma": self._serialize_hyperparameter("gamma"),
         }
         return {**super().get_config(), **config}
+
+    # TODO: from_config
 
     @staticmethod
     def is_binary(var):
