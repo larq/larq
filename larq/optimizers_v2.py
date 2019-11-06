@@ -198,7 +198,7 @@ class Bop(tf.keras.optimizers.Optimizer):
     # TODO: from_config
 
     @staticmethod
-    def is_binary(var):
+    def is_binary_variable(var):
         """Returns True for binary variables named using the Larq Zoo naming scheme.
         
         # Arguments
