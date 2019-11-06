@@ -116,30 +116,16 @@ class TestBopOptimizer:
     def test_bop_accuracy(self):
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
-                [
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=lq.optimizers.Bop(),
-                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
-                    ),
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
-                    ),
-                ]
+                [(lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop())],
+                tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
         # test optimizer on model with only binary trainable vars (low accuracy)
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
-                [
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=lq.optimizers.Bop(),
-                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
-                    ),
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
-                    ),
-                ]
+                [(lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop())],
+                tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
             trainable_bn=False,
@@ -154,8 +140,9 @@ class TestBopOptimizer:
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
                 [
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=lq.optimizers.Bop(
+                    (
+                        lq.optimizers.Bop.is_binary_variable,
+                        lq.optimizers.Bop(
                             threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
                                 3.0, decay_steps=1.0, decay_rate=0.5
                             ),
@@ -163,12 +150,9 @@ class TestBopOptimizer:
                                 3.0, decay_steps=1.0, decay_rate=0.5
                             ),
                         ),
-                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
-                    ),
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
-                    ),
-                ]
+                    )
+                ],
+                tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
@@ -185,15 +169,8 @@ class TestBopOptimizer:
         model.compile(
             loss="categorical_crossentropy",
             optimizer=lq.optimizers.CaseOptimizer(
-                [
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=lq.optimizers.Bop(),
-                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
-                    ),
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
-                    ),
-                ]
+                [(lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop())],
+                tf.keras.optimizers.Adam(0.01),
             ),
         )
 
@@ -212,14 +189,7 @@ class TestBopOptimizer:
     def test_bop_serialization(self):
         _test_serialization(
             lq.optimizers.CaseOptimizer(
-                [
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=lq.optimizers.Bop(),
-                        mask_fn=lq.optimizers.MaskedOptimizer.is_binary,
-                    ),
-                    lq.optimizers.MaskedOptimizer(
-                        optimizer=tf.keras.optimizers.Adam(0.01), mask_fn=None,
-                    ),
-                ]
+                [(lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop())],
+                tf.keras.optimizers.Adam(0.01),
             ),
         )
