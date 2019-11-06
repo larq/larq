@@ -51,41 +51,29 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         self.pred_opt_pairs = pred_opt_pairs
         self.default = default
 
+        self.var_opt_mapping = None
+        self.DEFAULT_OPT_INDEX = -1
+
     def __getattr__(self, name):
         if name == "lr":
             raise ValueError("No single learning rate available for CaseOptimizer.")
         return super().__getattr__(name)
 
     def apply_gradients(self, grads_and_vars, name=None):
-        """Apply gradients to variables for each optimizer."""
+        """Apply gradients to variables for each optimizer.
+        
+        On the first call to `apply_gradients()`, compute the mapping from variables to
+        optimizers and cache it in the `self.var_opt_mapping` dict for serialization and
+        faster access.
+        """
 
-        opt_grads_and_vars = [[] for _ in range(len(self.pred_opt_pairs))]
-        default_grads_and_vars = []
+        if self.var_opt_mapping is None:
+            grads_and_vars = self._compute_var_opt_mapping(grads_and_vars)
 
-        for grad, var in grads_and_vars:
-            num_opts = 0
-            for i, (pred, opt) in enumerate(self.pred_opt_pairs):
-                if pred(var):
-                    opt_grads_and_vars[i].append((grad, var))
-                    num_opts += 1
-
-            if num_opts == 0:
-                default_grads_and_vars.append((grad, var))
-            if num_opts > 1:
-                raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
-
-        optimizers = [opt for (_, opt) in self.pred_opt_pairs]
         train_ops = [
-            optimizer.apply_gradients(grads_and_vars, name=name)
-            for optimizer, grads_and_vars in zip(optimizers, opt_grads_and_vars)
+            self._get_optimizer(var).apply_gradients([(grad, var)])
+            for (grad, var) in grads_and_vars
         ]
-
-        if len(default_grads_and_vars) > 0 and self.default is None:
-            warnings.warn(
-                f"No `default` provided to train variables `{default_grads_and_vars}`."
-            )
-        else:
-            train_ops.append(self.default.apply_gradients(grads_and_vars, name=name))
 
         return tf.group(*train_ops, name="train_with_group")
 
@@ -121,6 +109,42 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             ),
             **config,
         )
+
+    def _get_optimizer(self, var):
+        """Get the optimizer for a variable."""
+
+        optimizer_index = self.var_opt_mapping[var.name]
+
+        if optimizer_index == self.DEFAULT_OPT_INDEX:
+            return self.default
+        else:
+            return self.pred_opt_pairs[optimizer_index][1]  # from (pred, opt) tuple
+
+    def _compute_var_opt_mapping(self, grads_and_vars):
+        """Compute a unique mapping from variables to optimizers.
+        
+        Also yield a new iterator for the original `grads_and_vars`, which can then be
+        used by `apply_gradients()`.
+        """
+
+        self.var_opt_mapping = {}
+
+        for grad, var in grads_and_vars:
+            num_opts = 0
+
+            for optimizer_index, (predicate, _) in enumerate(self.pred_opt_pairs):
+                if predicate(var):
+                    self.var_opt_mapping[var.name] = optimizer_index
+                    num_opts += 1
+
+            if num_opts > 1:
+                raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
+            if num_opts == 0:
+                self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
+                if self.default is None:
+                    warnings.warn(f"No `default` provided to train variable `{var}`.")
+
+            yield ((grad, var))
 
 
 @utils.register_keras_custom_object
