@@ -74,9 +74,11 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             if num_opts > 1:
                 raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
 
-        train_ops = []
-        for (_, opt), grads_and_vars in zip(self.pred_opt_pairs, opt_grads_and_vars):
-            train_ops.append(opt.apply_gradients(grads_and_vars, name=name))
+        optimizers = [opt for (_, opt) in self.pred_opt_pairs]
+        train_ops = [
+            optimizer.apply_gradients(grads_and_vars, name=name)
+            for operimizer, grads_and_vars in zip(optimizers, opt_grads_and_vars)
+        ]
 
         if len(default_grads_and_vars) > 0 and self.default is None:
             warnings.warn(
