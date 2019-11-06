@@ -26,7 +26,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         by any other optimizer.
     """
 
-    def __init__(self, pred_opt_pairs, default, name="optim_case"):
+    def __init__(self, pred_opt_pairs, default=None, name="optimizer_case"):
         super().__init__(name=name)
 
         # Type checks for (predicate, optimizer) pairs
