@@ -24,7 +24,7 @@ def assert_weights(weights, expected):
 
 
 def _test_optimizer(
-    optimizer_group, target=0.75, test_kernels_are_binary=True, trainable_bn=True
+    optimizer, target=0.75, test_kernels_are_binary=True, trainable_bn=True
 ):
     np.random.seed(1337)
     (x_train, y_train), _ = testing_utils.get_test_data(
@@ -35,9 +35,7 @@ def _test_optimizer(
     model = lq_testing_utils.get_small_bnn_model(
         x_train.shape[1], 20, y_train.shape[1], trainable_bn=trainable_bn
     )
-    model.compile(
-        loss="categorical_crossentropy", optimizer=optimizer_group, metrics=["acc"]
-    )
+    model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
 
     initial_vars = [tf.keras.backend.get_value(w) for w in model.trainable_weights]
 

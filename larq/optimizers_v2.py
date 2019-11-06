@@ -73,14 +73,46 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
         return tf.group(*train_ops, name="train_with_group")
 
-    # TODO
     def get_config(self):
-        raise NotImplementedError()
+        optimizer_configs = [opt.get_config() for (_, opt) in self.pred_opt_pairs]
+        default_config = self.default.get_config()
 
-    # TODO
+        config = {
+            "optimizer_configs": [
+                {"class_name": optimizer_config["name"], "config": optimizer_config}
+                for optimizer_config in optimizer_configs
+            ],
+            "default_config": {
+                "class_name": default_config["name"],
+                "config": default_config,
+            },
+            "var_opt_mapping": self.var_opt_mapping,  # serialized instead of `pred`s
+        }
+        return {**super().get_config(), **config}
+
     @classmethod
     def from_config(cls, original_config, custom_objects=None):
-        raise NotImplementedError()
+        config = deepcopy(original_config)
+
+        case_optimizer = cls(
+            pred_opt_pairs=[  # (pred, opt) tuples
+                (
+                    lambda _: False,  # placeholder callable (`pred` is not serialized)
+                    tf.keras.optimizers.deserialize(  # optimizer
+                        opt_config, custom_objects=custom_objects
+                    ),
+                )
+                for opt_config in config["optimizer_configs"]
+            ],
+            default=tf.keras.optimizers.deserialize(
+                config["default_config"], custom_objects=custom_objects
+            ),
+        )
+
+        # Since we no longer have the `pred`s, we set the mapping explicitly
+        case_optimizer.var_opt_mapping = config["var_opt_mapping"]
+
+        return case_optimizer
 
     def _get_optimizer(self, var):
         """Get the optimizer for a variable."""
@@ -189,8 +221,6 @@ class Bop(tf.keras.optimizers.Optimizer):
             "gamma": self._serialize_hyperparameter("gamma"),
         }
         return {**super().get_config(), **config}
-
-    # TODO: from_config
 
     @staticmethod
     def is_binary_variable(var):
