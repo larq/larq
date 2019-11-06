@@ -68,7 +68,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         """
 
         if self.var_opt_mapping is None:
-            grads_and_vars = self._compute_var_opt_mapping(grads_and_vars)
+            grads_and_vars = list(grads_and_vars)
+            self._compute_var_opt_mapping(grads_and_vars)
 
         train_ops = [
             self._get_optimizer(var).apply_gradients([(grad, var)])
@@ -97,11 +98,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             return self.pred_opt_pairs[optimizer_index][1]  # [1] from (pred, opt) tuple
 
     def _compute_var_opt_mapping(self, grads_and_vars):
-        """Compute a unique mapping from variables to optimizers.
-        
-        Also yield a new iterator for the original `grads_and_vars` so that it is not
-        depleted once `apply_gradients()` needs it.
-        """
+        """Compute a unique mapping from variables to optimizers."""
 
         self.var_opt_mapping = {}
 
@@ -120,9 +117,6 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
                 if self.default is None:
                     warnings.warn(f"No `default` provided to train variable `{var}`.")
-
-            # Yielding a new grads_and_vars iterator for use by `apply_gradients()`
-            yield ((grad, var))
 
 
 @utils.register_keras_custom_object
