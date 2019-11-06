@@ -21,7 +21,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     # Arguments
     pred_opt_pairs: a list of `(tf.keras.optimizers.Optimzer, pred)` pairs, where `pred` 
         takes one `tf.Variable` as argument and returns `True` if the optimizer should
-        train that variable, e.g. `pred(var) === True`.
+        train that variable, e.g. `pred(var) == True`.
     default: a `tf.keras.optimizers.Optimizer` to be applied to any variable not claimed
         by any other optimizer.
     """
@@ -30,14 +30,14 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         super().__init__(name=name)
 
         # Type checks for (predicate, optimizer) pairs
-        for i, (pred, opt) in enumerate(pred_opt_pairs):
-            if not callable(pred):
+        for i, (predicate, optimizer) in enumerate(pred_opt_pairs):
+            if not callable(predicate):
                 raise TypeError(
-                    f"Expected callable predicate at `pred_opt_pairs[{i}][0]` but got `{type(pred)}`."
+                    f"Expected callable predicate at `pred_opt_pairs[{i}][0]` but got `{type(predicate)}`."
                 )
-            if not isinstance(opt, tf.keras.optimizers.Optimizer):
+            if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
                 raise TypeError(
-                    f"Expected `tf.keras.optimizers.Optimizer` at `pred_opt_pairs[{i}][1]` but got `{type(opt)}`."
+                    f"Expected `tf.keras.optimizers.Optimizer` at `pred_opt_pairs[{i}][1]` but got `{type(optimizer)}`."
                 )
 
         # Type check for default optimizers
@@ -95,10 +95,10 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         config = deepcopy(original_config)
 
         case_optimizer = cls(
-            pred_opt_pairs=[  # (pred, opt) tuples
+            pred_opt_pairs=[  # `(pred, opt)` tuples
                 (
                     lambda _: False,  # placeholder callable (`pred` is not serialized)
-                    tf.keras.optimizers.deserialize(  # optimizer
+                    tf.keras.optimizers.deserialize(  # optimizer `opt`
                         opt_config, custom_objects=custom_objects
                     ),
                 )
@@ -166,7 +166,7 @@ class Bop(tf.keras.optimizers.Optimizer):
     Setting the threshold too high results in little learning, while setting it
     too low results in overly noisy behaviour.
 
-    #TODO: Add OptimizerGroup explanation and update example
+    TODO: Add OptimizerGroup explanation and update example
 
     !!! example
         ```python
