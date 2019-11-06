@@ -29,6 +29,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     def __init__(self, pred_opt_pairs, default, name="optim_case"):
         super().__init__(name=name)
 
+        # Type checks for (predicate, optimizer) pairs
         for i, (pred, opt) in enumerate(pred_opt_pairs):
             if not callable(pred):
                 raise TypeError(
@@ -38,14 +39,16 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 raise TypeError(
                     f"Expected `tf.keras.optimizers.Optimizer` at `pred_opt_pairs[{i}][1]` but got `{type(opt)}`."
                 )
-        self.pred_opt_pairs = pred_opt_pairs
 
+        # Type check for default optimizers
         if default is not None and not isinstance(
             default, tf.keras.optimizers.Optimizer
         ):
             raise TypeError(
                 f"Expected `tf.keras.optimizers.Optimizer` for `default` but got `{type(fallback_optimizer)}`."
             )
+
+        self.pred_opt_pairs = pred_opt_pairs
         self.default = default
 
     def __getattr__(self, name):
@@ -54,6 +57,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         return super().__getattr__(name)
 
     def apply_gradients(self, grads_and_vars, name=None):
+        """Apply gradients to variables for each optimizer."""
+
         opt_grads_and_vars = [[] for _ in range(len(self.pred_opt_pairs))]
         default_grads_and_vars = []
 
