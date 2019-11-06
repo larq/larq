@@ -47,8 +47,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         self.default = default
 
     def __getattr__(self, name):
-        if name == "lr":  # TODO: Return list of learning rates
-            raise NotImplementedError()
+        if name == "lr":
+            raise ValueError("No single learning rate available for CaseOptimizer.")
         return super().__getattr__(name)
 
     def apply_gradients(self, grads_and_vars, name=None):
