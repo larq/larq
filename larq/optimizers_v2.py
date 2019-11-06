@@ -1,3 +1,5 @@
+import warnings
+
 import tensorflow as tf
 import larq as lq
 
@@ -67,15 +69,16 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             if num_opts > 1:
                 raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
 
-        if len(default_grads_and_vars) > 0 and self.default is None:
-            raise ValueError(
-                f"No `default` provided to train variables `{default_grads_and_vars}`."
-            )
-
         train_ops = []
         for (_, opt), grads_and_vars in zip(self.pred_opt_pairs, opt_grads_and_vars):
             train_ops.append(opt.apply_gradients(grads_and_vars, name=name))
-        train_ops.append(self.default.apply_gradients(grads_and_vars, name=name))
+
+        if len(default_grads_and_vars) > 0 and self.default is None:
+            warnings.warn(
+                f"No `default` provided to train variables `{default_grads_and_vars}`."
+            )
+        else:
+            train_ops.append(self.default.apply_gradients(grads_and_vars, name=name))
 
         return tf.group(*train_ops, name="train_with_group")
 
