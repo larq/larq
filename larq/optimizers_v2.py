@@ -22,7 +22,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     pred_opt_pairs: A list of `(pred, tf.keras.optimizers.Optimzer)` pairs, where `pred` 
         takes one `tf.Variable` as argument and returns `True` if the optimizer should
         be used for that variable, e.g. `pred(var) == True`.
-    default: a `tf.keras.optimizers.Optimizer` to be applied to any variable not claimed
+    default: A `tf.keras.optimizers.Optimizer` to be applied to any variable not claimed
         by any other optimizer.
     """
 
