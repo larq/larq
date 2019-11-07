@@ -52,7 +52,11 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         self.default = default
 
         self.var_opt_mapping = None
-        self.DEFAULT_OPT_INDEX = -1
+
+        # List of optimizers ending in `default`, for easier internal access
+        self.optimizers = [opt for (_, opt) in self.pred_opt_pairs]
+        self.optimizers.append(self.default)
+        self.DEFAULT_OPT_INDEX = len(pred_opt_pairs)
 
     def apply_gradients(self, grads_and_vars, name=None):
         """Apply gradients to variables for each optimizer.
@@ -67,9 +71,15 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             grads_and_vars = list(grads_and_vars)
             self._compute_var_opt_mapping(grads_and_vars)
 
+        # Split gradients and variables into a separate list for each optimizer
+        grad_var_lists = [[] for _ in range(len(self.pred_opt_pairs) + 1)]
+        for grad, var in grads_and_vars:
+            grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
+
+        # Apply gradients to each optimizer
         train_ops = [
-            self._get_optimizer(var).apply_gradients([(grad, var)])
-            for (grad, var) in grads_and_vars
+            optimizer.apply_gradients(opt_grads_and_vars)
+            for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists)
         ]
 
         return tf.group(*train_ops, name="train_with_group")
@@ -115,18 +125,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
         return case_optimizer
 
-    def _get_optimizer(self, var):
-        """Get the optimizer for a variable."""
-
-        optimizer_index = self.var_opt_mapping[var.name]
-
-        if optimizer_index == self.DEFAULT_OPT_INDEX:
-            return self.default
-        else:
-            return self.pred_opt_pairs[optimizer_index][1]  # [1] from (pred, opt) tuple
-
     def _compute_var_opt_mapping(self, grads_and_vars):
-        """Compute a unique mapping from variables to optimizers."""
+        """Compute a unique mapping from variables to optimizer indices."""
 
         self.var_opt_mapping = {}
 
