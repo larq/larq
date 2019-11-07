@@ -1,6 +1,5 @@
 import tensorflow as tf
 from larq import metrics
-from tensorflow.python.keras import keras_parameterized
 import pytest
 
 
@@ -14,7 +13,7 @@ def test_scope():
             pass
 
 
-class FlipRatioTest(keras_parameterized.TestCase):
+class FlipRatioTest(tf.test.TestCase):
     def test_config(self):
         mcv = metrics.FlipRatio(
             values_shape=[3, 3], values_dtype="int16", name="mcv", dtype=tf.float16
