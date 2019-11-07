@@ -30,6 +30,7 @@ setup(
             "absl-py==0.8.1",
             "pytest==5.2.2",
             "pytest-cov==2.8.1",
+            "pytest-xdist==1.30.0",
             "snapshottest==0.5.1",
         ],
         "docs": [
