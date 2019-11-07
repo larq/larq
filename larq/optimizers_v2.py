@@ -221,7 +221,6 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     def get_config(self):
         config = {
-            "name": self._name,
             "threshold": self._serialize_hyperparameter("threshold"),
             "gamma": self._serialize_hyperparameter("gamma"),
         }
