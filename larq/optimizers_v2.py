@@ -45,7 +45,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             default, tf.keras.optimizers.Optimizer
         ):
             raise TypeError(
-                f"Expected `tf.keras.optimizers.Optimizer` for `default` but got `{type(fallback_optimizer)}`."
+                f"Expected `tf.keras.optimizers.Optimizer` for `default` but got `{type(default)}`."
             )
 
         self.pred_opt_pairs = pred_opt_pairs
