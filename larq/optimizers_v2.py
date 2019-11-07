@@ -166,11 +166,15 @@ class Bop(tf.keras.optimizers.Optimizer):
     Setting the threshold too high results in little learning, while setting it
     too low results in overly noisy behaviour.
 
-    TODO: Add OptimizerGroup explanation and update example
-
     !!! example
         ```python
-        optimizer = lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
+        optimizer = lq.optimizers.CaseOptimizer(
+            pred_opt_pairs=[(
+                lq.optimizers.Bop.is_binary_variable,
+                lq.optimizers.Bop(),
+            )],
+            default=tf.keras.optimizers.Adam(0.01),  # for full-precision weights
+        )
         ```
 
     # Arguments
