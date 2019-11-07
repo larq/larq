@@ -20,7 +20,7 @@ jobs:
           pip install tensorflow==${{matrix.tf-version}}
           pip install -e .[test]
       - name: Test with pytest
-        run: pytest .
+        run: pytest . -n auto
   coverage:
     runs-on: ubuntu-latest
     steps:
