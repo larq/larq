@@ -16,7 +16,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
     For each variable, at most one optimizer's predicate may evaluate to `True`. If no
     optimizer's predicate evaluates to `True` for a variable, it is trained with the
-    `default` optimizer.
+    `default` optimizer. If a variable is claimed by no optimizers and `default==None`,
+    the variable is not trained.
 
     # Arguments
     pred_opt_pairs: One or more `(pred, tf.keras.optimizers.Optimzer)` pairs, where 
@@ -229,6 +230,8 @@ class Bop(tf.keras.optimizers.Optimizer):
     @staticmethod
     def is_binary_variable(var):
         """Returns True for binary variables named using the Larq Zoo naming scheme.
+
+        This is an example of a predictate that can be used by the `CaseOptimizer`.
         
         # Arguments
         var: a `tf.Variable`.
