@@ -63,6 +63,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         """
 
         if self.var_opt_mapping is None:
+            # Convert `grads_and_vars` to list so we can iterate multiple times over it
             grads_and_vars = list(grads_and_vars)
             self._compute_var_opt_mapping(grads_and_vars)
 
