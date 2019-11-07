@@ -19,14 +19,14 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     `default` optimizer.
 
     # Arguments
-    pred_opt_pairs: A list of `(pred, tf.keras.optimizers.Optimzer)` pairs, where `pred` 
-        takes one `tf.Variable` as argument and returns `True` if the optimizer should
-        be used for that variable, e.g. `pred(var) == True`.
+    pred_opt_pairs: One or more `(pred, tf.keras.optimizers.Optimzer)` pairs, where 
+        `pred`  takes one `tf.Variable` as argument and returns `True` if the optimizer 
+        should be used for that variable, e.g. `pred(var) == True`.
     default: A `tf.keras.optimizers.Optimizer` to be applied to any variable not claimed
-        by any other optimizer.
+        by any other optimizer. (Must be passed as keyword argument.)
     """
 
-    def __init__(self, pred_opt_pairs, default=None, name="optimizer_case"):
+    def __init__(self, *pred_opt_pairs, default=None, name="optimizer_case"):
         super().__init__(name=name)
 
         # Type checks for (predicate, optimizer) pairs
@@ -96,7 +96,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         config = deepcopy(original_config)
 
         case_optimizer = cls(
-            pred_opt_pairs=[  # `(pred, opt)` tuples
+            *[  # `(pred, opt)` tuples
                 (
                     lambda _: False,  # placeholder callable (`pred` is not serialized)
                     tf.keras.optimizers.deserialize(  # optimizer `opt`
