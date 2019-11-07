@@ -1,12 +1,4 @@
-import numpy as np
 import tensorflow as tf
-import larq as lq
-
-from larq import testing_utils as lq_testing_utils
-from larq.callbacks import HyperparameterScheduler
-
-from tensorflow import keras
-from tensorflow.python.keras import testing_utils
 
 
 class LogHistory(tf.keras.callbacks.Callback):
