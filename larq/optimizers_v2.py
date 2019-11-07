@@ -9,7 +9,7 @@ from copy import deepcopy
 
 @utils.register_keras_custom_object
 class CaseOptimizer(tf.keras.optimizers.Optimizer):
-    """A case operation for optimizers that each train a subset of a model's variables.
+    """An optmizer wrapper that applies different optimizers to a subset of variables.
 
     An optimizer is used to train a variable iff its accompanying predicate evaluates to
     `True`.
