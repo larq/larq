@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: 3.7
       - name: Install Lint Dependencies
-        run: pip install pyflakes==2.1.1 black==19.3b0
+        run: pip install pyflakes==2.1.1 black==19.10b0
       - name: Run PyFlakes
         run: pyflakes .
       - name: Black code style
