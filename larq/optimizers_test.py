@@ -111,6 +111,10 @@ class TestXavierLearingRateScaling:
 
 
 class TestBopOptimizer:
+    @pytest.mark.skipif(
+        utils.tf_1_14_or_newer() is False,
+        reason="only supporting CaseOptimizer in TensorFlow >= 1.14",
+    )
     def test_bop_accuracy(self):
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
@@ -153,6 +157,10 @@ class TestBopOptimizer:
             test_kernels_are_binary=True,
         )
 
+    @pytest.mark.skipif(
+        utils.tf_1_14_or_newer() is False,
+        reason="only supporting CaseOptimizer in TensorFlow >= 1.14",
+    )
     def test_bop_serialization(self):
         _test_serialization(
             lq.optimizers.CaseOptimizer(
