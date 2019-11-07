@@ -4,7 +4,7 @@ Binarized Neural Networks (BNNs), usually contain a mix of low-precision weights
 include the first and last layers of image classificiation models, which have 
 higher-precision weights in most BNN architectures from the literature.
 
-Optimizing a BNN, then, consists of optimizing both low-precision and higher-precision
+Training a BNN, then, consists of optimizing both low-precision and higher-precision
 weights. In `larq`, we provide a mechanism to target different bit-precision variables
 with different optimizers using the `CaseOptimizer` class. Modeled after the
 [`tf.case`](https://www.tensorflow.org/api_docs/python/tf/case) signature,
