@@ -8,7 +8,7 @@ Stochastic Gradient Descent (SGD) is used pretty much everywhere in the field De
 
 However, when turning to BNNs, two fundamental issues arise with SGD:
 
-- The gradient of the binarization operation is zero almost everywhere, making the gradient $\frac{\partial L}{\partial w}$ utterly uninformative.
+- The gradient of the binarization operation is zero almost everywhere, making the gradient \\(\frac{\partial L}{\partial w}\\) utterly uninformative.
 - SGD performs optimization through small update steps that are accumulated over time. Binary weights, meanwhile, cannot absorb small updates: they can only be left alone or flipped.
 
 Another way of putting this is that the loss landscape for BNN is very different than what you are used to for real-valued networks. Gone are the glowing hills you can simply glide down from: the loss is now a discrete function, and many of the intuitions and theories developed for continuous loss landscapes no longer apply.
@@ -35,7 +35,7 @@ x_out = larq.layers.QuantDense(512,
                                kernel_constraint="weight_clip")(x_out)
 ```
 
-Any optimizer you now apply will update the latent weights; after the update the latent weights are clipped to $[-1, 1]$.
+Any optimizer you now apply will update the latent weights; after the update the latent weights are clipped to \\([-1, 1]\\).
 
 ### Alternative: Custom Optimizers
 

@@ -34,7 +34,7 @@ pip install -e ".[test]" # Installs all development dependencies
 Inside the project directory run:
 
 ```shell
-pytest .
+pytest . -n auto
 ```
 
 ## Build documentation

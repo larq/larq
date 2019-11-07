@@ -20,7 +20,7 @@ jobs:
           pip install tensorflow==${{matrix.tf-version}}
           pip install -e .[test]
       - name: Test with pytest
-        run: pytest .
+        run: pytest . -n auto
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +34,7 @@ jobs:
           pip install tensorflow==2.0.0
           pip install -e .[test]
       - name: Generate coverage report
-        run: pytest . --cov=larq --cov-report=xml --cov-config=.coveragerc
+        run: pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
       - name: Upload coverage to Codecov
         run: curl -s https://codecov.io/bash | bash -s -- -t $token -f ./coverage.xml -F unittests
         env:

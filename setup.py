@@ -30,6 +30,7 @@ setup(
             "absl-py==0.8.1",
             "pytest==5.2.2",
             "pytest-cov==2.8.1",
+            "pytest-xdist==1.30.0",
             "snapshottest==0.5.1",
         ],
         "docs": [
@@ -40,7 +41,7 @@ setup(
             "mkdocs-minify-plugin==0.2.1",
             "larq-zoo==0.4.2",
             "altair==3.2.0",
-            "pandas==0.25.2",
+            "pandas==0.25.3",
         ],
     },
     classifiers=[

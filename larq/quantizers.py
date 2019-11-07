@@ -183,7 +183,7 @@ def magnitude_aware_sign(x, clip_value=1.0):
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
 
     # Returns
-    Scaled binarized tensor (with values in \\(\\{-a, a\\}\\), where $a$ is a float).
+    Scaled binarized tensor (with values in \\(\\{-a, a\\}\\), where \\(a\\) is a float).
 
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
@@ -297,13 +297,13 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
     \end{cases}
     \\]
 
-    where $\Delta$ is defined as the threshold and can be passed as an argument,
+    where \\(\Delta\\) is defined as the threshold and can be passed as an argument,
     or can be calculated as per the Ternary Weight Networks original paper, such that
 
     \\[
     \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
     \\]
-    where we assume that $W_i$ is generated from a normal distribution.
+    where we assume that \\(W_i\\) is generated from a normal distribution.
 
     The gradient is estimated using the Straight-Through Estimator
     (essentially the Ternarization is replaced by a clipped identity on the
@@ -319,7 +319,7 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
 
     # Arguments
     x: Input tensor.
-    threshold_value: The value for the threshold, $\Delta$.
+    threshold_value: The value for the threshold, \\(\Delta\\).
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
@@ -577,13 +577,13 @@ class SteTern(QuantizerFunctionWrapper):
     \end{cases}
     \\]
 
-    where $\Delta$ is defined as the threshold and can be passed as an argument,
+    where \\(\Delta\\) is defined as the threshold and can be passed as an argument,
     or can be calculated as per the Ternary Weight Networks original paper, such that
 
     \\[
     \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
     \\]
-    where we assume that $W_i$ is generated from a normal distribution.
+    where we assume that \\(W_i\\) is generated from a normal distribution.
 
     The gradient is estimated using the Straight-Through Estimator
     (essentially the Ternarization is replaced by a clipped identity on the
@@ -598,7 +598,7 @@ class SteTern(QuantizerFunctionWrapper):
     ```
 
     # Arguments
-    threshold_value: The value for the threshold, $\Delta$.
+    threshold_value: The value for the threshold, \\(\Delta\\).
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
