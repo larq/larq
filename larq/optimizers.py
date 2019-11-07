@@ -36,7 +36,12 @@ if utils.tf_1_14_or_newer():
     from larq.optimizers_v2 import Bop, CaseOptimizer
 
     __all__ = ["Bop", "CaseOptimizer"]
+    assert Bop  # Asserts keep pyflakes happy
+    assert CaseOptimizer
+
 else:
     from larq.optimizers_v1 import Bop, XavierLearningRateScaling
 
     __all__ = ["Bop", "XavierLearningRateScaling"]
+    assert Bop
+    assert XavierLearningRateScaling
