@@ -153,35 +153,6 @@ class TestBopOptimizer:
             test_kernels_are_binary=True,
         )
 
-    def test_bop_lr_scheduler(self):
-        (x_train, y_train), _ = testing_utils.get_test_data(
-            train_samples=100, test_samples=0, input_shape=(10,), num_classes=2
-        )
-        y_train = keras.utils.to_categorical(y_train)
-
-        model = lq_testing_utils.get_small_bnn_model(
-            x_train.shape[1], 10, y_train.shape[1]
-        )
-        model.compile(
-            loss="categorical_crossentropy",
-            optimizer=lq.optimizers.CaseOptimizer(
-                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default=tf.keras.optimizers.Adam(0.01),
-            ),
-        )
-
-        model.fit(
-            x_train,
-            y_train,
-            epochs=4,
-            callbacks=[
-                tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1 / (1 + epoch)),
-                AssertLRCallback(lambda epoch: 1 / (1 + epoch)),
-            ],
-            batch_size=8,
-            verbose=0,
-        )
-
     def test_bop_serialization(self):
         _test_serialization(
             lq.optimizers.CaseOptimizer(
