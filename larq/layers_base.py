@@ -29,6 +29,17 @@ class BaseLayer(tf.keras.layers.Layer):
             return super().add_weight(name=name, getter=getter, **kwargs)
         return super().add_weight(name=name, **kwargs)
 
+    @property
+    def non_trainable_weights(self):
+        weights = super().non_trainable_weights
+        if hasattr(self, "flip_ratio"):
+            return [
+                weight
+                for weight in weights
+                if not any(weight is metric_w for metric_w in self.flip_ratio.weights)
+            ]
+        return weights
+
 
 class QuantizerBase(BaseLayer):
     """Base class for defining quantized layers
@@ -66,17 +77,6 @@ class QuantizerBase(BaseLayer):
                 self.flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.kernel.shape, name=f"flip_ratio/{self.name}"
                 )
-
-    @property
-    def non_trainable_weights(self):
-        weights = super().non_trainable_weights
-        if hasattr(self, "flip_ratio"):
-            return [
-                weight
-                for weight in weights
-                if not any(weight is metric_w for metric_w in self.flip_ratio.weights)
-            ]
-        return weights
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -135,17 +135,6 @@ class QuantizerDepthwiseBase(BaseLayer):
                     values_shape=self.depthwise_kernel.shape,
                     name=f"flip_ratio/{self.name}",
                 )
-
-    @property
-    def non_trainable_weights(self):
-        weights = super().non_trainable_weights
-        if hasattr(self, "flip_ratio"):
-            return [
-                weight
-                for weight in weights
-                if not any(weight is metric_w for metric_w in self.flip_ratio.weights)
-            ]
-        return weights
 
     def call(self, inputs):
         if self.input_quantizer:
