@@ -171,8 +171,7 @@ def test_ternarization_with_ternary_weight_networks():
 @pytest.mark.parametrize(
     "fn", [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside]
 )
-@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_identity_ste_grad(fn):
+def test_identity_ste_grad(eager_mode, fn):
     x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
     tf_x = tf.Variable(x)
     with tf.GradientTape() as tape:
@@ -184,8 +183,7 @@ def test_identity_ste_grad(fn):
 @pytest.mark.parametrize(
     "fn", [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside]
 )
-@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_ste_grad(fn):
+def test_ste_grad(eager_mode, fn):
     @np.vectorize
     def ste_grad(x):
         if np.abs(x) <= 1:
@@ -201,8 +199,7 @@ def test_ste_grad(fn):
 
 
 # Test with and without default threshold
-@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_swish_grad():
+def test_swish_grad(eager_mode):
     def swish_grad(x, beta):
         return beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
 
@@ -219,8 +216,7 @@ def test_swish_grad():
     np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=10.0))
 
 
-@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_approx_sign_grad():
+def test_approx_sign_grad(eager_mode):
     @np.vectorize
     def approx_sign_grad(x):
         if np.abs(x) <= 1:
@@ -235,8 +231,7 @@ def test_approx_sign_grad():
     np.testing.assert_allclose(grad.numpy(), approx_sign_grad(x))
 
 
-@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_magnitude_aware_sign():
+def test_magnitude_aware_sign(eager_mode):
     a = np.random.uniform(-2, 2, (3, 2, 2, 3))
     x = tf.Variable(a)
     with tf.GradientTape() as tape:
@@ -284,8 +279,7 @@ def test_dorefa_quantize(fn):
         )
 
 
-@pytest.mark.skipif(not tf.executing_eagerly(), reason="requires eager execution")
-def test_ste_grad_dorefa():
+def test_ste_grad_dorefa(eager_mode):
     @np.vectorize
     def ste_grad(x):
         if x <= 1 and x >= 0:
