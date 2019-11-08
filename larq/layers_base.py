@@ -10,7 +10,27 @@ log = logging.getLogger(__name__)
 # TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
 
 
-class QuantizerBase(tf.keras.layers.Layer):
+class BaseLayer(tf.keras.layers.Layer):
+    """Base class for defining quantized layers"""
+
+    def get_quantizer(self, name):
+        return None
+
+    def add_weight(self, name=None, **kwargs):
+        quantizer = self.get_quantizer(name)
+        if quantizer is not None:
+            # Wrap 'getter' with a version that returns an QuantizedVariable.
+            old_getter = kwargs.pop("getter", base_layer_utils.make_variable)
+
+            def getter(*args, **kwargs):
+                variable = old_getter(*args, **kwargs)
+                return quantized_variable.create_quantized_variable(variable, quantizer)
+
+            return super().add_weight(name=name, getter=getter, **kwargs)
+        return super().add_weight(name=name, **kwargs)
+
+
+class QuantizerBase(BaseLayer):
     """Base class for defining quantized layers
 
     `input_quantizer` and `kernel_quantizer` are the element-wise quantization
@@ -36,19 +56,10 @@ class QuantizerBase(tf.keras.layers.Layer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def add_weight(self, name=None, **kwargs):
-        if name == "kernel" and self.kernel_quantizer is not None:
-            # Wrap 'getter' with a version that returns an QuantizedVariable.
-            old_getter = kwargs.pop("getter", base_layer_utils.make_variable)
-
-            def getter(*args, **kwargs):
-                variable = old_getter(*args, **kwargs)
-                return quantized_variable.create_quantized_variable(
-                    variable, quantizer=self.kernel_quantizer
-                )
-
-            return super().add_weight(name=name, getter=getter, **kwargs)
-        return super().add_weight(name=name, **kwargs)
+    def get_quantizer(self, name):
+        if name == "kernel":
+            return self.kernel_quantizer
+        return None
 
     def build(self, input_shape):
         super().build(input_shape)
@@ -86,7 +97,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         return {**super().get_config(), **config}
 
 
-class QuantizerDepthwiseBase(tf.keras.layers.Layer):
+class QuantizerDepthwiseBase(BaseLayer):
     """Base class for defining quantized layers
 
     `input_quantizer` and `depthwise_quantizer` are the element-wise quantization
@@ -117,6 +128,11 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
+    def get_quantizer(self, name):
+        if name == "depthwise_kernel":
+            return self.depthwise_quantizer
+        return None
+
     def build(self, input_shape):
         super().build(input_shape)
         if self.depthwise_quantizer:
@@ -143,12 +159,9 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
 
-        with utils.quantize(
-            self, "depthwise_kernel", self.depthwise_quantizer
-        ) as kernel:
-            if hasattr(self, "flip_ratio"):
-                self.add_metric(self.flip_ratio(kernel))
-            return super().call(inputs)
+        if hasattr(self, "flip_ratio"):
+            self.add_metric(self.flip_ratio(self.depthwise_kernel))
+        return super().call(inputs)
 
     def get_config(self):
         config = {
@@ -158,7 +171,7 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
         return {**super().get_config(), **config}
 
 
-class QuantizerSeparableBase(tf.keras.layers.Layer):
+class QuantizerSeparableBase(BaseLayer):
     """Base class for defining separable quantized layers
 
     `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
@@ -197,6 +210,13 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
                 "Using `pointwise_quantizer` without setting `pointwise_constraint` "
                 "may result in starved weights (where the gradient is always zero)."
             )
+
+    def get_quantizer(self, name):
+        if name == "depthwise_kernel":
+            return self.depthwise_quantizer
+        if name == "pointwise_kernel":
+            return self.pointwise_quantizer
+        return None
 
     def build(self, input_shape):
         super().build(input_shape)
@@ -237,16 +257,11 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
 
-        with utils.quantize(
-            self, "depthwise_kernel", self.depthwise_quantizer
-        ) as depthwise_kernel, utils.quantize(
-            self, "pointwise_kernel", self.pointwise_quantizer
-        ) as pointwise_kernel:
-            if hasattr(self, "depthwise_flip_ratio"):
-                self.add_metric(self.depthwise_flip_ratio(depthwise_kernel))
-            if hasattr(self, "pointwise_flip_ratio"):
-                self.add_metric(self.pointwise_flip_ratio(pointwise_kernel))
-            return super().call(inputs)
+        if hasattr(self, "depthwise_flip_ratio"):
+            self.add_metric(self.depthwise_flip_ratio(self.depthwise_kernel))
+        if hasattr(self, "pointwise_flip_ratio"):
+            self.add_metric(self.pointwise_flip_ratio(self.pointwise_kernel))
+        return super().call(inputs)
 
     def get_config(self):
         config = {
