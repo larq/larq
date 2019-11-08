@@ -1,7 +1,7 @@
 import logging
 
 import tensorflow as tf
-from larq import quantizers, quantized_variable, utils, metrics as lq_metrics
+from larq import quantizers, quantized_variable, metrics as lq_metrics
 from tensorflow.python.keras.engine import base_layer_utils
 
 log = logging.getLogger(__name__)
@@ -43,8 +43,6 @@ class QuantizerBase(BaseLayer):
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
-        self.quantized_latent_weights = []
-        self.quantizers = []
         self._custom_metrics = (
             metrics if metrics is not None else lq_metrics.get_training_metrics()
         )
@@ -64,8 +62,6 @@ class QuantizerBase(BaseLayer):
     def build(self, input_shape):
         super().build(input_shape)
         if self.kernel_quantizer:
-            self.quantized_latent_weights.append(self.kernel)
-            self.quantizers.append(self.kernel_quantizer)
             if "flip_ratio" in self._custom_metrics:
                 self.flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.kernel.shape, name=f"flip_ratio/{self.name}"
@@ -115,8 +111,6 @@ class QuantizerDepthwiseBase(BaseLayer):
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
-        self.quantized_latent_weights = []
-        self.quantizers = []
         self._custom_metrics = (
             metrics if metrics is not None else lq_metrics.get_training_metrics()
         )
@@ -136,8 +130,6 @@ class QuantizerDepthwiseBase(BaseLayer):
     def build(self, input_shape):
         super().build(input_shape)
         if self.depthwise_quantizer:
-            self.quantized_latent_weights.append(self.depthwise_kernel)
-            self.quantizers.append(self.depthwise_quantizer)
             if "flip_ratio" in self._custom_metrics:
                 self.flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
@@ -193,8 +185,6 @@ class QuantizerSeparableBase(BaseLayer):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
-        self.quantized_latent_weights = []
-        self.quantizers = []
         self._custom_metrics = (
             metrics if metrics is not None else lq_metrics.get_training_metrics()
         )
@@ -221,16 +211,12 @@ class QuantizerSeparableBase(BaseLayer):
     def build(self, input_shape):
         super().build(input_shape)
         if self.depthwise_quantizer:
-            self.quantized_latent_weights.append(self.depthwise_kernel)
-            self.quantizers.append(self.depthwise_quantizer)
             if "flip_ratio" in self._custom_metrics:
                 self.depthwise_flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
                     name=f"flip_ratio/{self.name}_depthwise",
                 )
         if self.pointwise_quantizer:
-            self.quantized_latent_weights.append(self.pointwise_kernel)
-            self.quantizers.append(self.pointwise_quantizer)
             if "flip_ratio" in self._custom_metrics:
                 self.pointwise_flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.pointwise_kernel.shape,
