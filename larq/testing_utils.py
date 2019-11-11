@@ -1,7 +1,6 @@
 import larq as lq
 import numpy as np
 import tensorflow as tf
-from larq import utils
 
 # We should find a better solution without relying on private objects
 from tensorflow.python.keras.testing_utils import _thread_local_data, should_run_eagerly

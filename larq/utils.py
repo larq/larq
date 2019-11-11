@@ -1,6 +1,4 @@
 from contextlib import contextmanager
-from distutils.version import LooseVersion
-import tensorflow as tf
 from tensorflow.keras.utils import get_custom_objects
 
 

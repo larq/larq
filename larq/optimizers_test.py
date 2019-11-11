@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import larq as lq
 
-from larq import utils, testing_utils as lq_testing_utils
+from larq import testing_utils as lq_testing_utils
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
