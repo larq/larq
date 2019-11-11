@@ -77,6 +77,39 @@ class TestCaseOptimizer:
                 default=False,
             )
 
+    def test_overlapping_predicates(self):
+        with pytest.raises(ValueError):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lambda var: True, lq.optimizers.Bop()),
+                (lambda var: True, lq.optimizers.Bop()),
+            )
+            _test_optimizer(naughty_case_opt)
+
+    def test_missing_default(self):
+        with pytest.warns(Warning):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lambda var: False, lq.optimizers.Bop())
+            )
+
+            # Simple MNIST model
+            mnist = tf.keras.datasets.mnist
+            (train_images, train_labels), _ = mnist.load_data()
+            model = tf.keras.Sequential(
+                [
+                    tf.keras.layers.Flatten(input_shape=(28, 28)),
+                    tf.keras.layers.Dense(128, activation="relu"),
+                    tf.keras.layers.Dense(10, activation="softmax"),
+                ]
+            )
+            model.compile(
+                loss="sparse_categorical_crossentropy",
+                optimizer=naughty_case_opt,
+                metrics=["acc"],
+            )
+
+            # Should raise on first call to apply_gradients()
+            model.fit(train_images[:1], train_labels[:1], epochs=1)
+
 
 @pytest.mark.skipif(
     utils.tf_1_14_or_newer(),

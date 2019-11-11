@@ -56,8 +56,10 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
         # List of optimizers ending in `default`, for easier internal access
         self.optimizers = [opt for (_, opt) in self.pred_opt_pairs]
-        self.optimizers.append(self.default)
-        self.DEFAULT_OPT_INDEX = len(pred_opt_pairs)
+
+        if default:
+            self.optimizers.append(self.default)
+            self.DEFAULT_OPT_INDEX = len(pred_opt_pairs)
 
     def apply_gradients(self, grads_and_vars, name=None):
         """Apply gradients to variables for each optimizer.
@@ -75,7 +77,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         # Split gradients and variables into a separate list for each optimizer
         grad_var_lists = [[] for _ in range(len(self.pred_opt_pairs) + 1)]
         for grad, var in grads_and_vars:
-            grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
+            if var.name in self.var_opt_mapping:
+                grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
 
         # Apply gradients to each optimizer
         train_ops = [
@@ -143,8 +146,9 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             if num_optimizers > 1:
                 raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
             if num_optimizers == 0:
-                self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
-                if self.default is None:
+                if self.default is not None:
+                    self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
+                else:
                     warnings.warn(f"No `default` provided to train variable `{var}`.")
 
 
