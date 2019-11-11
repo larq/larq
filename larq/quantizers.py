@@ -51,12 +51,6 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 import tensorflow as tf
 from larq import utils, math
 
-try:
-    from tensorflow import is_tensor
-except:  # pragma: no cover
-    # For compatibility with TensorFlow 1.13
-    from tensorflow.python.framework.tensor_util import is_tensor
-
 __all__ = [
     "ste_sign",
     "approx_sign",
@@ -110,7 +104,7 @@ class QuantizerFunctionWrapper:
     def get_config(self):
         return {
             k: tf.keras.backend.eval(v)
-            if is_tensor(v) or isinstance(v, tf.Variable)
+            if tf.is_tensor(v) or isinstance(v, tf.Variable)
             else v
             for k, v in self._fn_kwargs.items()
         }

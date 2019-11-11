@@ -1,7 +1,6 @@
 import larq as lq
 import numpy as np
 import tensorflow as tf
-from larq import utils
 
 # We should find a better solution without relying on private objects
 from tensorflow.python.keras.testing_utils import _thread_local_data, should_run_eagerly
@@ -150,15 +149,13 @@ def layer_test(
     # See b/120160788 for more details. This should be mitigated after 2.0.
     model = tf.keras.models.Model(x, layer(x))
     if _thread_local_data.run_eagerly is not None:
-        # TensorFlow < 1.14 + eager is broken, skip the test
-        if utils.tf_1_14_or_newer():
-            model.compile(
-                "rmsprop",
-                "mse",
-                weighted_metrics=["acc"],
-                run_eagerly=should_run_eagerly(),
-            )
-            model.train_on_batch(input_data, actual_output)
+        model.compile(
+            "rmsprop",
+            "mse",
+            weighted_metrics=["acc"],
+            run_eagerly=should_run_eagerly(),
+        )
+        model.train_on_batch(input_data, actual_output)
     else:
         model.compile("rmsprop", "mse", weighted_metrics=["acc"])
         model.train_on_batch(input_data, actual_output)

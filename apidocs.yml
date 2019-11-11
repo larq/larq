@@ -7,10 +7,7 @@
 - constraints.md:
     - larq.constraints+
 - optimizers.md:
-    - larq.optimizers:
-        - larq.optimizers_v2.CaseOptimizer
-        - larq.optimizers_v2.Bop
-        - larq.optimizers_v1.XavierLearningRateScaling
+    - larq.optimizers+
 - math.md:
     - larq.math+
 - models.md:

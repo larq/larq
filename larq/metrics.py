@@ -10,12 +10,6 @@ from larq import utils
 import numpy as np
 from contextlib import contextmanager
 
-try:
-    from tensorflow.keras.metrics import Metric
-except:  # pragma: no cover
-    # TensorFlow 1.13 doesn't export this as a public API
-    from tensorflow.python.keras.metrics import Metric
-
 
 __all__ = ["scope", "get_training_metrics"]
 
@@ -70,46 +64,9 @@ def get_training_metrics():
     return _GLOBAL_TRAINING_METRICS
 
 
-class LarqMetric(Metric):
-    """Metric with support for both 1.13 and 1.14+"""
-
-    def add_weight(
-        self,
-        name,
-        shape=(),
-        aggregation=tf.VariableAggregation.SUM,
-        synchronization=tf.VariableSynchronization.ON_READ,
-        initializer=None,
-        dtype=None,
-    ):
-        if utils.tf_1_14_or_newer():
-            return super().add_weight(
-                name=name,
-                shape=shape,
-                aggregation=aggregation,
-                synchronization=synchronization,
-                initializer=initializer,
-                dtype=dtype,
-            )
-        else:  # pragma: no cover
-            # Call explicitely tf.keras.layers.Layer.add_weight because TF 1.13
-            # doesn't support setting a custom dtype
-            return tf.keras.layers.Layer.add_weight(
-                self,
-                name=name,
-                shape=shape,
-                dtype=self._dtype if dtype is None else dtype,
-                trainable=False,
-                initializer=initializer,
-                collections=[],
-                synchronization=synchronization,
-                aggregation=aggregation,
-            )
-
-
 @utils.register_alias("flip_ratio")
 @utils.register_keras_custom_object
-class FlipRatio(LarqMetric):
+class FlipRatio(tf.keras.metrics.Metric):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example

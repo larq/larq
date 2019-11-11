@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 import larq as lq
 
-from larq import utils, testing_utils as lq_testing_utils
+from larq import testing_utils as lq_testing_utils
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
@@ -55,10 +55,6 @@ def _test_serialization(optimizer):
     assert config == new_config
 
 
-@pytest.mark.skipif(
-    not utils.tf_1_14_or_newer(),
-    reason="Only supporting CaseOptimizer in TensorFlow >= 1.14.",
-)
 class TestCaseOptimizer:
     def test_type_check_predicate(self):
         with pytest.raises(TypeError):
@@ -109,56 +105,7 @@ class TestCaseOptimizer:
             model.fit(train_images[:1], train_labels[:1], epochs=1)
 
 
-@pytest.mark.skipif(
-    utils.tf_1_14_or_newer(),
-    reason="current implementation requires Tensorflow 1.13 or less",
-)
-class TestXavierLearingRateScaling:
-    def test_xavier_scaling(self):
-        dense = lq.layers.QuantDense(
-            1, kernel_quantizer="ste_sign", kernel_initializer="zeros", input_shape=(1,)
-        )
-        model = tf.keras.models.Sequential([dense])
-
-        model.compile(
-            loss="mae",
-            optimizer=lq.optimizers.XavierLearningRateScaling(
-                tf.keras.optimizers.SGD(1), model
-            ),
-        )
-        _assert_weights(dense.get_weights(), [0, 0])
-        model.fit(np.array([1.0]), np.array([2.0]), epochs=1, batch_size=1)
-        _assert_weights(dense.get_weights(), [1 / np.sqrt(1.5 / 2), 1])
-
-    def test_invalid_usage(self):
-        with pytest.raises(ValueError):
-            lq.optimizers.XavierLearningRateScaling(
-                tf.keras.optimizers.SGD(), "invalid"
-            )
-        with pytest.raises(ValueError):
-            lq.optimizers.XavierLearningRateScaling("invalid", tf.keras.models.Model())
-
-    def test_serialization(self):
-        dense = lq.layers.QuantDense(10, kernel_quantizer="ste_sign", input_shape=(3,))
-        model = tf.keras.models.Sequential([dense])
-        ref_opt = lq.optimizers.XavierLearningRateScaling(
-            tf.keras.optimizers.SGD(1), model
-        )
-        assert ref_opt.lr == ref_opt.optimizer.lr
-
-        config = tf.keras.optimizers.serialize(ref_opt)
-        opt = tf.keras.optimizers.deserialize(config)
-        assert opt.__class__ == ref_opt.__class__
-        assert opt.optimizer.__class__ == ref_opt.optimizer.__class__
-        assert opt.optimizer.get_config() == ref_opt.optimizer.get_config()
-        assert opt.multipliers == ref_opt.multipliers
-
-
 class TestBopOptimizer:
-    @pytest.mark.skipif(
-        utils.tf_1_14_or_newer() is False,
-        reason="Only supporting CaseOptimizer in TensorFlow >= 1.14",
-    )
     def test_bop_accuracy(self):
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
@@ -178,10 +125,6 @@ class TestBopOptimizer:
             target=0,
         )
 
-    @pytest.mark.skipif(
-        utils.tf_1_14_or_newer() is False,
-        reason="tf.keras.optimizers.schedules only exists in TensorFlow 1.14",
-    )
     def test_bop_tf_1_14_schedules(self):
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
@@ -201,10 +144,6 @@ class TestBopOptimizer:
             test_kernels_are_binary=True,
         )
 
-    @pytest.mark.skipif(
-        utils.tf_1_14_or_newer() is False,
-        reason="Only supporting CaseOptimizer in TensorFlow >= 1.14",
-    )
     def test_bop_serialization(self):
         _test_serialization(
             lq.optimizers.CaseOptimizer(

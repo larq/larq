@@ -1,6 +1,4 @@
 from contextlib import contextmanager
-from distutils.version import LooseVersion
-import tensorflow as tf
 from tensorflow.keras.utils import get_custom_objects
 
 
@@ -27,10 +25,6 @@ def register_alias(name):
     return register_func
 
 
-def tf_1_14_or_newer():
-    return LooseVersion(tf.__version__) >= LooseVersion("1.14.0")
-
-
 def set_precision(precision=32):
     """A decorator to set the precision of a quantizer function
 
@@ -43,15 +37,6 @@ def set_precision(precision=32):
         return function
 
     return decorator
-
-
-def supports_metrics():
-    """Checks if layer metrics are supported
-
-    TensorFlow 1.13 does not support adding an aggregated metric tensor in
-    `tf.keras.layers.Layer.call` in eager execution.
-    """
-    return tf_1_14_or_newer() or not tf.executing_eagerly()
 
 
 @contextmanager
