@@ -70,7 +70,7 @@ class TestCaseOptimizer:
                 (lq.optimizers.Bop.is_binary_variable, False)
             )
 
-    def test_type_check_optimizer(self):
+    def test_type_check_default(self):
         with pytest.raises(TypeError):
             naughty_case_opt = lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
