@@ -9,7 +9,6 @@ import tensorflow as tf
 from larq import utils
 import numpy as np
 from contextlib import contextmanager
-from tensorflow.keras.metrics import Metric
 
 
 __all__ = ["scope", "get_training_metrics"]
@@ -65,31 +64,9 @@ def get_training_metrics():
     return _GLOBAL_TRAINING_METRICS
 
 
-class LarqMetric(Metric):
-    """Metric with support for TensorFlow 1.14+."""
-
-    def add_weight(
-        self,
-        name,
-        shape=(),
-        aggregation=tf.VariableAggregation.SUM,
-        synchronization=tf.VariableSynchronization.ON_READ,
-        initializer=None,
-        dtype=None,
-    ):
-        return super().add_weight(
-            name=name,
-            shape=shape,
-            aggregation=aggregation,
-            synchronization=synchronization,
-            initializer=initializer,
-            dtype=dtype,
-        )
-
-
 @utils.register_alias("flip_ratio")
 @utils.register_keras_custom_object
-class FlipRatio(LarqMetric):
+class FlipRatio(tf.keras.metrics.Metric):
     """Computes the mean ration of changed values in a given tensor.
 
     !!! example
