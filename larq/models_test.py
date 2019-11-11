@@ -118,6 +118,15 @@ def test_summary_invalid_model():
         lq.models.summary(tf.keras.Model())
 
 
+def test_bitsize_invalid_key():
+    with pytest.raises(NotImplementedError):
+        lq.models._bitsize_as_str(-1)
+
+
+def test_number_as_readable_str_large():
+    assert lq.models._number_as_readable_str(1e16) == "1.00E+16"
+
+
 @pytest.fixture(autouse=True)
 def run_around_tests():
     tf.keras.backend.clear_session()
