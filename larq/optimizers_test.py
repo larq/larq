@@ -8,17 +8,7 @@ from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
 
-class AssertLRCallback(keras.callbacks.Callback):
-    def __init__(self, schedule):
-        self.schedule = schedule
-        super().__init__()
-
-    def on_epoch_end(self, epoch, logs=None):
-        learning_rate = keras.backend.get_value(self.model.optimizer.lr)
-        np.testing.assert_allclose(learning_rate, self.schedule(epoch))
-
-
-def assert_weights(weights, expected):
+def _assert_weights(weights, expected):
     for w, e in zip(weights, expected):
         np.testing.assert_allclose(np.squeeze(w), e)
 
@@ -82,9 +72,9 @@ class TestXavierLearingRateScaling:
                 tf.keras.optimizers.SGD(1), model
             ),
         )
-        assert_weights(dense.get_weights(), [0, 0])
+        _assert_weights(dense.get_weights(), [0, 0])
         model.fit(np.array([1.0]), np.array([2.0]), epochs=1, batch_size=1)
-        assert_weights(dense.get_weights(), [1 / np.sqrt(1.5 / 2), 1])
+        _assert_weights(dense.get_weights(), [1 / np.sqrt(1.5 / 2), 1])
 
     def test_invalid_usage(self):
         with pytest.raises(ValueError):
