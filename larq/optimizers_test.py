@@ -56,6 +56,29 @@ def _test_serialization(optimizer):
 
 
 @pytest.mark.skipif(
+    not utils.tf_1_14_or_newer(),
+    reason="Only supporting CaseOptimizer in TensorFlow >= 1.14.",
+)
+class TestCaseOptimizer:
+    def test_type_check_predicate(self):
+        with pytest.raises(TypeError):
+            naughty_case_opt = lq.optimizers.CaseOptimizer((False, lq.optimizers.Bop()))
+
+    def test_type_check_optimizer(self):
+        with pytest.raises(TypeError):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, False)
+            )
+
+    def test_type_check_optimizer(self):
+        with pytest.raises(TypeError):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+                default=False,
+            )
+
+
+@pytest.mark.skipif(
     utils.tf_1_14_or_newer(),
     reason="current implementation requires Tensorflow 1.13 or less",
 )
@@ -103,7 +126,7 @@ class TestXavierLearingRateScaling:
 class TestBopOptimizer:
     @pytest.mark.skipif(
         utils.tf_1_14_or_newer() is False,
-        reason="only supporting CaseOptimizer in TensorFlow >= 1.14",
+        reason="Only supporting CaseOptimizer in TensorFlow >= 1.14",
     )
     def test_bop_accuracy(self):
         _test_optimizer(
@@ -149,7 +172,7 @@ class TestBopOptimizer:
 
     @pytest.mark.skipif(
         utils.tf_1_14_or_newer() is False,
-        reason="only supporting CaseOptimizer in TensorFlow >= 1.14",
+        reason="Only supporting CaseOptimizer in TensorFlow >= 1.14",
     )
     def test_bop_serialization(self):
         _test_serialization(
