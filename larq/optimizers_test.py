@@ -74,7 +74,7 @@ class TestCaseOptimizer:
         with pytest.raises(TypeError):
             naughty_case_opt = lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default=False,
+                default_optimizer=False,
             )
 
     def test_overlapping_predicates(self):
@@ -165,7 +165,7 @@ class TestBopOptimizer:
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
@@ -173,7 +173,7 @@ class TestBopOptimizer:
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
             trainable_bn=False,
@@ -198,7 +198,7 @@ class TestBopOptimizer:
                         ),
                     ),
                 ),
-                default=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
@@ -211,6 +211,6 @@ class TestBopOptimizer:
         _test_serialization(
             lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
         )

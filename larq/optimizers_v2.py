@@ -16,50 +16,52 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
     For each variable, at most one optimizer's predicate may evaluate to `True`. If no
     optimizer's predicate evaluates to `True` for a variable, it is trained with the
-    `default` optimizer. If a variable is claimed by no optimizers and `default==None`,
-    the variable is not trained.
+    `default_optimizer`. If a variable is claimed by no optimizers and 
+    `default_optimizer == None`, the variable is not trained.
 
     # Arguments
-    pred_opt_pairs: One or more `(pred, tf.keras.optimizers.Optimzer)` pairs, where 
-        `pred`  takes one `tf.Variable` as argument and returns `True` if the optimizer 
-        should be used for that variable, e.g. `pred(var) == True`.
-    default: A `tf.keras.optimizers.Optimizer` to be applied to any variable not claimed
-        by any other optimizer. (Must be passed as keyword argument.)
+    predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.Optimzer)` pairs,
+        where `pred`  takes one `tf.Variable` as argument and returns `True` if the 
+        optimizer should be used for that variable, e.g. `pred(var) == True`.
+    default_optimizer: A `tf.keras.optimizers.Optimizer` to be applied to any variable
+        not claimed by any other optimizer. (Must be passed as keyword argument.)
     """
 
-    def __init__(self, *pred_opt_pairs, default=None, name="optimizer_case"):
+    def __init__(
+        self, *predicate_optimizer_pairs, default_optimizer=None, name="optimizer_case"
+    ):
         super().__init__(name=name)
 
         # Type checks for (predicate, optimizer) pairs
-        for i, (predicate, optimizer) in enumerate(pred_opt_pairs):
+        for i, (predicate, optimizer) in enumerate(predicate_optimizer_pairs):
             if not callable(predicate):
                 raise TypeError(
-                    f"Expected callable predicate at `pred_opt_pairs[{i}][0]` but got `{type(predicate)}`."
+                    f"Expected callable predicate at `predicate_optimizer_pairs[{i}][0]` but got `{type(predicate)}`."
                 )
             if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
                 raise TypeError(
-                    f"Expected `tf.keras.optimizers.Optimizer` at `pred_opt_pairs[{i}][1]` but got `{type(optimizer)}`."
+                    f"Expected `tf.keras.optimizers.Optimizer` at `predicate_optimizer_pairs[{i}][1]` but got `{type(optimizer)}`."
                 )
 
         # Type check for default optimizers
-        if default is not None and not isinstance(
-            default, tf.keras.optimizers.Optimizer
+        if default_optimizer is not None and not isinstance(
+            default_optimizer, tf.keras.optimizers.Optimizer
         ):
             raise TypeError(
-                f"Expected `tf.keras.optimizers.Optimizer` for `default` but got `{type(default)}`."
+                f"Expected `tf.keras.optimizers.Optimizer` for `default_optimizer` but got `{type(default_optimizer)}`."
             )
 
-        self.pred_opt_pairs = pred_opt_pairs
-        self.default = default
+        self.pred_opt_pairs = predicate_optimizer_pairs
+        self.default = default_optimizer
 
         self.var_opt_mapping = None
 
-        # List of optimizers ending in `default`, for easier internal access
+        # List of optimizers ending in `default_optimizer`, for easier internal access
         self.optimizers = [opt for (_, opt) in self.pred_opt_pairs]
 
-        if default:
+        if self.default:
             self.optimizers.append(self.default)
-            self.DEFAULT_OPT_INDEX = len(pred_opt_pairs)
+            self.DEFAULT_OPT_INDEX = len(self.pred_opt_pairs)
 
     def apply_gradients(self, grads_and_vars, name=None):
         """Apply gradients to variables for each optimizer.
@@ -119,7 +121,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 )
                 for opt_config in config["optimizer_configs"]
             ],
-            default=tf.keras.optimizers.deserialize(
+            default_optimizer=tf.keras.optimizers.deserialize(
                 config["default_config"], custom_objects=custom_objects
             ),
         )
@@ -149,7 +151,9 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 if self.default is not None:
                     self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
                 else:
-                    warnings.warn(f"No `default` provided to train variable `{var}`.")
+                    warnings.warn(
+                        f"No `default_optimizer` provided to train variable `{var}`."
+                    )
 
 
 @utils.register_keras_custom_object
@@ -175,11 +179,11 @@ class Bop(tf.keras.optimizers.Optimizer):
     !!! example
         ```python
         optimizer = lq.optimizers.CaseOptimizer(
-            pred_opt_pairs=[(
+            predicate_optimizer_pairs=[(
                 lq.optimizers.Bop.is_binary_variable,
                 lq.optimizers.Bop(),
             )],
-            default=tf.keras.optimizers.Adam(0.01),  # for full-precision weights
+            default_optimizer=tf.keras.optimizers.Adam(0.01),  # for FP weights
         )
         ```
 
