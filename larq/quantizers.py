@@ -50,12 +50,7 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 
 import tensorflow as tf
 from larq import utils, math
-
-try:
-    from tensorflow import is_tensor
-except:  # pragma: no cover
-    # For compatibility with TensorFlow 1.13
-    from tensorflow.python.framework.tensor_util import is_tensor
+from tensorflow import is_tensor
 
 __all__ = [
     "ste_sign",

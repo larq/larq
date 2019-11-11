@@ -70,7 +70,7 @@ model = MyModel()
 Before installing Larq, please install:
 
 - [Python](https://www.python.org) version `3.6` or `3.7`
-- [Tensorflow](https://www.tensorflow.org/install) version `1.13`, `1.14`, `1.15` or `2.0.0`:
+- [Tensorflow](https://www.tensorflow.org/install) version `1.14`, `1.15` or `2.0.0`:
   ```shell
   pip install tensorflow  # or tensorflow-gpu
   ```

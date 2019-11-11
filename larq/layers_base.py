@@ -39,7 +39,7 @@ class QuantizerBase(tf.keras.layers.Layer):
         if self.kernel_quantizer:
             self.quantized_latent_weights.append(self.kernel)
             self.quantizers.append(self.kernel_quantizer)
-            if "flip_ratio" in self._custom_metrics and utils.supports_metrics():
+            if "flip_ratio" in self._custom_metrics:
                 self.flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.kernel.shape, name=f"flip_ratio/{self.name}"
                 )
@@ -108,7 +108,7 @@ class QuantizerDepthwiseBase(tf.keras.layers.Layer):
         if self.depthwise_quantizer:
             self.quantized_latent_weights.append(self.depthwise_kernel)
             self.quantizers.append(self.depthwise_quantizer)
-            if "flip_ratio" in self._custom_metrics and utils.supports_metrics():
+            if "flip_ratio" in self._custom_metrics:
                 self.flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
                     name=f"flip_ratio/{self.name}",
@@ -189,7 +189,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if self.depthwise_quantizer:
             self.quantized_latent_weights.append(self.depthwise_kernel)
             self.quantizers.append(self.depthwise_quantizer)
-            if "flip_ratio" in self._custom_metrics and utils.supports_metrics():
+            if "flip_ratio" in self._custom_metrics:
                 self.depthwise_flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.depthwise_kernel.shape,
                     name=f"flip_ratio/{self.name}_depthwise",
@@ -197,7 +197,7 @@ class QuantizerSeparableBase(tf.keras.layers.Layer):
         if self.pointwise_quantizer:
             self.quantized_latent_weights.append(self.pointwise_kernel)
             self.quantizers.append(self.pointwise_quantizer)
-            if "flip_ratio" in self._custom_metrics and utils.supports_metrics():
+            if "flip_ratio" in self._custom_metrics:
                 self.pointwise_flip_ratio = lq_metrics.FlipRatio(
                     values_shape=self.pointwise_kernel.shape,
                     name=f"flip_ratio/{self.name}_pointwise",
