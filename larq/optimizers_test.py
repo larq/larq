@@ -62,17 +62,15 @@ def _test_serialization(optimizer):
 class TestCaseOptimizer:
     def test_type_check_predicate(self):
         with pytest.raises(TypeError):
-            naughty_case_opt = lq.optimizers.CaseOptimizer((False, lq.optimizers.Bop()))
+            lq.optimizers.CaseOptimizer((False, lq.optimizers.Bop()))
 
     def test_type_check_optimizer(self):
         with pytest.raises(TypeError):
-            naughty_case_opt = lq.optimizers.CaseOptimizer(
-                (lq.optimizers.Bop.is_binary_variable, False)
-            )
+            lq.optimizers.CaseOptimizer((lq.optimizers.Bop.is_binary_variable, False))
 
     def test_type_check_default(self):
         with pytest.raises(TypeError):
-            naughty_case_opt = lq.optimizers.CaseOptimizer(
+            lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
                 default_optimizer=False,
             )
