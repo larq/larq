@@ -8,17 +8,7 @@ from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
 
-class AssertLRCallback(keras.callbacks.Callback):
-    def __init__(self, schedule):
-        self.schedule = schedule
-        super().__init__()
-
-    def on_epoch_end(self, epoch, logs=None):
-        learning_rate = keras.backend.get_value(self.model.optimizer.lr)
-        np.testing.assert_allclose(learning_rate, self.schedule(epoch))
-
-
-def assert_weights(weights, expected):
+def _assert_weights(weights, expected):
     for w, e in zip(weights, expected):
         np.testing.assert_allclose(np.squeeze(w), e)
 
@@ -66,6 +56,60 @@ def _test_serialization(optimizer):
 
 
 @pytest.mark.skipif(
+    not utils.tf_1_14_or_newer(),
+    reason="Only supporting CaseOptimizer in TensorFlow >= 1.14.",
+)
+class TestCaseOptimizer:
+    def test_type_check_predicate(self):
+        with pytest.raises(TypeError):
+            lq.optimizers.CaseOptimizer((False, lq.optimizers.Bop()))
+
+    def test_type_check_optimizer(self):
+        with pytest.raises(TypeError):
+            lq.optimizers.CaseOptimizer((lq.optimizers.Bop.is_binary_variable, False))
+
+    def test_type_check_default(self):
+        with pytest.raises(TypeError):
+            lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+                default_optimizer=False,
+            )
+
+    def test_overlapping_predicates(self):
+        with pytest.raises(ValueError):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lambda var: True, lq.optimizers.Bop()),
+                (lambda var: True, lq.optimizers.Bop()),
+            )
+            _test_optimizer(naughty_case_opt)
+
+    def test_missing_default(self):
+        with pytest.warns(Warning):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lambda var: False, lq.optimizers.Bop())
+            )
+
+            # Simple MNIST model
+            mnist = tf.keras.datasets.mnist
+            (train_images, train_labels), _ = mnist.load_data()
+            model = tf.keras.Sequential(
+                [
+                    tf.keras.layers.Flatten(input_shape=(28, 28)),
+                    tf.keras.layers.Dense(128, activation="relu"),
+                    tf.keras.layers.Dense(10, activation="softmax"),
+                ]
+            )
+            model.compile(
+                loss="sparse_categorical_crossentropy",
+                optimizer=naughty_case_opt,
+                metrics=["acc"],
+            )
+
+            # Should raise on first call to apply_gradients()
+            model.fit(train_images[:1], train_labels[:1], epochs=1)
+
+
+@pytest.mark.skipif(
     utils.tf_1_14_or_newer(),
     reason="current implementation requires Tensorflow 1.13 or less",
 )
@@ -82,9 +126,9 @@ class TestXavierLearingRateScaling:
                 tf.keras.optimizers.SGD(1), model
             ),
         )
-        assert_weights(dense.get_weights(), [0, 0])
+        _assert_weights(dense.get_weights(), [0, 0])
         model.fit(np.array([1.0]), np.array([2.0]), epochs=1, batch_size=1)
-        assert_weights(dense.get_weights(), [1 / np.sqrt(1.5 / 2), 1])
+        _assert_weights(dense.get_weights(), [1 / np.sqrt(1.5 / 2), 1])
 
     def test_invalid_usage(self):
         with pytest.raises(ValueError):
@@ -111,14 +155,24 @@ class TestXavierLearingRateScaling:
 
 
 class TestBopOptimizer:
+    @pytest.mark.skipif(
+        utils.tf_1_14_or_newer() is False,
+        reason="Only supporting CaseOptimizer in TensorFlow >= 1.14",
+    )
     def test_bop_accuracy(self):
         _test_optimizer(
-            lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
+            lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
+            ),
             test_kernels_are_binary=True,
         )
         # test optimizer on model with only binary trainable vars (low accuracy)
         _test_optimizer(
-            lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
+            lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
+            ),
             test_kernels_are_binary=True,
             trainable_bn=False,
             target=0,
@@ -130,45 +184,31 @@ class TestBopOptimizer:
     )
     def test_bop_tf_1_14_schedules(self):
         _test_optimizer(
-            lq.optimizers.Bop(
-                threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
-                    3.0, decay_steps=1.0, decay_rate=0.5
+            lq.optimizers.CaseOptimizer(
+                (
+                    lq.optimizers.Bop.is_binary_variable,
+                    lq.optimizers.Bop(
+                        threshold=tf.keras.optimizers.schedules.InverseTimeDecay(
+                            3.0, decay_steps=1.0, decay_rate=0.5
+                        ),
+                        gamma=tf.keras.optimizers.schedules.InverseTimeDecay(
+                            3.0, decay_steps=1.0, decay_rate=0.5
+                        ),
+                    ),
                 ),
-                gamma=tf.keras.optimizers.schedules.InverseTimeDecay(
-                    3.0, decay_steps=1.0, decay_rate=0.5
-                ),
-                fp_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
 
-    def test_bop_lr_scheduler(self):
-        (x_train, y_train), _ = testing_utils.get_test_data(
-            train_samples=100, test_samples=0, input_shape=(10,), num_classes=2
-        )
-        y_train = keras.utils.to_categorical(y_train)
-
-        model = lq_testing_utils.get_small_bnn_model(
-            x_train.shape[1], 10, y_train.shape[1]
-        )
-        model.compile(
-            loss="categorical_crossentropy",
-            optimizer=lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01)),
-        )
-
-        model.fit(
-            x_train,
-            y_train,
-            epochs=4,
-            callbacks=[
-                tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1 / (1 + epoch)),
-                AssertLRCallback(lambda epoch: 1 / (1 + epoch)),
-            ],
-            batch_size=8,
-            verbose=0,
-        )
-
+    @pytest.mark.skipif(
+        utils.tf_1_14_or_newer() is False,
+        reason="Only supporting CaseOptimizer in TensorFlow >= 1.14",
+    )
     def test_bop_serialization(self):
         _test_serialization(
-            lq.optimizers.Bop(fp_optimizer=tf.keras.optimizers.Adam(0.01))
+            lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
+            ),
         )
