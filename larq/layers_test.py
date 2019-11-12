@@ -8,6 +8,58 @@ from larq import testing_utils
 from tensorflow.python.keras import keras_parameterized
 
 
+PARAMS_ALL_LAYERS = [
+    (lq.layers.QuantDense, tf.keras.layers.Dense, (3, 2), dict(units=3)),
+    (
+        lq.layers.QuantConv1D,
+        tf.keras.layers.Conv1D,
+        (2, 3, 7),
+        dict(filters=2, kernel_size=3),
+    ),
+    (
+        lq.layers.QuantConv2D,
+        tf.keras.layers.Conv2D,
+        (2, 3, 7, 6),
+        dict(filters=2, kernel_size=3),
+    ),
+    (
+        lq.layers.QuantConv3D,
+        tf.keras.layers.Conv3D,
+        (2, 3, 7, 6, 5),
+        dict(filters=2, kernel_size=3),
+    ),
+    (
+        lq.layers.QuantConv2DTranspose,
+        tf.keras.layers.Conv2DTranspose,
+        (2, 3, 7, 6),
+        dict(filters=2, kernel_size=3),
+    ),
+    (
+        lq.layers.QuantConv3DTranspose,
+        tf.keras.layers.Conv3DTranspose,
+        (2, 3, 7, 6, 5),
+        dict(filters=2, kernel_size=3),
+    ),
+    (
+        lq.layers.QuantLocallyConnected1D,
+        tf.keras.layers.LocallyConnected1D,
+        (2, 8, 5),
+        dict(filters=4, kernel_size=3),
+    ),
+    (
+        lq.layers.QuantLocallyConnected2D,
+        tf.keras.layers.LocallyConnected2D,
+        (8, 6, 10, 4),
+        dict(filters=3, kernel_size=3),
+    ),
+]
+
+PARAMS_SEP_LAYERS = [
+    (lq.layers.QuantSeparableConv1D, tf.keras.layers.SeparableConv1D, (2, 3, 7),),
+    (lq.layers.QuantSeparableConv2D, tf.keras.layers.SeparableConv2D, (2, 3, 7, 6),),
+]
+
+
 def random_input(shape):
     for i, dim in enumerate(shape):
         if dim is None:
@@ -16,64 +68,13 @@ def random_input(shape):
     return data.astype("float32")
 
 
-parameterized_all_layers = parameterized.named_parameters(
-    ("QuantDense", lq.layers.QuantDense, tf.keras.layers.Dense, (3, 2), dict(units=3)),
-    (
-        "QuantConv1D",
-        lq.layers.QuantConv1D,
-        tf.keras.layers.Conv1D,
-        (2, 3, 7),
-        dict(filters=2, kernel_size=3),
-    ),
-    (
-        "QuantConv2D",
-        lq.layers.QuantConv2D,
-        tf.keras.layers.Conv2D,
-        (2, 3, 7, 6),
-        dict(filters=2, kernel_size=3),
-    ),
-    (
-        "QuantConv3D",
-        lq.layers.QuantConv3D,
-        tf.keras.layers.Conv3D,
-        (2, 3, 7, 6, 5),
-        dict(filters=2, kernel_size=3),
-    ),
-    (
-        "QuantConv2DTranspose",
-        lq.layers.QuantConv2DTranspose,
-        tf.keras.layers.Conv2DTranspose,
-        (2, 3, 7, 6),
-        dict(filters=2, kernel_size=3),
-    ),
-    (
-        "QuantConv3DTranspose",
-        lq.layers.QuantConv3DTranspose,
-        tf.keras.layers.Conv3DTranspose,
-        (2, 3, 7, 6, 5),
-        dict(filters=2, kernel_size=3),
-    ),
-    (
-        "QuantLocallyConnected1D",
-        lq.layers.QuantLocallyConnected1D,
-        tf.keras.layers.LocallyConnected1D,
-        (2, 8, 5),
-        dict(filters=4, kernel_size=3),
-    ),
-    (
-        "QuantLocallyConnected2D",
-        lq.layers.QuantLocallyConnected2D,
-        tf.keras.layers.LocallyConnected2D,
-        (8, 6, 10, 4),
-        dict(filters=3, kernel_size=3),
-    ),
-)
-
-
-@keras_parameterized.run_all_keras_modes
-class LayersTest(keras_parameterized.TestCase):
-    @parameterized_all_layers
-    def test_binarization(self, quantized_layer, layer, input_shape, kwargs):
+class TestLayers:
+    @pytest.mark.parametrize(
+        "quantized_layer, layer, input_shape, kwargs", PARAMS_ALL_LAYERS
+    )
+    def test_binarization(
+        self, quantized_layer, layer, input_shape, kwargs, keras_should_run_eagerly
+    ):
         input_data = random_input(input_shape)
         random_weight = np.random.random() - 0.5
 
@@ -87,6 +88,7 @@ class LayersTest(keras_parameterized.TestCase):
                     kernel_initializer=tf.keras.initializers.constant(random_weight),
                 ),
                 input_data=input_data,
+                should_run_eagerly=keras_should_run_eagerly,
             )
 
         fp_output = testing_utils.layer_test(
@@ -98,27 +100,12 @@ class LayersTest(keras_parameterized.TestCase):
                 ),
             ),
             input_data=np.sign(input_data),
+            should_run_eagerly=keras_should_run_eagerly,
         )
 
-        self.assertAllClose(quant_output, fp_output)
+        np.testing.assert_allclose(quant_output, fp_output)
 
-
-class TestLayers:
-    @pytest.mark.parametrize(
-        "quantized_layer, layer, input_shape",
-        [
-            (
-                lq.layers.QuantSeparableConv1D,
-                tf.keras.layers.SeparableConv1D,
-                (2, 3, 7),
-            ),
-            (
-                lq.layers.QuantSeparableConv2D,
-                tf.keras.layers.SeparableConv2D,
-                (2, 3, 7, 6),
-            ),
-        ],
-    )
+    @pytest.mark.parametrize("quantized_layer, layer, input_shape", PARAMS_SEP_LAYERS)
     def test_separable_layers(
         self, quantized_layer, layer, input_shape, keras_should_run_eagerly
     ):
