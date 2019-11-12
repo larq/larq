@@ -158,37 +158,37 @@ class LayersTest(keras_parameterized.TestCase):
         self.assertAllClose(quant_output, fp_output)
 
 
-# TODO: Move back into class
-def test_depthwise_layers(keras_should_run_eagerly):
-    input_data = random_input((2, 3, 7, 6))
-    random_weight = np.random.random() - 0.5
+class TestLayers:
+    def test_depthwise_layers(self, keras_should_run_eagerly):
+        input_data = random_input((2, 3, 7, 6))
+        random_weight = np.random.random() - 0.5
 
-    with lq.metrics.scope(["flip_ratio"]):
-        quant_output = testing_utils.layer_test(
-            lq.layers.QuantDepthwiseConv2D,
+        with lq.metrics.scope(["flip_ratio"]):
+            quant_output = testing_utils.layer_test(
+                lq.layers.QuantDepthwiseConv2D,
+                kwargs=dict(
+                    kernel_size=3,
+                    depthwise_quantizer="ste_sign",
+                    input_quantizer="ste_sign",
+                    depthwise_initializer=tf.keras.initializers.constant(random_weight),
+                ),
+                input_data=input_data,
+                should_run_eagerly=keras_should_run_eagerly,
+            )
+
+        fp_output = testing_utils.layer_test(
+            tf.keras.layers.DepthwiseConv2D,
             kwargs=dict(
                 kernel_size=3,
-                depthwise_quantizer="ste_sign",
-                input_quantizer="ste_sign",
-                depthwise_initializer=tf.keras.initializers.constant(random_weight),
+                depthwise_initializer=tf.keras.initializers.constant(
+                    np.sign(random_weight)
+                ),
             ),
-            input_data=input_data,
+            input_data=np.sign(input_data),
             should_run_eagerly=keras_should_run_eagerly,
         )
 
-    fp_output = testing_utils.layer_test(
-        tf.keras.layers.DepthwiseConv2D,
-        kwargs=dict(
-            kernel_size=3,
-            depthwise_initializer=tf.keras.initializers.constant(
-                np.sign(random_weight)
-            ),
-        ),
-        input_data=np.sign(input_data),
-        should_run_eagerly=keras_should_run_eagerly,
-    )
-
-    np.testing.assert_allclose(quant_output, fp_output)
+        np.testing.assert_allclose(quant_output, fp_output)
 
 
 def test_layer_warns(caplog):
