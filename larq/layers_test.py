@@ -102,35 +102,6 @@ class LayersTest(keras_parameterized.TestCase):
 
         self.assertAllClose(quant_output, fp_output)
 
-    def test_depthwise_layers(self):
-        input_data = random_input((2, 3, 7, 6))
-        random_weight = np.random.random() - 0.5
-
-        with lq.metrics.scope(["flip_ratio"]):
-            quant_output = testing_utils.layer_test(
-                lq.layers.QuantDepthwiseConv2D,
-                kwargs=dict(
-                    kernel_size=3,
-                    depthwise_quantizer="ste_sign",
-                    input_quantizer="ste_sign",
-                    depthwise_initializer=tf.keras.initializers.constant(random_weight),
-                ),
-                input_data=input_data,
-            )
-
-        fp_output = testing_utils.layer_test(
-            tf.keras.layers.DepthwiseConv2D,
-            kwargs=dict(
-                kernel_size=3,
-                depthwise_initializer=tf.keras.initializers.constant(
-                    np.sign(random_weight)
-                ),
-            ),
-            input_data=np.sign(input_data),
-        )
-
-        self.assertAllClose(quant_output, fp_output)
-
     @parameterized.named_parameters(
         (
             "QuantSeparableConv1D",
@@ -185,6 +156,39 @@ class LayersTest(keras_parameterized.TestCase):
         )
 
         self.assertAllClose(quant_output, fp_output)
+
+
+# TODO: Move back into class
+def test_depthwise_layers(fixture_run_all_keras_modes):
+    input_data = random_input((2, 3, 7, 6))
+    random_weight = np.random.random() - 0.5
+
+    with lq.metrics.scope(["flip_ratio"]):
+        quant_output = testing_utils.layer_test(
+            lq.layers.QuantDepthwiseConv2D,
+            kwargs=dict(
+                kernel_size=3,
+                depthwise_quantizer="ste_sign",
+                input_quantizer="ste_sign",
+                depthwise_initializer=tf.keras.initializers.constant(random_weight),
+            ),
+            input_data=input_data,
+            should_run_eagerly=fixture_run_all_keras_modes,
+        )
+
+    fp_output = testing_utils.layer_test(
+        tf.keras.layers.DepthwiseConv2D,
+        kwargs=dict(
+            kernel_size=3,
+            depthwise_initializer=tf.keras.initializers.constant(
+                np.sign(random_weight)
+            ),
+        ),
+        input_data=np.sign(input_data),
+        should_run_eagerly=fixture_run_all_keras_modes,
+    )
+
+    np.testing.assert_allclose(quant_output, fp_output)
 
 
 def test_layer_warns(caplog):
