@@ -2,9 +2,6 @@ import larq as lq
 import numpy as np
 import tensorflow as tf
 
-# We should find a better solution without relying on private objects
-from tensorflow.python.keras.testing_utils import _thread_local_data, should_run_eagerly
-
 
 def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
     real_values = np.random.uniform(low, high, shape)
@@ -48,6 +45,7 @@ def layer_test(
     input_data=None,
     expected_output=None,
     expected_output_dtype=None,
+    should_run_eagerly=False,
 ):
     """Test routine for a layer with a single input and single output.
     Arguments:
@@ -148,17 +146,10 @@ def layer_test(
     # train(). This was causing some error for layer with Defun as it body.
     # See b/120160788 for more details. This should be mitigated after 2.0.
     model = tf.keras.models.Model(x, layer(x))
-    if _thread_local_data.run_eagerly is not None:
-        model.compile(
-            "rmsprop",
-            "mse",
-            weighted_metrics=["acc"],
-            run_eagerly=should_run_eagerly(),
-        )
-        model.train_on_batch(input_data, actual_output)
-    else:
-        model.compile("rmsprop", "mse", weighted_metrics=["acc"])
-        model.train_on_batch(input_data, actual_output)
+    model.compile(
+        "rmsprop", "mse", weighted_metrics=["acc"], run_eagerly=should_run_eagerly,
+    )
+    model.train_on_batch(input_data, actual_output)
 
     # test as first layer in Sequential API
     layer_config = layer.get_config()
