@@ -2,9 +2,6 @@ import larq as lq
 import numpy as np
 import tensorflow as tf
 
-# We should find a better solution without relying on private objects
-from tensorflow.python.keras.testing_utils import _thread_local_data, should_run_eagerly
-
 
 def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
     real_values = np.random.uniform(low, high, shape)

@@ -1,11 +1,9 @@
 import tensorflow as tf
 import numpy as np
-from absl.testing import parameterized
 import larq as lq
 import pytest
 import inspect
 from larq import testing_utils
-from tensorflow.python.keras import keras_parameterized
 
 
 PARAMS_ALL_LAYERS = [
