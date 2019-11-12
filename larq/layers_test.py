@@ -102,21 +102,26 @@ class LayersTest(keras_parameterized.TestCase):
 
         self.assertAllClose(quant_output, fp_output)
 
-    @parameterized.named_parameters(
-        (
-            "QuantSeparableConv1D",
-            lq.layers.QuantSeparableConv1D,
-            tf.keras.layers.SeparableConv1D,
-            (2, 3, 7),
-        ),
-        (
-            "QuantSeparableConv2D",
-            lq.layers.QuantSeparableConv2D,
-            tf.keras.layers.SeparableConv2D,
-            (2, 3, 7, 6),
-        ),
+
+class TestLayers:
+    @pytest.mark.parametrize(
+        "quantized_layer, layer, input_shape",
+        [
+            (
+                lq.layers.QuantSeparableConv1D,
+                tf.keras.layers.SeparableConv1D,
+                (2, 3, 7),
+            ),
+            (
+                lq.layers.QuantSeparableConv2D,
+                tf.keras.layers.SeparableConv2D,
+                (2, 3, 7, 6),
+            ),
+        ],
     )
-    def test_separable_layers(self, quantized_layer, layer, input_shape):
+    def test_separable_layers(
+        self, quantized_layer, layer, input_shape, keras_should_run_eagerly
+    ):
         input_data = random_input(input_shape)
         random_d_kernel = np.random.random() - 0.5
         random_p_kernel = np.random.random() - 0.5
@@ -138,6 +143,7 @@ class LayersTest(keras_parameterized.TestCase):
                     ),
                 ),
                 input_data=input_data,
+                should_run_eagerly=keras_should_run_eagerly,
             )
 
         fp_output = testing_utils.layer_test(
@@ -153,12 +159,11 @@ class LayersTest(keras_parameterized.TestCase):
                 ),
             ),
             input_data=np.sign(input_data),
+            should_run_eagerly=keras_should_run_eagerly,
         )
 
-        self.assertAllClose(quant_output, fp_output)
+        np.testing.assert_allclose(quant_output, fp_output)
 
-
-class TestLayers:
     def test_depthwise_layers(self, keras_should_run_eagerly):
         input_data = random_input((2, 3, 7, 6))
         random_weight = np.random.random() - 0.5
