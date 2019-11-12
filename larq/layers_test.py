@@ -183,51 +183,47 @@ class TestLayers:
         np.testing.assert_allclose(quant_output, fp_output)
 
 
-def test_layer_warns(caplog):
-    lq.layers.QuantDense(5, kernel_quantizer="ste_sign")
-    assert len(caplog.records) >= 1
-    assert "kernel_constraint" in caplog.text
+class TestLayerWarns:
+    def test_layer_warns(self, caplog):
+        lq.layers.QuantDense(5, kernel_quantizer="ste_sign")
+        assert len(caplog.records) >= 1
+        assert "kernel_constraint" in caplog.text
 
+    def test_layer_does_not_warn(self, caplog):
+        lq.layers.QuantDense(
+            5, kernel_quantizer="ste_sign", kernel_constraint="weight_clip"
+        )
+        assert caplog.records == []
 
-def test_layer_does_not_warn(caplog):
-    lq.layers.QuantDense(
-        5, kernel_quantizer="ste_sign", kernel_constraint="weight_clip"
-    )
-    assert caplog.records == []
+    def test_depthwise_layer_warns(self, caplog):
+        lq.layers.QuantDepthwiseConv2D(5, depthwise_quantizer="ste_sign")
+        assert len(caplog.records) >= 1
+        assert "depthwise_constraint" in caplog.text
 
+    def test_depthwise_layer_does_not_warn(self, caplog):
+        lq.layers.QuantDepthwiseConv2D(
+            5, depthwise_quantizer="ste_sign", depthwise_constraint="weight_clip"
+        )
+        assert caplog.records == []
 
-def test_depthwise_layer_warns(caplog):
-    lq.layers.QuantDepthwiseConv2D(5, depthwise_quantizer="ste_sign")
-    assert len(caplog.records) >= 1
-    assert "depthwise_constraint" in caplog.text
+    def test_separable_layer_warns(self, caplog):
+        lq.layers.QuantSeparableConv2D(
+            3, 3, depthwise_quantizer="ste_sign", pointwise_quantizer="ste_sign"
+        )
+        assert len(caplog.records) == 2
+        assert "depthwise_constraint" in caplog.text
+        assert "pointwise_constraint" in caplog.text
 
-
-def test_depthwise_layer_does_not_warn(caplog):
-    lq.layers.QuantDepthwiseConv2D(
-        5, depthwise_quantizer="ste_sign", depthwise_constraint="weight_clip"
-    )
-    assert caplog.records == []
-
-
-def test_separable_layer_warns(caplog):
-    lq.layers.QuantSeparableConv2D(
-        3, 3, depthwise_quantizer="ste_sign", pointwise_quantizer="ste_sign"
-    )
-    assert len(caplog.records) == 2
-    assert "depthwise_constraint" in caplog.text
-    assert "pointwise_constraint" in caplog.text
-
-
-def test_separable_layer_does_not_warn(caplog):
-    lq.layers.QuantSeparableConv2D(
-        3,
-        3,
-        depthwise_quantizer="ste_sign",
-        pointwise_quantizer="ste_sign",
-        depthwise_constraint="weight_clip",
-        pointwise_constraint="weight_clip",
-    )
-    assert caplog.records == []
+    def test_separable_layer_does_not_warn(self, caplog):
+        lq.layers.QuantSeparableConv2D(
+            3,
+            3,
+            depthwise_quantizer="ste_sign",
+            pointwise_quantizer="ste_sign",
+            depthwise_constraint="weight_clip",
+            pointwise_constraint="weight_clip",
+        )
+        assert caplog.records == []
 
 
 def test_metrics():
