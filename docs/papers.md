@@ -4,7 +4,7 @@ One of the main focuses of Larq is to accelerate research on neural networks wit
 
 If you publish a paper using Larq please let us know and [add it to the list below](https://github.com/larq/larq/edit/master/docs/papers.md). Feel free to also add the author names, abstract and links to the paper and source code.
 
-<h2><a class="headerlink" style="float:right; opacity: 1;" href="https://github.com/plumerai/rethinking-bnn-optimization" title="Source code"><i class="md-icon">code</i></a> <a class="headerlink" style="float:right; opacity: 1;" href="https://arxiv.org/abs/1906.02107" title="arXiv paper"><i class="md-icon">library_books</i></a> Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization</h2>
+<h2><a class="headerlink" style="float:right; opacity: 1;" href="https://github.com/plumerai/rethinking-bnn-optimization" title="Source code"><i class="md-icon">code</i></a> <a class="headerlink" style="float:right; opacity: 1;" href="https://github.com/plumerai/rethinking-bnn-optimization/raw/master/poster.pdf" title="Poster"><i class="md-icon">collections</i></a> <a class="headerlink" style="float:right; opacity: 1;" href="https://arxiv.org/abs/1906.02107" title="arXiv paper"><i class="md-icon">library_books</i></a> Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization</h2>
 
 <div style="color: rgba(0, 0, 0, 0.54);">Koen Helwegen, James Widdicombe, Lukas Geiger, Zechun Liu, Kwang-Ting Cheng, Roeland Nusselder</div>
 
