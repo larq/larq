@@ -66,9 +66,7 @@ class QuantizerBase(BaseLayer):
             )
 
     def get_quantizer(self, name):
-        if name == "kernel":
-            return self.kernel_quantizer
-        return None
+        return self.kernel_quantizer if name == "kernel" else None
 
     def build(self, input_shape):
         super().build(input_shape)
@@ -123,9 +121,7 @@ class QuantizerDepthwiseBase(BaseLayer):
             )
 
     def get_quantizer(self, name):
-        if name == "depthwise_kernel":
-            return self.depthwise_quantizer
-        return None
+        return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
     def build(self, input_shape):
         super().build(input_shape)
