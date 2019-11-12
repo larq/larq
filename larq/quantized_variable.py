@@ -71,9 +71,10 @@ class QuantizedVariable(variables.Variable):
         """Converts this variable to a tensor."""
         return self.latent_variable._dense_var_to_tensor(dtype, name, as_ref)
 
-    @quantize
     def eval(self, session=None):
-        return self.latent_variable.eval(session)
+        if self.quantizer:
+            return self.quantizer(self.latent_variable).eval(session=session)
+        return self.latent_variable.eval(session=session)
 
     @quantize
     def initialized_value(self):
