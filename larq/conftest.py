@@ -46,3 +46,12 @@ def keras_should_run_eagerly(request):
     else:
         with context.eager_mode():
             yield request.param == "tf_keras_eager"
+
+
+@pytest.fixture(params=["default", "distribute"])
+def distribute_scope(request):
+    if request.param == "distribute":
+        with tf.distribute.MirroredStrategy(["cpu:0"]).scope():
+            yield request.param
+    else:
+        yield request.param
