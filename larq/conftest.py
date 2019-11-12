@@ -23,9 +23,18 @@ def eager_and_graph_mode(request):
         yield request.param
 
 
-@pytest.fixture(params=["tf_eager", "tf_keras_eager", "graph"])
-def fixture_run_all_keras_modes(request):
-    """TODO"""
+@pytest.fixture(params=["graph", "tf_eager", "tf_keras_eager"])
+def keras_should_run_eagerly(request):
+    """Fixture to run in graph and two eager modes.
+    
+    The modes are:
+    - Graph mode
+    - TensorFlow eager and Keras eager
+    - TensorFlow eager and Keras not eager
+
+    The `tf.context` sets graph/eager mode for TensorFlow. The yield is True if Keras
+    should run eagerly.
+    """
 
     if request.param == "graph":
         with context.graph_mode():

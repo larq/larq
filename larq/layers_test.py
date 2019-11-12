@@ -159,7 +159,7 @@ class LayersTest(keras_parameterized.TestCase):
 
 
 # TODO: Move back into class
-def test_depthwise_layers(fixture_run_all_keras_modes):
+def test_depthwise_layers(keras_should_run_eagerly):
     input_data = random_input((2, 3, 7, 6))
     random_weight = np.random.random() - 0.5
 
@@ -173,7 +173,7 @@ def test_depthwise_layers(fixture_run_all_keras_modes):
                 depthwise_initializer=tf.keras.initializers.constant(random_weight),
             ),
             input_data=input_data,
-            should_run_eagerly=fixture_run_all_keras_modes,
+            should_run_eagerly=keras_should_run_eagerly,
         )
 
     fp_output = testing_utils.layer_test(
@@ -185,7 +185,7 @@ def test_depthwise_layers(fixture_run_all_keras_modes):
             ),
         ),
         input_data=np.sign(input_data),
-        should_run_eagerly=fixture_run_all_keras_modes,
+        should_run_eagerly=keras_should_run_eagerly,
     )
 
     np.testing.assert_allclose(quant_output, fp_output)
