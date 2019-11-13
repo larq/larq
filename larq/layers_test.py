@@ -89,19 +89,19 @@ class TestLayers:
                 should_run_eagerly=keras_should_run_eagerly,
             )
 
-        fp_output = testing_utils.layer_test(
-            layer,
-            kwargs=dict(
-                **kwargs,
-                kernel_initializer=tf.keras.initializers.constant(
-                    np.sign(random_weight)
-                ),
-            ),
-            input_data=np.sign(input_data),
-            should_run_eagerly=keras_should_run_eagerly,
+        fp_model = tf.keras.models.Sequential(
+            [
+                layer(
+                    **kwargs,
+                    kernel_initializer=tf.keras.initializers.constant(
+                        np.sign(random_weight)
+                    ),
+                    input_shape=input_shape[1:],
+                )
+            ]
         )
 
-        np.testing.assert_allclose(quant_output, fp_output)
+        np.testing.assert_allclose(quant_output, fp_model.predict(np.sign(input_data)))
 
     @pytest.mark.parametrize("quantized_layer, layer, input_shape", PARAMS_SEP_LAYERS)
     def test_separable_layers(
@@ -131,23 +131,23 @@ class TestLayers:
                 should_run_eagerly=keras_should_run_eagerly,
             )
 
-        fp_output = testing_utils.layer_test(
-            layer,
-            kwargs=dict(
-                filters=3,
-                kernel_size=3,
-                depthwise_initializer=tf.keras.initializers.constant(
-                    np.sign(random_d_kernel)
-                ),
-                pointwise_initializer=tf.keras.initializers.constant(
-                    np.sign(random_p_kernel)
-                ),
-            ),
-            input_data=np.sign(input_data),
-            should_run_eagerly=keras_should_run_eagerly,
+        fp_model = tf.keras.models.Sequential(
+            [
+                layer(
+                    filters=3,
+                    kernel_size=3,
+                    depthwise_initializer=tf.keras.initializers.constant(
+                        np.sign(random_d_kernel)
+                    ),
+                    pointwise_initializer=tf.keras.initializers.constant(
+                        np.sign(random_p_kernel)
+                    ),
+                    input_shape=input_shape[1:],
+                )
+            ]
         )
 
-        np.testing.assert_allclose(quant_output, fp_output)
+        np.testing.assert_allclose(quant_output, fp_model.predict(np.sign(input_data)))
 
     def test_depthwise_layers(self, keras_should_run_eagerly):
         input_data = random_input((2, 3, 7, 6))
@@ -166,19 +166,19 @@ class TestLayers:
                 should_run_eagerly=keras_should_run_eagerly,
             )
 
-        fp_output = testing_utils.layer_test(
-            tf.keras.layers.DepthwiseConv2D,
-            kwargs=dict(
-                kernel_size=3,
-                depthwise_initializer=tf.keras.initializers.constant(
-                    np.sign(random_weight)
-                ),
-            ),
-            input_data=np.sign(input_data),
-            should_run_eagerly=keras_should_run_eagerly,
+        fp_model = tf.keras.models.Sequential(
+            [
+                tf.keras.layers.DepthwiseConv2D(
+                    kernel_size=3,
+                    depthwise_initializer=tf.keras.initializers.constant(
+                        np.sign(random_weight)
+                    ),
+                    input_shape=input_data.shape[1:],
+                )
+            ]
         )
 
-        np.testing.assert_allclose(quant_output, fp_output)
+        np.testing.assert_allclose(quant_output, fp_model.predict(np.sign(input_data)))
 
 
 class TestLayerWarns:
