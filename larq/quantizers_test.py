@@ -97,18 +97,12 @@ class TestQuantization:
     def test_magnitude_aware_sign_binarization(self, eager_mode):
         a = np.random.uniform(-2, 2, (3, 2, 2, 3))
         x = tf.Variable(a)
-        with tf.GradientTape() as tape:
-            y = lq.quantizers.magnitude_aware_sign(x)
-        grad = tape.gradient(y, x)
+        y = lq.quantizers.magnitude_aware_sign(x)
 
         assert y.shape == x.shape
 
         # check sign
         np.testing.assert_allclose(tf.sign(y).numpy(), np.sign(a))
-
-        scale_vector = [
-            np.mean(np.reshape(np.abs(a[:, :, :, i]), [-1])) for i in range(3)
-        ]
 
         # check magnitude
         np.testing.assert_allclose(
