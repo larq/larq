@@ -291,7 +291,7 @@ class TestGradients:
             grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
         )
 
-    def test_ste_grad_dorefa(self, eager_mode):
+    def test_dorefa_ste_grad(self, eager_mode):
         @np.vectorize
         def ste_grad(x):
             if x <= 1 and x >= 0:
