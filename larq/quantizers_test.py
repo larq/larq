@@ -68,6 +68,14 @@ class TestCommonFunctionality:
         model.compile(optimizer="sgd", loss="mse")  # TODO modes?
         model.fit(input_data, np.ones((1,)), epochs=1)
 
+    def test_layer_as_kernel_quantizer(self):
+        input_data = testing_utils.random_input((1, 10))
+        model = tf.keras.Sequential(
+            [lq.layers.QuantDense(1, kernel_quantizer=DummyTrainableQuantizer())]
+        )
+        model.compile(optimizer="sgd", loss="mse")  # TODO modes?
+        model.fit(input_data, np.ones((1,)), epochs=1)
+
 
 class TestQuantization:
     """Test binarization and ternarization."""
