@@ -6,6 +6,17 @@ import larq as lq
 from larq import testing_utils
 
 
+class DummyTrainableQuantizer(tf.keras.layers.Layer):
+    """Used to test whether we can set layers as quantizers without any throws."""
+
+    def build(self, input_shape):
+        self.dummy_weight = self.add_weight("dummy_weight", trainable=True)
+        super().build(input_shape)
+
+    def call(self, inputs):
+        return self.dummy_weight * inputs
+
+
 class TestCommonFunctionality:
     """Test functionality common to all quantizers, like serialization and usage."""
 
@@ -48,6 +59,14 @@ class TestCommonFunctionality:
             lq.quantizers.get(42)
         with pytest.raises(ValueError):
             lq.quantizers.get("unknown")
+
+    def test_layer_as_input_quantizer(self):
+        input_data = testing_utils.random_input((1, 10))
+        model = tf.keras.Sequential(
+            [lq.layers.QuantDense(1, input_quantizer=DummyTrainableQuantizer())]
+        )
+        model.compile(optimizer="sgd", loss="mse")  # TODO modes?
+        model.fit(input_data, np.ones((1,)), epochs=1)
 
 
 class TestQuantization:
