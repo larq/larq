@@ -35,6 +35,14 @@ def get_small_bnn_model(input_dim, num_hidden, output_dim, trainable_bn=True):
     return model
 
 
+def random_input(shape):
+    for i, dim in enumerate(shape):
+        if dim is None:
+            shape[i] = np.random.randint(1, 4)
+    data = 10 * np.random.random(shape) - 0.5
+    return data.astype("float32")
+
+
 # This is a fork of https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/testing_utils.py#L72
 # as recommended in https://github.com/tensorflow/tensorflow/issues/28601#issuecomment-492810252
 def layer_test(
