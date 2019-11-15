@@ -92,13 +92,13 @@ class QuantizedVariable(variables.Variable):
     def __repr__(self):
         if context.executing_eagerly() and not self._in_graph_mode:
             return (
-                f"<QuantizedVariable '{self.name}' shape={self.shape} "
+                f"<{self.__class__.__name__} '{self.name}' shape={self.shape} "
                 f"dtype={self.dtype.name} quantizer={self.quantizer.__repr__()} "
                 f"precision={self.precision} "
                 f"numpy={ops.numpy_text(self.read_value(), is_repr=True)}>"
             )
         return (
-            f"<QuantizedVariable '{self.name}' shape={self.shape} "
+            f"<{self.__class__.__name__} '{self.name}' shape={self.shape} "
             f"dtype={self.dtype.name} quantizer={self.quantizer.__repr__()} "
             f"precision={self.precision}>"
         )
@@ -281,11 +281,5 @@ def create_quantized_variable(variable, quantizer=None):
                 distribution_strategy = maybe_variable
                 inner_var = variable.__class__(distribution_strategy, *args, **kwargs)
                 super().__init__(inner_var, quantizer=quantizer)
-
-        def __repr__(self):
-            return (
-                f"<QuantizedDistributedVariable dtype={self.dtype.name} "
-                f"inner_variable={self.latent_variable}>"
-            )
 
     return QuantizedDistributedVariable(variable, quantizer=quantizer)
