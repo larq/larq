@@ -1,10 +1,10 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
+from functools import wraps
+import tensorflow as tf
+
 from tensorflow.python.distribute import values as distribute_values
-from tensorflow.python.eager import context
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
-from tensorflow.python.ops import variables
-from functools import wraps
 
 
 def quantize(method):
@@ -23,7 +23,7 @@ def quantize(method):
     return wrapper
 
 
-class QuantizedVariable(variables.Variable):
+class QuantizedVariable(tf.Variable):
     """Variable that can be quantized in the forward pass in applicable contexts."""
 
     def __init__(self, variable, quantizer=None, precision=None):
@@ -90,7 +90,7 @@ class QuantizedVariable(variables.Variable):
         pass
 
     def __repr__(self):
-        if context.executing_eagerly() and not self._in_graph_mode:
+        if tf.executing_eagerly() and not self._in_graph_mode:
             return (
                 f"<{self.__class__.__name__} '{self.name}' shape={self.shape} "
                 f"dtype={self.dtype.name} quantizer={self.quantizer.__repr__()} "
@@ -237,7 +237,7 @@ class QuantizedVariable(variables.Variable):
 
 
 QuantizedVariable._OverloadAllOperators()
-ops.register_tensor_conversion_function(
+tf.register_tensor_conversion_function(
     QuantizedVariable, QuantizedVariable._dense_var_to_tensor
 )
 ops.register_dense_tensor_like_type(QuantizedVariable)
