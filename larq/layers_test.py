@@ -58,14 +58,6 @@ PARAMS_SEP_LAYERS = [
 ]
 
 
-def random_input(shape):
-    for i, dim in enumerate(shape):
-        if dim is None:
-            shape[i] = np.random.randint(1, 4)
-    data = 10 * np.random.random(shape) - 0.5
-    return data.astype("float32")
-
-
 class TestLayers:
     @pytest.mark.parametrize(
         "quantized_layer, layer, input_shape, kwargs", PARAMS_ALL_LAYERS
@@ -73,7 +65,7 @@ class TestLayers:
     def test_binarization(
         self, quantized_layer, layer, input_shape, kwargs, keras_should_run_eagerly
     ):
-        input_data = random_input(input_shape)
+        input_data = testing_utils.random_input(input_shape)
         random_weight = np.random.random() - 0.5
 
         with lq.metrics.scope(["flip_ratio"]):
@@ -107,7 +99,7 @@ class TestLayers:
     def test_separable_layers(
         self, quantized_layer, layer, input_shape, keras_should_run_eagerly
     ):
-        input_data = random_input(input_shape)
+        input_data = testing_utils.random_input(input_shape)
         random_d_kernel = np.random.random() - 0.5
         random_p_kernel = np.random.random() - 0.5
 
@@ -150,7 +142,7 @@ class TestLayers:
         np.testing.assert_allclose(quant_output, fp_model.predict(np.sign(input_data)))
 
     def test_depthwise_layers(self, keras_should_run_eagerly):
-        input_data = random_input((2, 3, 7, 6))
+        input_data = testing_utils.random_input((2, 3, 7, 6))
         random_weight = np.random.random() - 0.5
 
         with lq.metrics.scope(["flip_ratio"]):
@@ -208,7 +200,6 @@ class TestLayerWarns:
         lq.layers.QuantSeparableConv2D(
             3, 3, depthwise_quantizer="ste_sign", pointwise_quantizer="ste_sign"
         )
-        assert len(caplog.records) == 2
         assert "depthwise_constraint" in caplog.text
         assert "pointwise_constraint" in caplog.text
 

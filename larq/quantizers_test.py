@@ -3,7 +3,18 @@ import numpy as np
 
 import pytest
 import larq as lq
-from larq.testing_utils import generate_real_values_with_zeros
+from larq import testing_utils
+
+
+class DummyTrainableQuantizer(tf.keras.layers.Layer):
+    """Used to test whether we can set layers as quantizers without any throws."""
+
+    def build(self, input_shape):
+        self.dummy_weight = self.add_weight("dummy_weight", trainable=True)
+        super().build(input_shape)
+
+    def call(self, inputs):
+        return self.dummy_weight * inputs
 
 
 class TestCommonFunctionality:
@@ -49,6 +60,20 @@ class TestCommonFunctionality:
         with pytest.raises(ValueError):
             lq.quantizers.get("unknown")
 
+    @pytest.mark.parametrize("quantizer", ["input_quantizer", "kernel_quantizer"])
+    def test_layer_as_quantizer(self, quantizer, keras_should_run_eagerly):
+        """Test whether a keras.layers.Layer can be used as quantizer."""
+
+        input_data = testing_utils.random_input((1, 10))
+
+        model = tf.keras.Sequential(
+            [lq.layers.QuantDense(1, **{quantizer: DummyTrainableQuantizer()})]
+        )
+        model.compile(optimizer="sgd", loss="mse", run_eagerly=keras_should_run_eagerly)
+        model.fit(input_data, np.ones((1,)), epochs=1)
+
+        assert any(["dummy_weight" in var.name for var in model.trainable_variables])
+
 
 class TestQuantization:
     """Test binarization and ternarization."""
@@ -70,7 +95,7 @@ class TestQuantization:
         result = f([binarized_values])[0]
         np.testing.assert_allclose(result, binarized_values)
 
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         assert not np.any(result == 0)
         assert np.all(result[real_values < 0] == -1)
@@ -89,7 +114,7 @@ class TestQuantization:
         result = f([binarized_values])[0]
         np.testing.assert_allclose(result, binarized_values)
 
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         assert np.all(result[real_values <= 0] == 0)
         assert np.all(result[real_values > 0] == 1)
@@ -132,7 +157,7 @@ class TestQuantization:
         assert np.any(result == 1)
         assert np.any(result == 0)
 
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         assert not np.any(result > 1)
         assert not np.any(result < -1)
@@ -146,7 +171,7 @@ class TestQuantization:
         test_threshold = 0.05  # This is the default
         f = tf.keras.backend.function([x], [lq.quantizers.get(fn)(x)])
 
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         assert np.all(result[real_values > test_threshold] == 1)
         assert np.all(result[real_values < -test_threshold] == -1)
@@ -160,7 +185,7 @@ class TestQuantization:
         fn = lq.quantizers.SteTern(threshold_value=test_threshold)
         f = tf.keras.backend.function([x], [fn(x)])
 
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         assert np.all(result[real_values > test_threshold] == 1)
         assert np.all(result[real_values < -test_threshold] == -1)
@@ -170,7 +195,7 @@ class TestQuantization:
 
     def test_ternarization_with_ternary_weight_networks(self):
         x = tf.keras.backend.placeholder(ndim=2)
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         test_threshold = 0.7 * np.sum(np.abs(real_values)) / np.size(real_values)
         fn = lq.quantizers.SteTern(ternary_weight_networks=True)
         f = tf.keras.backend.function([x], [fn(x)])
@@ -188,7 +213,7 @@ class TestQuantization:
     def test_dorefa_quantize(self, fn):
         x = tf.keras.backend.placeholder(ndim=2)
         f = tf.keras.backend.function([x], [fn(x)])
-        real_values = generate_real_values_with_zeros()
+        real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         k_bit = 2
         n = 2 ** k_bit - 1
@@ -212,7 +237,7 @@ class TestGradients:
         [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside],
     )
     def test_identity_ste_grad(self, eager_mode, fn):
-        x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
+        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
             activation = fn(tf_x, clip_value=None)
@@ -230,7 +255,7 @@ class TestGradients:
                 return 1.0
             return 0.0
 
-        x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
+        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
             activation = fn(tf_x)
@@ -244,7 +269,7 @@ class TestGradients:
                 beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
             )
 
-        x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
+        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
             activation = lq.quantizers.swish_sign(tf_x)
@@ -263,7 +288,7 @@ class TestGradients:
                 return 2 - 2 * np.abs(x)
             return 0.0
 
-        x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
+        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
             activation = lq.quantizers.approx_sign(tf_x)
@@ -292,7 +317,7 @@ class TestGradients:
                 return 1.0
             return 0.0
 
-        x = generate_real_values_with_zeros(shape=(8, 3, 3, 16))
+        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
             activation = lq.quantizers.DoReFaQuantizer(2)(tf_x)
