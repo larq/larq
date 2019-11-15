@@ -260,21 +260,4 @@ def create_quantized_variable(variable, quantizer=None):
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
         """An QuantizedVariable that also subclasses from DistributedVariable."""
 
-        def __init__(self, maybe_variable, *args, quantizer=None, **kwargs):
-            if not args and not kwargs:
-                # The common case: We call the super constructor with a single argument,
-                # which is a variable.
-                super().__init__(maybe_variable, quantizer=quantizer)
-            else:
-                # This 'else' branch is needed, as distribution strategies sometimes
-                # clone a distributed variable by doing the following:
-                #
-                #    var = type(var)(var._distribute_strategy, var._device_map, ...)
-                #
-                # In this case, `maybe_variable` will instead be a distribution
-                # strategy. We create the DistributedVariable before wrapping it.
-                distribution_strategy = maybe_variable
-                inner_var = variable.__class__(distribution_strategy, *args, **kwargs)
-                super().__init__(inner_var, quantizer=quantizer)
-
     return QuantizedDistributedVariable(variable, quantizer=quantizer)
