@@ -54,22 +54,19 @@ class QuantizedVariable(tf.Variable):
         return self.latent_variable.read_value()
 
     @quantize
-    def sparse_read(self, indices, name=None):
-        """Reads the value of this variable sparsely, using `gather`."""
-        return self.latent_variable.sparse_read(indices, name=name)
+    def sparse_read(self, *args, **kwargs):
+        return self.latent_variable.sparse_read(*args, **kwargs)
 
     @quantize
-    def gather_nd(self, indices, name=None):
-        """Gather slices of the variable into a Tensor."""
-        return self.latent_variable.gather_nd(indices, name=name)
+    def gather_nd(self, *args, **kwargs):
+        return self.latent_variable.gather_nd(*args, **kwargs)
 
     def __getattr__(self, name):
         return getattr(self.latent_variable, name)
 
     @quantize
-    def _dense_var_to_tensor(self, dtype=None, name=None, as_ref=False):
-        """Converts this variable to a tensor."""
-        return self.latent_variable._dense_var_to_tensor(dtype, name, as_ref)
+    def _dense_var_to_tensor(self, *args, **kwargs):
+        return self.latent_variable._dense_var_to_tensor(*args, **kwargs)
 
     def eval(self, session=None):
         if self.quantizer:
@@ -117,8 +114,8 @@ class QuantizedVariable(tf.Variable):
     #     would be the same as the ref of the underlying variable, which would be
     #     strange as they are different Python objects.
 
-    def set_shape(self, shape):
-        return self.latent_variable.set_shape(self, shape)
+    def set_shape(self, *args, **kwargs):
+        return self.latent_variable.set_shape(self, *args, **kwargs)
 
     @property
     def trainable(self):
@@ -136,55 +133,53 @@ class QuantizedVariable(tf.Variable):
     def constraint(self):
         return self.latent_variable.constraint
 
-    def assign(self, value, use_locking=None, name=None, read_value=True):
-        return self.latent_variable.assign(value, use_locking, name, read_value)
+    def assign(self, *args, **kwargs):
+        return self.latent_variable.assign(*args, **kwargs)
 
-    def assign_add(self, delta, use_locking=None, name=None, read_value=True):
-        return self.latent_variable.assign_add(delta, use_locking, name, read_value)
+    def assign_add(self, *args, **kwargs):
+        return self.latent_variable.assign_add(*args, **kwargs)
 
-    def assign_sub(self, delta, use_locking=None, name=None, read_value=True):
-        return self.latent_variable.assign_sub(delta, use_locking, name, read_value)
+    def assign_sub(self, *args, **kwargs):
+        return self.latent_variable.assign_sub(*args, **kwargs)
 
-    def scatter_sub(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_sub(sparse_delta, use_locking, name)
+    def scatter_sub(self, *args, **kwargs):
+        return self.latent_variable.scatter_sub(*args, **kwargs)
 
-    def scatter_add(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_add(sparse_delta, use_locking, name)
+    def scatter_add(self, *args, **kwargs):
+        return self.latent_variable.scatter_add(*args, **kwargs)
 
-    def scatter_max(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_max(sparse_delta, use_locking, name)
+    def scatter_max(self, *args, **kwargs):
+        return self.latent_variable.scatter_max(*args, **kwargs)
 
-    def scatter_min(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_min(sparse_delta, use_locking, name)
+    def scatter_min(self, *args, **kwargs):
+        return self.latent_variable.scatter_min(*args, **kwargs)
 
-    def scatter_mul(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_mul(sparse_delta, use_locking, name)
+    def scatter_mul(self, *args, **kwargs):
+        return self.latent_variable.scatter_mul(*args, **kwargs)
 
-    def scatter_div(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_div(sparse_delta, use_locking, name)
+    def scatter_div(self, *args, **kwargs):
+        return self.latent_variable.scatter_div(*args, **kwargs)
 
-    def scatter_update(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.scatter_update(sparse_delta, use_locking, name)
+    def scatter_update(self, *args, **kwargs):
+        return self.latent_variable.scatter_update(*args, **kwargs)
 
-    def batch_scatter_update(self, sparse_delta, use_locking=False, name=None):
-        return self.latent_variable.batch_scatter_update(
-            sparse_delta, use_locking, name
-        )
+    def batch_scatter_update(self, *args, **kwargs):
+        return self.latent_variable.batch_scatter_update(*args, **kwargs)
 
-    def scatter_nd_sub(self, indices, updates, name=None):
-        return self.latent_variable.scatter_nd_sub(indices, updates, name)
+    def scatter_nd_sub(self, *args, **kwargs):
+        return self.latent_variable.scatter_nd_sub(*args, **kwargs)
 
-    def scatter_nd_add(self, indices, updates, name=None):
-        return self.latent_variable.scatter_nd_add(indices, updates, name)
+    def scatter_nd_add(self, *args, **kwargs):
+        return self.latent_variable.scatter_nd_add(*args, **kwargs)
 
-    def scatter_nd_update(self, indices, updates, name=None):
-        return self.latent_variable.scatter_nd_update(indices, updates, name)
+    def scatter_nd_update(self, *args, **kwargs):
+        return self.latent_variable.scatter_nd_update(*args, **kwargs)
 
-    def count_up_to(self, limit):
-        return self.latent_variable.count_up_to(limit)
+    def count_up_to(self, *args, **kwargs):
+        return self.latent_variable.count_up_to(*args, **kwargs)
 
-    def load(self, value, session=None):
-        return self.latent_variable.load(value, session)
+    def load(self, *args, **kwargs):
+        return self.latent_variable.load(*args, **kwargs)
 
     @property
     def dtype(self):
@@ -229,11 +224,11 @@ class QuantizedVariable(tf.Variable):
         return self.latent_variable._gather_saveables_for_checkpoint()
 
     # TODO: Maybe encode the fact the variable is an QuantizedVariable in to_proto().
-    def to_proto(self, export_scope=None):
-        return self.latent_variable.to_proto(export_scope)
+    def to_proto(self, *args, **kwargs):
+        return self.latent_variable.to_proto(*args, **kwargs)
 
-    def from_proto(self, variable_def, import_scope=None):
-        return self.latent_variable.from_proto(variable_def, import_scope)
+    def from_proto(self, *args, **kwargs):
+        return self.latent_variable.from_proto(*args, **kwargs)
 
 
 QuantizedVariable._OverloadAllOperators()
