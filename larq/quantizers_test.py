@@ -62,12 +62,17 @@ class TestCommonFunctionality:
 
     @pytest.mark.parametrize("quantizer", ["input_quantizer", "kernel_quantizer"])
     def test_layer_as_quantizer(self, quantizer, keras_should_run_eagerly):
+        """Test whether a keras.layers.Layer can be used as quantizer."""
+
         input_data = testing_utils.random_input((1, 10))
+
         model = tf.keras.Sequential(
             [lq.layers.QuantDense(1, **{quantizer: DummyTrainableQuantizer()})]
         )
         model.compile(optimizer="sgd", loss="mse", run_eagerly=keras_should_run_eagerly)
         model.fit(input_data, np.ones((1,)), epochs=1)
+
+        assert any(["dummy_weight" in var.name for var in model.trainable_variables])
 
 
 class TestQuantization:
