@@ -200,7 +200,6 @@ class TestLayerWarns:
         lq.layers.QuantSeparableConv2D(
             3, 3, depthwise_quantizer="ste_sign", pointwise_quantizer="ste_sign"
         )
-        assert len(caplog.records) == 2
         assert "depthwise_constraint" in caplog.text
         assert "pointwise_constraint" in caplog.text
 
