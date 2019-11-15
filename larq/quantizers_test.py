@@ -60,18 +60,11 @@ class TestCommonFunctionality:
         with pytest.raises(ValueError):
             lq.quantizers.get("unknown")
 
-    def test_layer_as_input_quantizer(self):
+    @pytest.mark.parametrize("quantizer", ["input_quantizer", "kernel_quantizer"])
+    def test_layer_as_quantizer(self, quantizer):
         input_data = testing_utils.random_input((1, 10))
         model = tf.keras.Sequential(
-            [lq.layers.QuantDense(1, input_quantizer=DummyTrainableQuantizer())]
-        )
-        model.compile(optimizer="sgd", loss="mse")  # TODO modes?
-        model.fit(input_data, np.ones((1,)), epochs=1)
-
-    def test_layer_as_kernel_quantizer(self):
-        input_data = testing_utils.random_input((1, 10))
-        model = tf.keras.Sequential(
-            [lq.layers.QuantDense(1, kernel_quantizer=DummyTrainableQuantizer())]
+            [lq.layers.QuantDense(1, **{quantizer: DummyTrainableQuantizer()})]
         )
         model.compile(optimizer="sgd", loss="mse")  # TODO modes?
         model.fit(input_data, np.ones((1,)), epochs=1)
