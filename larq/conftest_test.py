@@ -14,4 +14,4 @@ def test_graph_mode_fixture(graph_mode):
 
 
 def test_distribute_scope(distribute_scope):
-    assert tf.distribute.has_strategy() == (distribute_scope == "distribute")
+    assert tf.distribute.has_strategy() is distribute_scope
