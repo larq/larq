@@ -2,9 +2,8 @@
 from functools import wraps
 import tensorflow as tf
 
-from tensorflow.python.distribute import values as distribute_values
+from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
-from tensorflow.python.ops import resource_variable_ops
 
 
 def quantize(method):
@@ -36,10 +35,9 @@ class QuantizedVariable(tf.Variable):
         precision: An optional integer defining the precision of the quantized
             variable. If `None`, `quantizer.precision` is used.
         """
-        if not resource_variable_ops.is_resource_variable(variable):
+        if not isinstance(variable, (tf.Variable, DistributedVariable)):
             raise ValueError(
-                "variable must be of type tf.ResourceVariable, but got: "
-                "%s" % variable
+                "variable must be of type tf.Variable, but got: %s" % variable
             )
         self.latent_variable = variable
         self.quantizer = quantizer
@@ -254,7 +252,7 @@ def create_quantized_variable(variable, quantizer=None):
     Returns:
       An QuantizedVariable that wraps the variable.
     """
-    if not isinstance(variable, distribute_values.DistributedVariable):
+    if not isinstance(variable, DistributedVariable):
         return QuantizedVariable(variable, quantizer=quantizer)
 
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
