@@ -83,7 +83,7 @@ def _format_table_entry(x, units=1):
         if type(x) == str or x == 0 or units == 1:
             return x
         return x / units
-    except:
+    except AssertionError:
         return "?"
 
 
@@ -185,7 +185,7 @@ class LayerProfile:
     def input_precision(self, default="-"):
         try:
             return self._layer.input_quantizer.precision
-        except:
+        except AttributeError:
             return default
 
     @property
@@ -236,7 +236,7 @@ class LayerProfile:
             ):
                 if quantized_weight is weight:
                     return quantizer.precision
-        except:
+        except AttributeError:
             pass
         return 32
 

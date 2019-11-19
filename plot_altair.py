@@ -11,7 +11,7 @@ import pandas as pd
 
 try:
     tf.enable_eager_execution()
-except:
+except Exception:
     pass
 
 

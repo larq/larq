@@ -274,9 +274,9 @@ def test_layer_kwargs(quant_layer, layer):
     ):
         try:
             quant_params_list.remove(p)
-        except:
+        except ValueError:
             pass
     assert quant_params_list == params_list
 
     for param in params_list:
-        assert quant_params.get(param).default == params.get(param).default
+        assert quant_params.get(param).default == params.get(param).default  # type: ignore
