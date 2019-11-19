@@ -1,8 +1,9 @@
 import numpy as np
-import larq as lq
-from larq.testing_utils import generate_real_values_with_zeros
 import pytest
 import tensorflow as tf
+
+import larq as lq
+from larq.testing_utils import generate_real_values_with_zeros
 
 
 @pytest.mark.parametrize("fn", [lq.math.sign])

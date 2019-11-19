@@ -1,11 +1,11 @@
-import pytest
 import numpy as np
+import pytest
 import tensorflow as tf
-import larq as lq
-
-from larq import testing_utils as lq_testing_utils
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
+
+import larq as lq
+from larq import testing_utils as lq_testing_utils
 
 
 def _assert_weights(weights, expected):

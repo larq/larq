@@ -1,6 +1,9 @@
 import logging
+
 import tensorflow as tf
-from larq import quantizers, utils, metrics as lq_metrics
+
+from larq import metrics as lq_metrics
+from larq import quantizers, utils
 
 log = logging.getLogger(__name__)
 

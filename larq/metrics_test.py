@@ -1,6 +1,7 @@
-import tensorflow as tf
-from larq import metrics
 import pytest
+import tensorflow as tf
+
+from larq import metrics
 
 
 def test_scope():

@@ -1,6 +1,7 @@
-import larq as lq
 import numpy as np
 import tensorflow as tf
+
+import larq as lq
 
 
 def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):

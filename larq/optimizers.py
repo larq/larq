@@ -1,7 +1,7 @@
-"""Neural networks with extremely low-precision weights and activations, such as 
-Binarized Neural Networks (BNNs), usually contain a mix of low-precision weights (e.g. 
-1-bit) and  higher-precision weights (e.g. 8-bit, 16-bit, or 32-bit). Examples of this 
-include the first and last layers of image classificiation models, which have 
+"""Neural networks with extremely low-precision weights and activations, such as
+Binarized Neural Networks (BNNs), usually contain a mix of low-precision weights (e.g.
+1-bit) and  higher-precision weights (e.g. 8-bit, 16-bit, or 32-bit). Examples of this
+include the first and last layers of image classificiation models, which have
 higher-precision weights in most BNN architectures from the literature.
 
 Training a BNN, then, consists of optimizing both low-precision and higher-precision
@@ -32,13 +32,12 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 
 
 import warnings
-
-import tensorflow as tf
-import larq as lq
-
-from larq import utils
 from copy import deepcopy
 
+import tensorflow as tf
+
+import larq as lq
+from larq import utils
 
 __all__ = ["Bop", "CaseOptimizer"]
 

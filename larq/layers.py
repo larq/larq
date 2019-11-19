@@ -7,6 +7,7 @@ is equivalent to a full precision layer.
 """
 
 import tensorflow as tf
+
 from larq import utils
 from larq.layers_base import (
     QuantizerBase,

@@ -23,6 +23,7 @@ model.add(lq.layers.QuantDense(64, activation=lq.activations.hard_tanh))
 """
 
 import tensorflow as tf
+
 from larq import utils
 
 

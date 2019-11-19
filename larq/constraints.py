@@ -19,6 +19,7 @@ lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.))
 """
 
 import tensorflow as tf
+
 from larq import utils
 
 

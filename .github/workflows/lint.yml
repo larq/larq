@@ -1,9 +1,13 @@
 name: Lint
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,9 +16,15 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
-      - name: Install Lint Dependencies
-        run: pip install pyflakes==2.1.1 black==19.10b0
-      - name: Run PyFlakes
-        run: pyflakes .
+      - name: Install project dependencies
+        run: |
+          pip install tensorflow==2.0.0
+          pip install -e .[test]
+      - name: Run Flake8
+        run: flake8
       - name: Black code style
-        run: black . --check --target-version py36 --exclude 'build/|buck-out/|dzzist/|_build/|\.git/|\.hg/|\.mypy_cache/|\.tox/|\.venv/|larq/snapshots/'
+        run: black --check --target-version py36 --exclude 'build/|\.mypy_cache/|\.venv/|env/|larq/snapshots/|.pytype/' .
+      - name: Check import order with isort
+        run: isort --check-only --diff
+      - name: Type check with PyType
+        run: pytype

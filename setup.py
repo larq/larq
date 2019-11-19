@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 
 def readme():
@@ -27,10 +27,14 @@ setup(
         "tensorflow": ["tensorflow>=1.14.0"],
         "tensorflow_gpu": ["tensorflow-gpu>=1.14.0"],
         "test": [
-            "pytest==5.2.4",
-            "pytest-cov==2.8.1",
-            "pytest-xdist==1.30.0",
-            "snapshottest==0.5.1",
+            "black==19.10b0",
+            "flake8~=3.7.9",
+            "isort~=4.3.21",
+            "pytest~=5.2.4",
+            "pytest-cov~=2.8.1",
+            "pytest-xdist~=1.30.0",
+            "pytype~=2019.10.17",
+            "snapshottest~=0.5.1",
         ],
         "docs": [
             "mkdocs==1.0.4",
