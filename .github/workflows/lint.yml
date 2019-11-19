@@ -20,3 +20,5 @@ jobs:
         run: flake8
       - name: Black code style
         run: black --check --target-version py36 --exclude 'build/|\.mypy_cache/|\.venv/|env/|larq/snapshots/|.pytype/' .
+      - name: Type check with PyType
+        run: pytype
