@@ -25,24 +25,34 @@ bibliography: paper.bib
 # Summary
 
 Bringing the power of deep learning outside of data centers can transform society: self-driving cars, mobile-based neural networks, and autonomous drones all have the potential to revolutionize everyday lives.
-However, existing neural networks that use 32 bits, 16 bits or 8 bits to encode each weight and activation have an energy budget which is far beyond the scope of many of these applications.
-Binarized Neural Networks (BNNs) have emerged as a promising solution to this problem. In these networks both weights and activations are restricted to $\{-1, +1\}$, resulting in models which are dramatically less computationally expensive, have a far lower memory footprint, and when executed on specialized hardware yield a stunning reduction in energy consumption [@NIPS2016_6573].
-However, BNNs are very difficult to design and train, so their use in industry is not yet widespread. `larq` is the first step towards solving this problem.
+However, existing neural networks that use 32 bits to encode each weight and activation have an energy budget which is far beyond the scope of many of these applications. One common way to improve computational efficiency is to reduce the precision of the network to 16-bit or 8-bit, also known as quantization.
+Binarized Neural Networks (BNNs) represent and extreme case of quantization. In these networks both weights and activations are restricted to $\{-1, +1\}$ [@binarynet]. Compared to an equivalent 8-bit quantized network BNNs require 8 times less memory and can lead to a theoretical 64 times speedup when deployed on optimized hardware.
+However, many open research questions remain until the widespread use of BNNs and other extremely quantized neural networks in industry. [`larq`](https://larq.dev) is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs). It is intended to facilitate research to resolve these outstanding questions.
 
-`larq` is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs).
-The API of `larq` is built on top of `tf.keras` [@tensorflow2015-whitepaper; @chollet2015keras] and is designed to provide an easy to use, composable way to design and train BNNs. It provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
-It provides well-tested implementations and pretrained weights for a variety of popular extremely quantized models. This makes the field more accessible, encourages reproducibility, and facilitates research.
+# Training extremely quantized neural networks with `larq`
 
-`larq` is built around the concept of quantized layers that compute
+The API of `larq` is built on top of `tensorflow.keras` [@tensorflow; @keras] and is designed to provide an easy to use, composable way to design and train BNNs. While popular libaries like TensorFlow Lite, TensorFlow Model Optimization or PyTorch focus on 16-bit or 8-bit quantization [@tensorflow; @pytorch], `larq` aims to extend this towards lower bit-widths.
+
+Quantization is the process of mapping a set of continuous values to a smaller countable set. BNNs are a special case of QNNs, where the quantization output $x_q$ is binary:
+
+$$
+x_q = q(x), \quad x_q \in \{-1, +1\}, x \in \mathbb{R}
+$$
+
+`larq` is built around the concept of quantizers $q(x)$ and quantized layers that compute
 
 $$
 \sigma(f(q_{\, \mathrm{kernel}}(\boldsymbol{w}), q_{\, \mathrm{input}}(\boldsymbol{x})) + b)
 $$
 
 with full precision weights $\boldsymbol{w}$, arbitrary precision input $\boldsymbol{x}$, layer operation $f$ (e.g. $f(\boldsymbol{w}, \boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{w}$ for a densely-connected layer), activation $\sigma$ and bias $b$.
-$q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define an operation for quantizing a kernel and inputs, respectively, and a pseudo-gradient used for automatic differentiation.
+$q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define an operation for quantizing a kernel and inputs, respectively, and a pseudo-gradient used for automatic differentiation so that operations of the layer can be executed in reduced precision. The source code and documentation be found at [github.com/larq/larq](https://github.com/larq/larq) and [larq.dev](https://larq.dev) respectively.
 
-The flexible yet easy to use API of `larq` is aimed at both researchers in the field of efficient deep learning [@2019arXiv190602107H] and practitioners who want to explore BNNs for their applications. Furthermore, `larq` makes it easier for beginners and students to get started with BNNs.
+While `larq` can be used to train networks with arbitrary bit-widths, it provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
+
+Furthermore [`larq/zoo`](https://larq.dev/models) provides well-tested implementations and pretrained weights for a variety of popular extremely quantized models [@binarynet; @bireal_net; @binary_dense_net; @xnor_net]. This makes the field more accessible, encourages reproducibility, and facilitates research.
+
+The flexible yet easy to use API of `larq` is aimed at both researchers in the field of efficient deep learning [@bop] and practitioners who want to explore BNNs for their applications. Furthermore, `larq` makes it easier for beginners and students to get started with BNNs.
 We are working to expand the audience by adding support for deploying BNNs on embedded devices, making `larq` useful for real applications. By building a community-driven open source project, we hope to accelerate research in the field of BNNs and other QNNs to enable deep learning in resource-constrained environments.
 
 # References
