@@ -1,7 +1,7 @@
-import tensorflow as tf
 import numpy as np
-
 import pytest
+import tensorflow as tf
+
 import larq as lq
 from larq import testing_utils
 

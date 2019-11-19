@@ -1,10 +1,11 @@
-import tensorflow as tf
-import numpy as np
-import larq as lq
-import pytest
 import inspect
-from larq import testing_utils
 
+import numpy as np
+import pytest
+import tensorflow as tf
+
+import larq as lq
+from larq import testing_utils
 
 PARAMS_ALL_LAYERS = [
     (lq.layers.QuantDense, tf.keras.layers.Dense, (3, 2), dict(units=3)),

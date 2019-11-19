@@ -1,10 +1,12 @@
 import os
 import uuid
 from functools import reduce
+
 import numpy as np
-import larq as lq
 import tensorflow as tf
+
 import altair as alt
+import larq as lq
 import pandas as pd
 
 try:

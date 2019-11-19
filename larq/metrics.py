@@ -5,11 +5,12 @@ activation and not just the `y_true` and `y_pred` that Keras passes to metrics d
 in the usual way.
 """
 
-import tensorflow as tf
-from larq import utils
-import numpy as np
 from contextlib import contextmanager
 
+import numpy as np
+import tensorflow as tf
+
+from larq import utils
 
 __all__ = ["scope", "get_training_metrics"]
 

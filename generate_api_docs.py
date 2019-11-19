@@ -3,6 +3,7 @@
 import inspect
 import os
 import sys
+
 import yaml
 
 from pydocmd.document import Index

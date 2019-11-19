@@ -32,13 +32,12 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 
 
 import warnings
-
-import tensorflow as tf
-import larq as lq
-
-from larq import utils
 from copy import deepcopy
 
+import tensorflow as tf
+
+import larq as lq
+from larq import utils
 
 __all__ = ["Bop", "CaseOptimizer"]
 

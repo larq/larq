@@ -1,9 +1,10 @@
-import numpy as np
-from terminaltables import AsciiTable
 import itertools
 from dataclasses import dataclass
 
+import numpy as np
 import tensorflow.keras.layers as keras_layers
+from terminaltables import AsciiTable
+
 import larq.layers as lq_layers
 
 __all__ = ["summary"]
