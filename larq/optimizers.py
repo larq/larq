@@ -25,7 +25,7 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
             lq.optimizers.Bop.is_binary_variable,  # predicate
             lq.optimizers.Bop(threshold=1e-6, gamma=1e-3),  # optimizer
         ),
-        default=tf.keras.optimizers.Adam(0.01),
+        default_optimizer=tf.keras.optimizers.Adam(0.01),
     )
     ```
 """
