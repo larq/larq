@@ -22,7 +22,7 @@ date: 9 September 2019
 bibliography: paper.bib
 ---
 
-# Summary
+# Introduction
 
 Bringing the power of deep learning outside of data centers can transform society: self-driving cars, mobile-based neural networks, and autonomous drones all have the potential to revolutionize everyday lives.
 However, existing neural networks that use 32 bits to encode each weight and activation have an energy budget which is far beyond the scope of many of these applications. One common way to improve computational efficiency is to reduce the precision of the network to 16-bit or 8-bit, also known as quantization.
@@ -50,7 +50,12 @@ $q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define 
 
 While `larq` can be used to train networks with arbitrary bit-widths, it provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
 
-Furthermore [`larq/zoo`](https://larq.dev/models) provides well-tested implementations and pretrained weights for a variety of popular extremely quantized models [@binarynet; @bireal_net; @binary_dense_net; @xnor_net]. This makes the field more accessible, encourages reproducibility, and facilitates research.
+# Encouraging reproducible reseach with `larq/zoo`
+
+Fortunately, many researchers already publish code along with their papers, though in absence of a commmon API to define extremely quantized networks, authors end up re-implementing a large amount of code, making it difficult to share improvements and make rapid progress. We and many other researchers in the field often encounter major problems when it comes to reproducing existing literature, due to incomplete or even broken code of official implementations.
+To tackle this issue, [`larq/zoo`](https://larq.dev/models) provides tested and maintained implementations and pretrained weights for a variety of popular extremely quantized models [@binarynet; @bireal_net; @binary_dense_net; @xnor_net; @dorefa] helping researchers focus on their work instead of spending time on reproducing existing work.
+
+# Summary
 
 The flexible yet easy to use API of `larq` is aimed at both researchers in the field of efficient deep learning [@bop] and practitioners who want to explore BNNs for their applications. Furthermore, `larq` makes it easier for beginners and students to get started with BNNs.
 We are working to expand the audience by adding support for deploying BNNs on embedded devices, making `larq` useful for real applications. By building a community-driven open source project, we hope to accelerate research in the field of BNNs and other QNNs to enable deep learning in resource-constrained environments.
