@@ -21,7 +21,7 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 !!! example
     ```python
     case_optimizer = lq.optimizers.CaseOptimizer(
-        pred_opt_pairs=(
+        (
             lq.optimizers.Bop.is_binary_variable,  # predicate
             lq.optimizers.Bop(threshold=1e-6, gamma=1e-3),  # optimizer
         ),
@@ -214,10 +214,10 @@ class Bop(tf.keras.optimizers.Optimizer):
     !!! example
         ```python
         optimizer = lq.optimizers.CaseOptimizer(
-            predicate_optimizer_pairs=[(
+            (
                 lq.optimizers.Bop.is_binary_variable,
                 lq.optimizers.Bop(),
-            )],
+            ),
             default_optimizer=tf.keras.optimizers.Adam(0.01),  # for FP weights
         )
         ```
