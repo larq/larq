@@ -1,6 +1,7 @@
-from larq.quantized_variable import create_quantized_variable
-from tensorflow.python.distribute.values import DistributedVariable
 import tensorflow as tf
+from tensorflow.python.distribute.values import DistributedVariable
+
+from larq.quantized_variable import create_quantized_variable
 
 
 def test_inheritance(distribute_scope):

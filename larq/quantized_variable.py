@@ -1,7 +1,7 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
 from functools import wraps
-import tensorflow as tf
 
+import tensorflow as tf
 from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 
