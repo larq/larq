@@ -29,6 +29,14 @@ However, existing neural networks that use 32 bits to encode each weight and act
 Binarized Neural Networks (BNNs) represent and extreme case of quantization. In these networks both weights and activations are restricted to $\{-1, +1\}$ [@binarynet]. Compared to an equivalent 8-bit quantized network BNNs require 8 times less memory and can lead to a theoretical 64 times speedup when deployed on optimized hardware.
 However, many open research questions remain until the widespread use of BNNs and other extremely quantized neural networks in industry. [`larq`](https://larq.dev) is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs). It is intended to facilitate research to resolve these outstanding questions.
 
+# Background: Neural Network Binarization
+
+Binarization of artificial deep neural networks poses two fundamental challenges to regular deep learning strategies, which are all based on backpropagation and stochastic gradient descent [@rumelhart]: the gradient of the binarization function vanishes almost everywhere and a weight in the set ${-1, +1}$ cannot absorb small update steps. Therefore, binarization was long deemed unfeasible.
+
+A solution to both problems was suggested by Hinton [@hinton_coursera] who proposed the Straight-Through Estimator which ignores the binarization during the backward pass. The viability of this approach was demonstrated by BinaryConnect [@binaryconnect] and BinaryNet [@binarynet], proving that binarization of networks was possible even for complex tasks.
+
+Since then, the field of BNNs and closely related Ternary Neural Networks has become a prime candidate to enable efficient inference for deep neural networks. Numerous papers have explored novel architectures [@Zhu2018; @bireal_net; @xnor_net; @Zhuang2018] and optimization strategies [@Alizadeh2019; @bop], and the accuracy gap between efficient BNNs and regular DNNs is rapidly closing.
+
 # Training extremely quantized neural networks with `larq`
 
 Existing tools for BNN research either focus on deployment or require a high learning curve to use and contribute to [@dabnn; @bmxnetv2]. The API of `larq` is built on top of `tensorflow.keras` [@tensorflow; @keras] and is designed to provide an easy to use, composable way to design and train BNNs. While popular libaries like TensorFlow Lite, TensorFlow Model Optimization or PyTorch focus on 16-bit or 8-bit quantization [@tensorflow; @pytorch], `larq` aims to extend this towards lower bit-widths.
