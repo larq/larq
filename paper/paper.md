@@ -31,9 +31,9 @@ However, many open research questions remain until the widespread use of BNNs an
 
 # Background: Neural Network Binarization
 
-Binarization of artificial deep neural networks poses two fundamental challenges to regular deep learning strategies, which are all based on backpropagation and stochastic gradient descent [@rumelhart; @bottou1991]: the gradient of the binarization function vanishes almost everywhere and a weight in the set ${-1, +1}$ cannot absorb small update steps. Therefore, binarization was long deemed unfeasible.
+Binarization of artificial deep neural networks poses two fundamental challenges to regular deep learning strategies, which are all based on backpropagation and stochastic gradient descent [@rumelhart; @bottou1991]: the gradient of the binarization function vanishes almost everywhere and a weight in the set $\{-1, +1\}$ cannot absorb small update steps. Therefore, binarization was long deemed unfeasible.
 
-A solution to both problems was suggested by Hinton [@hinton_coursera] who proposed the Straight-Through Estimator which ignores the binarization during the backward pass. The viability of this approach was demonstrated by BinaryConnect [@binaryconnect] and BinaryNet [@binarynet], proving that binarization of networks was possible even for complex tasks.
+A solution to both problems was suggested by Hinton, who proposed the Straight-Through Estimator, which ignores the binarization during the backward pass [@hinton_coursera]. The viability of this approach was demonstrated by BinaryConnect [@binaryconnect] and BinaryNet [@binarynet], proving that binarization of networks was possible even for complex tasks.
 
 Since then, the field of BNNs and closely related Ternary Neural Networks has become a prime candidate to enable efficient inference for deep neural networks. Numerous papers have explored novel architectures [@Zhu2018; @bireal_net; @xnor_net; @Zhuang2018] and optimization strategies [@Alizadeh2019; @bop], and the accuracy gap between efficient BNNs and regular DNNs is rapidly closing.
 
@@ -65,7 +65,7 @@ To tackle this issue, [`larq/zoo`](https://larq.dev/models) provides tested and 
 
 # Summary
 
-The flexible yet easy to use API of `larq` is aimed at both researchers in the field of efficient deep learning [@bop] and practitioners who want to explore BNNs for their applications. Furthermore, `larq` makes it easier for beginners and students to get started with BNNs.
+The flexible yet easy to use API of `larq` is aimed at both researchers in the field of efficient deep learning and practitioners who want to explore BNNs for their applications. Furthermore, `larq` makes it easier for beginners and students to get started with BNNs.
 We are working to expand the audience by adding support for deploying BNNs on embedded devices, making `larq` useful for real applications. By building a community-driven open source project, we hope to accelerate research in the field of BNNs and other QNNs to enable deep learning in resource-constrained environments.
 
 # References
