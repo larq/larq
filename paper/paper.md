@@ -31,7 +31,7 @@ However, many open research questions remain until the widespread use of BNNs an
 
 # Background: Neural Network Binarization
 
-Binarization of artificial deep neural networks poses two fundamental challenges to regular deep learning strategies, which are all based on backpropagation and stochastic gradient descent [@rumelhart]: the gradient of the binarization function vanishes almost everywhere and a weight in the set ${-1, +1}$ cannot absorb small update steps. Therefore, binarization was long deemed unfeasible.
+Binarization of artificial deep neural networks poses two fundamental challenges to regular deep learning strategies, which are all based on backpropagation and stochastic gradient descent [@rumelhart; @bottou1991]: the gradient of the binarization function vanishes almost everywhere and a weight in the set ${-1, +1}$ cannot absorb small update steps. Therefore, binarization was long deemed unfeasible.
 
 A solution to both problems was suggested by Hinton [@hinton_coursera] who proposed the Straight-Through Estimator which ignores the binarization during the backward pass. The viability of this approach was demonstrated by BinaryConnect [@binaryconnect] and BinaryNet [@binarynet], proving that binarization of networks was possible even for complex tasks.
 
