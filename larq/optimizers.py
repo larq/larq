@@ -270,6 +270,15 @@ class Bop(tf.keras.optimizers.Optimizer):
         }
         return {**super().get_config(), **config}
 
+    @classmethod
+    def from_config(cls, config, custom_objects=None):
+        for hyper in ("gamma", "threshold"):
+            if hyper in config and isinstance(config[hyper], dict):
+                config[hyper] = tf.keras.optimizers.schedules.deserialize(
+                    config[hyper], custom_objects=custom_objects
+                )
+        return cls(**config)
+
     @staticmethod
     def is_binary_variable(var):
         """Returns True for binary variables named using the Larq Zoo naming scheme.
