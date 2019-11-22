@@ -2,7 +2,6 @@ import logging
 
 import tensorflow as tf
 from larq import quantizers, quantized_variable, metrics as lq_metrics
-from tensorflow.python.keras.engine import base_layer_utils
 
 log = logging.getLogger(__name__)
 
@@ -16,18 +15,20 @@ class BaseLayer(tf.keras.layers.Layer):
     def get_quantizer(self, name):
         return None
 
-    def add_weight(self, name=None, **kwargs):
+    def _add_variable_with_custom_getter(self, name, **kwargs):
         quantizer = self.get_quantizer(name)
         if quantizer is not None:
             # Wrap 'getter' with a version that returns an QuantizedVariable.
-            old_getter = kwargs.pop("getter", base_layer_utils.make_variable)
+            old_getter = kwargs.pop("getter")
 
             def getter(*args, **kwargs):
                 variable = old_getter(*args, **kwargs)
                 return quantized_variable.create_quantized_variable(variable, quantizer)
 
-            return super().add_weight(name=name, getter=getter, **kwargs)
-        return super().add_weight(name=name, **kwargs)
+            return super()._add_variable_with_custom_getter(
+                name, getter=getter, **kwargs
+            )
+        return super()._add_variable_with_custom_getter(name, **kwargs)
 
     @property
     def non_trainable_weights(self):
