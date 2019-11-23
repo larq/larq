@@ -1,19 +1,19 @@
-from contextlib import contextmanager
+import contextlib
+import threading
 
 __all__ = ["scope", "should_quantize"]
 
-# TODO: Does this need to be a thread local variable
-_SHOULD_QUANTIZE = False
+_quantized_scope = threading.local()
+_quantized_scope.should_quantize = False
 
 
-@contextmanager
+@contextlib.contextmanager
 def scope(should_quantize):
-    global _SHOULD_QUANTIZE
-    backup = _SHOULD_QUANTIZE
-    _SHOULD_QUANTIZE = should_quantize
+    backup = _quantized_scope.should_quantize
+    _quantized_scope.should_quantize = should_quantize
     yield should_quantize
-    _SHOULD_QUANTIZE = backup
+    _quantized_scope.should_quantize = backup
 
 
 def should_quantize():
-    return _SHOULD_QUANTIZE
+    return _quantized_scope.should_quantize
