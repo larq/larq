@@ -5,6 +5,8 @@ import tensorflow as tf
 from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 
+from larq import quantized_scope
+
 
 def quantize(method):
     """A decorator that can quantize the return value of the classmethod.
@@ -15,7 +17,7 @@ def quantize(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         value = method(self, *args, **kwargs)
-        if self.quantizer:
+        if self.quantizer and quantized_scope.should_quantize():
             return self.quantizer(value)
         return value
 

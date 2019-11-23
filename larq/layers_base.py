@@ -3,7 +3,7 @@ import logging
 import tensorflow as tf
 
 from larq import metrics as lq_metrics
-from larq import quantized_variable, quantizers
+from larq import quantized_scope, quantized_variable, quantizers
 
 log = logging.getLogger(__name__)
 
@@ -82,9 +82,10 @@ class QuantizerBase(BaseLayer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-        if hasattr(self, "flip_ratio"):
-            self.add_metric(self.flip_ratio(self.kernel))
-        return super().call(inputs)
+        with quantized_scope.scope(True):
+            if hasattr(self, "flip_ratio"):
+                self.add_metric(self.flip_ratio(self.kernel))
+            return super().call(inputs)
 
     def get_config(self):
         config = {
@@ -138,10 +139,10 @@ class QuantizerDepthwiseBase(BaseLayer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-
-        if hasattr(self, "flip_ratio"):
-            self.add_metric(self.flip_ratio(self.depthwise_kernel))
-        return super().call(inputs)
+        with quantized_scope.scope(True):
+            if hasattr(self, "flip_ratio"):
+                self.add_metric(self.flip_ratio(self.depthwise_kernel))
+            return super().call(inputs)
 
     def get_config(self):
         config = {
@@ -230,12 +231,12 @@ class QuantizerSeparableBase(BaseLayer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-
-        if hasattr(self, "depthwise_flip_ratio"):
-            self.add_metric(self.depthwise_flip_ratio(self.depthwise_kernel))
-        if hasattr(self, "pointwise_flip_ratio"):
-            self.add_metric(self.pointwise_flip_ratio(self.pointwise_kernel))
-        return super().call(inputs)
+        with quantized_scope.scope(True):
+            if hasattr(self, "depthwise_flip_ratio"):
+                self.add_metric(self.depthwise_flip_ratio(self.depthwise_kernel))
+            if hasattr(self, "pointwise_flip_ratio"):
+                self.add_metric(self.pointwise_flip_ratio(self.pointwise_kernel))
+            return super().call(inputs)
 
     def get_config(self):
         config = {
