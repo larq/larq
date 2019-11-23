@@ -22,9 +22,9 @@ class BaseLayer(tf.keras.layers.Layer):
         if quantizer is None:
             return super()._add_variable_with_custom_getter(name, **kwargs)
 
-        # Wrap 'getter' with a version that returns an QuantizedVariable.
         old_getter = kwargs.pop("getter")
 
+        # Wrap `getter` with a version that returns a `QuantizedVariable`.
         def getter(*args, **kwargs):
             variable = old_getter(*args, **kwargs)
             return quantized_variable.create_quantized_variable(variable, quantizer)
