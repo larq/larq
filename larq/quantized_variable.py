@@ -69,7 +69,7 @@ class QuantizedVariable(tf.Variable):
         return self.latent_variable._dense_var_to_tensor(*args, **kwargs)
 
     def eval(self, session=None):
-        if self.quantizer:
+        if self.quantizer and quantized_scope.should_quantize():
             return self.quantizer(self.latent_variable).eval(session=session)
         return self.latent_variable.eval(session=session)
 
