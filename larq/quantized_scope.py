@@ -1,8 +1,6 @@
 import contextlib
 import threading
 
-__all__ = ["scope", "should_quantize"]
-
 _quantized_scope = threading.local()
 _quantized_scope.should_quantize = False
 
