@@ -37,7 +37,7 @@ class QuantizedVariable(tf.Variable):
         precision: An optional integer defining the precision of the quantized
             variable. If `None`, `quantizer.precision` is used.
         """
-        if not isinstance(variable, (tf.Variable, DistributedVariable)):
+        if not isinstance(variable, (tf.Variable, DistributedVariable)):  # type: ignore
             raise ValueError(
                 "variable must be of type tf.Variable, but got: %s" % variable
             )
@@ -252,7 +252,7 @@ def create_quantized_variable(variable, quantizer=None):
     Returns:
       An QuantizedVariable that wraps the variable.
     """
-    if not isinstance(variable, DistributedVariable):
+    if not isinstance(variable, DistributedVariable):  # type: ignore
         return QuantizedVariable(variable, quantizer=quantizer)
 
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
