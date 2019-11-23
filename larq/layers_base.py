@@ -19,18 +19,17 @@ class BaseLayer(tf.keras.layers.Layer):
 
     def _add_variable_with_custom_getter(self, name, **kwargs):
         quantizer = self.get_quantizer(name)
-        if quantizer is not None:
-            # Wrap 'getter' with a version that returns an QuantizedVariable.
-            old_getter = kwargs.pop("getter")
+        if quantizer is None:
+            return super()._add_variable_with_custom_getter(name, **kwargs)
 
-            def getter(*args, **kwargs):
-                variable = old_getter(*args, **kwargs)
-                return quantized_variable.create_quantized_variable(variable, quantizer)
+        # Wrap 'getter' with a version that returns an QuantizedVariable.
+        old_getter = kwargs.pop("getter")
 
-            return super()._add_variable_with_custom_getter(
-                name, getter=getter, **kwargs
-            )
-        return super()._add_variable_with_custom_getter(name, **kwargs)
+        def getter(*args, **kwargs):
+            variable = old_getter(*args, **kwargs)
+            return quantized_variable.create_quantized_variable(variable, quantizer)
+
+        return super()._add_variable_with_custom_getter(name, getter=getter, **kwargs)
 
     @property
     def non_trainable_weights(self):
