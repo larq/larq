@@ -264,4 +264,9 @@ def create_quantized_variable(variable, quantizer=None):
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
         """An QuantizedVariable that also subclasses from DistributedVariable."""
 
+        @quantize
+        def get(self):
+            # For some reason this is needed to make unit `x + x` pass on TF 1.14
+            return self.latent_variable.get()
+
     return QuantizedDistributedVariable(variable, quantizer=quantizer)
