@@ -14,14 +14,20 @@ def eager_mode():
 def graph_mode():
     """pytest fixture for running test in graph mode"""
     with context.graph_mode():
-        yield
+        with tf.compat.v1.Session().as_default():
+            yield
 
 
 @pytest.fixture(params=["eager", "graph"])
 def eager_and_graph_mode(request):
     """pytest fixture for running test in eager and graph mode"""
-    with getattr(context, f"{request.param}_mode")():
-        yield request.param
+    if request.param == "graph":
+        with context.graph_mode():
+            with tf.compat.v1.Session().as_default():
+                yield request.param
+    else:
+        with context.eager_mode():
+            yield request.param
 
 
 @pytest.fixture(params=["graph", "tf_eager", "tf_keras_eager"])
