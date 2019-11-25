@@ -4,6 +4,7 @@ from functools import wraps
 import tensorflow as tf
 from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
+from tensorflow.python.ops import resource_variable_ops
 
 from larq import quantized_scope
 
@@ -37,9 +38,9 @@ class QuantizedVariable(tf.Variable):
         precision: An optional integer defining the precision of the quantized
             variable. If `None`, `quantizer.precision` is used.
         """
-        if not isinstance(variable, (tf.Variable, DistributedVariable)):  # type: ignore
+        if not resource_variable_ops.is_resource_variable(variable):
             raise ValueError(
-                "variable must be of type tf.Variable, but got: %s" % variable
+                f"variable must be of type tf.ResourceVariable, but got: {variable}"
             )
         self.latent_variable = variable
         self.quantizer = quantizer

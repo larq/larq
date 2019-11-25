@@ -8,6 +8,10 @@ from larq.quantized_variable import create_quantized_variable
 from larq.testing_utils import evaluate
 
 
+def get_var(val, dtype=None, name=None):
+    return tf.compat.v1.Variable(val, use_resource=True, dtype=dtype, name=name)
+
+
 @pytest.fixture(params=[True, False])
 def quantized(request):
     """pytest fixture for running test quantized and non-quantized"""
@@ -20,7 +24,7 @@ def test_quantize_scope(quantized):
 
 
 def test_inheritance(distribute_scope):
-    variable = tf.Variable(3.0)
+    variable = get_var(3.0)
     quantized_variable = create_quantized_variable(variable)
     assert isinstance(quantized_variable, tf.Variable)
     assert isinstance(quantized_variable, DistributedVariable) is distribute_scope  # type: ignore
@@ -28,9 +32,9 @@ def test_inheritance(distribute_scope):
 
 def test_overloads(quantized, distribute_scope, eager_and_graph_mode):
     if quantized:
-        x = create_quantized_variable(tf.Variable(3.5), quantizer=lambda x: 2 * x)
+        x = create_quantized_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     else:
-        x = create_quantized_variable(tf.Variable(7.0))
+        x = create_quantized_variable(get_var(7.0))
     evaluate(x.initializer)
     np.testing.assert_almost_equal(8, evaluate(x + 1))
     np.testing.assert_almost_equal(10, evaluate(3 + x))
@@ -64,10 +68,10 @@ def test_overloads(quantized, distribute_scope, eager_and_graph_mode):
 def test_tensor_equality(quantized, eager_mode):
     if quantized:
         x = create_quantized_variable(
-            tf.Variable([3.5, 4.0, 4.5]), quantizer=lambda x: 2 * x
+            get_var([3.5, 4.0, 4.5]), quantizer=lambda x: 2 * x
         )
     else:
-        x = create_quantized_variable(tf.Variable([7.0, 8.0, 9.0]))
+        x = create_quantized_variable(get_var([7.0, 8.0, 9.0]))
     evaluate(x.initializer)
     np.testing.assert_array_equal(evaluate(x), [7.0, 8.0, 9.0])
     if int(tf.__version__[0]) >= 2:
