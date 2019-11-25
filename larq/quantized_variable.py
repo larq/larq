@@ -53,6 +53,11 @@ class QuantizedVariable(tf.Variable):
     def read_value(self):
         return self.latent_variable.read_value()
 
+    def numpy(self):
+        if self.quantizer and quantized_scope.should_quantize():
+            return self.quantizer(self.latent_variable).numpy()
+        return self.latent_variable.numpy()
+
     @quantize
     def sparse_read(self, *args, **kwargs):
         return self.latent_variable.sparse_read(*args, **kwargs)

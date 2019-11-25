@@ -59,3 +59,17 @@ def test_overloads(quantized, distribute_scope, eager_and_graph_mode):
     np.testing.assert_almost_equal(128, evaluate(pow(2, x)))
     np.testing.assert_almost_equal(-7, evaluate(-x))
     np.testing.assert_almost_equal(7, evaluate(abs(x)))
+
+
+def test_tensor_equality(quantized, eager_mode):
+    if quantized:
+        x = create_quantized_variable(
+            tf.Variable([3.5, 4.0, 4.5]), quantizer=lambda x: 2 * x
+        )
+    else:
+        x = create_quantized_variable(tf.Variable([7.0, 8.0, 9.0]))
+    evaluate(x.initializer)
+    np.testing.assert_array_equal(evaluate(x), [7.0, 8.0, 9.0])
+    if int(tf.__version__[0]) >= 2:
+        np.testing.assert_array_equal(x == [7.0, 8.0, 10.0], [True, True, False])
+        np.testing.assert_array_equal(x != [7.0, 8.0, 10.0], [False, False, True])
