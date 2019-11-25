@@ -4,6 +4,29 @@ import tensorflow as tf
 import larq as lq
 
 
+def _eval_tensor(tensor):
+    if tensor is None:
+        return None
+    elif callable(tensor):
+        return _eval_helper(tensor())
+    else:
+        return tensor.numpy()
+
+
+def _eval_helper(tensors):
+    if tensors is None:
+        return None
+    return tf.nest.map_structure(_eval_tensor, tensors)
+
+
+def evaluate(tensors):
+    if tf.executing_eagerly():
+        return _eval_helper(tensors)
+    else:
+        sess = tf.compat.v1.get_default_session()
+        return sess.run(tensors)
+
+
 def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
     real_values = np.random.uniform(low, high, shape)
     real_values = np.insert(real_values, 1, 0, axis=1)
