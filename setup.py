@@ -43,7 +43,7 @@ setup(
             "mknotebooks==0.1.7",
             "mkdocs-minify-plugin==0.2.1",
             "larq-zoo==0.4.2",
-            "altair==3.2.0",
+            "altair==3.3.0",
             "pandas==0.25.3",
         ],
     },
