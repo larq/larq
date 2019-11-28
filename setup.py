@@ -42,7 +42,7 @@ setup(
             "pymdown-extensions==6.2",
             "mknotebooks==0.1.7",
             "mkdocs-minify-plugin==0.2.1",
-            "larq-zoo==0.4.2",
+            "larq-zoo==0.5.0",
             "altair==3.3.0",
             "pandas==0.25.3",
         ],
