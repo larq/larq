@@ -98,6 +98,13 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             self.optimizers.append(self.default)
             self.DEFAULT_OPT_INDEX = len(self.pred_opt_pairs)
 
+    @property
+    def weights(self):
+        weights = []
+        for optimizer in self.optimizers:
+            weights.extend(optimizer.weights)
+        return weights
+
     def apply_gradients(self, grads_and_vars, name=None):
         """Apply gradients to variables for each optimizer.
 

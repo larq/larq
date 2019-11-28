@@ -104,6 +104,33 @@ class TestCaseOptimizer:
             # Should raise on first call to apply_gradients()
             model.fit(train_images[:1], train_labels[:1], epochs=1)
 
+    def test_weights(self):
+        (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
+        model = tf.keras.Sequential(
+            [
+                tf.keras.layers.Flatten(input_shape=(28, 28)),
+                lq.layers.QuantDense(64, input_quantizer="ste_sign", activation="relu"),
+                tf.keras.layers.Dense(10, activation="softmax"),
+            ]
+        )
+        model.compile(
+            loss="sparse_categorical_crossentropy",
+            optimizer=lq.optimizers.CaseOptimizer(
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
+            ),
+        )
+        model.fit(train_images[:1], train_labels[:1], epochs=1)
+
+        opt_weights = model.optimizer.weights
+        assert len(opt_weights) != 0
+        checked_weights = 0
+        for opt in model.optimizer.optimizers:
+            for weight in opt.weights:
+                assert weight is opt_weights[checked_weights]
+                checked_weights += 1
+        assert checked_weights == len(opt_weights)
+
 
 class TestBopOptimizer:
     def test_bop_accuracy(self):
