@@ -184,7 +184,7 @@ class TestLayerWarns:
         lq.layers.QuantDense(
             5, kernel_quantizer="ste_sign", kernel_constraint="weight_clip"
         )
-        assert caplog.records == []
+        assert "kernel_constraint" not in caplog.text
 
     def test_depthwise_layer_warns(self, caplog):
         lq.layers.QuantDepthwiseConv2D(5, depthwise_quantizer="ste_sign")
@@ -195,7 +195,7 @@ class TestLayerWarns:
         lq.layers.QuantDepthwiseConv2D(
             5, depthwise_quantizer="ste_sign", depthwise_constraint="weight_clip"
         )
-        assert caplog.records == []
+        assert "depthwise_constraint" not in caplog.text
 
     def test_separable_layer_warns(self, caplog):
         lq.layers.QuantSeparableConv2D(
