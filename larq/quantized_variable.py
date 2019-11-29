@@ -1,28 +1,10 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
-from functools import wraps
-
 import tensorflow as tf
 from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
 from larq import quantized_scope
-
-
-def quantize(method):
-    """A decorator that can quantize the return value of the classmethod.
-
-    Syntactic sugar for `self.quantizer(self.method(*args, **kwargs))`.
-    """
-
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        value = method(self, *args, **kwargs)
-        if self.quantizer and quantized_scope.should_quantize():
-            return self.quantizer(value)
-        return value
-
-    return wrapper
 
 
 class QuantizedVariable(tf.Variable):
@@ -46,47 +28,43 @@ class QuantizedVariable(tf.Variable):
         self.quantizer = quantizer
         self.precision = precision or getattr(quantizer, "precision", None)
 
-    @quantize
-    def value(self):
-        return self.latent_variable.value()
+    def _quantize(self, value):
+        if self.quantizer and quantized_scope.should_quantize():
+            return self.quantizer(value)
+        return value
 
-    @quantize
+    def value(self):
+        return self._quantize(self.latent_variable.value())
+
     def read_value(self):
-        return self.latent_variable.read_value()
+        return self._quantize(self.latent_variable.read_value())
 
     def numpy(self):
-        if self.quantizer and quantized_scope.should_quantize():
-            return self.quantizer(self.latent_variable).numpy()
-        return self.latent_variable.numpy()
+        return self._quantize(self.latent_variable).numpy()
 
-    @quantize
     def sparse_read(self, *args, **kwargs):
-        return self.latent_variable.sparse_read(*args, **kwargs)
+        return self._quantize(self.latent_variable.sparse_read(*args, **kwargs))
 
-    @quantize
     def gather_nd(self, *args, **kwargs):
-        return self.latent_variable.gather_nd(*args, **kwargs)
+        return self._quantize(self.latent_variable.gather_nd(*args, **kwargs))
 
     def __getattr__(self, name):
         return getattr(self.latent_variable, name)
 
-    @quantize
     def _dense_var_to_tensor(self, *args, **kwargs):
-        return self.latent_variable._dense_var_to_tensor(*args, **kwargs)
+        return self._quantize(
+            self.latent_variable._dense_var_to_tensor(*args, **kwargs)
+        )
 
     def eval(self, session=None):
-        if self.quantizer and quantized_scope.should_quantize():
-            return self.quantizer(self.latent_variable).eval(session=session)
-        return self.latent_variable.eval(session=session)
+        return self._quantize(self.latent_variable).eval(session=session)
 
-    @quantize
     def initialized_value(self):
-        return self.latent_variable.initialized_value()
+        return self._quantize(self.latent_variable.initialized_value())
 
     @property
-    @quantize
     def initial_value(self):
-        return self.latent_variable.initial_value
+        return self._quantize(self.latent_variable.initial_value)
 
     def _should_act_as_resource_variable(self):
         """Pass resource_variable_ops.is_resource_variable check."""
@@ -264,9 +242,8 @@ def create_quantized_variable(variable, quantizer=None):
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
         """An QuantizedVariable that also subclasses from DistributedVariable."""
 
-        @quantize
         def get(self):
             # For some reason this is needed to make unit `x + x` pass on TF 1.14
-            return self.latent_variable.get()
+            return self._quantize(self.latent_variable.get())
 
     return QuantizedDistributedVariable(variable, quantizer=quantizer)
