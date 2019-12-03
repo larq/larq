@@ -8,7 +8,7 @@ from larq import quantized_scope
 
 
 class QuantizedVariable(tf.Variable):
-    """Variable that can be quantized in the forward pass in applicable contexts."""
+    """A Variable that can be quantized in the forward pass in applicable contexts."""
 
     def __init__(self, variable, quantizer=None, precision=None):
         """Creates an QuantizedVariable instance.
@@ -234,8 +234,8 @@ tf.register_tensor_conversion_function(
 ops.register_dense_tensor_like_type(QuantizedVariable)
 
 
-def create_quantized_variable(variable, quantizer=None):
-    """Creates an QuantizedVariable that wraps another variable.
+def create_quantized_variable(variable, quantizer=None, precision=None):
+    """Creates a QuantizedVariable that wraps another variable.
 
     This typically just returns `QuantizedVariable(variable)`. But, if the variable
     is a DistributedVariable or one of its subclasses, we instead dynamically
@@ -244,20 +244,24 @@ def create_quantized_variable(variable, quantizer=None):
     `isinstance(variable, variable.__class__)`, which is required for
     DistributedVariables and its subclasses to work properly.
 
-    Args:
-      variable: A floating-point resource variable to wrap.
+    # Arguments
+    variable: A floating-point resource variable to wrap.
+    quantizer: An optional quantizer to transform the floating-point variable to a
+        fake quantized variable.
+    precision: An optional integer defining the precision of the quantized variable.
+        If `None`, `quantizer.precision` is used.
 
-    Returns:
-      An QuantizedVariable that wraps the variable.
+    # Returns
+    A QuantizedVariable that wraps the variable.
     """
     if not isinstance(variable, DistributedVariable):  # type: ignore
-        return QuantizedVariable(variable, quantizer=quantizer)
+        return QuantizedVariable(variable, quantizer, precision)
 
     class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
-        """An QuantizedVariable that also subclasses from DistributedVariable."""
+        """A QuantizedVariable that also subclasses from DistributedVariable."""
 
         def get(self):
             # For some reason this is needed to make unit `x + x` pass on TF 1.14
             return self._quantize(self.latent_variable.get())
 
-    return QuantizedDistributedVariable(variable, quantizer=quantizer)
+    return QuantizedDistributedVariable(variable, quantizer, precision)
