@@ -117,59 +117,65 @@ class QuantizedVariable(tf.Variable):
 
     def assign(self, value, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign(value, use_locking, name, read_value)
-        return self.__class__(op, self.quantizer, self.precision) if read_value else op
+        if read_value:
+            return create_quantized_variable(op, self.quantizer, self.precision)
+        return op
 
     def assign_add(self, delta, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign_add(delta, use_locking, name, read_value)
-        return self.__class__(op, self.quantizer, self.precision) if read_value else op
+        if read_value:
+            return create_quantized_variable(op, self.quantizer, self.precision)
+        return op
 
     def assign_sub(self, delta, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign_sub(delta, use_locking, name, read_value)
-        return self.__class__(op, self.quantizer, self.precision) if read_value else op
+        if read_value:
+            return create_quantized_variable(op, self.quantizer, self.precision)
+        return op
 
     def scatter_sub(self, *args, **kwargs):
         var = self.latent_variable.scatter_sub(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_add(self, *args, **kwargs):
         var = self.latent_variable.scatter_add(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_max(self, *args, **kwargs):
         var = self.latent_variable.scatter_max(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_min(self, *args, **kwargs):
         var = self.latent_variable.scatter_min(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_mul(self, *args, **kwargs):
         var = self.latent_variable.scatter_mul(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_div(self, *args, **kwargs):
         var = self.latent_variable.scatter_div(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_update(self, *args, **kwargs):
         var = self.latent_variable.scatter_update(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def batch_scatter_update(self, *args, **kwargs):
         var = self.latent_variable.batch_scatter_update(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_nd_sub(self, *args, **kwargs):
         var = self.latent_variable.scatter_nd_sub(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_nd_add(self, *args, **kwargs):
         var = self.latent_variable.scatter_nd_add(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def scatter_nd_update(self, *args, **kwargs):
         var = self.latent_variable.scatter_nd_update(*args, **kwargs)
-        return self.__class__(var, self.quantizer, self.precision)
+        return create_quantized_variable(var, self.quantizer, self.precision)
 
     def count_up_to(self, *args, **kwargs):
         return self.latent_variable.count_up_to(*args, **kwargs)
