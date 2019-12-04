@@ -117,19 +117,19 @@ class QuantizedVariable(tf.Variable):
 
     def assign(self, value, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign(value, use_locking, name, read_value)
-        if read_value:
+        if read_value and resource_variable_ops.is_resource_variable(op):
             return create_quantized_variable(op, self.quantizer, self.precision)
         return op
 
     def assign_add(self, delta, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign_add(delta, use_locking, name, read_value)
-        if read_value:
+        if read_value and resource_variable_ops.is_resource_variable(op):
             return create_quantized_variable(op, self.quantizer, self.precision)
         return op
 
     def assign_sub(self, delta, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign_sub(delta, use_locking, name, read_value)
-        if read_value:
+        if read_value and resource_variable_ops.is_resource_variable(op):
             return create_quantized_variable(op, self.quantizer, self.precision)
         return op
 
