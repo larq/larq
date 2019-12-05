@@ -117,65 +117,59 @@ class QuantizedVariable(tf.Variable):
 
     def assign(self, value, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign(value, use_locking, name, read_value)
-        if read_value and resource_variable_ops.is_resource_variable(op):
-            return create_quantized_variable(op, self.quantizer, self.precision)
-        return op
+        return _maybe_wrap(op, self.quantizer, self.precision, wrap=read_value)
 
     def assign_add(self, delta, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign_add(delta, use_locking, name, read_value)
-        if read_value and resource_variable_ops.is_resource_variable(op):
-            return create_quantized_variable(op, self.quantizer, self.precision)
-        return op
+        return _maybe_wrap(op, self.quantizer, self.precision, wrap=read_value)
 
     def assign_sub(self, delta, use_locking=None, name=None, read_value=True):
         op = self.latent_variable.assign_sub(delta, use_locking, name, read_value)
-        if read_value and resource_variable_ops.is_resource_variable(op):
-            return create_quantized_variable(op, self.quantizer, self.precision)
-        return op
+        return _maybe_wrap(op, self.quantizer, self.precision, wrap=read_value)
 
     def scatter_sub(self, *args, **kwargs):
         var = self.latent_variable.scatter_sub(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_add(self, *args, **kwargs):
         var = self.latent_variable.scatter_add(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_max(self, *args, **kwargs):
         var = self.latent_variable.scatter_max(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_min(self, *args, **kwargs):
         var = self.latent_variable.scatter_min(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_mul(self, *args, **kwargs):
         var = self.latent_variable.scatter_mul(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_div(self, *args, **kwargs):
         var = self.latent_variable.scatter_div(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_update(self, *args, **kwargs):
         var = self.latent_variable.scatter_update(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def batch_scatter_update(self, *args, **kwargs):
         var = self.latent_variable.batch_scatter_update(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_nd_sub(self, *args, **kwargs):
         var = self.latent_variable.scatter_nd_sub(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_nd_add(self, *args, **kwargs):
         var = self.latent_variable.scatter_nd_add(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def scatter_nd_update(self, *args, **kwargs):
         var = self.latent_variable.scatter_nd_update(*args, **kwargs)
-        return create_quantized_variable(var, self.quantizer, self.precision)
+        return _maybe_wrap(var, self.quantizer, self.precision)
 
     def count_up_to(self, *args, **kwargs):
         return self.latent_variable.count_up_to(*args, **kwargs)
@@ -271,3 +265,27 @@ def create_quantized_variable(variable, quantizer=None, precision=None):
             return self._quantize(self.latent_variable.get())
 
     return QuantizedDistributedVariable(variable, quantizer, precision)
+
+
+def _maybe_wrap(variable, quantizer, precision, wrap=True):
+    """Creates an QuantizedVariable that wraps another variable if applicable.
+
+    This function is used to wrap the return value of QuantizedVariable.assign.
+    Unfortunately MirroredVariable.assign will (incorrectly) return a Mirrored
+    value instead of a MirroredVariable. So we cannot properly wrap it in an
+    AutoCastVariable. We return the original variable in that case.
+
+    # Arguments
+    variable: A tf.Variable or op.
+    quantizer: An optional quantizer to transform the floating-point variable to a
+        fake quantized variable.
+    precision: An optional integer defining the precision of the quantized variable.
+        If `None`, `quantizer.precision` is used.
+    wrap: A boolean to define whether to wrap the variable in an QuantizedVariable.
+
+    # Returns
+    An QuantizedVariable if wrap is True and variable is a resource variable.
+    """
+    if wrap and resource_variable_ops.is_resource_variable(variable):
+        return create_quantized_variable(variable, quantizer, precision)
+    return variable
