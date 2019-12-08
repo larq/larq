@@ -225,6 +225,9 @@ class QuantizedVariable(tf.Variable):
     def from_proto(self, *args, **kwargs):
         return self.latent_variable.from_proto(*args, **kwargs)
 
+    def _as_graph_element(self):
+        return self._quantize(self.latent_variable._as_graph_element())
+
 
 QuantizedVariable._OverloadAllOperators()
 tf.register_tensor_conversion_function(
