@@ -246,7 +246,7 @@ def test_invalid_wrapped_usage(distribute_scope):
 
 
 def test_repr(snapshot, eager_and_graph_mode):
-    x = get_var(0.0)
+    x = get_var(0.0, name="x")
 
     class Quantizer:
         def __call__(self, x):
