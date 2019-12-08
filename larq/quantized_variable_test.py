@@ -236,9 +236,13 @@ def test_checkpoint(tmp_path, distribute_scope):
         assert evaluate(x) == 123.0 * 2
 
 
-def test_invalid_wrapped_variable(distribute_scope):
+def test_invalid_wrapped_usage(distribute_scope):
     with pytest.raises(ValueError, match="variable must be of type"):
         create_quantized_variable(tf.constant([1.0]))
+    with pytest.raises(ValueError, match="quantizer must be callable or None"):
+        create_quantized_variable(get_var([1.0]), 1)
+    with pytest.raises(ValueError, match="precision must be of type integer or None"):
+        create_quantized_variable(get_var([1.0]), precision=1.0)
 
 
 def test_repr(snapshot, eager_and_graph_mode):

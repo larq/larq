@@ -24,6 +24,14 @@ class QuantizedVariable(tf.Variable):
             raise ValueError(
                 f"variable must be of type tf.ResourceVariable, but got: {variable}"
             )
+        if not (quantizer is None or callable(quantizer)):
+            raise ValueError(
+                f"quantizer must be callable or None, but got: {quantizer}"
+            )
+        if not (precision is None or type(precision) == int):
+            raise ValueError(
+                f"precision must be of type integer or None, but got: {precision}"
+            )
         self.latent_variable = variable
         self.quantizer = quantizer
         self.precision = precision or getattr(quantizer, "precision", None)
