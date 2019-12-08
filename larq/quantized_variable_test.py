@@ -175,7 +175,7 @@ def test_tensor_equality(quantized, eager_mode):
         assert_array_equal(x != [7.0, 8.0, 10.0], [False, False, True])
 
 
-def test_assign(quantized, distribute_scope):
+def test_assign(quantized, distribute_scope, eager_and_graph_mode):
     x = create_quantized_variable(get_var(0.0, tf.float64), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
 
@@ -221,7 +221,7 @@ def test_assign(quantized, distribute_scope):
     assert_almost_equal(evaluate(tf.compat.v1.assign_sub(x, latent_value)), value)
 
 
-def test_checkpoint(tmp_path, distribute_scope):
+def test_checkpoint(tmp_path, eager_and_graph_mode):
     x = create_quantized_variable(get_var(0.0), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
     evaluate(x.assign(123.0))
