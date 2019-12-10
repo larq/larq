@@ -81,13 +81,20 @@ class QuantizedVariable(tf.Variable):
         """Pass resource_variable_ops.is_resource_variable check."""
         pass
 
+    @staticmethod
+    def _get_name(obj):
+        try:
+            return obj.__name__
+        except AttributeError:
+            return obj.__class__.__name__
+
     def __repr__(self):
         repr_ = (
             f"<{self.__class__.__name__} '{self.name}' "
             f"shape={self.shape} dtype={self.dtype.name}"
         )
         if self.quantizer is not None:
-            repr_ += f" quantizer={_get_name(self.quantizer)}"
+            repr_ += f" quantizer={self._get_name(self.quantizer)}"
         if self.precision is not None:
             repr_ += f" precision={self.precision}"
         if tf.executing_eagerly() and not self._in_graph_mode:
@@ -302,10 +309,3 @@ def _maybe_wrap(variable, quantizer, precision, wrap=True):
     if wrap and resource_variable_ops.is_resource_variable(variable):
         return create_quantized_variable(variable, quantizer, precision)
     return variable
-
-
-def _get_name(obj):
-    try:
-        return obj.__name__
-    except AttributeError:
-        return obj.__class__.__name__
