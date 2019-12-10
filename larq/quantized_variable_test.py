@@ -1,6 +1,7 @@
 import pytest
 import tensorflow as tf
 from numpy.testing import assert_almost_equal, assert_array_equal
+from packaging import version
 from tensorflow.python.distribute.values import DistributedVariable
 
 from larq import quantized_scope
@@ -75,7 +76,8 @@ def test_method_delegations(distribute_scope, eager_and_graph_mode):
         assert evaluate(x.value()) == 7
         assert evaluate(x.read_value()) == 7
         assert x.trainable
-        assert x.synchronization == x.latent_variable.synchronization
+        if version.parse(tf.__version__) > version.parse("1.14"):
+            assert x.synchronization == x.latent_variable.synchronization
         assert x.aggregation == x.latent_variable.aggregation
         assert evaluate(x.initialized_value()) == 7
         if not tf.executing_eagerly():
@@ -114,10 +116,11 @@ def test_scatter_method_delegations(eager_and_graph_mode):
 
         assert_array_equal(evaluate(x.scatter_sub(slices(0.5, 0))), [6, 8])
         assert_array_equal(evaluate(x.scatter_add(slices(0.5, 0))), [7, 8])
-        assert_array_equal(evaluate(x.scatter_max(slices(4.5, 1))), [7, 9])
-        assert_array_equal(evaluate(x.scatter_min(slices(4.0, 1))), [7, 8])
-        assert_array_equal(evaluate(x.scatter_mul(slices(2.0, 1))), [7, 16])
-        assert_array_equal(evaluate(x.scatter_div(slices(2.0, 1))), [7, 8])
+        if version.parse(tf.__version__) > version.parse("1.14"):
+            assert_array_equal(evaluate(x.scatter_max(slices(4.5, 1))), [7, 9])
+            assert_array_equal(evaluate(x.scatter_min(slices(4.0, 1))), [7, 8])
+            assert_array_equal(evaluate(x.scatter_mul(slices(2.0, 1))), [7, 16])
+            assert_array_equal(evaluate(x.scatter_div(slices(2.0, 1))), [7, 8])
         assert_array_equal(evaluate(x.scatter_update(slices(2, 1))), [7, 4])
         assert_array_equal(evaluate(x.scatter_nd_sub([[0], [1]], [0.5, 1.0])), [6, 2])
         assert_array_equal(evaluate(x.scatter_nd_add([[0], [1]], [0.5, 1.0])), [7, 4])
@@ -170,7 +173,7 @@ def test_tensor_equality(quantized, eager_mode):
         x = create_quantized_variable(get_var([7.0, 8.0, 9.0]))
     evaluate(x.initializer)
     assert_array_equal(evaluate(x), [7.0, 8.0, 9.0])
-    if int(tf.__version__[0]) >= 2:
+    if version.parse(tf.__version__) >= version.parse("2"):
         assert_array_equal(x == [7.0, 8.0, 10.0], [True, True, False])
         assert_array_equal(x != [7.0, 8.0, 10.0], [False, False, True])
 

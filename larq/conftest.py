@@ -1,5 +1,6 @@
 import pytest
 import tensorflow as tf
+from packaging import version
 from tensorflow.python.eager import context
 
 
@@ -44,7 +45,7 @@ def keras_should_run_eagerly(request):
     """
 
     if request.param == "graph":
-        if int(tf.__version__[0]) >= 2:
+        if version.parse(tf.__version__) >= version.parse("2"):
             pytest.skip("Skipping graph mode for TensorFlow 2+.")
 
         with context.graph_mode():
