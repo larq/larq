@@ -22,15 +22,18 @@ class QuantizedVariable(tf.Variable):
         """
         if not resource_variable_ops.is_resource_variable(variable):
             raise ValueError(
-                f"variable must be of type tf.ResourceVariable, but got: {variable}"
+                "`variable` must be of type `tf.ResourceVariable`, "
+                f"but got `{type(variable)}`."
             )
         if not (quantizer is None or callable(quantizer)):
             raise ValueError(
-                f"quantizer must be callable or None, but got: {quantizer}"
+                "`quantizer` must be `callable` or `None`, "
+                f"but got `{type(quantizer)}`."
             )
         if not (precision is None or type(precision) == int):
             raise ValueError(
-                f"precision must be of type integer or None, but got: {precision}"
+                "`precision` must be of type `int` or `None`, "
+                f"but got `{type(precision)}`."
             )
         self.latent_variable = variable
         self.quantizer = quantizer
