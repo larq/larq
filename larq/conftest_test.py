@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+from larq import quantized_scope
+
 
 def test_eager_and_graph_mode_fixture(eager_and_graph_mode):
     if eager_and_graph_mode == "eager":
@@ -20,3 +22,7 @@ def test_graph_mode_fixture(graph_mode):
 
 def test_distribute_scope(distribute_scope):
     assert tf.distribute.has_strategy() is distribute_scope
+
+
+def test_quantize_scope(quantized):
+    assert quantized_scope.should_quantize() == quantized

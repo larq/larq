@@ -3,6 +3,8 @@ import tensorflow as tf
 from packaging import version
 from tensorflow.python.eager import context
 
+from larq import quantized_scope
+
 
 @pytest.fixture
 def eager_mode():
@@ -61,4 +63,11 @@ def distribute_scope(request):
         with tf.distribute.MirroredStrategy(["cpu:0"]).scope():
             yield request.param
     else:
+        yield request.param
+
+
+@pytest.fixture(params=[True, False])
+def quantized(request):
+    """pytest fixture for running test quantized and non-quantized"""
+    with quantized_scope.scope(request.param):
         yield request.param

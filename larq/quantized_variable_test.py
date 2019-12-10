@@ -13,17 +13,6 @@ def get_var(val, dtype=None, name=None):
     return tf.compat.v1.Variable(val, use_resource=True, dtype=dtype, name=name)
 
 
-@pytest.fixture(params=[True, False])
-def quantized(request):
-    """pytest fixture for running test quantized and non-quantized"""
-    with quantized_scope.scope(request.param):
-        yield request.param
-
-
-def test_quantize_scope(quantized):
-    assert quantized_scope.should_quantize() == quantized
-
-
 def test_inheritance(distribute_scope):
     variable = get_var(3.0)
     quantized_variable = create_quantized_variable(variable)
