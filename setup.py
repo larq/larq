@@ -30,6 +30,7 @@ setup(
             "black==19.10b0",
             "flake8~=3.7.9",
             "isort~=4.3.21",
+            "packaging~=19.2",
             "pytest>=5.2.4,<5.4.0",
             "pytest-cov~=2.8.1",
             "pytest-xdist~=1.30.0",
