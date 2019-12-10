@@ -18,12 +18,17 @@
     booktitle    = {NIPS Autodiff Workshop}
 }
 @article{bmxnetv2,
-    title        = {Training Competitive Binary Neural Networks from Scratch},
     author       = {Joseph Bethge and Marvin Bornstein and Adrian Loy and Haojin Yang and Christoph Meinel},
-    year         = 2018,
-    journal      = {ArXiv e-prints},
-    archiveprefix = {arXiv},
-    eprint       = {1812.01965}
+    title        = {Training Competitive Binary Neural Networks from Scratch},
+    journal      = {CoRR},
+    volume       = {abs/1812.01965},
+    year         = {2018},
+    url          = {http://arxiv.org/abs/1812.01965},
+    archivePrefix = {arXiv},
+    eprint       = {1812.01965},
+    timestamp    = {Tue, 01 Jan 2019 15:01:25 +0100},
+    biburl       = {https://dblp.org/rec/bib/journals/corr/abs-1812-01965},
+    bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 @misc{dabnn,
     title        = {daBNN: A Super Fast Inference Framework for Binary Neural Networks on ARM devices},
@@ -31,21 +36,15 @@
     year         = 2019,
     eprint       = {arXiv:1908.05858}
 }
-@article{bop,
+@incollection{bop,
     title        = {Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization},
-    author       = {{Helwegen}, Koen and {Widdicombe}, James and {Geiger}, Lukas and {Liu}, Zechun and {Cheng}, Kwang-Ting and {Nusselder}, Roeland},
+    author       = {Helwegen, Koen and Widdicombe, James and Geiger, Lukas and Liu, Zechun and Cheng, Kwang-Ting and Nusselder, Roeland},
     year         = 2019,
-    month        = jun,
-    journal      = {arXiv e-prints},
-    pages        = {arXiv:1906.02107},
-    url          = {https://arxiv.org/abs/1906.02107},
-    keywords     = {Computer Science - Machine Learning, Statistics - Machine Learning},
-    eid          = {arXiv:1906.02107},
-    archiveprefix = {arXiv},
-    eprint       = {1906.02107},
-    primaryclass = {cs.LG},
-    adsurl       = {https://ui.adsabs.harvard.edu/abs/2019arXiv190602107H},
-    adsnote      = {Provided by the SAO/NASA Astrophysics Data System}
+    booktitle    = {Advances in Neural Information Processing Systems 32},
+    publisher    = {Curran Associates, Inc.},
+    pages        = {7531--7542},
+    url          = {http://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization.pdf},
+    editor       = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d\textquotesingle Alch\'{e}-Buc and E. Fox and R. Garnett}
 }
 @incollection{binarynet,
     title        = {Binarized Neural Networks},
@@ -74,7 +73,9 @@
     title        = {Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved Representational Capability and Advanced Training Algorithm},
     author       = {Zechun Liu and Baoyuan Wu and Wenhan Luo and Xin Yang and Wei Liu and Kwang{-}Ting Cheng},
     year         = 2018,
+    month        = sep,
     journal      = {ECCV},
+    booktitle    = {The European Conference on Computer Vision (ECCV)},
     volume       = {abs/1808.00278},
     url          = {http://arxiv.org/abs/1808.00278},
     archiveprefix = {arXiv},
@@ -83,18 +84,16 @@
     biburl       = {https://dblp.org/rec/bib/journals/corr/abs-1808-00278},
     bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
-@article{xnor_net,
+@inproceedings{xnor_net,
     title        = {XNOR-Net: ImageNet Classification Using Binary Convolutional Neural Networks},
-    author       = {Mohammad Rastegari and Vicente Ordonez and Joseph Redmon and Ali Farhadi},
+    author       = {Rastegari, Mohammad and Ordonez, Vicente and Redmon, Joseph and Farhadi, Ali},
     year         = 2016,
-    journal      = {CoRR},
-    volume       = {abs/1603.05279},
-    url          = {http://arxiv.org/abs/1603.05279},
-    archiveprefix = {arXiv},
-    eprint       = {1603.05279},
-    timestamp    = {Mon, 13 Aug 2018 16:47:22 +0200},
-    biburl       = {https://dblp.org/rec/bib/journals/corr/RastegariORF16},
-    bibsource    = {dblp computer science bibliography, https://dblp.org}
+    booktitle    = {Computer Vision -- ECCV 2016},
+    publisher    = {Springer International Publishing},
+    address      = {Cham},
+    pages        = {525--542},
+    isbn         = {978-3-319-46493-0},
+    editor       = {Leibe, Bastian and Matas, Jiri and Sebe, Nicu and Welling, Max}
 }
 @article{dorefa,
     title        = {DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients},
@@ -110,7 +109,7 @@
     bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 @article{rumelhart,
-    title        = {{Learning representations by back-propagating errors}},
+    title        = {Learning representations by back-propagating errors},
     author       = {Rumelhart, David E. and Hinton, Geoffrey E. and Williams, Ronald J.},
     year         = 1986,
     journal      = {Nature},
@@ -128,43 +127,54 @@
     year         = 2012,
     journal      = {Coursera Video Lectures}
 }
-@article{binaryconnect,
-    title        = {{BinaryConnect: Training Deep Neural Networks with binary weights during propagations}},
+@incollection{binaryconnect,
+    title        = {BinaryConnect: Training Deep Neural Networks with binary weights during propagations},
     author       = {Courbariaux, Matthieu and Bengio, Yoshua and David, Jean-Pierre},
     year         = 2015,
-    journal      = {NIPS},
-    doi          = {arXiv: 1412.7024},
-    isbn         = {1872-2075},
-    issn         = 10495258
+    booktitle    = {Advances in Neural Information Processing Systems 28},
+    publisher    = {Curran Associates, Inc.},
+    pages        = {3123--3131},
+    url          = {http://papers.nips.cc/paper/5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations.pdf},
+    editor       = {C. Cortes and N. D. Lawrence and D. D. Lee and M. Sugiyama and R. Garnett}
 }
-@article{Alizadeh2019,
-    title        = {{An Emperical Study of Binary Neural Networks' Optimisation}},
-    author       = {Alizadeh, Milad and Fernandez-Marques, Javier and Lane, Nicholas D. and Gal, Yarin},
+@inproceedings{Alizadeh2019,
+    title        = {An Empirical study of Binary Neural Networks' Optimisation},
+    author       = {Milad Alizadeh and Javier Fern{\'{a}}ndez{-}Marqu{\'{e}}s and Nicholas D. Lane and Yarin Gal},
     year         = 2019,
-    journal      = {ICLR}
+    booktitle    = {7th International Conference on Learning Representations, {ICLR} 2019, New Orleans, LA, USA, May 6-9, 2019},
+    url          = {https://openreview.net/forum?id=rJfUCoR5KX},
+    crossref     = {DBLP:conf/iclr/2019},
+    timestamp    = {Thu, 25 Jul 2019 14:25:40 +0200},
+    biburl       = {https://dblp.org/rec/bib/conf/iclr/AlizadehFLG19},
+    bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 @article{Zhu2018,
-    title        = {{Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?}},
-    author       = {Zhu, Shilin and Dong, Xin and Su, Hao},
-    year         = 2018,
-    journal      = {arXiv preprint arXiv:1806.07550},
-    url          = {http://arxiv.org/abs/1806.07550}
+    author       = {Shilin Zhu and Xin Dong and Hao Su},
+    title        = {Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?},
+    journal      = {CoRR},
+    volume       = {abs/1806.07550},
+    year         = {2018},
+    url          = {http://arxiv.org/abs/1806.07550},
+    archivePrefix = {arXiv},
+    eprint       = {1806.07550},
+    timestamp    = {Mon, 13 Aug 2018 16:47:13 +0200},
+    biburl       = {https://dblp.org/rec/bib/journals/corr/abs-1806-07550},
+    bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
-@article{Zhuang2018,
-    title        = {{Structured Binary Neural Networks for Accurate Image Classification and Semantic Segmentation}},
+@inproceedings{Zhuang2018,
+    title        = {Structured Binary Neural Networks for Accurate Image Classification and Semantic Segmentation},
     author       = {Zhuang, Bohan and Shen, Chunhua and Tan, Mingkui and Liu, Lingqiao and Reid, Ian},
     year         = 2019,
-    journal      = {CVPR},
-    doi          = {10.2307/3495996},
-    issn         = 154040,
-    url          = {http://arxiv.org/abs/1811.10413}
+    month        = jun,
+    booktitle    = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+    url          = {http://openaccess.thecvf.com/content_CVPR_2019/papers/Zhuang_Structured_Binary_Neural_Networks_for_Accurate_Image_Classification_and_Semantic_CVPR_2019_paper.pdf}
 }
 @article{bottou1991,
     title        = {Stochastic gradient learning in neural networks},
     author       = {Bottou, L{\'e}on},
+    year         = 1991,
     journal      = {Proceedings of Neuro Nimes},
-    volume       = {91},
-    number       = {8},
-    pages        = {12},
-    year         = {1991}
+    volume       = 91,
+    number       = 8,
+    pages        = 12
 }
