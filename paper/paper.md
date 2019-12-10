@@ -58,7 +58,7 @@ $q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define 
 
 While `larq` can be used to train networks with arbitrary bit-widths, it provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
 
-# Encouraging reproducible reseach with `larq/zoo`
+# Encouraging reproducible research with `larq/zoo`
 
 Fortunately, many researchers already publish code along with their papers, though, in absence of a common API to define extremely quantized networks, authors end up re-implementing a large amount of code, making it difficult to share improvements and make rapid progress. We and many other researchers in the field often encounter major problems when it comes to reproducing existing literature, due to incomplete or even broken code of official implementations.
 To tackle this issue, [`larq/zoo`](https://larq.dev/models) provides tested and maintained implementations and pretrained weights for a variety of popular extremely quantized models [@binarynet; @bireal_net; @binary_dense_net; @xnor_net; @dorefa] helping researchers focus on their work instead of spending time on reproducing existing work.
