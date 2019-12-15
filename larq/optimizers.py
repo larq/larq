@@ -235,7 +235,7 @@ class Bop(tf.keras.optimizers.Optimizer):
     name: name of the optimizer.
 
     # References
-    - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://arxiv.org/abs/1906.02107)
+    - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
     """
 
     def __init__(self, threshold=1e-7, gamma=1e-2, name="Bop", **kwargs):

@@ -22,7 +22,7 @@ Suppose we take a batch of training samples and evaluate a forward and backward 
 
 At this point, what do we do? If we directly apply the updates to our weights, they are no longer binary. The standard solution to this problem has been to introduce real-valued **latent weights**. We apply our update step to this real-valued weight. During the forward pass, we use the binarized version of the latent weight.
 
-Beware that latent weights are [not really weights at all](https://arxiv.org/abs/1906.02107) - after all, changing the latent weights usually doesn't affect the behavior of the network and we throw the latent weights away after we're done training. Instead, they are best thought of as a product between the weight and a positive inertia: the higher this inertia, the stronger the signal required to make the weight flip.
+Beware that latent weights are [not really weights at all](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization) - after all, changing the latent weights usually doesn't affect the behavior of the network and we throw the latent weights away after we're done training. Instead, they are best thought of as a product between the weight and a positive inertia: the higher this inertia, the stronger the signal required to make the weight flip.
 
 One implication of this is that the latent weights should be constrained: as an increase in inertia does not change the behavior of the network, it can otherwise grow indefinitely.
 
@@ -61,5 +61,5 @@ Here are some general tips and tricks that you may want to keep in mind:
 
 If you would like to learn more, we recommend checking out the following papers (starting at the most recent):
 
-- [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://arxiv.org/abs/1906.02107) - This paper investigates optimization of BNNs using latent weights and introduces [Bop](/api/optimizers/#bop) as the first custom BNN optimizer.
+- [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization) - This paper investigates optimization of BNNs using latent weights and introduces [Bop](/api/optimizers/#bop) as the first custom BNN optimizer.
 - [An Empirical study of Binary Neural Networks' Optimisation](https://openreview.net/forum?id=rJfUCoR5KX) - An empirical comparison of BNN optimization methods, including a detailed discussion on the use of various optimizers and a number of tricks used in the literature.
