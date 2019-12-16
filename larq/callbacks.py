@@ -13,7 +13,11 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
             ),
             default_optimizer=tf.keras.optimizers.Adam(0.01),
         )
-        callbacks = [HyperparameterScheduler(lambda x:0.001*(0.1**(x//30)), 'gamma', optimizer.optimizers[0])]
+        callbacks = [
+            HyperparameterScheduler(
+                lambda x:0.001*(0.1**(x//30)), 'gamma', optimizer.optimizers[0]
+            )
+        ]
         ```
     # Arguments
     optimizer: the optimizer that contains the hyperparameter that will be scheduled.
