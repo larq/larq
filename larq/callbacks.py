@@ -27,7 +27,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
     verbose: int. 0: quiet, 1: update messages.
     """
 
-    def __init__(self, schedule, hyperparameter,optimizer=None, verbose=0):
+    def __init__(self, schedule, hyperparameter, optimizer=None, verbose=0):
         super(HyperparameterScheduler, self).__init__()
         if optimizer is None:
             self.optimizer = self.model.optimizer
