@@ -1,6 +1,9 @@
 import pytest
 import tensorflow as tf
+from packaging import version
 from tensorflow.python.eager import context
+
+from larq import quantized_scope
 
 
 @pytest.fixture
@@ -14,14 +17,20 @@ def eager_mode():
 def graph_mode():
     """pytest fixture for running test in graph mode"""
     with context.graph_mode():
-        yield
+        with tf.compat.v1.Session().as_default():
+            yield
 
 
 @pytest.fixture(params=["eager", "graph"])
 def eager_and_graph_mode(request):
     """pytest fixture for running test in eager and graph mode"""
-    with getattr(context, f"{request.param}_mode")():
-        yield request.param
+    if request.param == "graph":
+        with context.graph_mode():
+            with tf.compat.v1.Session().as_default():
+                yield request.param
+    else:
+        with context.eager_mode():
+            yield request.param
 
 
 @pytest.fixture(params=["graph", "tf_eager", "tf_keras_eager"])
@@ -38,7 +47,7 @@ def keras_should_run_eagerly(request):
     """
 
     if request.param == "graph":
-        if int(tf.__version__[0]) >= 2:
+        if version.parse(tf.__version__) >= version.parse("2"):
             pytest.skip("Skipping graph mode for TensorFlow 2+.")
 
         with context.graph_mode():
@@ -46,3 +55,19 @@ def keras_should_run_eagerly(request):
     else:
         with context.eager_mode():
             yield request.param == "tf_keras_eager"
+
+
+@pytest.fixture(params=[False, True])
+def distribute_scope(request):
+    if request.param is True:
+        with tf.distribute.MirroredStrategy(["cpu:0"]).scope():
+            yield request.param
+    else:
+        yield request.param
+
+
+@pytest.fixture(params=[True, False])
+def quantized(request):
+    """pytest fixture for running test quantized and non-quantized"""
+    with quantized_scope.scope(request.param):
+        yield request.param

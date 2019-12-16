@@ -1,5 +1,3 @@
-from contextlib import contextmanager
-
 from tensorflow.keras.utils import get_custom_objects
 
 
@@ -38,22 +36,3 @@ def set_precision(precision=32):
         return function
 
     return decorator
-
-
-@contextmanager
-def quantize(layer, kernel_name, quantizer):
-    """Temporarily apply a quantizer to a kernel.
-
-    This is needed, since we do not want to mutate existing references that might
-    expect a tf.Variable instead of a tf.Tensor. This can happen in eager mode since
-    overwriting a kernel would also mutate layer.trainable_variables which breaks
-    gradient computation.
-    """
-    full_precision_kernel = getattr(layer, kernel_name)
-    if quantizer is None:
-        yield full_precision_kernel
-    else:
-        quantized_kernel = quantizer(full_precision_kernel)
-        setattr(layer, kernel_name, quantized_kernel)
-        yield quantized_kernel
-        setattr(layer, kernel_name, full_precision_kernel)

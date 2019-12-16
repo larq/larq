@@ -97,9 +97,9 @@ def _get_output_shape(layer):
 
 
 class WeightProfile:
-    def __init__(self, weight, bitwidth=32, trainable=True):
+    def __init__(self, weight, trainable=True):
         self._weight = weight
-        self.bitwidth = bitwidth
+        self.bitwidth = getattr(weight, "precision", 32)
         self.trainable = trainable
 
     @property
@@ -130,9 +130,7 @@ class LayerProfile:
         self._layer = layer
         self.weight_profiles = [
             WeightProfile(
-                weight,
-                self._get_bitwidth(weight),
-                trainable=any(weight is w for w in layer.trainable_weights),
+                weight, trainable=any(weight is w for w in layer.trainable_weights),
             )
             for weight in layer.weights
         ]
@@ -228,17 +226,6 @@ class LayerProfile:
             row.append(n)
 
         return row
-
-    def _get_bitwidth(self, weight):
-        try:
-            for quantizer, quantized_weight in zip(
-                self._layer.quantizers, self._layer.quantized_latent_weights
-            ):
-                if quantized_weight is weight:
-                    return quantizer.precision
-        except AttributeError:
-            pass
-        return 32
 
 
 class ModelProfile(LayerProfile):
