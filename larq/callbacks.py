@@ -29,10 +29,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
 
     def __init__(self, schedule, hyperparameter, optimizer=None, verbose=0):
         super(HyperparameterScheduler, self).__init__()
-        if optimizer is None:
-            self.optimizer = self.model.optimizer
-        else:
-            self.optimizer = optimizer
+        self.optimizer = optimizer if optimizer else self.model.optimizer
         self.schedule = schedule
         self.hyperparameter = hyperparameter
         self.verbose = verbose
