@@ -39,6 +39,39 @@ class QuantizedVariable(tf.Variable):
         self.quantizer = quantizer
         self.precision = precision or getattr(quantizer, "precision", None)
 
+    @classmethod
+    def from_variable(cls, variable, quantizer=None, precision=None):
+        """Creates a QuantizedVariable that wraps another variable.
+
+        This typically just returns `QuantizedVariable(variable)`. But, if the variable
+        is a DistributedVariable or one of its subclasses, we instead dynamically
+        create a class that subclasses from both QuantizedVariable and
+        variable.__class__. This is so the returned variable will still pass
+        `isinstance(variable, variable.__class__)`, which is required for
+        DistributedVariables and its subclasses to work properly.
+
+        # Arguments
+        variable: A floating-point resource variable to wrap.
+        quantizer: An optional quantizer to transform the floating-point variable to a
+            fake quantized variable.
+        precision: An optional integer defining the precision of the quantized variable.
+            If `None`, `quantizer.precision` is used.
+
+        # Returns
+        A QuantizedVariable that wraps the variable.
+        """
+        if not isinstance(variable, DistributedVariable):  # type: ignore
+            return cls(variable, quantizer, precision)
+
+        class QuantizedDistributedVariable(cls, variable.__class__):
+            """A QuantizedVariable that also subclasses from DistributedVariable."""
+
+            def get(self, *args, **kwargs):
+                # For some reason this is needed to make unit `x + x` pass on TF 1.14
+                return self._quantize(self.latent_variable.get(*args, **kwargs))
+
+        return QuantizedDistributedVariable(variable, quantizer, precision)
+
     def _quantize(self, value):
         if self.quantizer and quantized_scope.should_quantize():
             return self.quantizer(value)
@@ -252,39 +285,6 @@ tf.register_tensor_conversion_function(
     QuantizedVariable, QuantizedVariable._dense_var_to_tensor
 )
 ops.register_dense_tensor_like_type(QuantizedVariable)
-
-
-def create_quantized_variable(variable, quantizer=None, precision=None):
-    """Creates a QuantizedVariable that wraps another variable.
-
-    This typically just returns `QuantizedVariable(variable)`. But, if the variable
-    is a DistributedVariable or one of its subclasses, we instead dynamically
-    create a class that subclasses from both QuantizedVariable and
-    variable.__class__. This is so the returned variable will still pass
-    `isinstance(variable, variable.__class__)`, which is required for
-    DistributedVariables and its subclasses to work properly.
-
-    # Arguments
-    variable: A floating-point resource variable to wrap.
-    quantizer: An optional quantizer to transform the floating-point variable to a
-        fake quantized variable.
-    precision: An optional integer defining the precision of the quantized variable.
-        If `None`, `quantizer.precision` is used.
-
-    # Returns
-    A QuantizedVariable that wraps the variable.
-    """
-    if not isinstance(variable, DistributedVariable):  # type: ignore
-        return QuantizedVariable(variable, quantizer, precision)
-
-    class QuantizedDistributedVariable(QuantizedVariable, variable.__class__):
-        """A QuantizedVariable that also subclasses from DistributedVariable."""
-
-        def get(self, *args, **kwargs):
-            # For some reason this is needed to make unit `x + x` pass on TF 1.14
-            return self._quantize(self.latent_variable.get(*args, **kwargs))
-
-    return QuantizedDistributedVariable(variable, quantizer, precision)
 
 
 def _maybe_wrap(variable, quantizer, precision, wrap=True):

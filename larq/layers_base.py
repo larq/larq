@@ -3,7 +3,8 @@ import logging
 import tensorflow as tf
 
 from larq import metrics as lq_metrics
-from larq import quantized_scope, quantized_variable, quantizers
+from larq import quantized_scope, quantizers
+from larq.quantized_variable import QuantizedVariable
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class BaseLayer(tf.keras.layers.Layer):
         # Wrap `getter` with a version that returns a `QuantizedVariable`.
         def getter(*args, **kwargs):
             variable = old_getter(*args, **kwargs)
-            return quantized_variable.create_quantized_variable(variable, quantizer)
+            return QuantizedVariable.from_variable(variable, quantizer)
 
         return super()._add_variable_with_custom_getter(name, getter=getter, **kwargs)
 
