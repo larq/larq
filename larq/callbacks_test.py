@@ -1,12 +1,10 @@
 import numpy as np
 import tensorflow as tf
-import larq as lq
+from tensorflow.python.keras import testing_utils
 
+import larq as lq
 from larq import testing_utils as lq_testing_utils
 from larq.callbacks import HyperparameterScheduler
-
-from tensorflow import keras
-from tensorflow.python.keras import testing_utils
 
 
 class LogHistory(tf.keras.callbacks.Callback):
@@ -32,7 +30,7 @@ class TestHyperparameterScheduler:
             train_samples=1000, test_samples=0, input_shape=(10,), num_classes=2
         )
 
-        y_train = keras.utils.to_categorical(y_train)
+        y_train = tf.keras.utils.to_categorical(y_train)
 
         model = lq_testing_utils.get_small_bnn_model(
             x_train.shape[1], 20, y_train.shape[1]
@@ -83,19 +81,19 @@ class TestHyperparameterScheduler:
         )
 
         np.testing.assert_almost_equal(
-            keras.backend.get_value(model.optimizer.optimizers[0].gamma),
+            tf.keras.backend.get_value(model.optimizer.optimizers[0].gamma),
             scheduler(num_epochs - 1),
             decimal=8,
         )
 
         np.testing.assert_almost_equal(
-            keras.backend.get_value(model.optimizer.optimizers[0].threshold),
+            tf.keras.backend.get_value(model.optimizer.optimizers[0].threshold),
             scheduler(num_epochs - 1),
             decimal=8,
         )
 
         np.testing.assert_almost_equal(
-            keras.backend.get_value(model.optimizer.optimizers[1].lr),
+            tf.keras.backend.get_value(model.optimizer.optimizers[1].lr),
             scheduler(num_epochs - 1),
             decimal=8,
         )
