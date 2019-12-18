@@ -53,19 +53,19 @@ class TestHyperparameterScheduler:
 
         cbk_gamma_scheduler = HyperparameterScheduler(
             schedule=scheduler,
-            optimizer=bop,
+            optimizer=model.optimizer.optimizers[0],
             hyperparameter="gamma",
             verbose=1,
         )
         cbk_threshold_scheduler = HyperparameterScheduler(
             schedule=scheduler,
-            optimizer=bop,
+            optimizer=model.optimizer.optimizers[0],
             hyperparameter="threshold",
             verbose=1,
         )
         cbk_lr_scheduler = HyperparameterScheduler(
             schedule=scheduler,
-            optimizer=adam,
+            optimizer=model.optimizer.optimizers[1],
             hyperparameter="lr",
             verbose=1,
         )
