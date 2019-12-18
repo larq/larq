@@ -238,7 +238,7 @@ class Bop(tf.keras.optimizers.Optimizer):
     - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
     """
 
-    def __init__(self, threshold=1e-7, gamma=1e-2, name="Bop", **kwargs):
+    def __init__(self, threshold=1e-8, gamma=1e-4, name="Bop", **kwargs):
         super().__init__(name=name, **kwargs)
 
         self._set_hyper("threshold", threshold)
