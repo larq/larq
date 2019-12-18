@@ -6,21 +6,18 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
 
     !!! example
         ```python
+        bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
+        adam = tf.keras.optimizers.Adam(0.01)
         optimizer = lq.optimizers.CaseOptimizer(
-            (
-                lq.optimizers.Bop.is_binary_variable,
-                lq.optimizers.Bop(threshold=1e-6, gamma=1e-3),
-            ),
-            default_optimizer=tf.keras.optimizers.Adam(0.01),
+            (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
         )
         callbacks = [
-            HyperparameterScheduler(
-                lambda x:0.001*(0.1**(x//30)), 'gamma', optimizer.optimizers[0]
-            )
+            HyperparameterScheduler(lambda x: 0.001 * (0.1 ** (x // 30)), "gamma", bop)
         ]
         ```
     # Arguments
     optimizer: the optimizer that contains the hyperparameter that will be scheduled.
+        Defaults to `self.model.optimizer` if `optimizer == None`.
     schedule: a function that takes an epoch index as input
         (integer, indexed from 0) and returns a new hyperparameter as output.
     hyperparameter: str. the name of the hyperparameter to be scheduled.

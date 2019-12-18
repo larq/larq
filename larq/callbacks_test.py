@@ -35,13 +35,13 @@ class TestHyperparameterScheduler:
         model = lq_testing_utils.get_small_bnn_model(
             x_train.shape[1], 20, y_train.shape[1]
         )
+
+        bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
+        adam = tf.keras.optimizers.Adam(0.01)
         case_optimizer = lq.optimizers.CaseOptimizer(
-            (
-                lq.optimizers.Bop.is_binary_variable,
-                lq.optimizers.Bop(threshold=1e-6, gamma=1e-3),
-            ),
-            default_optimizer=tf.keras.optimizers.Adam(0.01),
+            (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
         )
+
         model.compile(
             loss="categorical_crossentropy",
             optimizer=case_optimizer,
