@@ -2,8 +2,7 @@ import logging
 
 import tensorflow as tf
 
-from larq import metrics as lq_metrics
-from larq import quantized_scope, quantizers
+from larq import metrics as lq_metrics, quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
 
 log = logging.getLogger(__name__)
