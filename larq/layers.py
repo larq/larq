@@ -69,7 +69,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -166,7 +166,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -276,7 +276,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -393,7 +393,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -503,7 +503,7 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
     input_quantizer: Quantization function applied to the input of the layer.
     depthwise_quantizer: Quantization function applied to the `depthwise_kernel`
         weights matrix or integer defining the desired precision if quantization should
-        be handled by an external optimizer.
+        be handled by an specialized optimizer.
     depthwise_initializer: Initializer for the depthwise kernel matrix.
     bias_initializer: Initializer for the bias vector.
     depthwise_regularizer: Regularizer function applied to the depthwise kernel matrix.
@@ -608,10 +608,10 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     input_quantizer: Quantization function applied to the input of the layer.
     depthwise_quantizer: Quantization function applied to the depthwise kernel or
         nteger defining the desired precision if quantization should be handled by an
-        external optimizer.
+        specialized optimizer.
     pointwise_quantizer: Quantization function applied to the pointwise kernel or
         integer defining the desired precision if quantization should be handled by an
-        external optimizer.
+        specialized optimizer.
     depthwise_initializer: An initializer for the depthwise convolution kernel.
     pointwise_initializer: An initializer for the pointwise convolution kernel.
     bias_initializer: An initializer for the bias vector. If None, the default
@@ -741,10 +741,10 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
     input_quantizer: Quantization function applied to the input of the layer.
     depthwise_quantizer: Quantization function applied to the depthwise kernel matrix
         or integer defining the desired precision if quantization should be handled by
-        an external optimizer.
+        an specialized optimizer.
     pointwise_quantizer: Quantization function applied to the pointwise kernel matrix
         or integer defining the desired precision if quantization should be handled by
-        an external optimizer.
+        an specialized optimizer.
     depthwise_initializer: Initializer for the depthwise kernel matrix.
     pointwise_initializer: Initializer for the pointwise kernel matrix.
     bias_initializer: Initializer for the bias vector.
@@ -879,7 +879,7 @@ class QuantConv2DTranspose(QuantizerBase, tf.keras.layers.Conv2DTranspose):
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -1008,7 +1008,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -1129,7 +1129,7 @@ class QuantLocallyConnected1D(QuantizerBase, tf.keras.layers.LocallyConnected1D)
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
@@ -1267,7 +1267,7 @@ class QuantLocallyConnected2D(QuantizerBase, tf.keras.layers.LocallyConnected2D)
     input_quantizer: Quantization function applied to the input of the layer.
     kernel_quantizer: Quantization function applied to the `kernel` weights matrix
         or integer defining the desired precision if quantization should be handled
-        by an external optimizer.
+        by an specialized optimizer.
     kernel_initializer: Initializer for the `kernel` weights matrix.
     bias_initializer: Initializer for the bias vector.
     kernel_regularizer: Regularizer function applied to the `kernel` weights matrix.
