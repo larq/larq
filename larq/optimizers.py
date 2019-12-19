@@ -303,6 +303,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         if precision == 1 and getattr(var, "quantizer", None) is not None:
             warnings.warn(
                 f"Calling Bop with `quantizer={var.quantizer}`; this might result in "
-                "unexpected behaviour or won't do anything."
+                "unexpected behaviour or won't do anything. "
+                "To assign a layer to Bop, set `kernel_quantizer=1`."
             )
         return precision == 1
