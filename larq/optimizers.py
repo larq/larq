@@ -206,9 +206,11 @@ class Bop(tf.keras.optimizers.Optimizer):
     Bop is a latent-free optimizer for Binarized Neural Networks (BNNs) and
     Binary Weight Networks (BWN).
 
-    To use Bop to train a model set `kernel_quantizer=1` for the layers where
-    binarization should be handled by Bop or use custom predicate function in the
-    `CaseOptimizer`.
+    To use Bop to train a model, set `kernel_quantizer=1` for the layers where training
+    and binarization should be handled by Bop. This is the easiest, recommended
+    approach. Alternatively, you can define a custom predicate function for the
+    `CaseOptimizer` that captures the set of layers you want to assign to Bop
+    (see Bop's `is_binary_var()` for example).
 
     Bop maintains an exponential moving average of the gradients controlled by
     `gamma`. If this average exceeds the `threshold`, a weight is flipped.
