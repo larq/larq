@@ -23,7 +23,11 @@ def _test_optimizer(
     y_train = keras.utils.to_categorical(y_train)
 
     model = lq_testing_utils.get_small_bnn_model(
-        x_train.shape[1], 20, y_train.shape[1], trainable_bn=trainable_bn
+        x_train.shape[1],
+        20,
+        y_train.shape[1],
+        kernel_quantizer=1,
+        trainable_bn=trainable_bn,
     )
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["acc"])
 
@@ -109,7 +113,12 @@ class TestCaseOptimizer:
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Flatten(input_shape=(28, 28)),
-                lq.layers.QuantDense(64, input_quantizer="ste_sign", activation="relu"),
+                lq.layers.QuantDense(
+                    64,
+                    input_quantizer="ste_sign",
+                    kernel_quantizer=1,
+                    activation="relu",
+                ),
                 tf.keras.layers.Dense(10, activation="softmax"),
             ]
         )

@@ -27,7 +27,9 @@ class BaseLayer(tf.keras.layers.Layer):
         # Wrap `getter` with a version that returns a `QuantizedVariable`.
         def getter(*args, **kwargs):
             variable = old_getter(*args, **kwargs)
-            return QuantizedVariable.from_variable(variable, quantizer)
+            if type(quantizer) == int:
+                return QuantizedVariable.from_variable(variable, precision=quantizer)
+            return QuantizedVariable.from_variable(variable, quantizer=quantizer)
 
         return super()._add_variable_with_custom_getter(name, getter=getter, **kwargs)
 

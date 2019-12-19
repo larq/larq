@@ -56,7 +56,7 @@ class TestCommonFunctionality:
 
     def test_invalid_usage(self):
         with pytest.raises(ValueError):
-            lq.quantizers.get(42)
+            lq.quantizers.get(42.0)
         with pytest.raises(ValueError):
             lq.quantizers.get("unknown")
 

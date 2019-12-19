@@ -20,6 +20,7 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 
 !!! example
     ```python
+    layer = lq.layers.QuantDense(32, kernel_quantizer=1)
     case_optimizer = lq.optimizers.CaseOptimizer(
         (
             lq.optimizers.Bop.is_binary_variable,  # predicate
@@ -205,6 +206,10 @@ class Bop(tf.keras.optimizers.Optimizer):
     Bop is a latent-free optimizer for Binarized Neural Networks (BNNs) and
     Binary Weight Networks (BWN).
 
+    To use Bop to train a model set `kernel_quantizer=1` for the layers where
+    binarization should be handled by Bop or use custom predicate function in the
+    `CaseOptimizer`.
+
     Bop maintains an exponential moving average of the gradients controlled by
     `gamma`. If this average exceeds the `threshold`, a weight is flipped.
     Additionally, Bop accepts a regular optimizer that is applied to the
@@ -220,6 +225,7 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     !!! example
         ```python
+        layer = lq.layers.QuantDense(32, kernel_quantizer=1)
         optimizer = lq.optimizers.CaseOptimizer(
             (
                 lq.optimizers.Bop.is_binary_variable,
@@ -286,11 +292,17 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     @staticmethod
     def is_binary_variable(var):
-        """Returns True for binary variables named using the Larq Zoo naming scheme.
+        """Returns True for binary variables marked using `kernel_quantizer=1`.
 
         This is an example of a predictate that can be used by the `CaseOptimizer`.
 
         # Arguments
         var: a `tf.Variable`.
         """
-        return "/kernel" in var.name and "quant_" in var.name
+        precision = getattr(var, "precision", None)
+        if precision == 1 and getattr(var, "quantizer", None) is not None:
+            warnings.warn(
+                f"Calling Bop with `quantizer={var.quantizer}`; this might result in "
+                "unexpected behaviour or won't do anything."
+            )
+        return precision == 1

@@ -674,7 +674,7 @@ def get(identifier):
         return deserialize(identifier)
     if isinstance(identifier, str):
         return deserialize(str(identifier))
-    if callable(identifier):
+    if callable(identifier) or isinstance(identifier, int):
         return identifier
     raise ValueError(
         f"Could not interpret quantization function identifier: {identifier}"

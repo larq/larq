@@ -33,12 +33,14 @@ def generate_real_values_with_zeros(low=-2, high=2, shape=(4, 10)):
     return real_values
 
 
-def get_small_bnn_model(input_dim, num_hidden, output_dim, trainable_bn=True):
+def get_small_bnn_model(
+    input_dim, num_hidden, output_dim, kernel_quantizer="ste_sign", trainable_bn=True
+):
     model = tf.keras.models.Sequential()
     model.add(
         lq.layers.QuantDense(
             units=num_hidden,
-            kernel_quantizer="ste_sign",
+            kernel_quantizer=kernel_quantizer,
             kernel_constraint="weight_clip",
             activation="relu",
             input_shape=(input_dim,),
@@ -49,7 +51,7 @@ def get_small_bnn_model(input_dim, num_hidden, output_dim, trainable_bn=True):
     model.add(
         lq.layers.QuantDense(
             units=output_dim,
-            kernel_quantizer="ste_sign",
+            kernel_quantizer=kernel_quantizer,
             kernel_constraint="weight_clip",
             input_quantizer="ste_sign",
             activation="softmax",
