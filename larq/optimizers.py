@@ -207,8 +207,6 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     Bop maintains an exponential moving average of the gradients controlled by
     `gamma`. If this average exceeds the `threshold`, a weight is flipped.
-    Additionally, Bop accepts a regular optimizer that is applied to the
-    non-binary weights in the network.
 
     The hyperparameter `gamma` is somewhat analogues to the learning rate in
     SGD methods: a high `gamma` results in rapid convergence but also makes
