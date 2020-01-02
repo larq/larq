@@ -21,7 +21,7 @@ x_out = lq.layers.QuantDense(
     units=1024,
     input_quantizer=lq.quantizers.ste_sign,
     kernel_quantizer=lq.quantizers.ste_sign,
-    kernel_constraint=lq.constraints.weight_clip,
+    kernel_constraint=lq.constraints.WeightClip(clip_value=1.0),
     )(x_in)
 ```
 
@@ -80,7 +80,7 @@ def conv_with_shortcut(x):
         input_quantizer=lq.quantizers.ste_sign,
         kernel_quantizer=lq.quantizers.ste_sign,
         kernel_initializer="glorot_normal",
-        kernel_constraint=lq.constraints.weight_clip,
+        kernel_constraint=lq.constraints.WeightClip(clip_value=1.0),
         use_bias=False,
     )(x)
 
@@ -107,7 +107,7 @@ x = lq.layers.QuantConv2D(
     padding="same",
     input_quantizer=lq.quantizers.ste_sign,
     kernel_quantizer=lq.quantizers.ste_sign,
-    kernel_constraint=lq.constraints.weight_clip,
+    kernel_constraint=lq.constraints.WeightClip(clip_value=1.0),
     use_bias=False,
     )(x)
 x = tf.keras.layers.MaxPool2D(pool_size=3, strides=2)(x)
