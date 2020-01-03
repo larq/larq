@@ -24,10 +24,15 @@ bibliography: paper.bib
 
 # Introduction
 
-Bringing the power of deep learning outside of data centers can transform society: self-driving cars, mobile-based neural networks, and autonomous drones all have the potential to revolutionize everyday lives.
-However, existing neural networks that use 32 bits to encode each weight and activation have an energy budget which is far beyond the scope of many of these applications. One common way to improve computational efficiency is to reduce the precision of the network to 16-bit or 8-bit, also known as quantization.
-Binarized Neural Networks (BNNs) represent an extreme case of quantized networks, that cannot be viewed as approximations to real-valued networks and therefore requires special tools and optimization strategies [@bop]. In these networks both weights and activations are restricted to $\{-1, +1\}$ [@binarynet]. Compared to an equivalent 8-bit quantized network BNNs require 8 times less memory and can lead to a theoretical 64 times speed-up when deployed on optimized hardware.
+Modern deep learning methods have been successfully applied to many different tasks and have the potential to revolutionize everyday lives. However, existing neural networks that use 32 bits to encode each weight and activation often have an energy budget that far exceeds the capabilities of mobile or embedded devices. One common way to improve computational efficiency is to reduce the precision of the network to 16-bit or 8-bit, also known as quantization.
+Binarized Neural Networks (BNNs) represent an extreme case of quantized networks, that cannot be viewed as approximations to real-valued networks and therefore requires special tools and optimization strategies [@bop]. In these networks both weights and activations are restricted to $\{-1, +1\}$ [@binarynet]. Compared to an equivalent 8-bit quantized network BNNs require 8 times smaller memory size and 8 times fewer memory accesses, which reduces energy consumption drastically when deployed on optimized hardware [@binarynet].
 However, many open research questions remain until the use of BNNs and other extremely quantized neural networks becomes widespread in industry. [`larq`](https://larq.dev) is an ecosystem of Python packages for BNNs and other Quantized Neural Networks (QNNs). It is intended to facilitate researchers to resolve these outstanding questions.
+
+# Statement of need
+
+Fortunately, many researchers already publish code along with their papers, though, in absence of a common API to define extremely quantized networks, authors end up re-implementing a large amount of code, making it difficult to share improvements and make rapid progress. Existing tools for BNN research either focus on deployment or require a high learning curve to use and contribute to [@dabnn; @bmxnetv2]. The API of [`larq`](https://larq.dev) is built on top of `tensorflow.keras` [@tensorflow; @keras] and is designed to provide an easy to use, composable way to design and train BNNs. While popular libraries like TensorFlow Lite, TensorFlow Model Optimization or PyTorch focus on 16-bit or 8-bit quantization [@tensorflow; @pytorch], `larq` aims to extend this towards lower bit-widths.
+
+We and many other researchers in the field often encounter major problems when it comes to reproducing existing literature, due to incomplete or even broken code of official implementations. To encourage reproducible research, [`larq/zoo`](https://larq.dev/models) provides tested and maintained implementations and pretrained weights for a variety of popular extremely quantized models [@binarynet; @bireal_net; @binary_dense_net; @xnor_net; @dorefa] helping researchers focus on their work instead of spending time on reproducing existing work.
 
 # Background: Neural Network Binarization
 
@@ -38,8 +43,6 @@ A solution to both problems was suggested by Hinton, who proposed the Straight-T
 Since then, the field of BNNs and closely related Ternary Neural Networks has become a prime candidate to enable efficient inference for deep neural networks. Numerous papers have explored novel architectures [@Zhu2018; @bireal_net; @xnor_net; @Zhuang2018] and optimization strategies [@Alizadeh2019; @bop], and the accuracy gap between efficient BNNs and regular DNNs is rapidly closing.
 
 # Training extremely quantized neural networks with `larq`
-
-Existing tools for BNN research either focus on deployment or require a high learning curve to use and contribute to [@dabnn; @bmxnetv2]. The API of `larq` is built on top of `tensorflow.keras` [@tensorflow; @keras] and is designed to provide an easy to use, composable way to design and train BNNs. While popular libraries like TensorFlow Lite, TensorFlow Model Optimization or PyTorch focus on 16-bit or 8-bit quantization [@tensorflow; @pytorch], `larq` aims to extend this towards lower bit-widths.
 
 Quantization is the process of mapping a set of continuous values to a smaller countable set. BNNs are a special case of QNNs, where the quantization output $x_q$ is binary:
 
@@ -57,11 +60,6 @@ with full precision weights $\boldsymbol{w}$, arbitrary precision input $\boldsy
 $q_{\, \mathrm{kernel}}$ and $q_{\, \mathrm{input}}$ are quantizers that define an operation for quantizing a kernel and inputs, respectively, and a pseudo-gradient used for automatic differentiation so that operations of the layer can be executed in reduced precision. The source code and documentation be found at [github.com/larq/larq](https://github.com/larq/larq) and [larq.dev](https://larq.dev) respectively.
 
 While `larq` can be used to train networks with arbitrary bit-widths, it provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
-
-# Encouraging reproducible research with `larq/zoo`
-
-Fortunately, many researchers already publish code along with their papers, though, in absence of a common API to define extremely quantized networks, authors end up re-implementing a large amount of code, making it difficult to share improvements and make rapid progress. We and many other researchers in the field often encounter major problems when it comes to reproducing existing literature, due to incomplete or even broken code of official implementations.
-To tackle this issue, [`larq/zoo`](https://larq.dev/models) provides tested and maintained implementations and pretrained weights for a variety of popular extremely quantized models [@binarynet; @bireal_net; @binary_dense_net; @xnor_net; @dorefa] helping researchers focus on their work instead of spending time on reproducing existing work.
 
 # Summary
 
