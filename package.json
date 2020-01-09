@@ -1,0 +1,10 @@
+{
+  "name": "larq.dev",
+  "private": true,
+  "scripts": {
+    "preinstall": "python3 -m pip install nbconvert",
+    "install": "python3 -m pip install -r requirements.txt git+https://github.com/lgeiger/pydoc-markdown.git -e .[docs]",
+    "prebuild": "python3 generate_api_docs.py",
+    "build": "python3 -m mkdocs build -d public"
+  }
+}
