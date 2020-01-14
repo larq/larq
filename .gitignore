@@ -105,8 +105,9 @@ venv.bak/
 /site
 /public
 
-# mypy
+# Type checking
 .mypy_cache/
+.pytype/
 
 # Editors
 .vscode/
