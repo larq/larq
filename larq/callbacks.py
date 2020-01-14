@@ -26,12 +26,22 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
 
     def __init__(self, schedule, hyperparameter, optimizer=None, verbose=0):
         super(HyperparameterScheduler, self).__init__()
-        self.optimizer = optimizer if optimizer else self.model.optimizer
+        self.optimizer = optimizer
         self.schedule = schedule
         self.hyperparameter = hyperparameter
         self.verbose = verbose
 
+    def set_model(self, model):
+        super().set_model(model)
+        if self.optimizer is None:
+            if hasattr(model, "optimizer"):
+                self.optimizer = model.optimizer
+            else:
+                raise ValueError(f"Model must have an 'optimizer' attribute.")
+
     def on_epoch_begin(self, epoch, logs=None):
+        if self.optimizer is None:
+            raise ValueError(f"HyperParameterScheduler does not have an optimizer!")
         if not hasattr(self.optimizer, self.hyperparameter):
             raise ValueError(
                 f'Optimizer must have a "{self.hyperparameter}" attribute.'
