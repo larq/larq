@@ -1,0 +1,5 @@
+pytest/__init__ /home/jelmer/Plumerai/larq/.pytype/imports/default.pyi
+tensorflow/__init__ /home/jelmer/Plumerai/larq/.pytype/imports/default.pyi
+tensorflow/keras/utils/get_custom_objects/__init__ /home/jelmer/Plumerai/larq/.pytype/imports/default.pyi
+larq/utils /home/jelmer/Plumerai/larq/.pytype/pyi/larq/utils.pyi
+larq/metrics /home/jelmer/Plumerai/larq/.pytype/pyi/larq/metrics.pyi

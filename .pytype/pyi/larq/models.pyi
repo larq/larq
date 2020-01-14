@@ -1,0 +1,86 @@
+# (generated with --quick)
+
+import larq.layers
+from typing import Any, Callable, List, Tuple, Type, TypeVar, Union
+
+AsciiTable: Any
+__all__: List[str]
+itertools: module
+keras_layers: module
+lq_layers: module
+mac_containing_layers: Tuple[Type[larq.layers.QuantConv2D], Type[larq.layers.QuantSeparableConv2D], Type[larq.layers.QuantDepthwiseConv2D], Type[larq.layers.QuantDense], Any, Any, Any, Any]
+np: module
+op_count_supported_layer_types: Tuple[Type[larq.layers.QuantConv2D], Type[larq.layers.QuantSeparableConv2D], Type[larq.layers.QuantDepthwiseConv2D], Type[larq.layers.QuantDense], Any, Any, Any, Any, Any, Any, Any, Any]
+
+_T = TypeVar('_T')
+_T2 = TypeVar('_T2')
+
+class LayerProfile:
+    _layer: Any
+    fp_equivalent_memory: Any
+    memory: Any
+    op_profiles: List[OperationProfile]
+    output_pixels: int
+    output_shape: tuple
+    unique_op_precisions: list
+    unique_param_bidtwidths: list
+    weight_profiles: Any
+    def __init__(self, layer) -> None: ...
+    def generate_table_row(self, table_config) -> list: ...
+    def input_precision(self, default = ...) -> Any: ...
+    def op_count(self, op_type = ..., precision = ..., escape: _T2 = ...) -> Union[int, _T2]: ...
+    def weight_count(self, bitwidth = ..., trainable = ...) -> int: ...
+
+class LayersTable(Any):
+    inner_column_border: bool
+    inner_footing_row_border: bool
+    inner_heading_row_border: bool
+    justify_columns: Any
+    def __init__(self, table_data, title = ...) -> None: ...
+
+class ModelProfile(LayerProfile):
+    fp_equivalent_memory: Any
+    layer_profiles: Any
+    memory: Any
+    unique_op_precisions: list
+    unique_param_bidtwidths: list
+    def __init__(self, model) -> None: ...
+    def _generate_table_header(self, table_config) -> list: ...
+    def _generate_table_total(self, table_config) -> list: ...
+    def generate_summary(self, include_macs = ...) -> List[list]: ...
+    def generate_table(self, include_macs = ...) -> List[list]: ...
+    def op_count(self, op_type = ..., bitwidth = ...) -> Any: ...
+    def weight_count(self, bitwidth = ..., trainable = ...) -> Any: ...
+
+class OperationProfile:
+    n: int
+    op_type: str
+    precision: int
+    def __init__(self, n: int, precision: int, op_type: str) -> None: ...
+
+class SummaryTable(Any):
+    inner_column_border: bool
+    inner_heading_row_border: bool
+    def __init__(self, table_data, title = ...) -> None: ...
+
+class WeightProfile:
+    _weight: Any
+    bitwidth: Any
+    count: int
+    fp_equivalent_memory: Any
+    memory: Any
+    trainable: Any
+    def __init__(self, weight, trainable = ...) -> None: ...
+    def is_bias(self) -> bool: ...
+
+def _bitsize_as_str(bitsize) -> str: ...
+def _flatten(lst) -> list: ...
+def _format_table_entry(x, units = ...) -> Any: ...
+def _get_output_shape(layer) -> tuple: ...
+def _number_as_readable_str(num) -> str: ...
+@overload
+def dataclass(_cls: Type[_T]) -> Type[_T]: ...
+@overload
+def dataclass(*, init: bool = ..., repr: bool = ..., eq: bool = ..., order: bool = ..., unsafe_hash: bool = ..., frozen: bool = ...) -> Callable[[Type[_T]], Type[_T]]: ...
+def sanitize_table(table_data) -> list: ...
+def summary(model, print_fn = ..., include_macs = ...) -> None: ...
