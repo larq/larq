@@ -39,7 +39,7 @@ Any optimizer you now apply will update the latent weights; after the update the
 
 ### Alternative: Custom Optimizers
 
-Instead of using latent weights, one can opt for a custom BNN optimizer that inherently generates binary weights. An example of such an optimizer is [Bop](api/optimizers/#bop).
+Instead of using latent weights, one can opt for a custom BNN optimizer that inherently generates binary weights. An example of such an optimizer is [Bop](/api/optimizers/#bop).
 
 ## Choice of Pseudo-Gradient
 
