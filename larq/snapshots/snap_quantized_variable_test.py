@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['test_repr[eager] 1'] = "<QuantizedVariable 'x:0' shape=() dtype=float32 quantizer=<lambda> numpy=0.0>"
