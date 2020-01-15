@@ -55,7 +55,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     `default_optimizer == None`, the variable is not trained.
 
     # Arguments
-    predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.Optimzer)` pairs,
+    predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.Optimizer)` pairs,
         where `pred`  takes one `tf.Variable` as argument and returns `True` if the
         optimizer should be used for that variable, e.g. `pred(var) == True`.
     default_optimizer: A `tf.keras.optimizers.Optimizer` to be applied to any variable
