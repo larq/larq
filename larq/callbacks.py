@@ -24,6 +24,8 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
     schedule: a function that takes an epoch index as input
         (integer, indexed from 0) and returns a new hyperparameter as output.
     hyperparameter: str. the name of the hyperparameter to be scheduled.
+    unit: str (optional), what interval unit to change the hyperparameter at. Can be
+        either "epoch" (default) or "step".
     verbose: int. 0: quiet, 1: update messages.
     """
 
@@ -32,6 +34,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         schedule: Callable,
         hyperparameter: str,
         optimizer: Optional[keras.optimizers.Optimizer] = None,
+        unit: Optional[str] = "epoch",
         verbose: Optional[int] = 0,
     ):
         super(HyperparameterScheduler, self).__init__()
@@ -39,6 +42,15 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         self.schedule = schedule
         self.hyperparameter = hyperparameter
         self.verbose = verbose
+
+        # TODO: may want to make this a boolean instead for efficient comparison,
+        # need to test impact on speed.
+        if unit == "epoch" or unit == "step":
+            self.unit = unit
+        else:
+            raise ValueError(
+                f"HyperparameterScheduler.unit can only be 'step' or 'epoch'. Received value '{unit}'"
+            )
 
     def set_model(self, model: keras.models.Model):
         super().set_model(model)
@@ -52,20 +64,32 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
                 f'Optimizer must have a "{self.hyperparameter}" attribute.'
             )
 
-    def on_epoch_begin(self, epoch: int, logs: Optional[Dict] = None):
+    def set_hyperparameter(self, t: int):
         hp = getattr(self.optimizer, self.hyperparameter)
         try:  # new API
             hyperparameter_val = tf.keras.backend.get_value(hp)
-            hyperparameter_val = self.schedule(epoch, hyperparameter_val)
+            hyperparameter_val = self.schedule(t, hyperparameter_val)
         except TypeError:  # Support for old API for backward compatibility
-            hyperparameter_val = self.schedule(epoch)
+            hyperparameter_val = self.schedule(t)
 
         tf.keras.backend.set_value(hp, hyperparameter_val)
+        return hp
 
-        if self.verbose > 0:
-            print(
-                f"Epoch {epoch + 1}: {self.hyperparameter} changing to {tf.keras.backend.get_value(hp)}."
-            )
+    def on_epoch_begin(self, epoch: int, logs: Optional[Dict] = None):
+        if self.unit == "epoch":
+            hp = self.set_hyperparameter(epoch)
+
+            if self.verbose > 0:
+                print(
+                    f"Epoch {epoch + 1}: {self.hyperparameter} changing "
+                    + f"to {tf.keras.backend.get_value(hp)}."
+                )
+
+    def on_batch_begin(self, batch: int, logs: Optional[Dict] = None):
+        if self.unit == "step":
+            # We use optimizer.iterations (i.e. global step), since batch only
+            # reflects the batch index in the current epoch.
+            self.set_hyperparameter(self.optimizer.iterations)
 
     def on_epoch_end(self, epoch: int, logs: Optional[Dict] = None):
         logs = logs or {}
