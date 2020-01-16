@@ -111,7 +111,7 @@ class TestQuantization:
     def test_magnitude_aware_sign_binarization(self, eager_mode):
         a = np.random.uniform(-2, 2, (3, 2, 2, 3))
         x = tf.Variable(a)
-        y = lq.quantizers.magnitude_aware_sign(x)
+        y = lq.quantizers.MagnitudeAwareSign()(x)
 
         assert y.shape == x.shape
 
@@ -196,12 +196,9 @@ class TestQuantization:
         assert not np.any(result > 1)
         assert not np.any(result < -1)
 
-    @pytest.mark.parametrize(
-        "fn", [lq.quantizers.dorefa_quantizer, lq.quantizers.DoReFaQuantizer(2)]
-    )
-    def test_dorefa_quantize(self, fn):
+    def test_dorefa_quantize(self):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [fn(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaQuantizer(2)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         k_bit = 2
@@ -239,7 +236,11 @@ class TestGradients:
 
     @pytest.mark.parametrize(
         "fn",
-        [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside],
+        [
+            lq.quantizers.SteSign(),
+            lq.quantizers.SteTern(),
+            lq.quantizers.SteHeaviside(),
+        ],
     )
     def test_ste_grad(self, eager_mode, fn):
         @np.vectorize

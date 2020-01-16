@@ -41,9 +41,6 @@ The following usages are equivalent:
 lq.layers.QuantDense(64, kernel_quantizer="ste_sign")
 ```
 ```python
-lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.ste_sign)
-```
-```python
 lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 ```
 """
@@ -73,74 +70,7 @@ def _clipped_gradient(x, dy, clip_value):
     return tf.where(mask, dy, zeros)
 
 
-class QuantizerFunctionWrapper:
-    """Wraps a quantizer function in a class that can be serialized.
-
-    # Arguments
-    fn: The quantizer function to wrap, with signature `fn(x, **kwargs)`.
-    **kwargs: The keyword arguments that are passed on to `fn`.
-    """
-
-    def __init__(self, fn: Callable[[tf.Tensor], tf.Tensor], **kwargs):
-        self.fn = fn
-        self.precision = getattr(fn, "precision", 32)
-        self._fn_kwargs = kwargs
-
-    def __call__(self, x: tf.Tensor) -> tf.Tensor:
-        """Invokes the `QuantizerFunctionWrapper` instance.
-
-        # Arguments
-        x: Input tensor.
-
-        # Returns
-        Quantized tensor.
-        """
-        return self.fn(x, **self._fn_kwargs)
-
-    def get_config(self):
-        return {
-            k: tf.keras.backend.eval(v)
-            if tf.is_tensor(v) or isinstance(v, tf.Variable)
-            else v
-            for k, v in self._fn_kwargs.items()
-        }
-
-
-@utils.set_precision(1)
 def ste_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
-    r"""Sign binarization function.
-
-    \\[
-    q(x) = \begin{cases}
-      -1 & x < 0 \\\
-      1 & x \geq 0
-    \end{cases}
-    \\]
-
-    The gradient is estimated using the Straight-Through Estimator
-    (essentially the binarization is replaced by a clipped identity on the
-    backward pass).
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-      1 & \left|x\right| \leq \texttt{clip_value} \\\
-      0 & \left|x\right| > \texttt{clip_value}
-    \end{cases}\\]
-
-    ```plot-activation
-    quantizers.ste_sign
-    ```
-
-    # Arguments
-    x: Input tensor.
-    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
-
-    # Returns
-    Binarized tensor.
-
-    # References
-    - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
-      Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
-    """
-
     @tf.custom_gradient
     def _call(x):
         def grad(dy):
@@ -155,70 +85,8 @@ def _scaled_sign(x):  # pragma: no cover
     return 1.3 * ste_sign(x)
 
 
-@utils.set_precision(1)
-def magnitude_aware_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
-    r"""Magnitude-aware sign for Bi-Real Net.
-
-    A scaled sign function computed according to Section 3.3 in
-    [Zechun Liu et al](https://arxiv.org/abs/1808.00278).
-
-    ```plot-activation
-    quantizers._scaled_sign
-    ```
-
-    # Arguments
-    x: Input tensor
-    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
-
-    # Returns
-    Scaled binarized tensor (with values in \\(\\{-a, a\\}\\), where \\(a\\) is a float).
-
-    # References
-    - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
-      Representational Capability and Advanced Training
-      Algorithm](https://arxiv.org/abs/1808.00278)
-
-    """
-    scale_factor = tf.reduce_mean(tf.abs(x), axis=list(range(len(x.shape) - 1)))
-
-    return tf.stop_gradient(scale_factor) * ste_sign(x, clip_value=clip_value)
-
-
-@utils.set_precision(1)
 @tf.custom_gradient
 def approx_sign(x: tf.Tensor) -> tf.Tensor:
-    r"""
-    Sign binarization function.
-    \\[
-    q(x) = \begin{cases}
-      -1 & x < 0 \\\
-      1 & x \geq 0
-    \end{cases}
-    \\]
-
-    The gradient is estimated using the ApproxSign method.
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-      (2 - 2 \left|x\right|) & \left|x\right| \leq 1 \\\
-      0 & \left|x\right| > 1
-    \end{cases}
-    \\]
-
-    ```plot-activation
-    quantizers.approx_sign
-    ```
-
-    # Arguments
-    x: Input tensor.
-
-    # Returns
-    Binarized tensor.
-
-    # References
-    - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
-      Representational Capability and Advanced
-      Training Algorithm](http://arxiv.org/abs/1808.00278)
-    """
-
     def grad(dy):
         abs_x = tf.math.abs(x)
         zeros = tf.zeros_like(dy)
@@ -228,37 +96,7 @@ def approx_sign(x: tf.Tensor) -> tf.Tensor:
     return math.sign(x), grad
 
 
-@utils.set_precision(1)
 def swish_sign(x: tf.Tensor, beta: float = 5.0) -> tf.Tensor:
-    r"""Sign binarization function.
-
-    \\[
-    q(x) = \begin{cases}
-      -1 & x < 0 \\\
-      1 & x \geq 0
-    \end{cases}
-    \\]
-
-    The gradient is estimated using the SignSwish method.
-
-    \\[
-    \frac{\partial q_{\beta}(x)}{\partial x} = \frac{\beta\left\\{2-\beta x \tanh \left(\frac{\beta x}{2}\right)\right\\}}{1+\cosh (\beta x)}
-    \\]
-
-    ```plot-activation
-    quantizers.swish_sign
-    ```
-    # Arguments
-    x: Input tensor.
-    beta: Larger values result in a closer approximation to the derivative of the sign.
-
-    # Returns
-    Binarized tensor.
-
-    # References
-    - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
-    """
-
     @tf.custom_gradient
     def _call(x):
         def grad(dy):
@@ -270,57 +108,12 @@ def swish_sign(x: tf.Tensor, beta: float = 5.0) -> tf.Tensor:
     return _call(x)
 
 
-@utils.set_precision(2)
 def ste_tern(
     x: tf.Tensor,
     threshold_value: float = 0.05,
     ternary_weight_networks: bool = False,
     clip_value: float = 1.0,
 ) -> tf.Tensor:
-    r"""Ternarization function.
-
-    \\[
-    q(x) = \begin{cases}
-    +1 & x > \Delta \\\
-    0 & |x| < \Delta \\\
-     -1 & x < - \Delta
-    \end{cases}
-    \\]
-
-    where \\(\Delta\\) is defined as the threshold and can be passed as an argument,
-    or can be calculated as per the Ternary Weight Networks original paper, such that
-
-    \\[
-    \Delta = \frac{0.7}{n} \sum_{i=1}^{n} |W_i|
-    \\]
-    where we assume that \\(W_i\\) is generated from a normal distribution.
-
-    The gradient is estimated using the Straight-Through Estimator
-    (essentially the Ternarization is replaced by a clipped identity on the
-    backward pass).
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 & \left|x\right| \leq \texttt{clip_value} \\\
-    0 & \left|x\right| > \texttt{clip_value}
-    \end{cases}\\]
-
-    ```plot-activation
-    quantizers.ste_tern
-    ```
-
-    # Arguments
-    x: Input tensor.
-    threshold_value: The value for the threshold, \\(\Delta\\).
-    ternary_weight_networks: Boolean of whether to use the
-        Ternary Weight Networks threshold calculation.
-    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
-
-    # Returns
-    Ternarized tensor.
-
-    # References
-    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
-    """
-
     @tf.custom_gradient
     def _call(x):
         if ternary_weight_networks:
@@ -336,39 +129,7 @@ def ste_tern(
     return _call(x)
 
 
-@utils.set_precision(1)
 def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
-    r"""
-    Binarization function with output values 0 and 1.
-
-    \\[
-    q(x) = \begin{cases}
-    +1 & x > 0 \\\
-    0 & x \leq 0
-    \end{cases}
-    \\]
-
-    The gradient is estimated using the Straight-Through Estimator
-    (essentially the binarization is replaced by a clipped identity on the
-    backward pass).
-
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 & \left|x\right| \leq 1 \\\
-    0 & \left|x\right| > 1
-    \end{cases}\\]
-
-    ```plot-activation
-    quantizers.ste_heaviside
-    ```
-
-    # Arguments
-    x: Input tensor.
-    clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
-
-    # Returns
-    AND-binarized tensor.
-    """
-
     @tf.custom_gradient
     def _call(x):
         def grad(dy):
@@ -379,41 +140,7 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
-@utils.set_precision(2)
 def dorefa_quantizer(x: tf.Tensor, k_bit: int = 2) -> tf.Tensor:
-    r"""k_bit quantizer as in the DoReFa paper.
-
-    \\[
-    q(x) = \begin{cases}
-    0 & x < \frac{1}{2n} \\\
-    \frac{i}{n} & \frac{2i-1}{2n} < x < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
-     1 & \frac{2n-1}{2n} < x
-    \end{cases}
-    \\]
-
-    where \\(n = 2^{\text{k_bit}} - 1\\). The number of bits, k_bit, needs to be passed as an argument.
-    The gradient is estimated using the Straight-Through Estimator
-    (essentially the binarization is replaced by a clipped identity on the
-    backward pass).
-    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
-    1 &  0 \leq x \leq 1 \\\
-    0 & \text{else}
-    \end{cases}\\]
-
-    ```plot-activation
-    quantizers.dorefa_quantizer
-    ```
-
-    # Arguments
-    k_bit: number of bits for the quantization.
-
-    # Returns
-    quantized tensor
-
-    # References
-    - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks
-      with Low Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
-    """
     x = tf.clip_by_value(x, 0.0, 1.0)
 
     @tf.custom_gradient
@@ -426,7 +153,7 @@ def dorefa_quantizer(x: tf.Tensor, k_bit: int = 2) -> tf.Tensor:
 
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
-class SteSign(QuantizerFunctionWrapper):
+class SteSign(tf.keras.layers.Layer):
     r"""Instantiates a serializable binary quantizer.
 
     \\[
@@ -455,14 +182,22 @@ class SteSign(QuantizerFunctionWrapper):
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
+    precision = 1
 
-    def __init__(self, clip_value: float = 1.0):
-        super().__init__(ste_sign, clip_value=clip_value)
+    def __init__(self, clip_value: float = 1.0, **kwargs):
+        self.clip_value = clip_value
+        super().__init__(**kwargs)
+
+    def call(self, inputs):
+        return ste_sign(inputs, clip_value=self.clip_value)
+
+    def get_config(self):
+        return {**super().get_config(), "clip_value": self.clip_value}
 
 
 @utils.register_alias("approx_sign")
 @utils.register_keras_custom_object
-class ApproxSign(QuantizerFunctionWrapper):
+class ApproxSign(tf.keras.layers.Layer):
     r"""Instantiates a serializable binary quantizer.
     \\[
     q(x) = \begin{cases}
@@ -487,14 +222,15 @@ class ApproxSign(QuantizerFunctionWrapper):
       Representational Capability and Advanced
       Training Algorithm](http://arxiv.org/abs/1808.00278)
     """
+    precision = 1
 
-    def __init__(self):
-        super().__init__(approx_sign)
+    def call(self, inputs):
+        return approx_sign(inputs)
 
 
 @utils.register_alias("ste_heaviside")
 @utils.register_keras_custom_object
-class SteHeaviside(QuantizerFunctionWrapper):
+class SteHeaviside(tf.keras.layers.Layer):
     r"""
     Instantiates a binarization quantizer with output values 0 and 1.
     \\[
@@ -523,14 +259,22 @@ class SteHeaviside(QuantizerFunctionWrapper):
     # Returns
     AND Binarization function
     """
+    precision = 1
 
-    def __init__(self, clip_value: float = 1.0):
-        super().__init__(ste_heaviside, clip_value=clip_value)
+    def __init__(self, clip_value: float = 1.0, **kwargs):
+        self.clip_value = clip_value
+        super().__init__(**kwargs)
+
+    def call(self, inputs):
+        return ste_heaviside(inputs, clip_value=self.clip_value)
+
+    def get_config(self):
+        return {**super().get_config(), "clip_value": self.clip_value}
 
 
 @utils.register_alias("swish_sign")
 @utils.register_keras_custom_object
-class SwishSign(QuantizerFunctionWrapper):
+class SwishSign(tf.keras.layers.Layer):
     r"""Sign binarization function.
 
     \\[
@@ -558,14 +302,22 @@ class SwishSign(QuantizerFunctionWrapper):
     # References
     - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
     """
+    precision = 1
 
-    def __init__(self, beta: float = 5.0):
-        super().__init__(swish_sign, beta=beta)
+    def __init__(self, beta: float = 5.0, **kwargs):
+        self.beta = beta
+        super().__init__(**kwargs)
+
+    def call(self, inputs):
+        return swish_sign(inputs, beta=self.beta)
+
+    def get_config(self):
+        return {**super().get_config(), "beta": self.beta}
 
 
 @utils.register_alias("magnitude_aware_sign")
 @utils.register_keras_custom_object
-class MagnitudeAwareSign(QuantizerFunctionWrapper):
+class MagnitudeAwareSign(tf.keras.layers.Layer):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
 
     A scaled sign function computed according to Section 3.3 in
@@ -584,14 +336,26 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
       Algorithm](https://arxiv.org/abs/1808.00278)
 
     """
+    precision = 1
 
-    def __init__(self, clip_value: float = 1.0):
-        super().__init__(magnitude_aware_sign, clip_value=clip_value)
+    def __init__(self, clip_value: float = 1.0, **kwargs):
+        self.clip_value = clip_value
+        super().__init__(**kwargs)
+
+    def call(self, inputs):
+        scale_factor = tf.stop_gradient(
+            tf.reduce_mean(tf.abs(inputs), axis=list(range(len(inputs.shape) - 1)))
+        )
+
+        return scale_factor * ste_sign(inputs, clip_value=self.clip_value)
+
+    def get_config(self):
+        return {**super().get_config(), "clip_value": self.clip_value}
 
 
 @utils.register_alias("ste_tern")
 @utils.register_keras_custom_object
-class SteTern(QuantizerFunctionWrapper):
+class SteTern(tf.keras.layers.Layer):
     r"""Instantiates a serializable ternarization quantizer.
 
     \\[
@@ -632,23 +396,40 @@ class SteTern(QuantizerFunctionWrapper):
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
     """
 
+    precision = 2
+
     def __init__(
         self,
         threshold_value: float = 0.05,
         ternary_weight_networks: bool = False,
         clip_value: float = 1.0,
+        **kwargs,
     ):
-        super().__init__(
-            ste_tern,
-            threshold_value=threshold_value,
-            ternary_weight_networks=ternary_weight_networks,
-            clip_value=clip_value,
+        self.threshold_value = threshold_value
+        self.ternary_weight_networks = ternary_weight_networks
+        self.clip_value = clip_value
+        super().__init__(**kwargs)
+
+    def call(self, inputs):
+        return ste_tern(
+            inputs,
+            threshold_value=self.threshold_value,
+            ternary_weight_networks=self.ternary_weight_networks,
+            clip_value=self.clip_value,
         )
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            "threshold_value": self.threshold_value,
+            "ternary_weight_networks": self.ternary_weight_networks,
+            "clip_value": self.clip_value,
+        }
 
 
 @utils.register_alias("dorefa_quantizer")
 @utils.register_keras_custom_object
-class DoReFaQuantizer(QuantizerFunctionWrapper):
+class DoReFaQuantizer(tf.keras.layers.Layer):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -682,16 +463,24 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks
       with Low Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
     """
+    precision = None
 
-    def __init__(self, k_bit: int):
-        super().__init__(dorefa_quantizer, k_bit=k_bit)
+    def __init__(self, k_bit: int, **kwargs):
         self.precision = k_bit
+        self.k_bit = k_bit
+        super().__init__(**kwargs)
+
+    def call(self, inputs):
+        return dorefa_quantizer(inputs, k_bit=self.k_bit)
+
+    def get_config(self):
+        return {**super().get_config(), "k_bit": self.k_bit}
 
 
-Quantizer = Union[QuantizerFunctionWrapper, Callable[[tf.Tensor], tf.Tensor]]
+Quantizer = Union[tf.keras.layers.Layer, Callable[[tf.Tensor], tf.Tensor]]
 
 
-def serialize(quantizer: Quantizer):
+def serialize(quantizer: tf.keras.layers.Layer):
     return tf.keras.utils.serialize_keras_object(quantizer)
 
 
