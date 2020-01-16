@@ -172,7 +172,7 @@ class SteSign(tf.keras.layers.Layer):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.SteSign()
+    quantizers.SteSign
     ```
 
     # Arguments
@@ -214,7 +214,7 @@ class ApproxSign(tf.keras.layers.Layer):
     \\]
 
     ```plot-activation
-    quantizers.ApproxSign()
+    quantizers.ApproxSign
     ```
 
     # References
@@ -250,7 +250,7 @@ class SteHeaviside(tf.keras.layers.Layer):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.SteHeaviside()
+    quantizers.SteHeaviside
     ```
 
     # Arguments
@@ -291,7 +291,7 @@ class SwishSign(tf.keras.layers.Layer):
     \\]
 
     ```plot-activation
-    quantizers.SwishSign()
+    quantizers.SwishSign
     ```
     # Arguments
     beta: Larger values result in a closer approximation to the derivative of the sign.
@@ -383,7 +383,7 @@ class SteTern(tf.keras.layers.Layer):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.SteTern()
+    quantizers.SteTern
     ```
 
     # Arguments
@@ -450,7 +450,7 @@ class DoReFaQuantizer(tf.keras.layers.Layer):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.DorefaQuantizer()
+    quantizers.DoReFaQuantizer
     ```
 
     # Arguments
@@ -465,7 +465,7 @@ class DoReFaQuantizer(tf.keras.layers.Layer):
     """
     precision = None
 
-    def __init__(self, k_bit: int, **kwargs):
+    def __init__(self, k_bit: int = 2, **kwargs):
         self.precision = k_bit
         self.k_bit = k_bit
         super().__init__(**kwargs)
