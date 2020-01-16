@@ -55,13 +55,6 @@ import tensorflow as tf
 from larq import math, utils
 
 __all__ = [
-    "ste_sign",
-    "approx_sign",
-    "magnitude_aware_sign",
-    "swish_sign",
-    "ste_tern",
-    "ste_heaviside",
-    "dorefa_quantizer",
     "SteSign",
     "MagnitudeAwareSign",
     "SwishSign",
@@ -113,7 +106,6 @@ class QuantizerFunctionWrapper:
         }
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(1)
 def ste_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     r"""Sign binarization function.
@@ -163,7 +155,6 @@ def _scaled_sign(x):  # pragma: no cover
     return 1.3 * ste_sign(x)
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(1)
 def magnitude_aware_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     r"""Magnitude-aware sign for Bi-Real Net.
@@ -193,7 +184,6 @@ def magnitude_aware_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return tf.stop_gradient(scale_factor) * ste_sign(x, clip_value=clip_value)
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(1)
 @tf.custom_gradient
 def approx_sign(x: tf.Tensor) -> tf.Tensor:
@@ -238,7 +228,6 @@ def approx_sign(x: tf.Tensor) -> tf.Tensor:
     return math.sign(x), grad
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(1)
 def swish_sign(x: tf.Tensor, beta: float = 5.0) -> tf.Tensor:
     r"""Sign binarization function.
@@ -281,7 +270,6 @@ def swish_sign(x: tf.Tensor, beta: float = 5.0) -> tf.Tensor:
     return _call(x)
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(2)
 def ste_tern(
     x: tf.Tensor,
@@ -348,7 +336,6 @@ def ste_tern(
     return _call(x)
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(1)
 def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     r"""
@@ -392,7 +379,6 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
-@utils.register_keras_custom_object
 @utils.set_precision(2)
 def dorefa_quantizer(x: tf.Tensor, k_bit: int = 2) -> tf.Tensor:
     r"""k_bit quantizer as in the DoReFa paper.
@@ -438,6 +424,7 @@ def dorefa_quantizer(x: tf.Tensor, k_bit: int = 2) -> tf.Tensor:
     return _k_bit_with_identity_grad(x)
 
 
+@utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
 class SteSign(QuantizerFunctionWrapper):
     r"""Instantiates a serializable binary quantizer.
@@ -458,7 +445,7 @@ class SteSign(QuantizerFunctionWrapper):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.ste_sign
+    quantizers.SteSign()
     ```
 
     # Arguments
@@ -473,6 +460,39 @@ class SteSign(QuantizerFunctionWrapper):
         super().__init__(ste_sign, clip_value=clip_value)
 
 
+@utils.register_alias("approx_sign")
+@utils.register_keras_custom_object
+class ApproxSign(QuantizerFunctionWrapper):
+    r"""Instantiates a serializable binary quantizer.
+    \\[
+    q(x) = \begin{cases}
+      -1 & x < 0 \\\
+      1 & x \geq 0
+    \end{cases}
+    \\]
+
+    The gradient is estimated using the ApproxSign method.
+    \\[\frac{\partial q(x)}{\partial x} = \begin{cases}
+      (2 - 2 \left|x\right|) & \left|x\right| \leq 1 \\\
+      0 & \left|x\right| > 1
+    \end{cases}
+    \\]
+
+    ```plot-activation
+    quantizers.ApproxSign()
+    ```
+
+    # References
+    - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
+      Representational Capability and Advanced
+      Training Algorithm](http://arxiv.org/abs/1808.00278)
+    """
+
+    def __init__(self):
+        super().__init__(approx_sign)
+
+
+@utils.register_alias("ste_heaviside")
 @utils.register_keras_custom_object
 class SteHeaviside(QuantizerFunctionWrapper):
     r"""
@@ -494,7 +514,7 @@ class SteHeaviside(QuantizerFunctionWrapper):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.ste_heaviside
+    quantizers.SteHeaviside()
     ```
 
     # Arguments
@@ -508,6 +528,7 @@ class SteHeaviside(QuantizerFunctionWrapper):
         super().__init__(ste_heaviside, clip_value=clip_value)
 
 
+@utils.register_alias("swish_sign")
 @utils.register_keras_custom_object
 class SwishSign(QuantizerFunctionWrapper):
     r"""Sign binarization function.
@@ -526,7 +547,7 @@ class SwishSign(QuantizerFunctionWrapper):
     \\]
 
     ```plot-activation
-    quantizers.swish_sign
+    quantizers.SwishSign()
     ```
     # Arguments
     beta: Larger values result in a closer approximation to the derivative of the sign.
@@ -542,6 +563,7 @@ class SwishSign(QuantizerFunctionWrapper):
         super().__init__(swish_sign, beta=beta)
 
 
+@utils.register_alias("magnitude_aware_sign")
 @utils.register_keras_custom_object
 class MagnitudeAwareSign(QuantizerFunctionWrapper):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
@@ -567,6 +589,7 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
         super().__init__(magnitude_aware_sign, clip_value=clip_value)
 
 
+@utils.register_alias("ste_tern")
 @utils.register_keras_custom_object
 class SteTern(QuantizerFunctionWrapper):
     r"""Instantiates a serializable ternarization quantizer.
@@ -596,7 +619,7 @@ class SteTern(QuantizerFunctionWrapper):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.ste_tern
+    quantizers.SteTern()
     ```
 
     # Arguments
@@ -623,6 +646,7 @@ class SteTern(QuantizerFunctionWrapper):
         )
 
 
+@utils.register_alias("dorefa_quantizer")
 @utils.register_keras_custom_object
 class DoReFaQuantizer(QuantizerFunctionWrapper):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
@@ -645,7 +669,7 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.dorefa_quantizer
+    quantizers.DorefaQuantizer()
     ```
 
     # Arguments
