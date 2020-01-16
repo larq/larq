@@ -3,7 +3,7 @@ Below, we summarize the key concepts you need to understand to work with BNNs.
 
 ## Quantizer
 
-The transformation from high-precision Neural Networks to Quantized Neural Networks (QNNs) is achieved by [quantization](https://en.wikipedia.org/wiki/Quantization_(signal_processing)).
+The transformation from high-precision Neural Networks to Quantized Neural Networks (QNNs) is achieved by [quantization](<https://en.wikipedia.org/wiki/Quantization_(signal_processing)>).
 This is the process of mapping a large set of, often continuous, values to a smaller countable set.
 Binarized Neural Networks are a special case of QNNs, where the quantization output \\(x_q\\) is binary:
 \\[
@@ -99,7 +99,7 @@ Just like activations, quantizers can also be used on their own:
 
 ```python
 # The two lines below are equivalent
-x_binarized = larq.quantizers.ste_sign(x)
+x_binarized = larq.quantizers.SteSign(clip_value=1.0)(x)
 x_binarized = tf.keras.layers.Activation("ste_sign")(x)
 ```
 
