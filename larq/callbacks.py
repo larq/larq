@@ -24,8 +24,8 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
     schedule: a function that takes an epoch index as input
         (integer, indexed from 0) and returns a new hyperparameter as output.
     hyperparameter: str. the name of the hyperparameter to be scheduled.
-    unit: str (optional), what interval unit to change the hyperparameter at. Can be
-        either "epoch" (default) or "step".
+    update_freq: str (optional), denotes on what update_freq to change the
+        hyperparameter. Can be either "epoch" (default) or "step".
     verbose: int. 0: quiet, 1: update messages.
     """
 
@@ -34,7 +34,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         schedule: Callable,
         hyperparameter: str,
         optimizer: Optional[keras.optimizers.Optimizer] = None,
-        unit: Optional[str] = "epoch",
+        update_freq: Optional[str] = "epoch",
         verbose: Optional[int] = 0,
     ):
         super(HyperparameterScheduler, self).__init__()
@@ -43,14 +43,13 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         self.hyperparameter = hyperparameter
         self.verbose = verbose
 
-        # TODO: may want to make this a boolean instead for efficient comparison,
-        # need to test impact on speed.
-        if unit == "epoch" or unit == "step":
-            self.unit = unit
-        else:
+        if update_freq not in ["epoch", "step"]:
             raise ValueError(
-                f"HyperparameterScheduler.unit can only be 'step' or 'epoch'. Received value '{unit}'"
+                "HyperparameterScheduler.update_freq can only be 'step' or 'epoch'."
+                f"Received value '{update_freq}'"
             )
+
+        self.update_freq = update_freq
 
     def set_model(self, model: keras.models.Model):
         super().set_model(model)
@@ -76,20 +75,26 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         return hp
 
     def on_epoch_begin(self, epoch: int, logs: Optional[Dict] = None):
-        if self.unit == "epoch":
+        if self.update_freq == "epoch":
             hp = self.set_hyperparameter(epoch)
 
             if self.verbose > 0:
                 print(
-                    f"Epoch {epoch + 1}: {self.hyperparameter} changing "
-                    + f"to {tf.keras.backend.get_value(hp)}."
+                    f"Epoch {epoch}: {self.hyperparameter} changing"
+                    f"to {tf.keras.backend.get_value(hp)}."
                 )
 
     def on_batch_begin(self, batch: int, logs: Optional[Dict] = None):
-        if self.unit == "step":
+        if self.update_freq == "step":
             # We use optimizer.iterations (i.e. global step), since batch only
             # reflects the batch index in the current epoch.
-            self.set_hyperparameter(self.optimizer.iterations)
+            hp = self.set_hyperparameter(self.optimizer.iterations)
+
+            if self.verbose > 0:
+                print(
+                    f"Batch {self.optimizer.iterations}: {self.hyperparameter} changing"
+                    f"to {tf.keras.backend.get_value(hp)}."
+                )
 
     def on_epoch_end(self, epoch: int, logs: Optional[Dict] = None):
         logs = logs or {}
