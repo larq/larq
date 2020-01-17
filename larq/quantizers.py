@@ -53,6 +53,7 @@ from larq import math, utils
 
 __all__ = [
     "SteSign",
+    "ApproxSign",
     "MagnitudeAwareSign",
     "SwishSign",
     "SteTern",

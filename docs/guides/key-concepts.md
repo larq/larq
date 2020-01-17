@@ -3,7 +3,7 @@ Below, we summarize the key concepts you need to understand to work with BNNs.
 
 ## Quantizer
 
-The transformation from high-precision Neural Networks to Quantized Neural Networks (QNNs) is achieved by [quantization](<https://en.wikipedia.org/wiki/Quantization_(signal_processing)>).
+The transformation from high-precision Neural Networks to Quantized Neural Networks (QNNs) is achieved by [quantization](https://en.wikipedia.org/wiki/Quantization_(signal_processing)).
 This is the process of mapping a large set of, often continuous, values to a smaller countable set.
 Binarized Neural Networks are a special case of QNNs, where the quantization output \\(x_q\\) is binary:
 \\[

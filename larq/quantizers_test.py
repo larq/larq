@@ -73,6 +73,7 @@ class TestQuantization:
             "ste_sign",
             lq.quantizers.SteSign(),
             "approx_sign",
+            lq.quantizers.ApproxSign(),
             "swish_sign",
             lq.quantizers.SwishSign(),
         ],
