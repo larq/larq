@@ -16,13 +16,19 @@ Note that in BNN not everything is binary: usually higher-precision computations
 
 If Larq helps you in your work or research, it would be great if you can cite it as follows:
 
-```
-@misc{larq,
-  author       = {Geiger, Lukas and Widdicombe, James and Bakhtiari, Arash and Helwegen, Koen and Heuss, Maria and Nusselder, Roeland},
-  title        = {Larq: An Open-Source Deep Learning Library for Training Binarized Neural Networks},
-  howpublished = {Web page},
-  url          = {https://larq.dev},
-  year         = {2019}
+```bibtex
+@article{larq,
+  title     = {Larq: An Open-Source Library for Training Binarized Neural Networks},
+  author    = {Lukas Geiger and Plumerai Team},
+  year      = 2020,
+  month     = jan,
+  journal   = {Journal of Open Source Software},
+  publisher = {The Open Journal},
+  volume    = 5,
+  number    = 45,
+  pages     = 1746,
+  doi       = {10.21105/joss.01746},
+  url       = {https://doi.org/10.21105/joss.01746}
 }
 ```
 
