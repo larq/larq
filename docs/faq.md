@@ -16,7 +16,7 @@ Note that in BNN not everything is binary: usually higher-precision computations
 
 If Larq helps you in your work or research, it would be great if you can cite it as follows:
 
-```
+```bibtex
 @article{larq,
   title     = {Larq: An Open-Source Library for Training Binarized Neural Networks},
   author    = {Lukas Geiger and Plumerai Team},
