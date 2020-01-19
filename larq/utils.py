@@ -7,7 +7,7 @@ def register_keras_custom_object(cls):
     return cls
 
 
-def register_alias(name):
+def register_alias(name: str):
     """A decorator to register a custom keras object under a given alias.
     !!! example
         ```python
@@ -24,7 +24,7 @@ def register_alias(name):
     return register_func
 
 
-def set_precision(precision=32):
+def set_precision(precision: int = 32):
     """A decorator to set the precision of a quantizer function
 
     # Arguments

@@ -1,16 +1,25 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
+
+from typing import Optional
+
 import tensorflow as tf
 from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
 from larq import quantized_scope
+from larq.quantizers import Quantizer
 
 
 class QuantizedVariable(tf.Variable):
     """A Variable that can be quantized in the forward pass in applicable contexts."""
 
-    def __init__(self, variable, quantizer=None, precision=None):
+    def __init__(
+        self,
+        variable: tf.Variable,
+        quantizer: Optional[Quantizer] = None,
+        precision: Optional[int] = None,
+    ):
         """Creates an QuantizedVariable instance.
 
         # Arguments
@@ -40,7 +49,12 @@ class QuantizedVariable(tf.Variable):
         self.precision = precision or getattr(quantizer, "precision", None)
 
     @classmethod
-    def from_variable(cls, variable, quantizer=None, precision=None):
+    def from_variable(
+        cls,
+        variable: tf.Variable,
+        quantizer: Optional[Quantizer] = None,
+        precision: Optional[int] = None,
+    ):
         """Creates a QuantizedVariable that wraps another variable.
 
         This typically just returns `QuantizedVariable(variable)`. But, if the variable
@@ -73,7 +87,12 @@ class QuantizedVariable(tf.Variable):
         return QuantizedDistributedVariable(variable, quantizer, precision)
 
     @staticmethod
-    def _maybe_wrap(variable, quantizer, precision, wrap=True):
+    def _maybe_wrap(
+        variable: tf.Variable,
+        quantizer: Optional[Quantizer],
+        precision: Optional[int],
+        wrap: bool = True,
+    ) -> tf.Variable:
         """Creates an QuantizedVariable that wraps another variable if applicable.
 
         This function is used to wrap the return value of QuantizedVariable.assign.
@@ -139,13 +158,13 @@ class QuantizedVariable(tf.Variable):
         pass
 
     @staticmethod
-    def _get_name(obj):
+    def _get_name(obj) -> str:
         try:
             return obj.__name__
         except AttributeError:
             return obj.__class__.__name__
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         repr_ = (
             f"<{self.__class__.__name__} '{self.name}' "
             f"shape={self.shape} dtype={self.dtype.name}"

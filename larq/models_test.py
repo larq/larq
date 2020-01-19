@@ -66,7 +66,7 @@ def test_layer_profile():
         32 * (32 * 11 * 11 * 10 + 10),
     ]
     fp_equiv_mem = [32 * n for n in param_count]
-    input_precision = ["-", "-", 2, 1, "-", "-"]
+    input_precision = [None, None, 2, 1, None, None]
     output_shape = [
         (-1, 64, 64, 32),
         (-1, 32, 32, 32),
@@ -87,7 +87,7 @@ def test_layer_profile():
     profiles = profile.layer_profiles
     for i in range(len(profiles)):
         print(f"Testing layer {i}...")
-        assert profiles[i].input_precision() == input_precision[i]
+        assert profiles[i].input_precision == input_precision[i]
         assert profiles[i].output_shape == output_shape[i]
         assert profiles[i].output_pixels == output_pixels[i]
         assert profiles[i].weight_count() == param_count[i]
