@@ -1,6 +1,6 @@
 import itertools
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterator, Optional, Sequence, TypeVar, Union
+from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
 
 import numpy as np
 from tensorflow import keras
@@ -217,7 +217,9 @@ class LayerProfile:
     def unique_op_precisions(self) -> Sequence[int]:
         return sorted(set([op.precision for op in self.op_profiles]))
 
-    def generate_table_row(self, table_config: Dict) -> Sequence[Union[str, float]]:
+    def generate_table_row(
+        self, table_config: Mapping[str, Any]
+    ) -> Sequence[Union[str, float]]:
         row = [
             self._layer.name,
             self.input_precision or "-",
@@ -270,7 +272,7 @@ class ModelProfile(LayerProfile):
             set(_flatten(l.unique_op_precisions for l in self.layer_profiles))
         )
 
-    def _generate_table_header(self, table_config: Dict) -> Sequence[str]:
+    def _generate_table_header(self, table_config: Mapping[str, Any]) -> Sequence[str]:
         return [
             "Layer",
             "Input prec.\n(bit)",
@@ -283,7 +285,9 @@ class ModelProfile(LayerProfile):
             *(f"{i}-bit MACs" for i in table_config["mac_precisions"]),
         ]
 
-    def _generate_table_total(self, table_config: Dict) -> Sequence[Union[float, str]]:
+    def _generate_table_total(
+        self, table_config: Mapping[str, Any]
+    ) -> Sequence[Union[float, str]]:
         row = ["Total", "", ""]
         for i in table_config["param_bidtwidths"]:
             row.append(

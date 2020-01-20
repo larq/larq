@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, MutableMapping, Optional
 
 from tensorflow import keras
 
@@ -51,7 +51,9 @@ class HyperparameterScheduler(keras.callbacks.Callback):
                 f'Optimizer must have a "{self.hyperparameter}" attribute.'
             )
 
-    def on_epoch_begin(self, epoch: int, logs: Optional[Dict] = None) -> None:
+    def on_epoch_begin(
+        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
         hp = getattr(self.optimizer, self.hyperparameter)
         try:  # new API
             hyperparameter_val = keras.backend.get_value(hp)
@@ -66,7 +68,9 @@ class HyperparameterScheduler(keras.callbacks.Callback):
                 f"Epoch {epoch + 1}: {self.hyperparameter} changing to {keras.backend.get_value(hp)}."
             )
 
-    def on_epoch_end(self, epoch: int, logs: Optional[Dict] = None) -> None:
+    def on_epoch_end(
+        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
         logs = logs or {}
         hp = getattr(self.optimizer, self.hyperparameter)
         logs[self.hyperparameter] = keras.backend.get_value(hp)

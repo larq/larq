@@ -18,7 +18,7 @@ lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.))
 ```
 """
 
-from typing import Dict
+from typing import Any, Mapping
 
 import tensorflow as tf
 
@@ -42,7 +42,7 @@ class WeightClip(tf.keras.constraints.Constraint):
     def __call__(self, x: tf.Tensor) -> tf.Tensor:
         return tf.clip_by_value(x, -self.clip_value, self.clip_value)
 
-    def get_config(self) -> Dict:
+    def get_config(self) -> Mapping[str, Any]:
         return {"clip_value": self.clip_value}
 
 
