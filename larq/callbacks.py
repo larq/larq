@@ -1,10 +1,9 @@
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, MutableMapping, Optional
 
-import tensorflow as tf
 from tensorflow import keras
 
 
-class HyperparameterScheduler(tf.keras.callbacks.Callback):
+class HyperparameterScheduler(keras.callbacks.Callback):
     """Generic hyperparameter scheduler.
 
     !!! example
@@ -32,7 +31,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         schedule: Callable,
         hyperparameter: str,
         optimizer: Optional[keras.optimizers.Optimizer] = None,
-        verbose: Optional[int] = 0,
+        verbose: int = 0,
     ):
         super(HyperparameterScheduler, self).__init__()
         self.optimizer = optimizer
@@ -40,7 +39,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         self.hyperparameter = hyperparameter
         self.verbose = verbose
 
-    def set_model(self, model: keras.models.Model):
+    def set_model(self, model: keras.models.Model) -> None:
         super().set_model(model)
         if self.optimizer is None:
             # It is not possible for a model to reach this state and not have
@@ -52,22 +51,26 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
                 f'Optimizer must have a "{self.hyperparameter}" attribute.'
             )
 
-    def on_epoch_begin(self, epoch: int, logs: Optional[Dict] = None):
+    def on_epoch_begin(
+        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
         hp = getattr(self.optimizer, self.hyperparameter)
         try:  # new API
-            hyperparameter_val = tf.keras.backend.get_value(hp)
+            hyperparameter_val = keras.backend.get_value(hp)
             hyperparameter_val = self.schedule(epoch, hyperparameter_val)
         except TypeError:  # Support for old API for backward compatibility
             hyperparameter_val = self.schedule(epoch)
 
-        tf.keras.backend.set_value(hp, hyperparameter_val)
+        keras.backend.set_value(hp, hyperparameter_val)
 
         if self.verbose > 0:
             print(
-                f"Epoch {epoch + 1}: {self.hyperparameter} changing to {tf.keras.backend.get_value(hp)}."
+                f"Epoch {epoch + 1}: {self.hyperparameter} changing to {keras.backend.get_value(hp)}."
             )
 
-    def on_epoch_end(self, epoch: int, logs: Optional[Dict] = None):
+    def on_epoch_end(
+        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
         logs = logs or {}
         hp = getattr(self.optimizer, self.hyperparameter)
-        logs[self.hyperparameter] = tf.keras.backend.get_value(hp)
+        logs[self.hyperparameter] = keras.backend.get_value(hp)

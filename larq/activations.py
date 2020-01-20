@@ -28,7 +28,7 @@ from larq import utils
 
 
 @utils.register_keras_custom_object
-def hard_tanh(x):
+def hard_tanh(x: tf.Tensor) -> tf.Tensor:
     """Hard tanh activation function.
     ```plot-activation
     activations.hard_tanh
@@ -44,7 +44,7 @@ def hard_tanh(x):
 
 
 @utils.register_keras_custom_object
-def leaky_tanh(x, alpha=0.2):
+def leaky_tanh(x: tf.Tensor, alpha: float = 0.2) -> tf.Tensor:
     r"""Leaky tanh activation function.
     Similar to hard tanh, but with non-zero slopes as in leaky ReLU.
 

@@ -1,8 +1,9 @@
 import itertools
 from dataclasses import dataclass
+from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
 
 import numpy as np
-import tensorflow.keras.layers as keras_layers
+from tensorflow import keras
 from terminaltables import AsciiTable
 
 import larq.layers as lq_layers
@@ -14,14 +15,14 @@ op_count_supported_layer_types = (
     lq_layers.QuantSeparableConv2D,
     lq_layers.QuantDepthwiseConv2D,
     lq_layers.QuantDense,
-    keras_layers.Conv2D,
-    keras_layers.SeparableConv2D,
-    keras_layers.DepthwiseConv2D,
-    keras_layers.Dense,
-    keras_layers.Flatten,
-    keras_layers.BatchNormalization,
-    keras_layers.MaxPool2D,
-    keras_layers.AveragePooling2D,
+    keras.layers.Conv2D,
+    keras.layers.SeparableConv2D,
+    keras.layers.DepthwiseConv2D,
+    keras.layers.Dense,
+    keras.layers.Flatten,
+    keras.layers.BatchNormalization,
+    keras.layers.MaxPool2D,
+    keras.layers.AveragePooling2D,
 )
 
 mac_containing_layers = (
@@ -29,18 +30,21 @@ mac_containing_layers = (
     lq_layers.QuantSeparableConv2D,
     lq_layers.QuantDepthwiseConv2D,
     lq_layers.QuantDense,
-    keras_layers.Conv2D,
-    keras_layers.SeparableConv2D,
-    keras_layers.DepthwiseConv2D,
-    keras_layers.Dense,
+    keras.layers.Conv2D,
+    keras.layers.SeparableConv2D,
+    keras.layers.DepthwiseConv2D,
+    keras.layers.Dense,
 )
 
 
-def _flatten(lst):
+T = TypeVar("T")
+
+
+def _flatten(lst: Iterator[Iterator[T]]) -> Sequence[T]:
     return list(itertools.chain.from_iterable(lst))
 
 
-def _bitsize_as_str(bitsize):
+def _bitsize_as_str(bitsize: int) -> str:
     bitsize_names = {8: "byte", 8 * 1024: "kB"}
 
     try:
@@ -49,7 +53,7 @@ def _bitsize_as_str(bitsize):
         raise NotImplementedError()
 
 
-def _number_as_readable_str(num):
+def _number_as_readable_str(num: float) -> str:
     # The initial rounding here is necessary so that e.g. `999000` gets
     # formatted as `1.000 M` rather than `1000 k`
     num = float(f"{num:.3g}")
@@ -77,7 +81,7 @@ def _number_as_readable_str(num):
     return num + unit
 
 
-def _format_table_entry(x, units=1):
+def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
     try:
         assert not np.isnan(x)
         if type(x) == str or x == 0 or units == 1:
@@ -87,34 +91,25 @@ def _format_table_entry(x, units=1):
         return "?"
 
 
-def _get_output_shape(layer):
-    try:
-        return tuple(dim if dim else -1 for dim in layer.output_shape)
-    except AttributeError:
-        return "multiple"
-    except RuntimeError:  # output_shape unknown in Eager mode.
-        return "?"
-
-
 class WeightProfile:
-    def __init__(self, weight, trainable=True):
+    def __init__(self, weight, trainable: bool = True):
         self._weight = weight
         self.bitwidth = getattr(weight, "precision", 32)
         self.trainable = trainable
 
     @property
-    def count(self):
+    def count(self) -> int:
         return int(np.prod(self._weight.shape.as_list()))
 
     @property
-    def memory(self):
+    def memory(self) -> int:
         return self.bitwidth * self.count
 
     @property
-    def fp_equivalent_memory(self):
+    def fp_equivalent_memory(self) -> int:
         return 32 * self.count
 
-    def is_bias(self):
+    def is_bias(self) -> bool:
         return "bias" in self._weight.name
 
 
@@ -126,7 +121,7 @@ class OperationProfile:
 
 
 class LayerProfile:
-    def __init__(self, layer):
+    def __init__(self, layer: keras.layers.Layer):
         self._layer = layer
         self.weight_profiles = [
             WeightProfile(
@@ -143,20 +138,22 @@ class LayerProfile:
                     self.op_profiles.append(
                         OperationProfile(
                             n=p.count * self.output_pixels,
-                            precision=max(self.input_precision(32), p.bitwidth),
+                            precision=max(self.input_precision or 32, p.bitwidth),
                             op_type="mac",
                         )
                     )
 
     @property
-    def memory(self):
+    def memory(self) -> int:
         return sum(p.memory for p in self.weight_profiles)
 
     @property
-    def fp_equivalent_memory(self):
+    def fp_equivalent_memory(self) -> int:
         return sum(p.fp_equivalent_memory for p in self.weight_profiles)
 
-    def weight_count(self, bitwidth=None, trainable=None):
+    def weight_count(
+        self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
+    ) -> int:
         count = 0
         for p in self.weight_profiles:
             if (bitwidth is None or p.bitwidth == bitwidth) and (
@@ -165,7 +162,9 @@ class LayerProfile:
                 count += p.count
         return count
 
-    def op_count(self, op_type=None, precision=None, escape="?"):
+    def op_count(
+        self, op_type: Optional[str] = None, precision: Optional[int] = None,
+    ) -> Optional[int]:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
@@ -177,26 +176,31 @@ class LayerProfile:
                 ):
                     count += op.n
             return count
-        else:
-            return escape
+        return None
 
-    def input_precision(self, default="-"):
+    @property
+    def input_precision(self) -> Optional[int]:
         try:
             return self._layer.input_quantizer.precision
         except AttributeError:
-            return default
+            return None
 
     @property
-    def output_shape(self):
+    def output_shape(self) -> Optional[Sequence[int]]:
         try:
             return tuple(dim if dim else -1 for dim in self._layer.output_shape)
         except AttributeError:
-            return "multiple"
-        except RuntimeError:  # output_shape unknown in Eager mode.
+            return None
+
+    @property
+    def output_shape_str(self) -> str:
+        try:
+            return str(self.output_shape or "multiple")
+        except RuntimeError:
             return "?"
 
     @property
-    def output_pixels(self):
+    def output_pixels(self) -> int:
         """Number of pixels for a single feature map (1 for fully connected layers)."""
         if len(self.output_shape) == 4:
             return int(np.prod(self.output_shape[1:3]))
@@ -206,15 +210,21 @@ class LayerProfile:
             raise NotImplementedError()
 
     @property
-    def unique_param_bidtwidths(self):
+    def unique_param_bidtwidths(self) -> Sequence[int]:
         return sorted(set([p.bitwidth for p in self.weight_profiles]))
 
     @property
-    def unique_op_precisions(self):
+    def unique_op_precisions(self) -> Sequence[int]:
         return sorted(set([op.precision for op in self.op_profiles]))
 
-    def generate_table_row(self, table_config):
-        row = [self._layer.name, self.input_precision(), self.output_shape]
+    def generate_table_row(
+        self, table_config: Mapping[str, Any]
+    ) -> Sequence[Union[str, float]]:
+        row = [
+            self._layer.name,
+            self.input_precision or "-",
+            self.output_shape_str,
+        ]
         for i in table_config["param_bidtwidths"]:
             n = self.weight_count(i)
             n = _format_table_entry(n, table_config["param_units"])
@@ -229,36 +239,40 @@ class LayerProfile:
 
 
 class ModelProfile(LayerProfile):
-    def __init__(self, model):
+    def __init__(self, model: keras.models.Model):
         self.layer_profiles = [LayerProfile(l) for l in model.layers]
 
     @property
-    def memory(self):
+    def memory(self) -> int:
         return sum(l.memory for l in self.layer_profiles)
 
     @property
-    def fp_equivalent_memory(self):
+    def fp_equivalent_memory(self) -> int:
         return sum(l.fp_equivalent_memory for l in self.layer_profiles)
 
-    def weight_count(self, bitwidth=None, trainable=None):
+    def weight_count(
+        self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
+    ) -> int:
         return sum(l.weight_count(bitwidth, trainable) for l in self.layer_profiles)
 
-    def op_count(self, op_type=None, bitwidth=None):
-        return sum(l.op_count(op_type, bitwidth, 0) for l in self.layer_profiles)
+    def op_count(
+        self, op_type: Optional[str] = None, bitwidth: Optional[int] = None
+    ) -> int:
+        return sum(l.op_count(op_type, bitwidth) or 0 for l in self.layer_profiles)
 
     @property
-    def unique_param_bidtwidths(self):
+    def unique_param_bidtwidths(self) -> Sequence[int]:
         return sorted(
             set(_flatten(l.unique_param_bidtwidths for l in self.layer_profiles))
         )
 
     @property
-    def unique_op_precisions(self):
+    def unique_op_precisions(self) -> Sequence[int]:
         return sorted(
             set(_flatten(l.unique_op_precisions for l in self.layer_profiles))
         )
 
-    def _generate_table_header(self, table_config):
+    def _generate_table_header(self, table_config: Mapping[str, Any]) -> Sequence[str]:
         return [
             "Layer",
             "Input prec.\n(bit)",
@@ -271,7 +285,9 @@ class ModelProfile(LayerProfile):
             *(f"{i}-bit MACs" for i in table_config["mac_precisions"]),
         ]
 
-    def _generate_table_total(self, table_config):
+    def _generate_table_total(
+        self, table_config: Mapping[str, Any]
+    ) -> Sequence[Union[float, str]]:
         row = ["Total", "", ""]
         for i in table_config["param_bidtwidths"]:
             row.append(
@@ -284,7 +300,9 @@ class ModelProfile(LayerProfile):
             )
         return row
 
-    def generate_table(self, include_macs=True):
+    def generate_table(
+        self, include_macs: bool = True
+    ) -> Sequence[Sequence[Union[float, str]]]:
         table_config = {
             "param_bidtwidths": self.unique_param_bidtwidths,
             "mac_precisions": self.unique_op_precisions if include_macs else [],
@@ -304,7 +322,9 @@ class ModelProfile(LayerProfile):
 
         return table
 
-    def generate_summary(self, include_macs=True):
+    def generate_summary(
+        self, include_macs: bool = True
+    ) -> Sequence[Sequence[Union[str, float]]]:
         summary = [
             ["Total params", _number_as_readable_str(self.weight_count())],
             [
@@ -351,8 +371,10 @@ class ModelProfile(LayerProfile):
         return summary
 
 
-def sanitize_table(table_data):
-    return [[f"{v:.2f}" if type(v) == float else v for v in row] for row in table_data]
+def sanitize_table(table_data: Sequence[Sequence[Any]]) -> Sequence[Sequence[str]]:
+    return [
+        [f"{v:.2f}" if type(v) == float else str(v) for v in row] for row in table_data
+    ]
 
 
 class LayersTable(AsciiTable):
@@ -373,7 +395,9 @@ class SummaryTable(AsciiTable):
         self.inner_heading_row_border = False
 
 
-def summary(model, print_fn=None, include_macs=True):
+def summary(
+    model, print_fn: Callable[[str], Any] = print, include_macs: bool = True
+) -> None:
     """Prints a string summary of the network.
 
     The summary includes the following information per layer:
@@ -414,9 +438,6 @@ def summary(model, print_fn=None, include_macs=True):
             "`model.build()` or calling `model.fit()` with some data, or specify an "
             "`input_shape` argument in the first layer(s) for automatic build."
         )
-
-    if print_fn is None:
-        print_fn = print
 
     model_profile = ModelProfile(model)
     print_fn(
