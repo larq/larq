@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 
 import larq as lq
 from larq import testing_utils
@@ -35,11 +36,17 @@ class TestCommonFunctionality:
     def test_serialization(self, module, name, ref_cls):
         fn = module.get(name)
         assert fn.__class__ == ref_cls
-        config = module.serialize(fn)
-        fn = module.deserialize(config)
+        fn = module.get(ref_cls())
         assert fn.__class__ == ref_cls
         assert type(fn.precision) == int
-        fn = module.get(ref_cls())
+        if module == tf.keras.activations and version.parse(
+            tf.__version__
+        ) < version.parse("1.15"):
+            pytest.skip(
+                "TensorFlow < 1.15 does not support Quantizer classes as activations"
+            )
+        config = module.serialize(fn)
+        fn = module.deserialize(config)
         assert fn.__class__ == ref_cls
         assert type(fn.precision) == int
 
