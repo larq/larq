@@ -141,17 +141,6 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
-def dorefa_quantizer(x: tf.Tensor, k_bit: int = 2) -> tf.Tensor:
-    x = tf.clip_by_value(x, 0.0, 1.0)
-
-    @tf.custom_gradient
-    def _k_bit_with_identity_grad(x):
-        n = 2 ** k_bit - 1
-        return tf.round(x * n) / n, lambda dy: dy
-
-    return _k_bit_with_identity_grad(x)
-
-
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
 class SteSign(tf.keras.layers.Layer):
@@ -468,14 +457,20 @@ class DoReFaQuantizer(tf.keras.layers.Layer):
 
     def __init__(self, k_bit: int = 2, **kwargs):
         self.precision = k_bit
-        self.k_bit = k_bit
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return dorefa_quantizer(inputs, k_bit=self.k_bit)
+        inputs = tf.clip_by_value(inputs, 0.0, 1.0)
+
+        @tf.custom_gradient
+        def _k_bit_with_identity_grad(x):
+            n = 2 ** self.precision - 1
+            return tf.round(x * n) / n, lambda dy: dy
+
+        return _k_bit_with_identity_grad(inputs)
 
     def get_config(self):
-        return {**super().get_config(), "k_bit": self.k_bit}
+        return {**super().get_config(), "k_bit": self.precision}
 
 
 Quantizer = Union[tf.keras.layers.Layer, Callable[[tf.Tensor], tf.Tensor]]
