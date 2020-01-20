@@ -21,7 +21,7 @@ def test_inheritance(distribute_scope):
     assert isinstance(quantized_variable, DistributedVariable) is distribute_scope  # type: ignore
 
 
-def test_read(distribute_scope, eager_and_graph_mode):
+def test_read(eager_and_graph_mode, distribute_scope):
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
 
@@ -48,7 +48,7 @@ def test_sparse_reads(eager_and_graph_mode):
         assert evaluate(x.gather_nd([0])) == 2
 
 
-def test_read_nested_scopes(distribute_scope, eager_and_graph_mode):
+def test_read_nested_scopes(eager_and_graph_mode, distribute_scope):
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
     with quantized_scope.scope(True):
@@ -58,7 +58,7 @@ def test_read_nested_scopes(distribute_scope, eager_and_graph_mode):
         assert evaluate(x.read_value()) == 7
 
 
-def test_method_delegations(distribute_scope, eager_and_graph_mode):
+def test_method_delegations(eager_and_graph_mode, distribute_scope):
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     with quantized_scope.scope(True):
         evaluate(x.initializer)
@@ -118,7 +118,7 @@ def test_scatter_method_delegations(eager_and_graph_mode):
         )
 
 
-def test_overloads(quantized, distribute_scope, eager_and_graph_mode):
+def test_overloads(eager_and_graph_mode, quantized, distribute_scope):
     if quantized:
         x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     else:
@@ -167,7 +167,7 @@ def test_tensor_equality(quantized, eager_mode):
         assert_array_equal(x != [7.0, 8.0, 10.0], [False, False, True])
 
 
-def test_assign(quantized, distribute_scope, eager_and_graph_mode):
+def test_assign(eager_and_graph_mode, quantized, distribute_scope):
     x = QuantizedVariable.from_variable(
         get_var(0.0, tf.float64), quantizer=lambda x: 2 * x
     )
