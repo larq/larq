@@ -393,8 +393,8 @@ def dorefa_quantizer(x, k_bit=2):
     \\[
     q(x) = \begin{cases}
     0 & x < \frac{1}{2n} \\\
-    \frac{i}{n} & \frac{2i-1}{2n} < |x| < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
-     1 & \frac{2n-1}{2n} < x
+    \frac{i}{n} & \frac{2i-1}{2n} <= x < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
+     1 & \frac{2n-1}{2n} <= x
     \end{cases}
     \\]
 
