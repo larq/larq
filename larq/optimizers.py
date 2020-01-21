@@ -33,6 +33,7 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 
 import warnings
 from copy import deepcopy
+from typing import Callable, Optional, Tuple
 
 import tensorflow as tf
 
@@ -63,7 +64,12 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     """
 
     def __init__(
-        self, *predicate_optimizer_pairs, default_optimizer=None, name="optimizer_case"
+        self,
+        *predicate_optimizer_pairs: Tuple[
+            Callable[[tf.Variable], bool], tf.keras.optimizers.Optimizer
+        ],
+        default_optimizer: Optional[tf.keras.optimizers.Optimizer] = None,
+        name: str = "optimizer_case",
     ):
         super().__init__(name=name)
 
@@ -105,7 +111,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             weights.extend(optimizer.weights)
         return weights
 
-    def apply_gradients(self, grads_and_vars, name=None):
+    def apply_gradients(self, grads_and_vars, name: Optional[str] = None):
         """Apply gradients to variables for each optimizer.
 
         On the first call to `apply_gradients()`, compute the mapping from variables to
@@ -236,7 +242,9 @@ class Bop(tf.keras.optimizers.Optimizer):
     - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
     """
 
-    def __init__(self, threshold=1e-8, gamma=1e-4, name="Bop", **kwargs):
+    def __init__(
+        self, threshold: float = 1e-8, gamma: float = 1e-4, name: str = "Bop", **kwargs
+    ):
         super().__init__(name=name, **kwargs)
 
         self._set_hyper("threshold", threshold)
@@ -246,7 +254,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         for var in var_list:
             self.add_slot(var, "m")
 
-    def _get_decayed_hyper(self, name, var_dtype):
+    def _get_decayed_hyper(self, name: str, var_dtype):
         hyper = self._get_hyper(name, var_dtype)
         if isinstance(hyper, tf.keras.optimizers.schedules.LearningRateSchedule):
             local_step = tf.cast(self.iterations, var_dtype)
@@ -283,7 +291,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         return cls(**config)
 
     @staticmethod
-    def is_binary_variable(var):
+    def is_binary_variable(var: tf.Variable) -> bool:
         """Returns True for binary variables named using the Larq Zoo naming scheme.
 
         This is an example of a predictate that can be used by the `CaseOptimizer`.

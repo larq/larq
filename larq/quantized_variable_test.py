@@ -234,9 +234,9 @@ def test_invalid_wrapped_usage(distribute_scope):
     with pytest.raises(ValueError, match="`variable` must be of type"):
         QuantizedVariable.from_variable(tf.constant([1.0]))
     with pytest.raises(ValueError, match="`quantizer` must be `callable` or `None`"):
-        QuantizedVariable.from_variable(get_var([1.0]), 1)
+        QuantizedVariable.from_variable(get_var([1.0]), 1)  # type: ignore
     with pytest.raises(ValueError, match="`precision` must be of type `int` or `None`"):
-        QuantizedVariable.from_variable(get_var([1.0]), precision=1.0)
+        QuantizedVariable.from_variable(get_var([1.0]), precision=1.0)  # type: ignore
 
 
 def test_repr(snapshot, eager_and_graph_mode):

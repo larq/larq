@@ -1,9 +1,11 @@
 import logging
+from typing import Optional
 
-import tensorflow as tf
+from tensorflow import keras
 
 from larq import metrics as lq_metrics, quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
+from larq.quantizers import Quantizer
 
 log = logging.getLogger(__name__)
 
@@ -11,13 +13,13 @@ log = logging.getLogger(__name__)
 # TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
 
 
-class BaseLayer(tf.keras.layers.Layer):
+class BaseLayer(keras.layers.Layer):
     """Base class for defining quantized layers"""
 
-    def get_quantizer(self, name):
+    def get_quantizer(self, name) -> Optional[Quantizer]:
         return None
 
-    def _add_variable_with_custom_getter(self, name, **kwargs):
+    def _add_variable_with_custom_getter(self, name: str, **kwargs):
         quantizer = self.get_quantizer(name)
         if quantizer is None:
             return super()._add_variable_with_custom_getter(name, **kwargs)
@@ -67,7 +69,7 @@ class QuantizerBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name):
+    def get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.kernel_quantizer if name == "kernel" else None
 
     def build(self, input_shape):
@@ -105,8 +107,8 @@ class QuantizerDepthwiseBase(BaseLayer):
     def __init__(
         self,
         *args,
-        input_quantizer=None,
-        depthwise_quantizer=None,
+        input_quantizer: Optional[Quantizer] = None,
+        depthwise_quantizer: Optional[Quantizer] = None,
         metrics=None,
         **kwargs,
     ):
@@ -123,7 +125,7 @@ class QuantizerDepthwiseBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name):
+    def get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
     def build(self, input_shape):
@@ -164,9 +166,9 @@ class QuantizerSeparableBase(BaseLayer):
     def __init__(
         self,
         *args,
-        input_quantizer=None,
-        depthwise_quantizer=None,
-        pointwise_quantizer=None,
+        input_quantizer: Optional[Quantizer] = None,
+        depthwise_quantizer: Optional[Quantizer] = None,
+        pointwise_quantizer: Optional[Quantizer] = None,
         metrics=None,
         **kwargs,
     ):
@@ -189,7 +191,7 @@ class QuantizerSeparableBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name):
+    def get_quantizer(self, name: str) -> Optional[Quantizer]:
         if name == "depthwise_kernel":
             return self.depthwise_quantizer
         if name == "pointwise_kernel":

@@ -48,6 +48,8 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 ```
 """
 
+from typing import Callable, Union
+
 import tensorflow as tf
 
 from larq import math, utils
@@ -86,12 +88,12 @@ class QuantizerFunctionWrapper:
     **kwargs: The keyword arguments that are passed on to `fn`.
     """
 
-    def __init__(self, fn, **kwargs):
+    def __init__(self, fn: Callable[[tf.Tensor], tf.Tensor], **kwargs):
         self.fn = fn
         self.precision = getattr(fn, "precision", 32)
         self._fn_kwargs = kwargs
 
-    def __call__(self, x):
+    def __call__(self, x: tf.Tensor) -> tf.Tensor:
         """Invokes the `QuantizerFunctionWrapper` instance.
 
         # Arguments
@@ -113,7 +115,7 @@ class QuantizerFunctionWrapper:
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-def ste_sign(x, clip_value=1.0):
+def ste_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     r"""Sign binarization function.
 
     \\[
@@ -163,7 +165,7 @@ def _scaled_sign(x):  # pragma: no cover
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-def magnitude_aware_sign(x, clip_value=1.0):
+def magnitude_aware_sign(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     r"""Magnitude-aware sign for Bi-Real Net.
 
     A scaled sign function computed according to Section 3.3 in
@@ -194,7 +196,7 @@ def magnitude_aware_sign(x, clip_value=1.0):
 @utils.register_keras_custom_object
 @utils.set_precision(1)
 @tf.custom_gradient
-def approx_sign(x):
+def approx_sign(x: tf.Tensor) -> tf.Tensor:
     r"""
     Sign binarization function.
     \\[
@@ -238,7 +240,7 @@ def approx_sign(x):
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-def swish_sign(x, beta=5.0):
+def swish_sign(x: tf.Tensor, beta: float = 5.0) -> tf.Tensor:
     r"""Sign binarization function.
 
     \\[
@@ -281,7 +283,12 @@ def swish_sign(x, beta=5.0):
 
 @utils.register_keras_custom_object
 @utils.set_precision(2)
-def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0):
+def ste_tern(
+    x: tf.Tensor,
+    threshold_value: float = 0.05,
+    ternary_weight_networks: bool = False,
+    clip_value: float = 1.0,
+) -> tf.Tensor:
     r"""Ternarization function.
 
     \\[
@@ -343,7 +350,7 @@ def ste_tern(x, threshold_value=0.05, ternary_weight_networks=False, clip_value=
 
 @utils.register_keras_custom_object
 @utils.set_precision(1)
-def ste_heaviside(x, clip_value=1.0):
+def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     r"""
     Binarization function with output values 0 and 1.
 
@@ -387,13 +394,13 @@ def ste_heaviside(x, clip_value=1.0):
 
 @utils.register_keras_custom_object
 @utils.set_precision(2)
-def dorefa_quantizer(x, k_bit=2):
+def dorefa_quantizer(x: tf.Tensor, k_bit: int = 2) -> tf.Tensor:
     r"""k_bit quantizer as in the DoReFa paper.
 
     \\[
     q(x) = \begin{cases}
     0 & x < \frac{1}{2n} \\\
-    \frac{i}{n} & \frac{2i-1}{2n} < |x| < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
+    \frac{i}{n} & \frac{2i-1}{2n} < x < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
      1 & \frac{2n-1}{2n} < x
     \end{cases}
     \\]
@@ -462,7 +469,7 @@ class SteSign(QuantizerFunctionWrapper):
       Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
     """
 
-    def __init__(self, clip_value=1.0):
+    def __init__(self, clip_value: float = 1.0):
         super().__init__(ste_sign, clip_value=clip_value)
 
 
@@ -497,7 +504,7 @@ class SteHeaviside(QuantizerFunctionWrapper):
     AND Binarization function
     """
 
-    def __init__(self, clip_value=1.0):
+    def __init__(self, clip_value: float = 1.0):
         super().__init__(ste_heaviside, clip_value=clip_value)
 
 
@@ -531,7 +538,7 @@ class SwishSign(QuantizerFunctionWrapper):
     - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
     """
 
-    def __init__(self, beta=5.0):
+    def __init__(self, beta: float = 5.0):
         super().__init__(swish_sign, beta=beta)
 
 
@@ -556,7 +563,7 @@ class MagnitudeAwareSign(QuantizerFunctionWrapper):
 
     """
 
-    def __init__(self, clip_value=1.0):
+    def __init__(self, clip_value: float = 1.0):
         super().__init__(magnitude_aware_sign, clip_value=clip_value)
 
 
@@ -603,7 +610,10 @@ class SteTern(QuantizerFunctionWrapper):
     """
 
     def __init__(
-        self, threshold_value=0.05, ternary_weight_networks=False, clip_value=1.0
+        self,
+        threshold_value: float = 0.05,
+        ternary_weight_networks: bool = False,
+        clip_value: float = 1.0,
     ):
         super().__init__(
             ste_tern,
@@ -620,7 +630,7 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
     \\[
     q(x) = \begin{cases}
     0 & x < \frac{1}{2n} \\\
-    \frac{i}{n} & \frac{2i-1}{2n} < |x| < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
+    \frac{i}{n} & \frac{2i-1}{2n} < x < \frac{2i+1}{2n} \text{ for } i \in \\{1,n-1\\}\\\
      1 & \frac{2n-1}{2n} < x
     \end{cases}
     \\]
@@ -649,12 +659,15 @@ class DoReFaQuantizer(QuantizerFunctionWrapper):
       with Low Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
     """
 
-    def __init__(self, k_bit):
+    def __init__(self, k_bit: int):
         super().__init__(dorefa_quantizer, k_bit=k_bit)
         self.precision = k_bit
 
 
-def serialize(quantizer):
+Quantizer = Union[QuantizerFunctionWrapper, Callable[[tf.Tensor], tf.Tensor]]
+
+
+def serialize(quantizer: Quantizer):
     return tf.keras.utils.serialize_keras_object(quantizer)
 
 

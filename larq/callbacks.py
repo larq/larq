@@ -1,10 +1,9 @@
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, MutableMapping, Optional
 
-import tensorflow as tf
 from tensorflow import keras
 
 
-class HyperparameterScheduler(tf.keras.callbacks.Callback):
+class HyperparameterScheduler(keras.callbacks.Callback):
     """Generic hyperparameter scheduler.
 
     !!! example
@@ -35,7 +34,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         hyperparameter: str,
         optimizer: Optional[keras.optimizers.Optimizer] = None,
         update_freq: str = "epoch",
-        verbose: Optional[int] = 0,
+        verbose: int = 0,
     ):
         super(HyperparameterScheduler, self).__init__()
         self.optimizer = optimizer
@@ -51,7 +50,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
 
         self.update_freq = update_freq
 
-    def set_model(self, model: keras.models.Model):
+    def set_model(self, model: keras.models.Model) -> None:
         super().set_model(model)
         if self.optimizer is None:
             # It is not possible for a model to reach this state and not have
@@ -73,17 +72,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         tf.keras.backend.set_value(hp, hyperparameter_val)
         return hp
 
-    def on_epoch_begin(self, epoch: int, logs: Optional[Dict] = None):
-        if self.update_freq == "epoch":
-            hp = self.set_hyperparameter(epoch)
-
-            if self.verbose > 0:
-                print(
-                    f"Epoch {epoch}: {self.hyperparameter} changing"
-                    f" to {tf.keras.backend.get_value(hp)}."
-                )
-
-    def on_batch_begin(self, batch: int, logs: Optional[Dict] = None):
+    def on_batch_begin(self, batch: int, logs: Optional[MutableMapping[str, Any]] = None):
         if self.update_freq == "step":
             # We use optimizer.iterations (i.e. global step), since batch only
             # reflects the batch index in the current epoch.
@@ -93,9 +82,27 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
                 print(
                     f"Batch {self.optimizer.iterations}: {self.hyperparameter} changing"
                     f" to {tf.keras.backend.get_value(hp)}."
-                )
 
-    def on_epoch_end(self, epoch: int, logs: Optional[Dict] = None):
+    def on_epoch_begin(
+        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
+        hp = getattr(self.optimizer, self.hyperparameter)
+        try:  # new API
+            hyperparameter_val = keras.backend.get_value(hp)
+            hyperparameter_val = self.schedule(epoch, hyperparameter_val)
+        except TypeError:  # Support for old API for backward compatibility
+            hyperparameter_val = self.schedule(epoch)
+
+        keras.backend.set_value(hp, hyperparameter_val)
+
+        if self.verbose > 0:
+            print(
+                f"Epoch {epoch + 1}: {self.hyperparameter} changing to {keras.backend.get_value(hp)}."
+            )
+
+    def on_epoch_end(
+        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
         logs = logs or {}
         hp = getattr(self.optimizer, self.hyperparameter)
-        logs[self.hyperparameter] = tf.keras.backend.get_value(hp)
+        logs[self.hyperparameter] = keras.backend.get_value(hp)
