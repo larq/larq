@@ -69,13 +69,8 @@ class TestHyperparameterScheduler:
             metrics=["accuracy"],
         )
 
-        # FIXME: it's kinda ugly that we need to cast this to a float. Is there a better
-        # solution? I don't think we want the step to be a float by default, since
-        # we may want to identify specific iterations (e.g. return 0 if x == 3).
-        # Or we can keep it like this, but should specify that this needs to be
-        # a tensorflow function.
         def scheduler(x):
-            return 1.0 / (1.0 + tf.cast(x, tf.float32))
+            return 1.0 / (1.0 + x)
 
         # Test that we don't accept incorrect `update_freq`
         with pytest.raises(ValueError):
@@ -101,7 +96,7 @@ class TestHyperparameterScheduler:
 
         np.testing.assert_almost_equal(
             tf.keras.backend.get_value(model.optimizer.lr),
-            scheduler(math.ceil(train_samples / batch_size) - 1).numpy(),
+            scheduler(math.ceil(train_samples / batch_size) - 1),
             decimal=8,
         )
 
