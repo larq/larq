@@ -46,7 +46,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         if update_freq not in ["epoch", "step"]:
             raise ValueError(
                 "HyperparameterScheduler.update_freq can only be 'step' or 'epoch'."
-                f"Received value '{update_freq}'"
+                f" Received value '{update_freq}'"
             )
 
         self.update_freq = update_freq
@@ -70,7 +70,6 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
             hyperparameter_val = self.schedule(t, hyperparameter_val)
         except TypeError:  # Support for old API for backward compatibility
             hyperparameter_val = self.schedule(t)
-
         tf.keras.backend.set_value(hp, hyperparameter_val)
         return hp
 
@@ -81,7 +80,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
             if self.verbose > 0:
                 print(
                     f"Epoch {epoch}: {self.hyperparameter} changing"
-                    f"to {tf.keras.backend.get_value(hp)}."
+                    f" to {tf.keras.backend.get_value(hp)}."
                 )
 
     def on_batch_begin(self, batch: int, logs: Optional[Dict] = None):
@@ -93,7 +92,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
             if self.verbose > 0:
                 print(
                     f"Batch {self.optimizer.iterations}: {self.hyperparameter} changing"
-                    f"to {tf.keras.backend.get_value(hp)}."
+                    f" to {tf.keras.backend.get_value(hp)}."
                 )
 
     def on_epoch_end(self, epoch: int, logs: Optional[Dict] = None):
