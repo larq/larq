@@ -34,7 +34,7 @@ class HyperparameterScheduler(tf.keras.callbacks.Callback):
         schedule: Callable,
         hyperparameter: str,
         optimizer: Optional[keras.optimizers.Optimizer] = None,
-        update_freq: Optional[str] = "epoch",
+        update_freq: str = "epoch",
         verbose: Optional[int] = 0,
     ):
         super(HyperparameterScheduler, self).__init__()
