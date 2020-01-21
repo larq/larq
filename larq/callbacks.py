@@ -78,11 +78,12 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         if self.update_freq == "step":
             # We use optimizer.iterations (i.e. global step), since batch only
             # reflects the batch index in the current epoch.
-            hp = self.set_hyperparameter(self.optimizer.iterations.numpy())
+            batch = keras.backend.get_value(self.optimizer.iterations)
+            hp = self.set_hyperparameter(batch)
 
             if self.verbose > 0:
                 print(
-                    f"Batch {self.optimizer.iterations}: {self.hyperparameter} changing"
+                    f"Batch {batch}: {self.hyperparameter} changing"
                     f" to {keras.backend.get_value(hp)}."
                 )
 

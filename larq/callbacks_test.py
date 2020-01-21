@@ -1,12 +1,13 @@
 import math
 
-import larq as lq
 import numpy as np
 import pytest
 import tensorflow as tf
+from tensorflow.python.keras import testing_utils
+
+import larq as lq
 from larq import testing_utils as lq_testing_utils
 from larq.callbacks import HyperparameterScheduler
-from tensorflow.python.keras import testing_utils
 
 
 class TestHyperparameterScheduler:
