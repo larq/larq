@@ -9,7 +9,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
     !!! example
         ```python
         bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
-        adam = tf.keras.optimizers.Adam(0.01)
+        adam = keras.optimizers.Adam(0.01)
         optimizer = lq.optimizers.CaseOptimizer(
             (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
         )
@@ -62,17 +62,19 @@ class HyperparameterScheduler(keras.callbacks.Callback):
                 f'Optimizer must have a "{self.hyperparameter}" attribute.'
             )
 
-    def set_hyperparameter(self, t: int):
+    def set_hyperparameter(self, t: int) -> Any:
         hp = getattr(self.optimizer, self.hyperparameter)
         try:  # new API
-            hyperparameter_val = tf.keras.backend.get_value(hp)
+            hyperparameter_val = keras.backend.get_value(hp)
             hyperparameter_val = self.schedule(t, hyperparameter_val)
         except TypeError:  # Support for old API for backward compatibility
             hyperparameter_val = self.schedule(t)
-        tf.keras.backend.set_value(hp, hyperparameter_val)
+        keras.backend.set_value(hp, hyperparameter_val)
         return hp
 
-    def on_batch_begin(self, batch: int, logs: Optional[MutableMapping[str, Any]] = None):
+    def on_batch_begin(
+        self, batch: int, logs: Optional[MutableMapping[str, Any]] = None
+    ) -> None:
         if self.update_freq == "step":
             # We use optimizer.iterations (i.e. global step), since batch only
             # reflects the batch index in the current epoch.
@@ -81,7 +83,8 @@ class HyperparameterScheduler(keras.callbacks.Callback):
             if self.verbose > 0:
                 print(
                     f"Batch {self.optimizer.iterations}: {self.hyperparameter} changing"
-                    f" to {tf.keras.backend.get_value(hp)}."
+                    f" to {keras.backend.get_value(hp)}."
+                )
 
     def on_epoch_begin(
         self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
