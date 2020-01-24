@@ -18,7 +18,7 @@ jobs:
           python-version: 3.7
       - name: Install project dependencies
         run: |
-          pip install tensorflow==2.0.0
+          pip install tensorflow==2.1.0
           pip install -e .[test]
       - name: Run Flake8
         run: flake8
@@ -27,4 +27,4 @@ jobs:
       - name: Check import order with isort
         run: isort --check-only --diff
       - name: Type check with PyType
-        run: pytype
+        run: pytype --jobs 2

@@ -19,8 +19,8 @@ import larq as lq
 ...
 x_out = lq.layers.QuantDense(
     units=1024,
-    input_quantizer=lq.quantizers.ste_sign,
-    kernel_quantizer=lq.quantizers.ste_sign,
+    input_quantizer=lq.quantizers.SteSign(clip_value=1.0),
+    kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0),
     kernel_constraint=lq.constraints.WeightClip(clip_value=1.0),
     )(x_in)
 ```
@@ -77,8 +77,8 @@ def conv_with_shortcut(x):
         filters=filters,
         kernel_size=3,
         padding="same",
-        input_quantizer=lq.quantizers.ste_sign,
-        kernel_quantizer=lq.quantizers.ste_sign,
+        input_quantizer=lq.quantizers.SteSign(clip_value=1.0),
+        kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0),
         kernel_initializer="glorot_normal",
         kernel_constraint=lq.constraints.WeightClip(clip_value=1.0),
         use_bias=False,
@@ -105,8 +105,8 @@ x = lq.layers.QuantConv2D(
     filters=512,
     kernel_size=3,
     padding="same",
-    input_quantizer=lq.quantizers.ste_sign,
-    kernel_quantizer=lq.quantizers.ste_sign,
+    input_quantizer=lq.quantizers.SteSign(clip_value=1.0),
+    kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0),
     kernel_constraint=lq.constraints.WeightClip(clip_value=1.0),
     use_bias=False,
     )(x)

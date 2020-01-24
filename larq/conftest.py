@@ -19,6 +19,7 @@ def graph_mode():
     with context.graph_mode():
         with tf.compat.v1.Session().as_default():
             yield
+            tf.keras.backend.clear_session()
 
 
 @pytest.fixture(params=["eager", "graph"])
@@ -28,6 +29,7 @@ def eager_and_graph_mode(request):
         with context.graph_mode():
             with tf.compat.v1.Session().as_default():
                 yield request.param
+                tf.keras.backend.clear_session()
     else:
         with context.eager_mode():
             yield request.param

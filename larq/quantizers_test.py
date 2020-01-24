@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 
 import larq as lq
 from larq import testing_utils
@@ -22,37 +23,32 @@ class TestCommonFunctionality:
 
     @pytest.mark.parametrize("module", [lq.quantizers, tf.keras.activations])
     @pytest.mark.parametrize(
-        "name",
-        ["ste_sign", "approx_sign", "magnitude_aware_sign", "swish_sign", "ste_tern"],
-    )
-    def test_serialization(self, module, name):
-        fn = module.get(name)
-        ref_fn = getattr(lq.quantizers, name)
-        assert fn == ref_fn
-        assert type(fn.precision) == int
-        config = module.serialize(fn)
-        fn = module.deserialize(config)
-        assert fn == ref_fn
-        assert type(fn.precision) == int
-        fn = module.get(ref_fn)
-        assert fn == ref_fn
-        assert type(fn.precision) == int
-
-    @pytest.mark.parametrize(
-        "ref_fn",
+        "name,ref_cls",
         [
-            lq.quantizers.SteSign(),
-            lq.quantizers.SteHeaviside(),
-            lq.quantizers.MagnitudeAwareSign(),
-            lq.quantizers.SwishSign(),
-            lq.quantizers.SteTern(),
+            ("ste_sign", lq.quantizers.SteSign),
+            ("approx_sign", lq.quantizers.ApproxSign),
+            ("ste_heaviside", lq.quantizers.SteHeaviside),
+            ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
+            ("swish_sign", lq.quantizers.SwishSign),
+            ("ste_tern", lq.quantizers.SteTern),
         ],
     )
-    def test_serialization_cls(self, ref_fn):
-        assert type(ref_fn.precision) == int
-        config = lq.quantizers.serialize(ref_fn)
-        fn = lq.quantizers.deserialize(config)
-        assert fn.__class__ == ref_fn.__class__
+    def test_serialization(self, module, name, ref_cls):
+        fn = module.get(name)
+        assert fn.__class__ == ref_cls
+        fn = module.get(ref_cls())
+        assert fn.__class__ == ref_cls
+        assert type(fn.precision) == int
+        if module == tf.keras.activations and version.parse(
+            tf.__version__
+        ) < version.parse("1.15"):
+            pytest.skip(
+                "TensorFlow < 1.15 does not support Quantizer classes as activations"
+            )
+        config = module.serialize(fn)
+        fn = module.deserialize(config)
+        assert fn.__class__ == ref_cls
+        assert type(fn.precision) == int
 
     def test_invalid_usage(self):
         with pytest.raises(ValueError):
@@ -84,6 +80,7 @@ class TestQuantization:
             "ste_sign",
             lq.quantizers.SteSign(),
             "approx_sign",
+            lq.quantizers.ApproxSign(),
             "swish_sign",
             lq.quantizers.SwishSign(),
         ],
@@ -122,7 +119,7 @@ class TestQuantization:
     def test_magnitude_aware_sign_binarization(self, eager_mode):
         a = np.random.uniform(-2, 2, (3, 2, 2, 3))
         x = tf.Variable(a)
-        y = lq.quantizers.magnitude_aware_sign(x)
+        y = lq.quantizers.MagnitudeAwareSign()(x)
 
         assert y.shape == x.shape
 
@@ -207,12 +204,9 @@ class TestQuantization:
         assert not np.any(result > 1)
         assert not np.any(result < -1)
 
-    @pytest.mark.parametrize(
-        "fn", [lq.quantizers.dorefa_quantizer, lq.quantizers.DoReFaQuantizer(2)]
-    )
-    def test_dorefa_quantize(self, fn):
+    def test_dorefa_quantize(self):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [fn(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaQuantizer(2)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         k_bit = 2
@@ -234,19 +228,27 @@ class TestGradients:
 
     @pytest.mark.parametrize(
         "fn",
-        [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside],
+        [
+            lq.quantizers.SteSign(clip_value=None),
+            lq.quantizers.SteTern(clip_value=None),
+            lq.quantizers.SteHeaviside(clip_value=None),
+        ],
     )
     def test_identity_ste_grad(self, eager_mode, fn):
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = fn(tf_x, clip_value=None)
+            activation = fn(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), np.ones_like(x))
 
     @pytest.mark.parametrize(
         "fn",
-        [lq.quantizers.ste_sign, lq.quantizers.ste_tern, lq.quantizers.ste_heaviside],
+        [
+            lq.quantizers.SteSign(),
+            lq.quantizers.SteTern(),
+            lq.quantizers.SteHeaviside(),
+        ],
     )
     def test_ste_grad(self, eager_mode, fn):
         @np.vectorize
@@ -272,12 +274,12 @@ class TestGradients:
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.swish_sign(tf_x)
+            activation = lq.quantizers.SwishSign()(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=5.0))
 
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.swish_sign(tf_x, beta=10.0)
+            activation = lq.quantizers.SwishSign(beta=10.0)(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=10.0))
 
@@ -291,7 +293,7 @@ class TestGradients:
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.approx_sign(tf_x)
+            activation = lq.quantizers.ApproxSign()(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), approx_sign_grad(x))
 
@@ -299,7 +301,7 @@ class TestGradients:
         a = np.random.uniform(-2, 2, (3, 2, 2, 3))
         x = tf.Variable(a)
         with tf.GradientTape() as tape:
-            y = lq.quantizers.magnitude_aware_sign(x)
+            y = lq.quantizers.MagnitudeAwareSign()(x)
         grad = tape.gradient(y, x)
 
         scale_vector = [

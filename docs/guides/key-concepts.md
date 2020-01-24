@@ -99,7 +99,7 @@ Just like activations, quantizers can also be used on their own:
 
 ```python
 # The two lines below are equivalent
-x_binarized = larq.quantizers.ste_sign(x)
+x_binarized = larq.quantizers.SteSign(clip_value=1.0)(x)
 x_binarized = tf.keras.layers.Activation("ste_sign")(x)
 ```
 

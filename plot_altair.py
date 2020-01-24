@@ -1,3 +1,4 @@
+import inspect
 import os
 import uuid
 from functools import reduce
@@ -44,6 +45,8 @@ def html_format(source, language=None, css_class=None, options=None, md=None):
 
 def plot_activation(source, language=None, css_class=None, options=None, md=None):
     function = reduce(getattr, [lq, *source.split(".")])
+    if inspect.isclass(function):
+        function = function()
     x = np.linspace(-2, 2, 500)
     y, dy = calculate_activation(function, x)
     data = pd.DataFrame({"x": x, "y": y, "dy / dx": dy})
