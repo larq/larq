@@ -9,7 +9,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
     !!! example
         ```python
         bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
-        adam = keras.optimizers.Adam(0.01)
+        adam = tf.keras.optimizers.Adam(0.01)
         optimizer = lq.optimizers.CaseOptimizer(
             (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
         )
@@ -75,7 +75,8 @@ class HyperparameterScheduler(keras.callbacks.Callback):
     def on_batch_begin(
         self, batch: int, logs: Optional[MutableMapping[str, Any]] = None
     ) -> None:
-        if self.update_freq == "step":
+        if not self.update_freq == "step":
+            return
             # We use optimizer.iterations (i.e. global step), since batch only
             # reflects the batch index in the current epoch.
             batch = keras.backend.get_value(self.optimizer.iterations)
