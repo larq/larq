@@ -26,6 +26,9 @@ class HyperparameterScheduler(keras.callbacks.Callback):
     update_freq: str (optional), denotes on what update_freq to change the
         hyperparameter. Can be either "epoch" (default) or "step".
     verbose: int. 0: quiet, 1: update messages.
+    log_name: str (optional), under which name to log this hyperparameter to
+        Tensorboard. If `None`, defaults to `hyperparameter`. Use this if you have
+        several schedules for the same hyperparameter on different optimizers.
     """
 
     def __init__(
@@ -87,8 +90,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
 
         if self.verbose > 0:
             print(
-                f"Batch {batch}: {self.log_name} changing"
-                f" to {keras.backend.get_value(hp)}."
+                f"Batch {batch}: {self.log_name} is now {keras.backend.get_value(hp)}."
             )
 
     def on_epoch_begin(
@@ -101,8 +103,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
 
         if self.verbose > 0:
             print(
-                f"Epoch {epoch}: {self.log_name} changing"
-                f" to {keras.backend.get_value(hp)}."
+                f"Epoch {epoch}: {self.log_name} is now {keras.backend.get_value(hp)}."
             )
 
     def on_epoch_end(
