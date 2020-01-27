@@ -35,11 +35,13 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         optimizer: Optional[keras.optimizers.Optimizer] = None,
         update_freq: str = "epoch",
         verbose: int = 0,
+        log_name: Optional[str] = None,
     ):
         super(HyperparameterScheduler, self).__init__()
         self.optimizer = optimizer
         self.schedule = schedule
         self.hyperparameter = hyperparameter
+        self.log_name = log_name or hyperparameter
         self.verbose = verbose
 
         if update_freq not in ["epoch", "step"]:
@@ -77,32 +79,30 @@ class HyperparameterScheduler(keras.callbacks.Callback):
     ) -> None:
         if not self.update_freq == "step":
             return
-            # We use optimizer.iterations (i.e. global step), since batch only
-            # reflects the batch index in the current epoch.
-            batch = keras.backend.get_value(self.optimizer.iterations)
-            hp = self.set_hyperparameter(batch)
 
-            if self.verbose > 0:
-                print(
-                    f"Batch {batch}: {self.hyperparameter} changing"
-                    f" to {keras.backend.get_value(hp)}."
-                )
+        # We use optimizer.iterations (i.e. global step), since batch only
+        # reflects the batch index in the current epoch.
+        batch = keras.backend.get_value(self.optimizer.iterations)
+        hp = self.set_hyperparameter(batch)
+
+        if self.verbose > 0:
+            print(
+                f"Batch {batch}: {self.log_name} changing"
+                f" to {keras.backend.get_value(hp)}."
+            )
 
     def on_epoch_begin(
         self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
     ) -> None:
-        hp = getattr(self.optimizer, self.hyperparameter)
-        try:  # new API
-            hyperparameter_val = keras.backend.get_value(hp)
-            hyperparameter_val = self.schedule(epoch, hyperparameter_val)
-        except TypeError:  # Support for old API for backward compatibility
-            hyperparameter_val = self.schedule(epoch)
+        if not self.update_freq == "epoch":
+            return
 
-        keras.backend.set_value(hp, hyperparameter_val)
+        hp = self.set_hyperparameter(epoch)
 
         if self.verbose > 0:
             print(
-                f"Epoch {epoch + 1}: {self.hyperparameter} changing to {keras.backend.get_value(hp)}."
+                f"Epoch {epoch}: {self.log_name} changing"
+                f" to {keras.backend.get_value(hp)}."
             )
 
     def on_epoch_end(
@@ -110,4 +110,4 @@ class HyperparameterScheduler(keras.callbacks.Callback):
     ) -> None:
         logs = logs or {}
         hp = getattr(self.optimizer, self.hyperparameter)
-        logs[self.hyperparameter] = keras.backend.get_value(hp)
+        logs[self.log_name] = keras.backend.get_value(hp)
