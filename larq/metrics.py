@@ -80,23 +80,28 @@ class FlipRatio(tf.keras.metrics.Metric):
         ```
 
     # Arguments
-    values_shape: Shape of the tensor for which to track changes.
-    values_dtype: Data type of the tensor for which to track changes.
     name: Name of the metric.
     dtype: Data type of the moving mean.
     """
 
-    def __init__(
-        self, values_shape=(), values_dtype="int8", name="flip_ratio", dtype=None
-    ):
+    def __init__(self, name="flip_ratio", values_dtype="int8", dtype=None):
         super().__init__(name=name, dtype=dtype)
+
         self.values_dtype = tf.as_dtype(values_dtype)
-        self.values_shape = tf.TensorShape(values_shape).as_list()
+        self.values_shape = None
+        self._built = False
+
+    def _build(self, shape):
+        self.values_shape = shape
+
         self.is_weight_metric = True
+        self._size = np.prod(self.values_shape)
+        # Fails here because of None in shape
+
         with tf.init_scope():
             self._previous_values = self.add_weight(
                 "previous_values",
-                shape=values_shape,
+                shape=self.values_shape,
                 dtype=self.values_dtype,
                 initializer=tf.keras.initializers.zeros,
                 aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
@@ -111,9 +116,20 @@ class FlipRatio(tf.keras.metrics.Metric):
                 initializer=tf.keras.initializers.zeros,
                 aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
             )
-        self._size = np.prod(self.values_shape)
+
+        # TODO: also initialize variables with keras backend?
+        # https://github.com/tensorflow/tensorflow/blob/944e6fe82a2b7733dd2f58ad352fcaeb7ad066b8/tensorflow/python/keras/metrics.py#L2723
+        # https://github.com/tensorflow/tensorflow/blob/944e6fe82a2b7733dd2f58ad352fcaeb7ad066b8/tensorflow/python/keras/backend.py#L955
+
+        self._built = True
 
     def update_state(self, values, sample_weight=None):
+        if not self._built:
+            print(values.shape)
+            # This still has shape (None, 2) for `pytest -k "layers_test" -s -x`, while
+            # we'd expect it to have the actual shape I think.
+            self._build(values.shape)
+
         values = tf.cast(values, self.values_dtype)
         unchanged_values = tf.math.count_nonzero(
             tf.equal(self._previous_values, values)
