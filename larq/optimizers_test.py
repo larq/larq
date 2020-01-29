@@ -136,8 +136,7 @@ class TestCaseOptimizer:
         var = tf.Variable([2.0])
         opt = tf.keras.optimizers.SGD(1.0, momentum=1.0)
         opt = lq.optimizers.CaseOptimizer((lambda var: True, opt))
-        run_fn = lambda: opt.minimize(lambda: var + 1.0, var_list=[var])
-        run_fn()
+        opt.minimize(lambda: var + 1.0, var_list=[var])
         slot_var = opt.optimizers[0].get_slot(var, "momentum")
         slot_value = slot_var.numpy().item()
 
@@ -146,7 +145,7 @@ class TestCaseOptimizer:
         save_path = checkpoint.save(tmp_path / "ckpt")
 
         # Run model again.
-        run_fn()
+        opt.minimize(lambda: var + 1.0, var_list=[var])
         assert slot_var.numpy().item() != slot_value
 
         # Load checkpoint and ensure loss scale is back to it's original value.
