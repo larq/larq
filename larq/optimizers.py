@@ -98,6 +98,10 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             self.optimizers.append(self.default)
             self.DEFAULT_OPT_INDEX = len(self.pred_opt_pairs)
 
+        # Track optimizers to support reloading via tf.train.Checkpoint
+        for i, optimizer in enumerate(self.optimizers):
+            self._track_trackable(optimizer, name=f"optimizer_{i}")
+
     @property
     def weights(self):
         weights = []
