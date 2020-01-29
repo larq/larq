@@ -4,7 +4,7 @@ quantized output and the pseudo-gradient method used for the backwards pass.
 Quantizers can either be used through quantizer arguments that are supported
 for Larq layers, such as `input_quantizer` and `kernel_quantizer`; or they
 can be used similar to activations, i.e. either through an `Activation` layer,
-or through the `activation` argument supported by all forward layer:
+or through the `activation` argument supported by all forward layers:
 
 ```python
 import tensorflow as tf
@@ -49,7 +49,7 @@ from typing import Callable, Union
 
 import tensorflow as tf
 
-from larq import math, utils
+from larq import math, utils, metrics as lq_metrics
 
 __all__ = [
     "SteSign",
@@ -63,6 +63,8 @@ __all__ = [
 
 
 def _clipped_gradient(x, dy, clip_value):
+    """Calculate `clipped_gradent * dy`."""
+
     if clip_value is None:
         return dy
 
@@ -141,9 +143,28 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
+class BaseQuantizer(tf.keras.layers.Layer):
+    """Base class for defining quantizers with Larq metrics."""
+
+    def __init__(self, *args, metrics=None, **kwargs):
+        self._custom_metrics = (
+            metrics if metrics is not None else lq_metrics.get_training_metrics()
+        )
+
+        super().__init__(*args, **kwargs)
+
+    def build(self, input_shape):
+        super().build(input_shape)
+
+        if "flip_ratio" in self._custom_metrics:
+            self.flip_ratio = lq_metrics.FlipRatio(
+                values_shape=input_shape, name=f"flip_ratio/{self.name}"
+            )
+
+
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
-class SteSign(tf.keras.layers.Layer):
+class SteSign(BaseQuantizer):
     r"""Instantiates a serializable binary quantizer.
 
     \\[
@@ -174,11 +195,13 @@ class SteSign(tf.keras.layers.Layer):
     """
     precision = 1
 
-    def __init__(self, clip_value: float = 1.0, **kwargs):
+    def __init__(self, *args, clip_value: float = 1.0, **kwargs):
         self.clip_value = clip_value
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def call(self, inputs):
+        if hasattr(self, "flip_ratio"):
+            self.add_metric(self.flip_ratio(inputs))
         return ste_sign(inputs, clip_value=self.clip_value)
 
     def get_config(self):

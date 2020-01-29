@@ -20,7 +20,7 @@ _AVAILABLE_METRICS = {"flip_ratio"}
 
 @contextmanager
 def scope(metrics=[]):
-    """A context manager to set the training metrics to be used in layers.
+    """A context manager to set the training metrics to be used in quantizers.
 
     !!! example
         ```python
@@ -32,7 +32,7 @@ def scope(metrics=[]):
         ```
 
     # Arguments
-    metrics: Iterable of metrics to add to layers defined inside this context.
+    metrics: Iterable of metrics to add to quantizers defined inside this context.
         Currently only the `flip_ratio` metric is available.
     """
     for metric in metrics:

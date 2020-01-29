@@ -58,9 +58,6 @@ class QuantizerBase(BaseLayer):
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
-        self._custom_metrics = (
-            metrics if metrics is not None else lq_metrics.get_training_metrics()
-        )
 
         super().__init__(*args, **kwargs)
         if kernel_quantizer and not self.kernel_constraint:
@@ -74,18 +71,11 @@ class QuantizerBase(BaseLayer):
 
     def build(self, input_shape):
         super().build(input_shape)
-        if self.kernel_quantizer:
-            if "flip_ratio" in self._custom_metrics:
-                self.flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.kernel.shape, name=f"flip_ratio/{self.name}"
-                )
 
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
         with quantized_scope.scope(True):
-            if hasattr(self, "flip_ratio"):
-                self.add_metric(self.flip_ratio(self.kernel))
             return super().call(inputs)
 
     def get_config(self):
