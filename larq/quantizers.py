@@ -192,6 +192,9 @@ class SteSign(BaseQuantizer):
 
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # References
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
@@ -233,6 +236,11 @@ class ApproxSign(BaseQuantizer):
     quantizers.ApproxSign
     ```
 
+    # Arguments
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
+
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
       Representational Capability and Advanced
@@ -272,6 +280,9 @@ class SteHeaviside(BaseQuantizer):
 
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # Returns
     AND Binarization function
@@ -313,6 +324,9 @@ class SwishSign(BaseQuantizer):
     ```
     # Arguments
     beta: Larger values result in a closer approximation to the derivative of the sign.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # Returns
     SwishSign quantization function
@@ -348,6 +362,9 @@ class MagnitudeAwareSign(BaseQuantizer):
 
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
@@ -411,6 +428,9 @@ class SteTern(BaseQuantizer):
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
@@ -476,6 +496,9 @@ class DoReFaQuantizer(BaseQuantizer):
 
     # Arguments
     k_bit: number of bits for the quantization.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # Returns
     Quantization function

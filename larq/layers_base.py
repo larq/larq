@@ -3,7 +3,7 @@ from typing import Optional
 
 from tensorflow import keras
 
-from larq import metrics as lq_metrics, quantized_scope, quantizers
+from larq import quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
 from larq.quantizers import Quantizer
 
@@ -33,17 +33,6 @@ class BaseLayer(keras.layers.Layer):
 
         return super()._add_variable_with_custom_getter(name, getter=getter, **kwargs)
 
-    @property
-    def non_trainable_weights(self):
-        weights = super().non_trainable_weights
-        if hasattr(self, "flip_ratio"):
-            return [
-                weight
-                for weight in weights
-                if not any(weight is metric_w for metric_w in self.flip_ratio.weights)
-            ]
-        return weights
-
 
 class QuantizerBase(BaseLayer):
     """Base class for defining quantized layers
@@ -53,9 +42,7 @@ class QuantizerBase(BaseLayer):
     equivalent to `Layer`.
     """
 
-    def __init__(
-        self, *args, input_quantizer=None, kernel_quantizer=None, metrics=None, **kwargs
-    ):
+    def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
 
@@ -99,14 +86,10 @@ class QuantizerDepthwiseBase(BaseLayer):
         *args,
         input_quantizer: Optional[Quantizer] = None,
         depthwise_quantizer: Optional[Quantizer] = None,
-        metrics=None,
         **kwargs,
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
-        self._custom_metrics = (
-            metrics if metrics is not None else lq_metrics.get_training_metrics()
-        )
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
@@ -118,21 +101,10 @@ class QuantizerDepthwiseBase(BaseLayer):
     def get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
-    def build(self, input_shape):
-        super().build(input_shape)
-        if self.depthwise_quantizer:
-            if "flip_ratio" in self._custom_metrics:
-                self.flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.depthwise_kernel.shape,
-                    name=f"flip_ratio/{self.name}",
-                )
-
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
         with quantized_scope.scope(True):
-            if hasattr(self, "flip_ratio"):
-                self.add_metric(self.flip_ratio(self.depthwise_kernel))
             return super().call(inputs)
 
     def get_config(self):
@@ -159,15 +131,11 @@ class QuantizerSeparableBase(BaseLayer):
         input_quantizer: Optional[Quantizer] = None,
         depthwise_quantizer: Optional[Quantizer] = None,
         pointwise_quantizer: Optional[Quantizer] = None,
-        metrics=None,
         **kwargs,
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
-        self._custom_metrics = (
-            metrics if metrics is not None else lq_metrics.get_training_metrics()
-        )
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
@@ -188,45 +156,10 @@ class QuantizerSeparableBase(BaseLayer):
             return self.pointwise_quantizer
         return None
 
-    def build(self, input_shape):
-        super().build(input_shape)
-        if self.depthwise_quantizer:
-            if "flip_ratio" in self._custom_metrics:
-                self.depthwise_flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.depthwise_kernel.shape,
-                    name=f"flip_ratio/{self.name}_depthwise",
-                )
-        if self.pointwise_quantizer:
-            if "flip_ratio" in self._custom_metrics:
-                self.pointwise_flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.pointwise_kernel.shape,
-                    name=f"flip_ratio/{self.name}_pointwise",
-                )
-
-    @property
-    def non_trainable_weights(self):
-        weights = super().non_trainable_weights
-        metrics_weights = []
-        if hasattr(self, "depthwise_flip_ratio"):
-            metrics_weights.extend(self.depthwise_flip_ratio.weights)
-        if hasattr(self, "pointwise_flip_ratio"):
-            metrics_weights.extend(self.pointwise_flip_ratio.weights)
-        if metrics_weights:
-            return [
-                weight
-                for weight in weights
-                if not any(weight is metric_w for metric_w in metrics_weights)
-            ]
-        return weights
-
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
         with quantized_scope.scope(True):
-            if hasattr(self, "depthwise_flip_ratio"):
-                self.add_metric(self.depthwise_flip_ratio(self.depthwise_kernel))
-            if hasattr(self, "pointwise_flip_ratio"):
-                self.add_metric(self.pointwise_flip_ratio(self.pointwise_kernel))
             return super().call(inputs)
 
     def get_config(self):
