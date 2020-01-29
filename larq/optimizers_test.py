@@ -131,6 +131,30 @@ class TestCaseOptimizer:
                 checked_weights += 1
         assert checked_weights == len(opt_weights)
 
+    def test_checkpoint(self, eager_mode, tmp_path):
+        # Build and run a simple model.
+        var = tf.Variable([2.0])
+        opt = tf.keras.optimizers.SGD(1.0, momentum=1.0)
+        opt = lq.optimizers.CaseOptimizer((lambda var: True, opt))
+        run_fn = lambda: opt.minimize(lambda: var + 1.0, var_list=[var])
+        run_fn()
+        slot_var = opt.optimizers[0].get_slot(var, "momentum")
+        slot_value = slot_var.numpy().item()
+
+        # Save a checkpoint.
+        checkpoint = tf.train.Checkpoint(optimizer=opt, var=var)
+        save_path = checkpoint.save(tmp_path / "ckpt")
+
+        # Run model again.
+        run_fn()
+        assert slot_var.numpy().item() != slot_value
+
+        # Load checkpoint and ensure loss scale is back to it's original value.
+        status = checkpoint.restore(save_path)
+        status.assert_consumed()
+        status.run_restore_ops()
+        assert slot_var.numpy().item() == slot_value
+
 
 class TestBopOptimizer:
     def test_bop_accuracy(self):
