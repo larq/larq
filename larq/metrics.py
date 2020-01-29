@@ -81,6 +81,7 @@ class FlipRatio(tf.keras.metrics.Metric):
 
     # Arguments
     name: Name of the metric.
+    values_dtype: Data type of the tensor for which to track changes.
     dtype: Data type of the moving mean.
     """
 
