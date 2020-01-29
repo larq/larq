@@ -148,7 +148,7 @@ class TestCaseOptimizer:
         opt.minimize(lambda: var + 1.0, var_list=[var])
         assert slot_var.numpy().item() != slot_value
 
-        # Load checkpoint and ensure loss scale is back to it's original value.
+        # Load checkpoint and ensure loss scale is back to its original value.
         status = checkpoint.restore(save_path)
         status.assert_consumed()
         status.run_restore_ops()
