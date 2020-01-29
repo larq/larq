@@ -325,3 +325,35 @@ class TestGradients:
             activation = lq.quantizers.DoReFaQuantizer(2)(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), ste_grad(x))
+
+
+@pytest.mark.parametrize(
+    "quantizer", [("ste_sign", lq.quantizers.SteSign)],
+)
+def test_metrics(quantizer):
+    quantizer_str, quantizer_cls = quantizer
+
+    model = tf.keras.models.Sequential(
+        [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
+    )
+    model.compile(loss="mse", optimizer="sgd")
+    assert len(model.layers[0]._metrics) == 0
+
+    with lq.metrics.scope(["flip_ratio"]):
+        model = tf.keras.models.Sequential(
+            [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
+        )
+    model.compile(loss="mse", optimizer="sgd")
+    assert len(model.layers[0].kernel_quantizer._metrics) == 1
+
+    model = tf.keras.models.Sequential(
+        [
+            lq.layers.QuantDense(
+                3,
+                kernel_quantizer=quantizer_cls(metrics=["flip_ratio"]),
+                input_shape=(32,),
+            )
+        ]
+    )
+    model.compile(loss="mse", optimizer="sgd")
+    assert len(model.layers[0].kernel_quantizer._metrics) == 1
