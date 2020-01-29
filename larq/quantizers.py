@@ -161,6 +161,10 @@ class BaseQuantizer(tf.keras.layers.Layer):
                 values_shape=input_shape, name=f"flip_ratio/{self.name}"
             )
 
+    def call(self, inputs):
+        if hasattr(self, "flip_ratio"):
+            self.add_metric(self.flip_ratio(inputs))
+
 
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
@@ -195,13 +199,12 @@ class SteSign(BaseQuantizer):
     """
     precision = 1
 
-    def __init__(self, *args, clip_value: float = 1.0, **kwargs):
+    def __init__(self, clip_value: float = 1.0, **kwargs):
         self.clip_value = clip_value
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
     def call(self, inputs):
-        if hasattr(self, "flip_ratio"):
-            self.add_metric(self.flip_ratio(inputs))
+        super().call(inputs)
         return ste_sign(inputs, clip_value=self.clip_value)
 
     def get_config(self):
@@ -210,7 +213,7 @@ class SteSign(BaseQuantizer):
 
 @utils.register_alias("approx_sign")
 @utils.register_keras_custom_object
-class ApproxSign(tf.keras.layers.Layer):
+class ApproxSign(BaseQuantizer):
     r"""Instantiates a serializable binary quantizer.
     \\[
     q(x) = \begin{cases}
@@ -238,12 +241,13 @@ class ApproxSign(tf.keras.layers.Layer):
     precision = 1
 
     def call(self, inputs):
+        super().call(inputs)
         return approx_sign(inputs)
 
 
 @utils.register_alias("ste_heaviside")
 @utils.register_keras_custom_object
-class SteHeaviside(tf.keras.layers.Layer):
+class SteHeaviside(BaseQuantizer):
     r"""
     Instantiates a binarization quantizer with output values 0 and 1.
     \\[
@@ -279,6 +283,7 @@ class SteHeaviside(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
+        super().call(inputs)
         return ste_heaviside(inputs, clip_value=self.clip_value)
 
     def get_config(self):
@@ -287,7 +292,7 @@ class SteHeaviside(tf.keras.layers.Layer):
 
 @utils.register_alias("swish_sign")
 @utils.register_keras_custom_object
-class SwishSign(tf.keras.layers.Layer):
+class SwishSign(BaseQuantizer):
     r"""Sign binarization function.
 
     \\[
@@ -322,6 +327,7 @@ class SwishSign(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
+        super().call(inputs)
         return swish_sign(inputs, beta=self.beta)
 
     def get_config(self):
@@ -330,7 +336,7 @@ class SwishSign(tf.keras.layers.Layer):
 
 @utils.register_alias("magnitude_aware_sign")
 @utils.register_keras_custom_object
-class MagnitudeAwareSign(tf.keras.layers.Layer):
+class MagnitudeAwareSign(BaseQuantizer):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
 
     A scaled sign function computed according to Section 3.3 in
@@ -356,6 +362,7 @@ class MagnitudeAwareSign(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
+        super().call(inputs)
         scale_factor = tf.stop_gradient(
             tf.reduce_mean(tf.abs(inputs), axis=list(range(len(inputs.shape) - 1)))
         )
@@ -368,7 +375,7 @@ class MagnitudeAwareSign(tf.keras.layers.Layer):
 
 @utils.register_alias("ste_tern")
 @utils.register_keras_custom_object
-class SteTern(tf.keras.layers.Layer):
+class SteTern(BaseQuantizer):
     r"""Instantiates a serializable ternarization quantizer.
 
     \\[
@@ -424,6 +431,7 @@ class SteTern(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
+        super().call(inputs)
         return ste_tern(
             inputs,
             threshold_value=self.threshold_value,
@@ -442,7 +450,7 @@ class SteTern(tf.keras.layers.Layer):
 
 @utils.register_alias("dorefa_quantizer")
 @utils.register_keras_custom_object
-class DoReFaQuantizer(tf.keras.layers.Layer):
+class DoReFaQuantizer(BaseQuantizer):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -483,6 +491,7 @@ class DoReFaQuantizer(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
+        super().call(inputs)
         inputs = tf.clip_by_value(inputs, 0.0, 1.0)
 
         @tf.custom_gradient

@@ -328,7 +328,16 @@ class TestGradients:
 
 
 @pytest.mark.parametrize(
-    "quantizer", [("ste_sign", lq.quantizers.SteSign)],
+    "quantizer",
+    [
+        ("ste_sign", lq.quantizers.SteSign),
+        ("approx_sign", lq.quantizers.ApproxSign),
+        ("ste_heaviside", lq.quantizers.SteHeaviside),
+        ("swish_sign", lq.quantizers.SwishSign),
+        ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
+        ("ste_tern", lq.quantizers.SteTern),
+        ("dorefa_quantizer", lq.quantizers.DoReFaQuantizer),
+    ],
 )
 def test_metrics(quantizer):
     quantizer_str, quantizer_cls = quantizer
