@@ -81,18 +81,20 @@ class FlipRatio(tf.keras.metrics.Metric):
 
     # Arguments
     name: Name of the metric.
+    values_shape: Shape of the tensor for which to track changes.
     values_dtype: Data type of the tensor for which to track changes.
     dtype: Data type of the moving mean.
     """
 
     def __init__(
-        self, name="flip_ratio", values_shape=None, values_dtype="int8", dtype=None
+        self, values_shape=None, values_dtype="int8", name="flip_ratio", dtype=None
     ):
         super().__init__(name=name, dtype=dtype)
 
-        self.is_weight_metric = True
         self.values_dtype = tf.as_dtype(values_dtype)
         self.values_shape = values_shape
+
+        self.is_weight_metric = True
         self.built = False
 
         with tf.init_scope():
