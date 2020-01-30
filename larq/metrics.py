@@ -113,7 +113,7 @@ class FlipRatio(tf.keras.metrics.Metric):
         if self.values_shape is not None and self.values_shape != shape:
             raise ValueError(
                 f"Shape of first value `{shape}` does not match shape set on __init__()"
-                f"` {self.values_shape}`."
+                f" `{self.values_shape}`."
             )
 
         self.values_shape = shape
