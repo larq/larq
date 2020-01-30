@@ -72,7 +72,7 @@ class FlipRatio(tf.keras.metrics.Metric):
 
     !!! example
         ```python
-        m = metrics.FlipRatio(values_shape=(2,))
+        m = metrics.FlipRatio()
         m.update_state((1, 1))  # result: 0
         m.update_state((2, 2))  # result: 1
         m.update_state((1, 2))  # result: 0.75
@@ -85,12 +85,14 @@ class FlipRatio(tf.keras.metrics.Metric):
     dtype: Data type of the moving mean.
     """
 
-    def __init__(self, name="flip_ratio", values_dtype="int8", dtype=None):
+    def __init__(
+        self, name="flip_ratio", values_shape=None, values_dtype="int8", dtype=None
+    ):
         super().__init__(name=name, dtype=dtype)
 
         self.is_weight_metric = True
         self.values_dtype = tf.as_dtype(values_dtype)
-        self.values_shape = None
+        self.values_shape = values_shape
         self.built = False
 
         with tf.init_scope():
