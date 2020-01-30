@@ -49,7 +49,7 @@ from typing import Callable, Union
 
 import tensorflow as tf
 
-from larq import math, utils, metrics as lq_metrics
+from larq import math, metrics as lq_metrics, utils
 
 __all__ = [
     "SteSign",
