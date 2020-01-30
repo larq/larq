@@ -45,7 +45,7 @@ setup(
             "mkdocs-minify-plugin==0.2.1",
             "larq-zoo==0.5.0",
             "altair==4.0.1",
-            "pandas==0.25.3",
+            "pandas==1.0.0",
         ],
     },
     classifiers=[
