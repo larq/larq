@@ -164,7 +164,7 @@ class BaseQuantizer(tf.keras.layers.Layer):
 
             # If the flip ratio hasn't been built, first check if this is a weights
             # quantizer; if not, remove the flip ratio.
-            if not self.flip_ratio.built and inputs.shape[0] == None:
+            if not self.flip_ratio.built and inputs.shape[0] is None:
                 delattr(self, "flip_ratio")
 
             # Otherwise compute the flip ratio and
