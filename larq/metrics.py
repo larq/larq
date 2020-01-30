@@ -144,7 +144,9 @@ class FlipRatio(tf.keras.metrics.Metric):
         unchanged_values = tf.math.count_nonzero(
             tf.equal(self._previous_values, values)
         )
-        flip_ratio = 1 - (tf.cast(unchanged_values, self.dtype) / self._size)
+        flip_ratio = 1 - (
+            tf.cast(unchanged_values, self.dtype) / tf.cast(self._size, self.dtype)
+        )
 
         update_total_op = self.total.assign_add(flip_ratio * tf.sign(self.count))
         with tf.control_dependencies([update_total_op]):
