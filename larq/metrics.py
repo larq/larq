@@ -110,6 +110,12 @@ class FlipRatio(tf.keras.metrics.Metric):
     def _build(self, shape):
         """Only add the weights that require us to know a shape on first call."""
 
+        if self.values_shape is not None and self.values_shape != shape:
+            raise ValueError(
+                f"Shape of first value `{shape}` does not match shape set on __init__()"
+                f"` {self.values_shape}`."
+            )
+
         self.values_shape = shape
         self._size = np.prod(shape)
 

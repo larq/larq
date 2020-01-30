@@ -59,8 +59,14 @@ def test_metric(eager_mode):
     assert 1.5 / 2 == mcv.result().numpy()
 
 
+def test_metric_wrong_shape(eager_mode):
+    mcv = metrics.FlipRatio(values_shape=[3])
+    with pytest.raises(ValueError):
+        mcv.update_state(np.array([1, 1]))
+
+
 def test_metric_in_graph_mode(graph_mode):
-    mcv = metrics.FlipRatio([2])
+    mcv = metrics.FlipRatio(values_shape=[2])
 
     new_state = tf.compat.v1.placeholder(dtype=tf.float32, shape=[2])
     update_state_op = mcv.update_state(new_state)
