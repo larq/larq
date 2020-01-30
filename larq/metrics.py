@@ -88,25 +88,12 @@ class FlipRatio(tf.keras.metrics.Metric):
     def __init__(self, name="flip_ratio", values_dtype="int8", dtype=None):
         super().__init__(name=name, dtype=dtype)
 
+        self.is_weight_metric = True
         self.values_dtype = tf.as_dtype(values_dtype)
         self.values_shape = None
-        self._built = False
-
-    def _build(self, shape):
-        self.values_shape = shape
-
-        self.is_weight_metric = True
-        self._size = np.prod(self.values_shape)
-        # Fails here because of None in shape
+        self.built = False
 
         with tf.init_scope():
-            self._previous_values = self.add_weight(
-                "previous_values",
-                shape=self.values_shape,
-                dtype=self.values_dtype,
-                initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
-            )
             self.total = self.add_weight(
                 "total",
                 initializer=tf.keras.initializers.zeros,
@@ -118,17 +105,29 @@ class FlipRatio(tf.keras.metrics.Metric):
                 aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
             )
 
+    def _build(self, shape):
+        """Only add the weights that require us to know a shape on first call."""
+
+        self.values_shape = shape
+        self._size = np.prod(shape)
+
+        with tf.init_scope():
+            self._previous_values = self.add_weight(
+                "previous_values",
+                shape=self.values_shape,
+                dtype=self.values_dtype,
+                initializer=tf.keras.initializers.zeros,
+                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
+            )
+
         # TODO: also initialize variables with keras backend?
         # https://github.com/tensorflow/tensorflow/blob/944e6fe82a2b7733dd2f58ad352fcaeb7ad066b8/tensorflow/python/keras/metrics.py#L2723
         # https://github.com/tensorflow/tensorflow/blob/944e6fe82a2b7733dd2f58ad352fcaeb7ad066b8/tensorflow/python/keras/backend.py#L955
 
-        self._built = True
+        self.built = True
 
     def update_state(self, values, sample_weight=None):
-        if not self._built:
-            print(values.shape)
-            # This still has shape (None, 2) for `pytest -k "layers_test" -s -x`, while
-            # we'd expect it to have the actual shape I think.
+        if not self.built:
             self._build(values.shape)
 
         values = tf.cast(values, self.values_dtype)

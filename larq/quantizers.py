@@ -161,8 +161,15 @@ class BaseQuantizer(tf.keras.layers.Layer):
 
     def call(self, inputs):
         if hasattr(self, "flip_ratio"):
-            # TODO: Add precision check
-            self.add_metric(self.flip_ratio(inputs))
+
+            # If the flip ratio hasn't been built, first check if this is a weights
+            # quantizer; if not, remove the flip ratio.
+            if not self.flip_ratio.built and inputs.shape[0] == None:
+                delattr(self, "flip_ratio")
+
+            # Otherwise compute the flip ratio and
+            else:
+                self.add_metric(self.flip_ratio(inputs))
 
 
 @utils.register_alias("ste_sign")
