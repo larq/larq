@@ -153,25 +153,19 @@ class BaseQuantizer(tf.keras.layers.Layer):
 
         super().__init__(*args, **kwargs)
 
-    def build(self, input_shape):
-        super().build(input_shape)
-
-        if "flip_ratio" in self._custom_metrics:
+    def __call__(self, inputs):
+        if (
+            "flip_ratio" in self._custom_metrics
+            and not hasattr(self, "flip_ratio")
+            and "kernel" in inputs.name  # Flip ratio is only relevant for weights.
+        ):
             self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}")
+
+        return super().__call__(inputs)
 
     def call(self, inputs):
         if hasattr(self, "flip_ratio"):
-
-            # If the flip ratio hasn't been built, first check if this is a weights
-            # quantizer; if not, remove the flip ratio.
-            if not self.flip_ratio.built and (
-                inputs.shape[0] is None or str(inputs.shape[0]) == "?"
-            ):
-                delattr(self, "flip_ratio")
-
-            # Otherwise compute the flip ratio and
-            else:
-                self.add_metric(self.flip_ratio(inputs))
+            self.add_metric(self.flip_ratio(inputs))
 
 
 @utils.register_alias("ste_sign")
