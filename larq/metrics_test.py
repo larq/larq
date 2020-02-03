@@ -21,14 +21,12 @@ def test_config():
     assert mcv.stateful
     assert mcv.dtype == tf.float16
     assert mcv.values_dtype == tf.int16
-    # assert mcv.values_shape == [3, 3]
 
     mcv2 = metrics.FlipRatio.from_config(mcv.get_config())
     assert mcv2.name == "mcv"
     assert mcv2.stateful
     assert mcv2.dtype == tf.float16
     assert mcv2.values_dtype == tf.int16
-    # assert mcv2.values_shape == [3, 3]
 
 
 def test_metric(eager_mode):
