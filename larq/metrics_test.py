@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import tensorflow as tf
 
@@ -15,43 +16,37 @@ def test_scope():
 
 
 def test_config():
-    mcv = metrics.FlipRatio(
-        values_shape=[3, 3], values_dtype="int16", name="mcv", dtype=tf.float16
-    )
+    mcv = metrics.FlipRatio(values_dtype="int16", name="mcv", dtype=tf.float16)
     assert mcv.name == "mcv"
     assert mcv.stateful
     assert mcv.dtype == tf.float16
     assert mcv.values_dtype == tf.int16
-    assert mcv.values_shape == [3, 3]
+    # assert mcv.values_shape == [3, 3]
 
     mcv2 = metrics.FlipRatio.from_config(mcv.get_config())
     assert mcv2.name == "mcv"
     assert mcv2.stateful
     assert mcv2.dtype == tf.float16
     assert mcv2.values_dtype == tf.int16
-    assert mcv2.values_shape == [3, 3]
+    # assert mcv2.values_shape == [3, 3]
 
 
 def test_metric(eager_mode):
-    mcv = metrics.FlipRatio([2])
+    mcv = metrics.FlipRatio()
 
-    assert 0 == mcv.result().numpy()
-    assert 0 == mcv.total.numpy()
-    assert 0 == mcv.count.numpy()
-
-    mcv.update_state([1, 1])
+    mcv(np.array([1, 1]))
     assert all([1, 1] == mcv._previous_values.numpy())
     assert 0 == mcv.total.numpy()
     assert 1 == mcv.count.numpy()
     assert 0 == mcv.result().numpy()
 
-    mcv.update_state([2, 2])
+    mcv(np.array([2, 2]))
     assert all([2, 2] == mcv._previous_values.numpy())
     assert 1 == mcv.total.numpy()
     assert 2 == mcv.count.numpy()
     assert 1 == mcv.result().numpy()
 
-    mcv.update_state([1, 2])
+    mcv(np.array([1, 2]))
     assert all([1, 2] == mcv._previous_values.numpy())
     assert 1.5 == mcv.total.numpy()
     assert 3 == mcv.count.numpy()
@@ -59,10 +54,10 @@ def test_metric(eager_mode):
 
 
 def test_metric_in_graph_mode(graph_mode):
-    mcv = metrics.FlipRatio([2])
+    mcv = metrics.FlipRatio()
 
     new_state = tf.compat.v1.placeholder(dtype=tf.float32, shape=[2])
-    update_state_op = mcv.update_state(new_state)
+    update_state_op = mcv(new_state)
     metric_value = mcv.result()
 
     with tf.compat.v1.Session() as sess:

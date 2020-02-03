@@ -76,9 +76,7 @@ class QuantizerBase(BaseLayer):
         super().build(input_shape)
         if self.kernel_quantizer:
             if "flip_ratio" in self._custom_metrics:
-                self.flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.kernel.shape, name=f"flip_ratio/{self.name}"
-                )
+                self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}")
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -132,10 +130,7 @@ class QuantizerDepthwiseBase(BaseLayer):
         super().build(input_shape)
         if self.depthwise_quantizer:
             if "flip_ratio" in self._custom_metrics:
-                self.flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.depthwise_kernel.shape,
-                    name=f"flip_ratio/{self.name}",
-                )
+                self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}",)
 
     def call(self, inputs):
         if self.input_quantizer:
@@ -203,13 +198,11 @@ class QuantizerSeparableBase(BaseLayer):
         if self.depthwise_quantizer:
             if "flip_ratio" in self._custom_metrics:
                 self.depthwise_flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.depthwise_kernel.shape,
                     name=f"flip_ratio/{self.name}_depthwise",
                 )
         if self.pointwise_quantizer:
             if "flip_ratio" in self._custom_metrics:
                 self.pointwise_flip_ratio = lq_metrics.FlipRatio(
-                    values_shape=self.pointwise_kernel.shape,
                     name=f"flip_ratio/{self.name}_pointwise",
                 )
 
