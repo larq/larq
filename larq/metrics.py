@@ -86,32 +86,37 @@ class FlipRatio(tf.keras.metrics.Metric):
     dtype: Data type of the moving mean.
     """
 
-    def __init__(
-        self, values_shape=(), values_dtype="int8", name="flip_ratio", dtype=None
-    ):
+    def __init__(self, values_dtype="int8", name="flip_ratio", dtype=None):
         super().__init__(name=name, dtype=dtype)
+        self.built = False
         self.values_dtype = tf.as_dtype(values_dtype)
-        self.values_shape = tf.TensorShape(values_shape).as_list()
-        self.is_weight_metric = True
-        with tf.init_scope():
-            self._previous_values = self.add_weight(
-                "previous_values",
-                shape=values_shape,
-                dtype=self.values_dtype,
-                initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
-            )
-            self.total = self.add_weight(
-                "total",
-                initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
-            )
-            self.count = self.add_weight(
-                "count",
-                initializer=tf.keras.initializers.zeros,
-                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
-            )
-        self._size = np.prod(self.values_shape)
+
+    def __call__(self, inputs, **kwargs):
+        if not self.built:
+            with tf.name_scope(self.name), tf.init_scope():
+                self.build(inputs.shape)
+        return super().__call__(inputs, **kwargs)
+
+    def build(self, input_shape):
+        self._previous_values = self.add_weight(
+            "previous_values",
+            shape=input_shape,
+            dtype=self.values_dtype,
+            initializer=tf.keras.initializers.zeros,
+            aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
+        )
+        self.total = self.add_weight(
+            "total",
+            initializer=tf.keras.initializers.zeros,
+            aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
+        )
+        self.count = self.add_weight(
+            "count",
+            initializer=tf.keras.initializers.zeros,
+            aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
+        )
+        self._size = tf.cast(np.prod(input_shape), self.dtype)
+        self.built = True
 
     def update_state(self, values, sample_weight=None):
         values = tf.cast(values, self.values_dtype)
@@ -133,8 +138,4 @@ class FlipRatio(tf.keras.metrics.Metric):
         )
 
     def get_config(self):
-        return {
-            **super().get_config(),
-            "values_shape": self.values_shape,
-            "values_dtype": self.values_dtype.name,
-        }
+        return {**super().get_config(), "values_dtype": self.values_dtype.name}
