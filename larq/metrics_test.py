@@ -32,6 +32,9 @@ def test_config():
 def test_metric(eager_mode):
     mcv = metrics.FlipRatio()
     mcv.build((2,))
+    assert 0 == mcv.result().numpy()
+    assert 0 == mcv.total.numpy()
+    assert 0 == mcv.count.numpy()
 
     mcv.update_state(np.array([1, 1]))
     assert all([1, 1] == mcv._previous_values.numpy())
