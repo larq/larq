@@ -57,9 +57,10 @@ def test_metric(eager_mode):
 
 def test_metric_in_graph_mode(graph_mode):
     mcv = metrics.FlipRatio()
+    mcv.build((2,))
 
     new_state = tf.compat.v1.placeholder(dtype=tf.float32, shape=[2])
-    update_state_op = mcv(new_state)
+    update_state_op = mcv.update_state(new_state)
     metric_value = mcv.result()
 
     with tf.compat.v1.Session() as sess:
