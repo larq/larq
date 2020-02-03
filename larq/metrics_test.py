@@ -16,26 +16,22 @@ def test_scope():
 
 
 def test_config():
-    mcv = metrics.FlipRatio(
-        values_shape=[3, 3], values_dtype="int16", name="mcv", dtype=tf.float16
-    )
+    mcv = metrics.FlipRatio(values_dtype="int16", name="mcv", dtype=tf.float16)
     assert mcv.name == "mcv"
     assert mcv.stateful
     assert mcv.dtype == tf.float16
     assert mcv.values_dtype == tf.int16
-    assert mcv.values_shape == [3, 3]
 
     mcv2 = metrics.FlipRatio.from_config(mcv.get_config())
     assert mcv2.name == "mcv"
     assert mcv2.stateful
     assert mcv2.dtype == tf.float16
     assert mcv2.values_dtype == tf.int16
-    assert mcv2.values_shape == [3, 3]
 
 
 def test_metric(eager_mode):
     mcv = metrics.FlipRatio()
-
+    mcv.build((2,))
     assert 0 == mcv.result().numpy()
     assert 0 == mcv.total.numpy()
     assert 0 == mcv.count.numpy()
@@ -66,7 +62,8 @@ def test_metric_wrong_shape(eager_mode):
 
 
 def test_metric_in_graph_mode(graph_mode):
-    mcv = metrics.FlipRatio(values_shape=[2])
+    mcv = metrics.FlipRatio()
+    mcv.build((2,))
 
     new_state = tf.compat.v1.placeholder(dtype=tf.float32, shape=[2])
     update_state_op = mcv.update_state(new_state)
