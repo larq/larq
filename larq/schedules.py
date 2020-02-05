@@ -78,7 +78,7 @@ class CombinedSchedule(AbstractSchedule):
             )
 
         if not all(
-            x < y for x, y in zip([0] + self.starting_times, self.starting_times)
+            x < y for x, y in zip([-1] + self.starting_times, self.starting_times)
         ):
             raise ValueError(
                 "`starting_times` should be positive and strictly monotonically "
