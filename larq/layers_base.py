@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from tensorflow import keras
+import tensorflow as tf
 
 from larq import quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 # TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
 
 
-class BaseLayer(keras.layers.Layer):
+class BaseLayer(tf.keras.layers.Layer):
     """Base class for defining quantized layers"""
 
     def get_quantizer(self, name) -> Optional[Quantizer]:
