@@ -44,7 +44,10 @@ class QuantizerBase(BaseLayer):
 
     def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
         self.input_quantizer = quantizers.get(input_quantizer)
+
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
+        if self.kernel_quantizer:
+            self.kernel_quantizer.is_kernel_quantizer = True
 
         super().__init__(*args, **kwargs)
         if kernel_quantizer and not self.kernel_constraint:
@@ -89,7 +92,9 @@ class QuantizerDepthwiseBase(BaseLayer):
         **kwargs,
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
+
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
+        self.depthwise_quantizer.is_kernel_quantizer = True
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
@@ -134,8 +139,12 @@ class QuantizerSeparableBase(BaseLayer):
         **kwargs,
     ):
         self.input_quantizer = quantizers.get(input_quantizer)
+
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
+        self.depthwise_quantizer.is_kernel_quantizer = True
+
         self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
+        self.pointwise_quantizer.is_kernel_quantizer = True
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
