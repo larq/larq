@@ -342,12 +342,14 @@ class TestGradients:
 def test_metrics(quantizer):
     quantizer_str, quantizer_cls = quantizer
 
+    # No metric
     model = tf.keras.models.Sequential(
         [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
     )
     model.compile(loss="mse", optimizer="sgd")
     assert len(model.layers[0]._metrics) == 0
 
+    # Metric added using scope
     with lq.metrics.scope(["flip_ratio"]):
         model = tf.keras.models.Sequential(
             [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
@@ -361,6 +363,7 @@ def test_metrics(quantizer):
         # metrics copy.
         assert len(model.layers[0].kernel_quantizer._metrics) == 2
 
+    # Metric added explicitly to quantizer
     model = tf.keras.models.Sequential(
         [
             lq.layers.QuantDense(
@@ -371,4 +374,9 @@ def test_metrics(quantizer):
         ]
     )
     model.compile(loss="mse", optimizer="sgd")
-    assert len(model.layers[0].kernel_quantizer._metrics) == 1
+    if version.parse(tf.__version__) > version.parse("1.14"):
+        assert len(model.layers[0].kernel_quantizer._metrics) == 1
+    else:
+        # In TF1.14, call() gets called twice, resulting in having an extra initial
+        # metrics copy.
+        assert len(model.layers[0].kernel_quantizer._metrics) == 2
