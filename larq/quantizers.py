@@ -148,13 +148,11 @@ class BaseQuantizer(tf.keras.layers.Layer):
 
     def __init__(self, *args, metrics=None, **kwargs):
         self.is_kernel_quantizer = False
-        self._custom_metrics = (
-            metrics if metrics is not None else lq_metrics.get_training_metrics()
-        )
-
+        self._custom_metrics = metrics or lq_metrics.get_training_metrics()
         super().__init__(*args, **kwargs)
 
-    def __call__(self, inputs):
+    def call(self, inputs):
+        # Lazily add FlipRatio on first call
         if (
             "flip_ratio" in self._custom_metrics
             and not hasattr(self, "flip_ratio")
@@ -162,9 +160,7 @@ class BaseQuantizer(tf.keras.layers.Layer):
         ):
             self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}")
 
-        return super().__call__(inputs)
-
-    def call(self, inputs):
+        # Calculate FlipRatio metric
         if hasattr(self, "flip_ratio"):
             self.add_metric(self.flip_ratio(inputs))
 
