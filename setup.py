@@ -40,7 +40,7 @@ setup(
         "docs": [
             "mkdocs==1.0.4",
             "mkdocs-material==4.6.0",
-            "pymdown-extensions==6.2.1",
+            "pymdown-extensions==6.3",
             "mknotebooks==0.1.7",
             "mkdocs-minify-plugin==0.2.1",
             "larq-zoo==0.5.0",
