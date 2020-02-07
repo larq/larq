@@ -158,6 +158,7 @@ class BaseQuantizer(tf.keras.layers.Layer):
     def call(self, inputs):
         if hasattr(self, "flip_ratio"):
             self.add_metric(self.flip_ratio(inputs))
+        return inputs
 
     @property
     def non_trainable_weights(self):
@@ -205,8 +206,7 @@ class SteSign(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        super().call(inputs)
-        return ste_sign(inputs, clip_value=self.clip_value)
+        return ste_sign(super().call(inputs), clip_value=self.clip_value)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -247,8 +247,7 @@ class ApproxSign(BaseQuantizer):
     precision = 1
 
     def call(self, inputs):
-        super().call(inputs)
-        return approx_sign(inputs)
+        return approx_sign(super().call(inputs))
 
 
 @utils.register_alias("ste_heaviside")
@@ -292,8 +291,7 @@ class SteHeaviside(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        super().call(inputs)
-        return ste_heaviside(inputs, clip_value=self.clip_value)
+        return ste_heaviside(super().call(inputs), clip_value=self.clip_value)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -339,8 +337,7 @@ class SwishSign(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        super().call(inputs)
-        return swish_sign(inputs, beta=self.beta)
+        return swish_sign(super().call(inputs), beta=self.beta)
 
     def get_config(self):
         return {**super().get_config(), "beta": self.beta}
@@ -377,12 +374,11 @@ class MagnitudeAwareSign(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        super().call(inputs)
         scale_factor = tf.stop_gradient(
             tf.reduce_mean(tf.abs(inputs), axis=list(range(len(inputs.shape) - 1)))
         )
 
-        return scale_factor * ste_sign(inputs, clip_value=self.clip_value)
+        return scale_factor * ste_sign(super().call(inputs), clip_value=self.clip_value)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -449,9 +445,8 @@ class SteTern(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        super().call(inputs)
         return ste_tern(
-            inputs,
+            super().call(inputs),
             threshold_value=self.threshold_value,
             ternary_weight_networks=self.ternary_weight_networks,
             clip_value=self.clip_value,
@@ -512,7 +507,6 @@ class DoReFaQuantizer(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        super().call(inputs)
         inputs = tf.clip_by_value(inputs, 0.0, 1.0)
 
         @tf.custom_gradient
@@ -520,7 +514,7 @@ class DoReFaQuantizer(BaseQuantizer):
             n = 2 ** self.precision - 1
             return tf.round(x * n) / n, lambda dy: dy
 
-        return _k_bit_with_identity_grad(inputs)
+        return _k_bit_with_identity_grad(super().call(inputs))
 
     def get_config(self):
         return {**super().get_config(), "k_bit": self.precision}
