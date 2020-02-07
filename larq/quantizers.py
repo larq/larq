@@ -164,6 +164,10 @@ class BaseQuantizer(tf.keras.layers.Layer):
         if hasattr(self, "flip_ratio"):
             self.add_metric(self.flip_ratio(inputs))
 
+    @property
+    def non_trainable_weights(self):
+        return []
+
 
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
