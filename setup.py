@@ -38,6 +38,7 @@ setup(
             "snapshottest~=0.5.1",
         ],
         "docs": [
+            "markdown==3.1.1",
             "mkdocs==1.0.4",
             "mkdocs-material==4.6.0",
             "pymdown-extensions==6.2.1",
