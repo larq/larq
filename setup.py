@@ -42,7 +42,7 @@ setup(
             "mkdocs-material==4.6.1",
             "pymdown-extensions==6.3",
             "mknotebooks==0.1.7",
-            "mkdocs-minify-plugin==0.2.1",
+            "mkdocs-minify-plugin==0.2.2",
             "larq-zoo==0.5.0",
             "altair==4.0.1",
             "pandas==1.0.1",
