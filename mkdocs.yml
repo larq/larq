@@ -23,7 +23,6 @@ nav:
       - Tutorials:
           - Introduction to BNNs with Larq: larq/tutorials/mnist.ipynb
           - BinaryNet on CIFAR10: larq/tutorials/binarynet_cifar10.ipynb
-          - BinaryNet on CIFAR10 (Advanced): larq/tutorials/binarynet_advanced_cifar10.ipynb
   - Zoo:
       - Getting Started: zoo/index.md
       - API: larq/api/larq_zoo.md
