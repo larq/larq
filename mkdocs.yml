@@ -7,6 +7,13 @@ site_url: "https://docs.larq.dev/"
 nav:
   - Larq:
       - Getting Started: index.md
+      - User Guides:
+          - Key Concepts: larq/guides/key-concepts.md
+          - Building BNNs: larq/guides/bnn-architecture.md
+          - Training BNNs: larq/guides/bnn-optimization.md
+      - Tutorials:
+          - Introduction to BNNs with Larq: larq/tutorials/mnist.ipynb
+          - BinaryNet on CIFAR10: larq/tutorials/binarynet_cifar10.ipynb
       - API:
           - Layers: larq/api/layers.md
           - Quantizers: larq/api/quantizers.md
@@ -17,17 +24,10 @@ nav:
           - Math: larq/api/math.md
           - Models: larq/api/models.md
           - Metrics: larq/api/metrics.md
-      - User Guides:
-          - Key Concepts: larq/guides/key-concepts.md
-          - Building BNNs: larq/guides/bnn-architecture.md
-          - Training BNNs: larq/guides/bnn-optimization.md
-      - Tutorials:
-          - Introduction to BNNs with Larq: larq/tutorials/mnist.ipynb
-          - BinaryNet on CIFAR10: larq/tutorials/binarynet_cifar10.ipynb
   - Zoo:
       - Getting Started: zoo/index.md
-      - API: larq/api/larq_zoo.md
       - Tutorials: zoo/tutorials.ipynb
+      - API: larq/api/larq_zoo.md
   - FAQ: faq.md
 
 repo_url: https://github.com/larq/larq
