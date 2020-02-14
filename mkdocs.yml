@@ -1,40 +1,34 @@
 site_name: Larq
 site_description: "Larq is an open-source deep learning library based on TensorFlow and Keras for training neural networks with extremely low-precision weights and activations, such as Binarized Neural Networks."
 site_author: "Plumerai"
-site_url: "https://larq.dev/"
+site_url: "https://docs.larq.dev/"
 
 nav:
-  - Learn:
-      - Home: index.md
+  - Larq:
+      - Getting Started: index.md
+      - API:
+          - Layers: api/layers.md
+          - Quantizers: api/quantizers.md
+          - Activations: api/activations.md
+          - Constraints: api/constraints.md
+          - Callbacks: api/callbacks.md
+          - Optimizers: api/optimizers.md
+          - Math: api/math.md
+          - Models: api/models.md
+          - Metrics: api/metrics.md
       - User Guides:
           - Key Concepts: guides/key-concepts.md
           - Building BNNs: guides/bnn-architecture.md
           - Training BNNs: guides/bnn-optimization.md
-      - Examples:
+      - Tutorials:
           - Introduction to BNNs with Larq: examples/mnist.ipynb
           - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
           - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
-  - API:
-      - Layers: api/layers.md
-      - Quantizers: api/quantizers.md
-      - Activations: api/activations.md
-      - Constraints: api/constraints.md
-      - Callbacks: api/callbacks.md
-      - Optimizers: api/optimizers.md
-      - Math: api/math.md
-      - Models: api/models.md
-      - Metrics: api/metrics.md
-  - Models:
-      - Larq Zoo: models/index.md
-      - Examples: models/examples.ipynb
+  - Zoo:
+      - Getting Started: models/index.md
       - API: api/larq_zoo.md
-  - Community:
-      - Papers using Larq: papers.md
-      - Contributing Guide: contributing.md
-      - Code of Conduct: code-of-conduct.md
-  - About:
-      - Why Larq?: about.md
-      - FAQ: faq.md
+      - Examples: models/examples.ipynb
+  - FAQ: faq.md
 
 repo_url: https://github.com/larq/larq
 repo_name: larq/larq
@@ -47,8 +41,6 @@ theme:
   palette:
     primary: larq
     accent: larq
-  feature:
-    tabs: true
 
 extra:
   social:
