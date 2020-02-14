@@ -39,7 +39,7 @@ setup(
         ],
         "docs": [
             "mkdocs==1.0.4",
-            "mkdocs-material==4.6.2",
+            "mkdocs-material==4.6.3",
             "pymdown-extensions==6.3",
             "mknotebooks==0.1.7",
             "mkdocs-minify-plugin==0.2.3",
