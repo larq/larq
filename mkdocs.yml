@@ -41,6 +41,9 @@ theme:
   palette:
     primary: larq
     accent: larq
+  font:
+    text: "Work Sans"
+    code: "Roboto Mono"
 
 extra:
   social:
