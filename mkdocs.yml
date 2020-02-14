@@ -7,27 +7,27 @@ nav:
   - Larq:
       - Getting Started: index.md
       - API:
-          - Layers: api/layers.md
-          - Quantizers: api/quantizers.md
-          - Activations: api/activations.md
-          - Constraints: api/constraints.md
-          - Callbacks: api/callbacks.md
-          - Optimizers: api/optimizers.md
-          - Math: api/math.md
-          - Models: api/models.md
-          - Metrics: api/metrics.md
+          - Layers: larq/api/layers.md
+          - Quantizers: larq/api/quantizers.md
+          - Activations: larq/api/activations.md
+          - Constraints: larq/api/constraints.md
+          - Callbacks: larq/api/callbacks.md
+          - Optimizers: larq/api/optimizers.md
+          - Math: larq/api/math.md
+          - Models: larq/api/models.md
+          - Metrics: larq/api/metrics.md
       - User Guides:
-          - Key Concepts: guides/key-concepts.md
-          - Building BNNs: guides/bnn-architecture.md
-          - Training BNNs: guides/bnn-optimization.md
+          - Key Concepts: larq/guides/key-concepts.md
+          - Building BNNs: larq/guides/bnn-architecture.md
+          - Training BNNs: larq/guides/bnn-optimization.md
       - Tutorials:
-          - Introduction to BNNs with Larq: examples/mnist.ipynb
-          - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
-          - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
+          - Introduction to BNNs with Larq: larq/tutorials/mnist.ipynb
+          - BinaryNet on CIFAR10: larq/tutorials/binarynet_cifar10.ipynb
+          - BinaryNet on CIFAR10 (Advanced): larq/tutorials/binarynet_advanced_cifar10.ipynb
   - Zoo:
-      - Getting Started: models/index.md
-      - API: api/larq_zoo.md
-      - Examples: models/examples.ipynb
+      - Getting Started: zoo/index.md
+      - API: larq/api/larq_zoo.md
+      - Tutorials: zoo/tutorials.ipynb
   - FAQ: faq.md
 
 repo_url: https://github.com/larq/larq
