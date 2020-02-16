@@ -39,7 +39,7 @@ theme:
   logo: images/logo-big-font.svg
   favicon: images/favicon-32.png
   palette:
-    primary: larq
+    primary: white
     accent: larq
   font:
     text: "Work Sans"

@@ -61,10 +61,6 @@ button[data-md-color-accent="larq"] {
   .md-search__scrollwrap::-webkit-scrollbar-thumb:hover {
   background-color: #059e29;
 }
-[data-md-color-accent="larq"] .md-search-result__link:hover,
-[data-md-color-accent="larq"] .md-search-result__link[data-md-state="active"] {
-  background-color: #0a1d3c;
-}
 [data-md-color-accent="larq"]
   .md-sidebar__scrollwrap::-webkit-scrollbar-thumb:hover {
   background-color: #059e29;
