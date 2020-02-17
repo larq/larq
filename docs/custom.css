@@ -11,6 +11,7 @@
 button[data-md-color-primary="larq"] {
   background-color: #0a1d3c;
 }
+[data-md-color-primary="white"] .md-typeset a,
 [data-md-color-primary="larq"] .md-typeset a {
   color: #153c7a;
 }
@@ -18,10 +19,13 @@ button[data-md-color-primary="larq"] {
 [data-md-color-primary="larq"] .md-hero {
   background-color: #0a1d3c;
 }
+[data-md-color-primary="white"] .md-nav__link--active,
+[data-md-color-primary="white"] .md-nav__link:active,
 [data-md-color-primary="larq"] .md-nav__link--active,
 [data-md-color-primary="larq"] .md-nav__link:active {
   color: #153c7a;
 }
+[data-md-color-primary="white"] .md-nav__item--nested > .md-nav__link,
 [data-md-color-primary="larq"] .md-nav__item--nested > .md-nav__link {
   color: inherit;
 }
