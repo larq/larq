@@ -4,7 +4,7 @@
   "scripts": {
     "preinstall": "python3 -m pip install nbconvert",
     "install": "python3 -m pip install -r requirements.txt git+https://github.com/lgeiger/pydoc-markdown.git -e .[docs]",
-    "prebuild": "python3 generate_api_docs.py",
+    "prebuild": "./download_lce_docs.sh && python3 generate_api_docs.py",
     "build:docs": "python3 -m mkdocs build -d public",
     "build": "npm run build:docs && npm run build:docs",
     "dev": "python3 -m mkdocs serve"

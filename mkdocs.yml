@@ -28,6 +28,14 @@ nav:
       - Getting Started: zoo/index.md
       - Tutorials: zoo/tutorials.ipynb
       - API: larq/api/larq_zoo.md
+  - Compute Engine:
+      - Getting Started: compute-engine/index.md
+      - Converter: compute-engine/converter.md
+      - Inference: compute-engine/inference.md
+      - Quickstart Android: compute-engine/quickstart_android.md
+      - Build:
+          - Build from source: compute-engine/build.md
+          - Build for ARM: compute-engine/build_arm.md
   - FAQ: faq.md
 
 repo_url: https://github.com/larq/larq

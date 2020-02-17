@@ -1,6 +1,7 @@
 junit
 docs/larq/api
 docs/api
+docs/compute-engine/
 docs/plots/generated
 
 # Byte-compiled / optimized / DLL files
