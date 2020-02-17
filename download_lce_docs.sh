@@ -2,6 +2,8 @@
 set -e
 basedir=`dirname $0`
 
+mkdir $basedir/docs/compute-engine || true
+
 # Fetch compute-engine docs
 echo "# Larq Compute Engine" > $basedir/docs/compute-engine/index.md
 curl https://raw.githubusercontent.com/larq/compute-engine/master/README.md | tail -n +4 >> $basedir/docs/compute-engine/index.md
