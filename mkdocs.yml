@@ -1,40 +1,42 @@
-site_name: Larq
+site_name: Documentation
+title: Larq
 site_description: "Larq is an open-source deep learning library based on TensorFlow and Keras for training neural networks with extremely low-precision weights and activations, such as Binarized Neural Networks."
 site_author: "Plumerai"
-site_url: "https://larq.dev/"
+site_url: "https://docs.larq.dev/"
 
 nav:
-  - Learn:
-      - Home: index.md
+  - Larq:
+      - Getting Started: index.md
       - User Guides:
-          - Key Concepts: guides/key-concepts.md
-          - Building BNNs: guides/bnn-architecture.md
-          - Training BNNs: guides/bnn-optimization.md
-      - Examples:
-          - Introduction to BNNs with Larq: examples/mnist.ipynb
-          - BinaryNet on CIFAR10: examples/binarynet_cifar10.ipynb
-          - BinaryNet on CIFAR10 (Advanced): examples/binarynet_advanced_cifar10.ipynb
-  - API:
-      - Layers: api/layers.md
-      - Quantizers: api/quantizers.md
-      - Activations: api/activations.md
-      - Constraints: api/constraints.md
-      - Callbacks: api/callbacks.md
-      - Optimizers: api/optimizers.md
-      - Math: api/math.md
-      - Models: api/models.md
-      - Metrics: api/metrics.md
-  - Models:
-      - Larq Zoo: models/index.md
-      - Examples: models/examples.ipynb
-      - API: api/larq_zoo.md
-  - Community:
-      - Papers using Larq: papers.md
-      - Contributing Guide: contributing.md
-      - Code of Conduct: code-of-conduct.md
-  - About:
-      - Why Larq?: about.md
-      - FAQ: faq.md
+          - Key Concepts: larq/guides/key-concepts.md
+          - Building BNNs: larq/guides/bnn-architecture.md
+          - Training BNNs: larq/guides/bnn-optimization.md
+      - Tutorials:
+          - Introduction to BNNs with Larq: larq/tutorials/mnist.ipynb
+          - BinaryNet on CIFAR10: larq/tutorials/binarynet_cifar10.ipynb
+      - API:
+          - Layers: larq/api/layers.md
+          - Quantizers: larq/api/quantizers.md
+          - Activations: larq/api/activations.md
+          - Constraints: larq/api/constraints.md
+          - Callbacks: larq/api/callbacks.md
+          - Optimizers: larq/api/optimizers.md
+          - Math: larq/api/math.md
+          - Models: larq/api/models.md
+          - Metrics: larq/api/metrics.md
+  - Zoo:
+      - Getting Started: zoo/index.md
+      - Tutorials: zoo/tutorials.ipynb
+      - API: larq/api/larq_zoo.md
+  - Compute Engine:
+      - Getting Started: compute-engine/index.md
+      - Converter: compute-engine/converter.md
+      - Inference: compute-engine/inference.md
+      - Quickstart Android: compute-engine/quickstart_android.md
+      - Build:
+          - Build from source: compute-engine/build.md
+          - Build for ARM: compute-engine/build_arm.md
+  - FAQ: faq.md
 
 repo_url: https://github.com/larq/larq
 repo_name: larq/larq
@@ -45,10 +47,11 @@ theme:
   logo: images/logo-big-font.svg
   favicon: images/favicon-32.png
   palette:
-    primary: larq
+    primary: white
     accent: larq
-  feature:
-    tabs: true
+  font:
+    text: "Work Sans"
+    code: "Roboto Mono"
 
 extra:
   social:

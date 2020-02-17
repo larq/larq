@@ -1,20 +1,16 @@
-<h1><img src="/images/logo.svg" alt="logo" width="450px" style="display: block; margin-left: auto; margin-right: auto"/></h1>
-
 Larq is an open-source Python library for training neural networks with extremely low-precision weights and activations, such as Binarized Neural Networks (BNNs)[^1].
 
 Existing deep neural networks use 32 bits, 16 bits or 8 bits to encode each weight and activation, making them large, slow and power-hungry. This prohibits many applications in resource-constrained environments. Larq is the first step towards solving this.
 The API of Larq is built on top of `tf.keras` and is designed to provide an easy to use, composable way to design and train BNNs (1 bit) and other types of Quantized Neural Networks (QNNs). It provides tools specifically designed to aid in BNN development, such as specialized optimizers, training metrics, and profiling tools.
 It is aimed at both researchers in the field of efficient deep learning and practitioners who want to explore BNNs for their applications. Furthermore, Larq makes it easier for beginners and students to get started with the field of efficient deep learning.
 
-## Getting Started
+To build a QNN, Larq introduces the concept of [quantized layers](/larq/api/layers/) and [quantizers](/larq/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer. This layer can be used inside a [Keras model](https://www.tensorflow.org/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/guide/keras/train_and_evaluate#part_ii_writing_your_own_training_evaluation_loops_from_scratch).
 
-To build a QNN, Larq introduces the concept of [quantized layers](https://larq.dev/api/layers/) and [quantizers](https://larq.dev/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer. This layer can be used inside a [Keras model](https://www.tensorflow.org/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/guide/keras/train_and_evaluate#part_ii_writing_your_own_training_evaluation_loops_from_scratch).
+For a detailed explanation checkout our [user guide](/larq/guides/key-concepts/).
 
-For a detailed explanation checkout our [user guide](https://larq.dev/guides/key-concepts/).
+## Defining a simple BNN
 
-### Defining a simple BNN
-
-A simple fully-connected BNN using the [Straight-Through Estimator](https://larq.dev/api/quantizers/#ste_sign) can be defined in just a few lines of code using either the Keras sequential, functional or model subclassing APIs:
+A simple fully-connected BNN using the [Straight-Through Estimator](/larq/api/quantizers/#ste_sign) can be defined in just a few lines of code using either the Keras sequential, functional or model subclassing APIs:
 
 ```python tab="Larq 1-bit model"
 model = tf.keras.models.Sequential([

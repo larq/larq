@@ -39,11 +39,11 @@ Any optimizer you now apply will update the latent weights; after the update the
 
 ### Alternative: Custom Optimizers
 
-Instead of using latent weights, one can opt for a custom BNN optimizer that inherently generates binary weights. An example of such an optimizer is [Bop](/api/optimizers/#bop).
+Instead of using latent weights, one can opt for a custom BNN optimizer that inherently generates binary weights. An example of such an optimizer is [Bop](/larq/api/optimizers/#bop).
 
 ## Choice of Pseudo-Gradient
 
-In [`larq.quantizers`](/api/quantizers) you will find a variety of quantizers that have been introduced in different papers. Many of these quantizers behave identically during the forward pass but implement different pseudo-gradients. Studies comparing different pseudo-gradients report little difference between them. Therefore, we recommend using the classical [`ste_sign()`](/api/quantizers/#ste_sign) as default.
+In [`larq.quantizers`](/larq/api/quantizers) you will find a variety of quantizers that have been introduced in different papers. Many of these quantizers behave identically during the forward pass but implement different pseudo-gradients. Studies comparing different pseudo-gradients report little difference between them. Therefore, we recommend using the classical [`ste_sign()`](/larq/api/quantizers/#ste_sign) as default.
 
 ## Choice of Optimizer
 
@@ -61,5 +61,5 @@ Here are some general tips and tricks that you may want to keep in mind:
 
 If you would like to learn more, we recommend checking out the following papers (starting at the most recent):
 
-- [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization) - This paper investigates optimization of BNNs using latent weights and introduces [Bop](/api/optimizers/#bop) as the first custom BNN optimizer.
+- [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization) - This paper investigates optimization of BNNs using latent weights and introduces [Bop](/larq/api/optimizers/#bop) as the first custom BNN optimizer.
 - [An Empirical study of Binary Neural Networks' Optimisation](https://openreview.net/forum?id=rJfUCoR5KX) - An empirical comparison of BNN optimization methods, including a detailed discussion on the use of various optimizers and a number of tricks used in the literature.
