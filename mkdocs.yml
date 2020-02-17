@@ -52,6 +52,8 @@ theme:
   font:
     text: "Work Sans"
     code: "Roboto Mono"
+  feature:
+    tabs: true
 
 extra:
   social:
