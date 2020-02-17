@@ -4,7 +4,7 @@ Here you will find a quick overview of the best practices that have evolved in t
 
 Any layer has two types of inputs: the layer parameters, such as a weight matrix and biases, and incoming activations.
 
-We can reduce the memory footprint of the model by binarizing parameters. In Larq, this can be done by passing a `kernel_quantizer` from [`larq.quantizers`](/api/quantizers) when instantiating a [`larq.layer`](/api/layers) object, or by using a custom BNN optimizer such as [Bop](/api/optimizers/#bop) (note that by default Bop only targets kernels of layers in [`larq.layers`](/api/layers)).
+We can reduce the memory footprint of the model by binarizing parameters. In Larq, this can be done by passing a `kernel_quantizer` from [`larq.quantizers`](/larq/api/quantizers) when instantiating a [`larq.layer`](/larq/api/layers) object, or by using a custom BNN optimizer such as [Bop](/larq/api/optimizers/#bop) (note that by default Bop only targets kernels of layers in [`larq.layers`](/larq/api/layers)).
 
 To get the efficiency of binary computations, the incoming activations need to be binary as well. This can be done by setting a `input_quantizer`.
 

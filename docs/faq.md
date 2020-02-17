@@ -32,7 +32,7 @@ If Larq helps you in your work or research, it would be great if you can cite it
 }
 ```
 
-If your paper is publicly available, feel free to also add it to the list of [Papers using Larq](/papers).
+If your paper is publicly available, feel free to also add it to the list of [Papers using Larq](https://github.com/larq/larq/edit/master/docs/papers.md).
 
 ## Can I add my algorithm or model to Larq?
 
