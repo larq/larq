@@ -87,6 +87,9 @@ button[data-md-color-accent="larq"] {
   [data-md-color-primary="larq"] .md-tabs {
     background-color: #0a1d3c;
   }
+  [data-md-color-primary=white] .md-tabs {
+    border: none;
+  }
 }
 .md-typeset table:not([class]) th {
   background-color: #0a1d3c;
