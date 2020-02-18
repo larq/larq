@@ -1,3 +1,6 @@
+.md-nav__item--nested > .md-nav__link::after {
+  vertical-align: middle;
+}
 .code-link::before {
   content: "</>";
 }
