@@ -38,7 +38,7 @@ If your paper is publicly available, feel free to also add it to the list of [Pa
 
 Absolutely! If you have developed a new model or training method that you would like to share with the community, create a PR or get in touch with us. Make sure you check out the contribution guide. For entire models with pretrained weights [`larq-zoo`](https://github.com/larq/zoo) is the correct place, everything else can be added to [`larq`](https://github.com/larq/larq) directly.
 
-## Can I use Larq only for Binarized Neural Networks (BNNs)?
+## Can I use Larq only for Binarized Neural Networks?
 
 No, Larq is not just for BNNs! The real goal of Larq is to make it easy to work with extremely quantized networks. This includes BNNs as well as ternary networks (see for example [Ternary Weight Networks](https://arxiv.org/abs/1605.04711) or [Trained Ternary Quantization](https://arxiv.org/abs/1612.01064)). Although the focus is currently on BNNs, Larq already supports a [ternary quantizer](/larq/api/quantizers/#stetern) and binary and ternary networks have a lot in common. Moreover, modern BNNs are not 'pure' binary networks: they contain higher-precision first and last layers and shortcut connections, for example.
 
