@@ -34,7 +34,6 @@ Check out our examples on how to train a Binarized Neural Network in just a few 
 
 - [Introduction to BNNs with Larq](https://docs.larq.dev/larq/tutorials/mnist/)
 - [BinaryNet on CIFAR10](https://docs.larq.dev/larq/tutorials/binarynet_cifar10/)
-- [BinaryNet on CIFAR10 (Advanced)](https://docs.larq.dev/larq/tutorials/binarynet_advanced_cifar10/)
 
 ## Installation
 
