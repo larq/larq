@@ -206,7 +206,8 @@ class SteSign(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return ste_sign(super().call(inputs), clip_value=self.clip_value)
+        outputs = ste_sign(inputs, clip_value=self.clip_value)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -247,7 +248,8 @@ class ApproxSign(BaseQuantizer):
     precision = 1
 
     def call(self, inputs):
-        return approx_sign(super().call(inputs))
+        outputs = approx_sign(inputs)
+        return super().call(outputs)
 
 
 @utils.register_alias("ste_heaviside")
@@ -291,7 +293,8 @@ class SteHeaviside(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return ste_heaviside(super().call(inputs), clip_value=self.clip_value)
+        outputs = ste_heaviside(inputs, clip_value=self.clip_value)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -337,7 +340,8 @@ class SwishSign(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return swish_sign(super().call(inputs), beta=self.beta)
+        outputs = swish_sign(inputs, beta=self.beta)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "beta": self.beta}
@@ -378,7 +382,8 @@ class MagnitudeAwareSign(BaseQuantizer):
             tf.reduce_mean(tf.abs(inputs), axis=list(range(len(inputs.shape) - 1)))
         )
 
-        return scale_factor * ste_sign(super().call(inputs), clip_value=self.clip_value)
+        outputs = scale_factor * ste_sign(inputs, clip_value=self.clip_value)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -445,12 +450,13 @@ class SteTern(BaseQuantizer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return ste_tern(
-            super().call(inputs),
+        outputs = ste_tern(
+            inputs,
             threshold_value=self.threshold_value,
             ternary_weight_networks=self.ternary_weight_networks,
             clip_value=self.clip_value,
         )
+        return super().call(outputs)
 
     def get_config(self):
         return {
@@ -514,7 +520,8 @@ class DoReFaQuantizer(BaseQuantizer):
             n = 2 ** self.precision - 1
             return tf.round(x * n) / n, lambda dy: dy
 
-        return _k_bit_with_identity_grad(super().call(inputs))
+        outputs = _k_bit_with_identity_grad(inputs)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "k_bit": self.precision}
