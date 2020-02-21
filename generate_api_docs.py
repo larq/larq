@@ -92,8 +92,8 @@ for doc in index.documents.values():
         preproc.preprocess_section(section)
 
 # Write out all the generated documents.
-os.makedirs(os.path.join("docs", "api"), exist_ok=True)
+os.makedirs(os.path.join("docs", "larq", "api"), exist_ok=True)
 for fname, doc in index.documents.items():
-    with open(os.path.join("docs", "api", fname), "w") as fp:
+    with open(os.path.join("docs", "larq", "api", fname), "w") as fp:
         for section in doc.sections:
             section.render(fp)

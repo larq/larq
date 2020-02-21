@@ -1,46 +1,52 @@
-{#-
-  This file was automatically generated - do not edit
--#}
+{#- This file was automatically generated - do not edit -#}
 <header class="md-header" data-md-component="header">
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="{{ config.site_url | default(nav.homepage.url, true) | url }}" title="{{ config.site_name }}" class="md-header-nav__button md-logo">
+        <a
+          href="{{ config.site_url | default(nav.homepage.url, true) | url }}"
+          title="{{ config.site_name }}"
+          class="md-header-nav__button md-logo"
+        >
           {% if config.theme.logo.icon %}
-            <i class="md-icon">{{ config.theme.logo.icon }}</i>
+          <i class="md-icon">{{ config.theme.logo.icon }}</i>
           {% else %}
-            <img src="{{ config.theme.logo | url }}" height="24">
+          <img src="{{ config.theme.logo | url }}" height="24" />
           {% endif %}
         </a>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+        <label
+          class="md-icon md-icon--menu md-header-nav__button"
+          for="__drawer"
+        ></label>
       </div>
       <div class="md-flex__cell md-flex__cell--stretch">
         <div class="md-flex__ellipsis" data-md-component="title">
-            <span class="md-header-nav__topic">
-              <nav class="md-tabs md-tabs--active md-tabs__inner md-grid">
-                <ul class="md-tabs__list">
-                  {% for nav_item in nav %}
-                    {% include "partials/tabs-item.html" %}
-                  {% endfor %}
-                </ul>
-              </nav>
-            </span>
+          <span class="md-header-nav__topic">
+            <nav class="md-tabs md-tabs--active md-tabs__inner md-grid">
+              <ul class="md-tabs__list">
+                {% for nav_item in nav %} {% include "partials/tabs-item.html"
+                %} {% endfor %}
+              </ul>
+            </nav>
+          </span>
         </div>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
         {% if "search" in config["plugins"] %}
-          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-          {% include "partials/search.html" %}
-        {% endif %}
+        <label
+          class="md-icon md-icon--search md-header-nav__button"
+          for="__search"
+        ></label>
+        {% include "partials/search.html" %} {% endif %}
       </div>
       {% if config.repo_url %}
-        <div class="md-flex__cell md-flex__cell--shrink">
-          <div class="md-header-nav__source">
-            {% include "partials/source.html" %}
-          </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <div class="md-header-nav__source">
+          {% include "partials/source.html" %}
         </div>
+      </div>
       {% endif %}
     </div>
   </nav>
