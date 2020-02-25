@@ -37,22 +37,6 @@ Inside the project directory run:
 pytest . -n auto
 ```
 
-## Build documentation
-
-Installs dependencies for building the docs:
-
-```shell
-pip install nbconvert git+https://github.com/lgeiger/pydoc-markdown.git
-pip install -e ".[docs]"
-```
-
-Inside the project directory run:
-
-```shell
-python generate_api_docs.py
-mkdocs serve
-```
-
 A new version of the documentation will be automatically published once merged into the master branch.
 
 ## Code style
