@@ -3,7 +3,7 @@ from typing import Optional
 
 import tensorflow as tf
 
-from larq import quantized_scope, quantizers, metrics as lq_metrics
+from larq import metrics as lq_metrics, quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
 from larq.quantizers import Quantizer
 
