@@ -10,6 +10,8 @@ from larq import testing_utils
 class DummyTrainableQuantizer(tf.keras.layers.Layer):
     """Used to test whether we can set layers as quantizers without any throws."""
 
+    _custom_metrics = None
+
     def build(self, input_shape):
         self.dummy_weight = self.add_weight("dummy_weight", trainable=True)
         super().build(input_shape)

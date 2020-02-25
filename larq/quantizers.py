@@ -147,12 +147,11 @@ class BaseQuantizer(tf.keras.layers.Layer):
     """Base class for defining quantizers with Larq metrics."""
 
     def __init__(self, *args, metrics=None, **kwargs):
-        self.is_kernel_quantizer = False
-        self._custom_metrics = metrics or lq_metrics.get_training_metrics()
+        self._custom_metrics = metrics
         super().__init__(*args, **kwargs)
 
     def build(self, input_shape):
-        if "flip_ratio" in self._custom_metrics and self.is_kernel_quantizer:
+        if self._custom_metrics and "flip_ratio" in self._custom_metrics:
             self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}")
 
     def call(self, inputs):
