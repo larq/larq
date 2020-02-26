@@ -238,7 +238,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         ```
 
     # Arguments
-    threshold: determines to whether to flip each weight.
+    threshold: magnitude of average gradient signal required to flip a weight.
     gamma: the adaptivity rate.
     name: name of the optimizer.
 
