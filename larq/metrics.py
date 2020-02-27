@@ -20,7 +20,7 @@ _AVAILABLE_METRICS = {"flip_ratio"}
 
 @contextmanager
 def scope(metrics=[]):
-    """A context manager to set the training metrics to be used in layers.
+    """A context manager to set the training metrics to be used in quantizers.
 
     !!! example
         ```python
@@ -32,7 +32,7 @@ def scope(metrics=[]):
         ```
 
     # Arguments
-    metrics: Iterable of metrics to add to layers defined inside this context.
+    metrics: Iterable of metrics to add to quantizers defined inside this context.
         Currently only the `flip_ratio` metric is available.
     """
     for metric in metrics:
@@ -72,7 +72,7 @@ class FlipRatio(tf.keras.metrics.Metric):
 
     !!! example
         ```python
-        m = metrics.FlipRatio(values_shape=(2,))
+        m = metrics.FlipRatio()
         m.update_state((1, 1))  # result: 0
         m.update_state((2, 2))  # result: 1
         m.update_state((1, 2))  # result: 0.75
@@ -80,9 +80,8 @@ class FlipRatio(tf.keras.metrics.Metric):
         ```
 
     # Arguments
-    values_shape: Shape of the tensor for which to track changes.
-    values_dtype: Data type of the tensor for which to track changes.
     name: Name of the metric.
+    values_dtype: Data type of the tensor for which to track changes.
     dtype: Data type of the moving mean.
     """
 
@@ -119,9 +118,16 @@ class FlipRatio(tf.keras.metrics.Metric):
         self.built = True
 
     def update_state(self, values, sample_weight=None):
+        if not self.built:
+            self._build(values.shape)
+
         values = tf.cast(values, self.values_dtype)
-        changed_values = tf.math.count_nonzero(tf.equal(self._previous_values, values))
-        flip_ratio = 1 - (tf.cast(changed_values, self.dtype) / self._size)
+        unchanged_values = tf.math.count_nonzero(
+            tf.equal(self._previous_values, values)
+        )
+        flip_ratio = 1 - (
+            tf.cast(unchanged_values, self.dtype) / tf.cast(self._size, self.dtype)
+        )
 
         update_total_op = self.total.assign_add(flip_ratio * tf.sign(self.count))
         with tf.control_dependencies([update_total_op]):

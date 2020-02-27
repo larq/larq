@@ -4,7 +4,7 @@ quantized output and the pseudo-gradient method used for the backwards pass.
 Quantizers can either be used through quantizer arguments that are supported
 for Larq layers, such as `input_quantizer` and `kernel_quantizer`; or they
 can be used similar to activations, i.e. either through an `Activation` layer,
-or through the `activation` argument supported by all forward layer:
+or through the `activation` argument supported by all forward layers:
 
 ```python
 import tensorflow as tf
@@ -49,7 +49,7 @@ from typing import Callable, Union
 
 import tensorflow as tf
 
-from larq import math, utils
+from larq import math, metrics as lq_metrics, utils
 
 __all__ = [
     "SteSign",
@@ -63,6 +63,8 @@ __all__ = [
 
 
 def _clipped_gradient(x, dy, clip_value):
+    """Calculate `clipped_gradent * dy`."""
+
     if clip_value is None:
         return dy
 
@@ -141,9 +143,30 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
+class BaseQuantizer(tf.keras.layers.Layer):
+    """Base class for defining quantizers with Larq metrics."""
+
+    def __init__(self, *args, metrics=None, **kwargs):
+        self._custom_metrics = metrics
+        super().__init__(*args, **kwargs)
+
+    def build(self, input_shape):
+        if self._custom_metrics and "flip_ratio" in self._custom_metrics:
+            self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}")
+
+    def call(self, inputs):
+        if hasattr(self, "flip_ratio"):
+            self.add_metric(self.flip_ratio(inputs))
+        return inputs
+
+    @property
+    def non_trainable_weights(self):
+        return []
+
+
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
-class SteSign(tf.keras.layers.Layer):
+class SteSign(BaseQuantizer):
     r"""Instantiates a serializable binary quantizer.
 
     \\[
@@ -167,6 +190,9 @@ class SteSign(tf.keras.layers.Layer):
 
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # References
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
@@ -179,7 +205,8 @@ class SteSign(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return ste_sign(inputs, clip_value=self.clip_value)
+        outputs = ste_sign(inputs, clip_value=self.clip_value)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -187,7 +214,7 @@ class SteSign(tf.keras.layers.Layer):
 
 @utils.register_alias("approx_sign")
 @utils.register_keras_custom_object
-class ApproxSign(tf.keras.layers.Layer):
+class ApproxSign(BaseQuantizer):
     r"""Instantiates a serializable binary quantizer.
     \\[
     q(x) = \begin{cases}
@@ -207,6 +234,11 @@ class ApproxSign(tf.keras.layers.Layer):
     quantizers.ApproxSign
     ```
 
+    # Arguments
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
+
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
       Representational Capability and Advanced
@@ -215,12 +247,13 @@ class ApproxSign(tf.keras.layers.Layer):
     precision = 1
 
     def call(self, inputs):
-        return approx_sign(inputs)
+        outputs = approx_sign(inputs)
+        return super().call(outputs)
 
 
 @utils.register_alias("ste_heaviside")
 @utils.register_keras_custom_object
-class SteHeaviside(tf.keras.layers.Layer):
+class SteHeaviside(BaseQuantizer):
     r"""
     Instantiates a binarization quantizer with output values 0 and 1.
     \\[
@@ -245,6 +278,9 @@ class SteHeaviside(tf.keras.layers.Layer):
 
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # Returns
     AND Binarization function
@@ -256,7 +292,8 @@ class SteHeaviside(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return ste_heaviside(inputs, clip_value=self.clip_value)
+        outputs = ste_heaviside(inputs, clip_value=self.clip_value)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -264,7 +301,7 @@ class SteHeaviside(tf.keras.layers.Layer):
 
 @utils.register_alias("swish_sign")
 @utils.register_keras_custom_object
-class SwishSign(tf.keras.layers.Layer):
+class SwishSign(BaseQuantizer):
     r"""Sign binarization function.
 
     \\[
@@ -285,6 +322,9 @@ class SwishSign(tf.keras.layers.Layer):
     ```
     # Arguments
     beta: Larger values result in a closer approximation to the derivative of the sign.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # Returns
     SwishSign quantization function
@@ -299,7 +339,8 @@ class SwishSign(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return swish_sign(inputs, beta=self.beta)
+        outputs = swish_sign(inputs, beta=self.beta)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "beta": self.beta}
@@ -307,7 +348,7 @@ class SwishSign(tf.keras.layers.Layer):
 
 @utils.register_alias("magnitude_aware_sign")
 @utils.register_keras_custom_object
-class MagnitudeAwareSign(tf.keras.layers.Layer):
+class MagnitudeAwareSign(BaseQuantizer):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
 
     A scaled sign function computed according to Section 3.3 in
@@ -319,6 +360,9 @@ class MagnitudeAwareSign(tf.keras.layers.Layer):
 
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
@@ -337,7 +381,8 @@ class MagnitudeAwareSign(tf.keras.layers.Layer):
             tf.reduce_mean(tf.abs(inputs), axis=list(range(len(inputs.shape) - 1)))
         )
 
-        return scale_factor * ste_sign(inputs, clip_value=self.clip_value)
+        outputs = scale_factor * ste_sign(inputs, clip_value=self.clip_value)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "clip_value": self.clip_value}
@@ -345,7 +390,7 @@ class MagnitudeAwareSign(tf.keras.layers.Layer):
 
 @utils.register_alias("ste_tern")
 @utils.register_keras_custom_object
-class SteTern(tf.keras.layers.Layer):
+class SteTern(BaseQuantizer):
     r"""Instantiates a serializable ternarization quantizer.
 
     \\[
@@ -381,6 +426,9 @@ class SteTern(tf.keras.layers.Layer):
     ternary_weight_networks: Boolean of whether to use the
         Ternary Weight Networks threshold calculation.
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # References
     - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
@@ -401,12 +449,13 @@ class SteTern(tf.keras.layers.Layer):
         super().__init__(**kwargs)
 
     def call(self, inputs):
-        return ste_tern(
+        outputs = ste_tern(
             inputs,
             threshold_value=self.threshold_value,
             ternary_weight_networks=self.ternary_weight_networks,
             clip_value=self.clip_value,
         )
+        return super().call(outputs)
 
     def get_config(self):
         return {
@@ -419,7 +468,7 @@ class SteTern(tf.keras.layers.Layer):
 
 @utils.register_alias("dorefa_quantizer")
 @utils.register_keras_custom_object
-class DoReFaQuantizer(tf.keras.layers.Layer):
+class DoReFaQuantizer(BaseQuantizer):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -445,6 +494,9 @@ class DoReFaQuantizer(tf.keras.layers.Layer):
 
     # Arguments
     k_bit: number of bits for the quantization.
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
 
     # Returns
     Quantization function
@@ -467,7 +519,8 @@ class DoReFaQuantizer(tf.keras.layers.Layer):
             n = 2 ** self.precision - 1
             return tf.round(x * n) / n, lambda dy: dy
 
-        return _k_bit_with_identity_grad(inputs)
+        outputs = _k_bit_with_identity_grad(inputs)
+        return super().call(outputs)
 
     def get_config(self):
         return {**super().get_config(), "k_bit": self.precision}

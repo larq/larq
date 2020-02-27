@@ -10,6 +10,8 @@ from larq import testing_utils
 class DummyTrainableQuantizer(tf.keras.layers.Layer):
     """Used to test whether we can set layers as quantizers without any throws."""
 
+    _custom_metrics = None
+
     def build(self, input_shape):
         self.dummy_weight = self.add_weight("dummy_weight", trainable=True)
         super().build(input_shape)
@@ -325,3 +327,58 @@ class TestGradients:
             activation = lq.quantizers.DoReFaQuantizer(2)(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), ste_grad(x))
+
+
+@pytest.mark.parametrize(
+    "quantizer",
+    [
+        ("ste_sign", lq.quantizers.SteSign),
+        ("approx_sign", lq.quantizers.ApproxSign),
+        ("ste_heaviside", lq.quantizers.SteHeaviside),
+        ("swish_sign", lq.quantizers.SwishSign),
+        ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
+        ("ste_tern", lq.quantizers.SteTern),
+        ("dorefa_quantizer", lq.quantizers.DoReFaQuantizer),
+    ],
+)
+def test_metrics(quantizer):
+    quantizer_str, quantizer_cls = quantizer
+
+    # No metric
+    model = tf.keras.models.Sequential(
+        [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
+    )
+    model.compile(loss="mse", optimizer="sgd")
+    assert len(model.layers[0]._metrics) == 0
+
+    # Metric added using scope
+    with lq.metrics.scope(["flip_ratio"]):
+        model = tf.keras.models.Sequential(
+            [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
+        )
+    model.compile(loss="mse", optimizer="sgd")
+
+    if version.parse(tf.__version__) > version.parse("1.14"):
+        assert len(model.layers[0].kernel_quantizer._metrics) == 1
+    else:
+        # In TF1.14, call() gets called twice, resulting in having an extra initial
+        # metrics copy.
+        assert len(model.layers[0].kernel_quantizer._metrics) == 2
+
+    # Metric added explicitly to quantizer
+    model = tf.keras.models.Sequential(
+        [
+            lq.layers.QuantDense(
+                3,
+                kernel_quantizer=quantizer_cls(metrics=["flip_ratio"]),
+                input_shape=(32,),
+            )
+        ]
+    )
+    model.compile(loss="mse", optimizer="sgd")
+    if version.parse(tf.__version__) > version.parse("1.14"):
+        assert len(model.layers[0].kernel_quantizer._metrics) == 1
+    else:
+        # In TF1.14, call() gets called twice, resulting in having an extra initial
+        # metrics copy.
+        assert len(model.layers[0].kernel_quantizer._metrics) == 2

@@ -55,6 +55,13 @@ def test_metric(eager_mode):
     assert 1.5 / 2 == mcv.result().numpy()
 
 
+def test_metric_wrong_shape(eager_mode):
+    mcv = metrics.FlipRatio()
+    mcv.build((3,))
+    with pytest.raises(ValueError):
+        mcv.update_state(np.array([1, 1]))
+
+
 def test_metric_in_graph_mode(graph_mode):
     mcv = metrics.FlipRatio()
     mcv.build((2,))

@@ -216,34 +216,6 @@ class TestLayerWarns:
         assert caplog.records == []
 
 
-def test_metrics():
-    model = tf.keras.models.Sequential(
-        [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
-    )
-    model.compile(loss="mse", optimizer="sgd")
-    assert len(model.layers[0]._metrics) == 0
-
-    with lq.metrics.scope(["flip_ratio"]):
-        model = tf.keras.models.Sequential(
-            [lq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
-        )
-    model.compile(loss="mse", optimizer="sgd")
-    assert len(model.layers[0]._metrics) == 1
-
-    model = tf.keras.models.Sequential(
-        [
-            lq.layers.QuantDense(
-                3,
-                kernel_quantizer="ste_sign",
-                metrics=["flip_ratio"],
-                input_shape=(32,),
-            )
-        ]
-    )
-    model.compile(loss="mse", optimizer="sgd")
-    assert len(model.layers[0]._metrics) == 1
-
-
 @pytest.mark.parametrize(
     "quant_layer,layer",
     [
@@ -270,7 +242,6 @@ def test_layer_kwargs(quant_layer, layer):
         "kernel_quantizer",
         "depthwise_quantizer",
         "pointwise_quantizer",
-        "metrics",
     ):
         try:
             quant_params_list.remove(p)
