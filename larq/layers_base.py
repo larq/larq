@@ -10,9 +10,6 @@ from larq.quantizers import Quantizer
 log = logging.getLogger(__name__)
 
 
-# TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
-
-
 class BaseLayer(tf.keras.layers.Layer):
     """Base class for defining quantized layers"""
 
