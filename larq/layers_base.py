@@ -134,8 +134,8 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
             self._get_spatial_shape(input_shape)
         )
         if self.data_format == "channels_last":
-            return [input_shape[0], *spatial_shape, input_shape[-1]]
-        return [*input_shape[:2], *spatial_shape]
+            return tf.TensorShape([input_shape[0], *spatial_shape, input_shape[-1]])
+        return tf.TensorShape([*input_shape[:2], *spatial_shape])
 
     def build(self, input_shape):
         if self._is_native_padding():
@@ -146,13 +146,13 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
 
     def call(self, inputs):
         if self._is_native_padding():
-            return super().call(inputs)
+            return super(QuantizerBaseConv, self).call(inputs)
 
         inputs = tf.pad(
             inputs, self._get_padding_same(inputs), constant_values=self.pad_values
         )
         with utils.patch_object(self, "padding", "valid"):
-            return super().call(inputs)
+            return super(QuantizerBaseConv, self).call(inputs)
 
     def get_config(self):
         return {
