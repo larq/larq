@@ -146,13 +146,13 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
 
     def call(self, inputs):
         if self._is_native_padding():
-            return super(QuantizerBaseConv, self).call(inputs)
+            return super().call(inputs)
 
         inputs = tf.pad(
             inputs, self._get_padding_same(inputs), constant_values=self.pad_values
         )
         with utils.patch_object(self, "padding", "valid"):
-            return super(QuantizerBaseConv, self).call(inputs)
+            return super().call(inputs)
 
     def get_config(self):
         return {
