@@ -150,6 +150,7 @@ class QuantConv1D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv1D):
         input[t+1:]. Useful when modeling temporal data where the model should not
         violate the temporal order. See [WaveNet: A Generative Model for Raw Audio,
             section 2.1](https://arxiv.org/abs/1609.03499).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
     dilation_rate: an integer or tuple/list of a single integer, specifying the dilation
         rate to use for dilated convolution. Currently, specifying any `dilation_rate`
@@ -249,6 +250,7 @@ class QuantConv2D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv2D):
         specify the same value for all spatial dimensions. Specifying any stride
         value != 1 is incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `"valid"` or `"same"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds to
         inputs with shape `(batch, height, width, channels)` while `channels_first`
@@ -360,6 +362,7 @@ class QuantConv3D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv3D):
         same value for all spatial dimensions. Specifying any stride value != 1 is
         incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `"valid"` or `"same"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds to
         inputs with shape `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
@@ -468,6 +471,7 @@ class QuantDepthwiseConv2D(
         same value for all spatial dimensions. Specifying any stride value != 1 is
         incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `'valid'` or `'same'` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     depth_multiplier: The number of depthwise convolution output channels for each input
         channel. The total number of depthwise convolution output channels will be equal
         to `filters_in * depth_multiplier`.
@@ -572,6 +576,7 @@ class QuantSeparableConv1D(
         Specifying any `stride` value != 1 is incompatible with specifying
         any `dilation_rate` value != 1.
     padding: One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds
         to inputs with shape `(batch, length, channels)` while `channels_first`
@@ -697,6 +702,7 @@ class QuantSeparableConv2D(
         the same value for all spatial dimensions. Specifying any stride value != 1
         is incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `"valid"` or `"same"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds to
         inputs with shape `(batch, height, width, channels)` while `channels_first`
