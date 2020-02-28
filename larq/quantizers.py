@@ -554,3 +554,10 @@ def get(identifier):
     raise ValueError(
         f"Could not interpret quantization function identifier: {identifier}"
     )
+
+
+def get_kernel_quantizer(identifier):
+    quantizer = get(identifier)
+    if quantizer and not quantizer._custom_metrics:
+        quantizer._custom_metrics = lq_metrics.get_training_metrics()
+    return quantizer

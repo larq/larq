@@ -3,7 +3,7 @@ from typing import Optional
 
 import tensorflow as tf
 
-from larq import metrics as lq_metrics, quantized_scope, quantizers
+from larq import quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
 from larq.quantizers import Quantizer
 
@@ -60,9 +60,7 @@ class QuantizerBase(BaseLayer):
     """
 
     def __init__(self, *args, kernel_quantizer=None, **kwargs):
-        self.kernel_quantizer = quantizers.get(kernel_quantizer)
-        if self.kernel_quantizer and not self.kernel_quantizer._custom_metrics:
-            self.kernel_quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        self.kernel_quantizer = quantizers.get_kernel_quantizer(kernel_quantizer)
 
         super().__init__(*args, **kwargs)
         if kernel_quantizer and not self.kernel_constraint:
@@ -92,9 +90,7 @@ class QuantizerDepthwiseBase(BaseLayer):
     def __init__(
         self, *args, depthwise_quantizer: Optional[Quantizer] = None, **kwargs,
     ):
-        self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
-        if self.depthwise_quantizer and not self.depthwise_quantizer._custom_metrics:
-            self.depthwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
@@ -130,13 +126,8 @@ class QuantizerSeparableBase(BaseLayer):
         pointwise_quantizer: Optional[Quantizer] = None,
         **kwargs,
     ):
-        self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
-        if self.depthwise_quantizer and not self.depthwise_quantizer._custom_metrics:
-            self.depthwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
-
-        self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
-        if self.pointwise_quantizer and not self.pointwise_quantizer._custom_metrics:
-            self.pointwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
+        self.pointwise_quantizer = quantizers.get_kernel_quantizer(pointwise_quantizer)
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
