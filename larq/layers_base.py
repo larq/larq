@@ -3,18 +3,19 @@ from typing import Optional
 
 import tensorflow as tf
 
-from larq import metrics as lq_metrics, quantized_scope, quantizers
+from larq import quantized_scope, quantizers
 from larq.quantized_variable import QuantizedVariable
 from larq.quantizers import Quantizer
 
 log = logging.getLogger(__name__)
 
 
-# TODO: find a good way remove duplication between QuantizerBase, QuantizerDepthwiseBase and QuantizerSeparableBase
-
-
 class BaseLayer(tf.keras.layers.Layer):
-    """Base class for defining quantized layers"""
+    """Base class for defining quantized layers.
+
+    `input_quantizer` is the element-wise quantization functions to use.
+    If `input_quantizer=None` this layer is equivalent to `tf.keras.layers.Layer`.
+    """
 
     def __init__(self, *args, input_quantizer=None, **kwargs):
         self.input_quantizer = quantizers.get(input_quantizer)
@@ -52,17 +53,14 @@ class BaseLayer(tf.keras.layers.Layer):
 
 
 class QuantizerBase(BaseLayer):
-    """Base class for defining quantized layers
+    """Base class for defining quantized layers with a single kernel.
 
-    `input_quantizer` and `kernel_quantizer` are the element-wise quantization
-    functions to use. If both quantization functions are `None` this layer is
-    equivalent to `Layer`.
+    `kernel_quantizer` is the element-wise quantization functions to use.
+    If `kernel_quantizer=None` this layer is equivalent to `BaseLayer`.
     """
 
     def __init__(self, *args, kernel_quantizer=None, **kwargs):
-        self.kernel_quantizer = quantizers.get(kernel_quantizer)
-        if self.kernel_quantizer and not self.kernel_quantizer._custom_metrics:
-            self.kernel_quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        self.kernel_quantizer = quantizers.get_kernel_quantizer(kernel_quantizer)
 
         super().__init__(*args, **kwargs)
         if kernel_quantizer and not self.kernel_constraint:
@@ -82,19 +80,16 @@ class QuantizerBase(BaseLayer):
 
 
 class QuantizerDepthwiseBase(BaseLayer):
-    """Base class for defining quantized layers
+    """Base class for defining depthwise quantized layers
 
-    `input_quantizer` and `depthwise_quantizer` are the element-wise quantization
-    functions to use. If both quantization functions are `None` this layer is
-    equivalent to `Layer`.
+    `depthwise_quantizer` is the element-wise quantization functions to use.
+    If `depthwise_quantizer=None` this layer is equivalent to `BaseLayer`.
     """
 
     def __init__(
         self, *args, depthwise_quantizer: Optional[Quantizer] = None, **kwargs,
     ):
-        self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
-        if self.depthwise_quantizer and not self.depthwise_quantizer._custom_metrics:
-            self.depthwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
@@ -114,13 +109,11 @@ class QuantizerDepthwiseBase(BaseLayer):
 
 
 class QuantizerSeparableBase(BaseLayer):
-    """Base class for defining separable quantized layers
+    """Base class for defining separable quantized layers.
 
-    `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
-    element-wise quantization functions to use. If all quantization functions are `None`
-    this layer is equivalent to `SeparableConv1D`. If `use_bias` is True and
-    a bias initializer is provided, it adds a bias vector to the output.
-    It then optionally applies an activation function to produce the final output.
+    `depthwise_quantizer` and `pointwise_quantizer` are the element-wise quantization
+    functions to use. If all quantization functions are `None` this layer is equivalent
+    to `BaseLayer`.
     """
 
     def __init__(
@@ -130,13 +123,8 @@ class QuantizerSeparableBase(BaseLayer):
         pointwise_quantizer: Optional[Quantizer] = None,
         **kwargs,
     ):
-        self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
-        if self.depthwise_quantizer and not self.depthwise_quantizer._custom_metrics:
-            self.depthwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
-
-        self.pointwise_quantizer = quantizers.get(pointwise_quantizer)
-        if self.pointwise_quantizer and not self.pointwise_quantizer._custom_metrics:
-            self.pointwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
+        self.pointwise_quantizer = quantizers.get_kernel_quantizer(pointwise_quantizer)
 
         super().__init__(*args, **kwargs)
         if depthwise_quantizer and not self.depthwise_constraint:
