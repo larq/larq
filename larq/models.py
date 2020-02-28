@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
 
 import numpy as np
-from tensorflow import keras
+import tensorflow as tf
 from terminaltables import AsciiTable
 
 import larq.layers as lq_layers
@@ -15,14 +15,14 @@ op_count_supported_layer_types = (
     lq_layers.QuantSeparableConv2D,
     lq_layers.QuantDepthwiseConv2D,
     lq_layers.QuantDense,
-    keras.layers.Conv2D,
-    keras.layers.SeparableConv2D,
-    keras.layers.DepthwiseConv2D,
-    keras.layers.Dense,
-    keras.layers.Flatten,
-    keras.layers.BatchNormalization,
-    keras.layers.MaxPool2D,
-    keras.layers.AveragePooling2D,
+    tf.keras.layers.Conv2D,
+    tf.keras.layers.SeparableConv2D,
+    tf.keras.layers.DepthwiseConv2D,
+    tf.keras.layers.Dense,
+    tf.keras.layers.Flatten,
+    tf.keras.layers.BatchNormalization,
+    tf.keras.layers.MaxPool2D,
+    tf.keras.layers.AveragePooling2D,
 )
 
 mac_containing_layers = (
@@ -30,10 +30,10 @@ mac_containing_layers = (
     lq_layers.QuantSeparableConv2D,
     lq_layers.QuantDepthwiseConv2D,
     lq_layers.QuantDense,
-    keras.layers.Conv2D,
-    keras.layers.SeparableConv2D,
-    keras.layers.DepthwiseConv2D,
-    keras.layers.Dense,
+    tf.keras.layers.Conv2D,
+    tf.keras.layers.SeparableConv2D,
+    tf.keras.layers.DepthwiseConv2D,
+    tf.keras.layers.Dense,
 )
 
 
@@ -121,7 +121,7 @@ class OperationProfile:
 
 
 class LayerProfile:
-    def __init__(self, layer: keras.layers.Layer):
+    def __init__(self, layer: tf.keras.layers.Layer):
         self._layer = layer
         self.weight_profiles = [
             WeightProfile(
@@ -239,7 +239,7 @@ class LayerProfile:
 
 
 class ModelProfile(LayerProfile):
-    def __init__(self, model: keras.models.Model):
+    def __init__(self, model: tf.keras.models.Model):
         self.layer_profiles = [LayerProfile(l) for l in model.layers]
 
     @property

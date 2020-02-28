@@ -16,11 +16,28 @@ log = logging.getLogger(__name__)
 class BaseLayer(tf.keras.layers.Layer):
     """Base class for defining quantized layers"""
 
-    def get_quantizer(self, name) -> Optional[Quantizer]:
+    def __init__(self, *args, input_quantizer=None, **kwargs):
+        self.input_quantizer = quantizers.get(input_quantizer)
+        super().__init__(*args, **kwargs)
+
+    def call(self, inputs):
+        if self.input_quantizer:
+            inputs = self.input_quantizer(inputs)
+        with quantized_scope.scope(True):
+            return super().call(inputs)
+
+    def get_config(self):
+        return {
+            **super().get_config(),
+            "input_quantizer": quantizers.serialize(self.input_quantizer),
+        }
+
+    def _get_quantizer(self, name) -> Optional[Quantizer]:
+        """Get quantizer for given kernel name"""
         return None
 
     def _add_variable_with_custom_getter(self, name: str, **kwargs):
-        quantizer = self.get_quantizer(name)
+        quantizer = self._get_quantizer(name)
         if quantizer is None:
             return super()._add_variable_with_custom_getter(name, **kwargs)
 
@@ -42,9 +59,7 @@ class QuantizerBase(BaseLayer):
     equivalent to `Layer`.
     """
 
-    def __init__(self, *args, input_quantizer=None, kernel_quantizer=None, **kwargs):
-        self.input_quantizer = quantizers.get(input_quantizer)
-
+    def __init__(self, *args, kernel_quantizer=None, **kwargs):
         self.kernel_quantizer = quantizers.get(kernel_quantizer)
         if self.kernel_quantizer and not self.kernel_quantizer._custom_metrics:
             self.kernel_quantizer._custom_metrics = lq_metrics.get_training_metrics()
@@ -56,24 +71,14 @@ class QuantizerBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.kernel_quantizer if name == "kernel" else None
 
-    def build(self, input_shape):
-        super().build(input_shape)
-
-    def call(self, inputs):
-        if self.input_quantizer:
-            inputs = self.input_quantizer(inputs)
-        with quantized_scope.scope(True):
-            return super().call(inputs)
-
     def get_config(self):
-        config = {
-            "input_quantizer": quantizers.serialize(self.input_quantizer),
+        return {
+            **super().get_config(),
             "kernel_quantizer": quantizers.serialize(self.kernel_quantizer),
         }
-        return {**super().get_config(), **config}
 
 
 class QuantizerDepthwiseBase(BaseLayer):
@@ -85,14 +90,8 @@ class QuantizerDepthwiseBase(BaseLayer):
     """
 
     def __init__(
-        self,
-        *args,
-        input_quantizer: Optional[Quantizer] = None,
-        depthwise_quantizer: Optional[Quantizer] = None,
-        **kwargs,
+        self, *args, depthwise_quantizer: Optional[Quantizer] = None, **kwargs,
     ):
-        self.input_quantizer = quantizers.get(input_quantizer)
-
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         if self.depthwise_quantizer and not self.depthwise_quantizer._custom_metrics:
             self.depthwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
@@ -104,21 +103,14 @@ class QuantizerDepthwiseBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
-    def call(self, inputs):
-        if self.input_quantizer:
-            inputs = self.input_quantizer(inputs)
-        with quantized_scope.scope(True):
-            return super().call(inputs)
-
     def get_config(self):
-        config = {
-            "input_quantizer": quantizers.serialize(self.input_quantizer),
+        return {
+            **super().get_config(),
             "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
         }
-        return {**super().get_config(), **config}
 
 
 class QuantizerSeparableBase(BaseLayer):
@@ -134,13 +126,10 @@ class QuantizerSeparableBase(BaseLayer):
     def __init__(
         self,
         *args,
-        input_quantizer: Optional[Quantizer] = None,
         depthwise_quantizer: Optional[Quantizer] = None,
         pointwise_quantizer: Optional[Quantizer] = None,
         **kwargs,
     ):
-        self.input_quantizer = quantizers.get(input_quantizer)
-
         self.depthwise_quantizer = quantizers.get(depthwise_quantizer)
         if self.depthwise_quantizer and not self.depthwise_quantizer._custom_metrics:
             self.depthwise_quantizer._custom_metrics = lq_metrics.get_training_metrics()
@@ -161,23 +150,16 @@ class QuantizerSeparableBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
         if name == "depthwise_kernel":
             return self.depthwise_quantizer
         if name == "pointwise_kernel":
             return self.pointwise_quantizer
         return None
 
-    def call(self, inputs):
-        if self.input_quantizer:
-            inputs = self.input_quantizer(inputs)
-        with quantized_scope.scope(True):
-            return super().call(inputs)
-
     def get_config(self):
-        config = {
-            "input_quantizer": quantizers.serialize(self.input_quantizer),
+        return {
+            **super().get_config(),
             "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
             "pointwise_quantizer": quantizers.serialize(self.pointwise_quantizer),
         }
-        return {**super().get_config(), **config}
