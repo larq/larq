@@ -32,11 +32,12 @@ class BaseLayer(tf.keras.layers.Layer):
             "input_quantizer": quantizers.serialize(self.input_quantizer),
         }
 
-    def get_quantizer(self, name) -> Optional[Quantizer]:
+    def _get_quantizer(self, name) -> Optional[Quantizer]:
+        """Get quantizer for given kernel name"""
         return None
 
     def _add_variable_with_custom_getter(self, name: str, **kwargs):
-        quantizer = self.get_quantizer(name)
+        quantizer = self._get_quantizer(name)
         if quantizer is None:
             return super()._add_variable_with_custom_getter(name, **kwargs)
 
@@ -70,7 +71,7 @@ class QuantizerBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.kernel_quantizer if name == "kernel" else None
 
     def get_config(self):
@@ -102,7 +103,7 @@ class QuantizerDepthwiseBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
         return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
     def get_config(self):
@@ -149,7 +150,7 @@ class QuantizerSeparableBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
         if name == "depthwise_kernel":
             return self.depthwise_quantizer
         if name == "pointwise_kernel":
