@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from tensorflow.keras.utils import get_custom_objects
 
 
@@ -57,3 +59,12 @@ def set_precision(precision: int = 32):
         return function
 
     return decorator
+
+
+@contextmanager
+def patch_object(object, name, value):
+    """Temporarily overwrite attribute on object"""
+    old_value = getattr(object, name)
+    setattr(object, name, value)
+    yield
+    setattr(object, name, old_value)

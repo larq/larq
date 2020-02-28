@@ -54,8 +54,8 @@ PARAMS_ALL_LAYERS = [
 ]
 
 PARAMS_SEP_LAYERS = [
-    (lq.layers.QuantSeparableConv1D, tf.keras.layers.SeparableConv1D, (2, 3, 7),),
-    (lq.layers.QuantSeparableConv2D, tf.keras.layers.SeparableConv2D, (2, 3, 7, 6),),
+    (lq.layers.QuantSeparableConv1D, tf.keras.layers.SeparableConv1D, (2, 3, 7)),
+    (lq.layers.QuantSeparableConv2D, tf.keras.layers.SeparableConv2D, (2, 3, 7, 6)),
 ]
 
 
@@ -173,6 +173,27 @@ class TestLayers:
 
         np.testing.assert_allclose(quant_output, fp_model.predict(np.sign(input_data)))
 
+    @pytest.mark.parametrize(
+        "layer_cls, input_dim",
+        [
+            (lq.layers.QuantConv1D, 3),
+            (lq.layers.QuantConv2D, 4),
+            (lq.layers.QuantConv3D, 5),
+            (lq.layers.QuantSeparableConv1D, 3),
+            (lq.layers.QuantSeparableConv2D, 4),
+            (lq.layers.QuantDepthwiseConv2D, 4),
+        ],
+    )
+    @pytest.mark.parametrize("data_format", ["channels_last", "channels_first"])
+    def test_non_zero_padding_layers(self, layer_cls, input_dim, data_format):
+        inputs = np.zeros(np.random.randint(2, 20, size=input_dim), np.float32)
+        kernel = tuple(np.random.randint(2, 7, size=input_dim - 2))
+
+        args = (kernel,) if layer_cls == lq.layers.QuantDepthwiseConv2D else (2, kernel)
+        ref_layer = layer_cls(*args, padding="same")
+        layer = layer_cls(*args, padding="same", pad_values=1.0)
+        assert layer(inputs).shape == ref_layer(inputs).shape
+
 
 class TestLayerWarns:
     def test_layer_warns(self, caplog):
@@ -242,6 +263,7 @@ def test_layer_kwargs(quant_layer, layer):
         "kernel_quantizer",
         "depthwise_quantizer",
         "pointwise_quantizer",
+        "pad_values",
     ):
         try:
             quant_params_list.remove(p)
