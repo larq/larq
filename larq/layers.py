@@ -121,7 +121,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
 
 
 @utils.register_keras_custom_object
-class QuantConv1D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv1D):
+class QuantConv1D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv1D):
     """1D quantized convolution layer (e.g. temporal convolution).
 
     This layer creates a convolution kernel that is convolved with the layer input
@@ -223,7 +223,7 @@ class QuantConv1D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv1D):
 
 
 @utils.register_keras_custom_object
-class QuantConv2D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv2D):
+class QuantConv2D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv2D):
     """2D quantized convolution layer (e.g. spatial convolution over images).
 
     This layer creates a convolution kernel that is convolved
@@ -335,7 +335,7 @@ class QuantConv2D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv2D):
 
 
 @utils.register_keras_custom_object
-class QuantConv3D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv3D):
+class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
     """3D convolution layer (e.g. spatial convolution over volumes).
 
     This layer creates a convolution kernel that is convolved
@@ -454,7 +454,7 @@ class QuantConv3D(QuantizerBaseConv, QuantizerBase, tf.keras.layers.Conv3D):
 
 @utils.register_keras_custom_object
 class QuantDepthwiseConv2D(
-    QuantizerBaseConv, QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv2D
+    QuantizerDepthwiseBase, QuantizerBaseConv, tf.keras.layers.DepthwiseConv2D
 ):
     """"Quantized depthwise separable 2D convolution.
     Depthwise Separable convolutions consists in performing just the first step in a
@@ -556,7 +556,7 @@ class QuantDepthwiseConv2D(
 
 @utils.register_keras_custom_object
 class QuantSeparableConv1D(
-    QuantizerBaseConv, QuantizerSeparableBase, tf.keras.layers.SeparableConv1D
+    QuantizerSeparableBase, QuantizerBaseConv, tf.keras.layers.SeparableConv1D
 ):
     """Depthwise separable 1D quantized convolution.
 
@@ -672,7 +672,7 @@ class QuantSeparableConv1D(
 
 @utils.register_keras_custom_object
 class QuantSeparableConv2D(
-    QuantizerBaseConv, QuantizerSeparableBase, tf.keras.layers.SeparableConv2D
+    QuantizerSeparableBase, QuantizerBaseConv, tf.keras.layers.SeparableConv2D
 ):
     """Depthwise separable 2D convolution.
 
