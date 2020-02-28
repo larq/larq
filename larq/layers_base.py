@@ -11,7 +11,11 @@ log = logging.getLogger(__name__)
 
 
 class BaseLayer(tf.keras.layers.Layer):
-    """Base class for defining quantized layers"""
+    """Base class for defining quantized layers
+
+    `input_quantizer` is the element-wise quantization functions to use.
+    If `input_quantizer=None` this layer is equivalent to `tf.keras.layers.Layer`.
+    """
 
     def __init__(self, *args, input_quantizer=None, **kwargs):
         self.input_quantizer = quantizers.get(input_quantizer)
@@ -49,11 +53,10 @@ class BaseLayer(tf.keras.layers.Layer):
 
 
 class QuantizerBase(BaseLayer):
-    """Base class for defining quantized layers
+    """Base class for defining quantized layers with a single kernel
 
-    `input_quantizer` and `kernel_quantizer` are the element-wise quantization
-    functions to use. If both quantization functions are `None` this layer is
-    equivalent to `Layer`.
+    `kernel_quantizer` is the element-wise quantization functions to use.
+    If `kernel_quantizer=None` this layer is equivalent to `BaseLayer`.
     """
 
     def __init__(self, *args, kernel_quantizer=None, **kwargs):
@@ -77,11 +80,10 @@ class QuantizerBase(BaseLayer):
 
 
 class QuantizerDepthwiseBase(BaseLayer):
-    """Base class for defining quantized layers
+    """Base class for defining depthwise quantized layers
 
-    `input_quantizer` and `depthwise_quantizer` are the element-wise quantization
-    functions to use. If both quantization functions are `None` this layer is
-    equivalent to `Layer`.
+    `depthwise_quantizer` is the element-wise quantization functions to use.
+    If `depthwise_quantizer=None` this layer is equivalent to `BaseLayer`.
     """
 
     def __init__(
@@ -109,11 +111,9 @@ class QuantizerDepthwiseBase(BaseLayer):
 class QuantizerSeparableBase(BaseLayer):
     """Base class for defining separable quantized layers
 
-    `input_quantizer`, `depthwise_quantizer` and `pointwise_quantizer` are the
-    element-wise quantization functions to use. If all quantization functions are `None`
-    this layer is equivalent to `SeparableConv1D`. If `use_bias` is True and
-    a bias initializer is provided, it adds a bias vector to the output.
-    It then optionally applies an activation function to produce the final output.
+    `depthwise_quantizer` and `pointwise_quantizer` are the element-wise quantization
+    functions to use. If all quantization functions are `None` this layer is equivalent
+    to `BaseLayer`.
     """
 
     def __init__(
