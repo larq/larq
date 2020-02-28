@@ -557,6 +557,14 @@ def get(identifier):
 
 
 def get_kernel_quantizer(identifier):
+    """Returns a quantizer from identifier and adds default kernel quantizer metrics.
+
+    # Arguments
+    identifier: Function or string
+
+    # Returns
+    `Quantizer` or `None`
+    """
     quantizer = get(identifier)
     if quantizer and not quantizer._custom_metrics:
         quantizer._custom_metrics = lq_metrics.get_training_metrics()

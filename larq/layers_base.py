@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class BaseLayer(tf.keras.layers.Layer):
-    """Base class for defining quantized layers
+    """Base class for defining quantized layers.
 
     `input_quantizer` is the element-wise quantization functions to use.
     If `input_quantizer=None` this layer is equivalent to `tf.keras.layers.Layer`.
@@ -53,7 +53,7 @@ class BaseLayer(tf.keras.layers.Layer):
 
 
 class QuantizerBase(BaseLayer):
-    """Base class for defining quantized layers with a single kernel
+    """Base class for defining quantized layers with a single kernel.
 
     `kernel_quantizer` is the element-wise quantization functions to use.
     If `kernel_quantizer=None` this layer is equivalent to `BaseLayer`.
@@ -109,7 +109,7 @@ class QuantizerDepthwiseBase(BaseLayer):
 
 
 class QuantizerSeparableBase(BaseLayer):
-    """Base class for defining separable quantized layers
+    """Base class for defining separable quantized layers.
 
     `depthwise_quantizer` and `pointwise_quantizer` are the element-wise quantization
     functions to use. If all quantization functions are `None` this layer is equivalent
