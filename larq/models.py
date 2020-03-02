@@ -81,7 +81,7 @@ def _number_as_readable_str(num: float) -> str:
     return num + unit
 
 
-def _memory_as_readable_str(num_bits: int):
+def _memory_as_readable_str(num_bits: int) -> str:
     """Generate a human-readable string for the memory size.
 
     1 KiB = 1024 B; we use the binary prefix (KiB) [1] instead of the decimal prefix
@@ -97,6 +97,8 @@ def _memory_as_readable_str(num_bits: int):
         rounded = num_bytes / (1024 ** i)
         if rounded < 1024 or i == len(suffixes) - 1:
             return f"{rounded:,.2f} {suffix}"
+
+    return ""  # to make pytype believe we always return a `str`
 
 
 def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
