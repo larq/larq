@@ -185,13 +185,16 @@ class TestLayers:
         ],
     )
     @pytest.mark.parametrize("data_format", ["channels_last", "channels_first"])
-    def test_non_zero_padding_layers(self, layer_cls, input_dim, data_format):
-        inputs = np.zeros(np.random.randint(2, 20, size=input_dim), np.float32)
-        kernel = tuple(np.random.randint(2, 7, size=input_dim - 2))
+    @pytest.mark.parametrize("dilation", [True, False])
+    def test_non_zero_padding_layers(self, layer_cls, input_dim, data_format, dilation):
+        inputs = np.zeros(np.random.randint(5, 20, size=input_dim), np.float32)
+        kernel = tuple(np.random.randint(3, 7, size=input_dim - 2))
+        rand_tuple = tuple(np.random.randint(1, 4, size=input_dim - 2))
+        kwargs = {"dilation_rate": rand_tuple} if dilation else {"strides": rand_tuple}
 
         args = (kernel,) if layer_cls == lq.layers.QuantDepthwiseConv2D else (2, kernel)
-        ref_layer = layer_cls(*args, padding="same")
-        layer = layer_cls(*args, padding="same", pad_values=1.0)
+        ref_layer = layer_cls(*args, padding="same", **kwargs)
+        layer = layer_cls(*args, padding="same", pad_values=1.0, **kwargs)
         assert layer(inputs).shape == ref_layer(inputs).shape
 
 
