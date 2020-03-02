@@ -190,6 +190,11 @@ class TestLayers:
         inputs = np.zeros(np.random.randint(5, 20, size=input_dim), np.float32)
         kernel = tuple(np.random.randint(3, 7, size=input_dim - 2))
         rand_tuple = tuple(np.random.randint(1, 4, size=input_dim - 2))
+        if not dilation and layer_cls in (
+            lq.layers.QuantSeparableConv2D,
+            lq.layers.QuantDepthwiseConv2D,
+        ):
+            rand_tuple = int(rand_tuple[0])
         kwargs = {"dilation_rate": rand_tuple} if dilation else {"strides": rand_tuple}
 
         args = (kernel,) if layer_cls == lq.layers.QuantDepthwiseConv2D else (2, kernel)
