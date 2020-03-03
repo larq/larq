@@ -96,7 +96,7 @@ def _memory_as_readable_str(num_bits: int) -> str:
 
     for i, suffix in enumerate(suffixes):
         rounded = num_bytes / (1024 ** i)
-        if rounded < 1024 or i == len(suffixes) - 1:
+        if rounded < 1024:
             break
 
     return f"{rounded:,.2f} {suffix}"
