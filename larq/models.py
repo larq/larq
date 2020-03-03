@@ -97,10 +97,9 @@ def _memory_as_readable_str(num_bits: int) -> str:
     for i, suffix in enumerate(suffixes):
         rounded = num_bytes / (1024 ** i)
         if rounded < 1024 or i == len(suffixes) - 1:
-            readable_str = f"{rounded:,.2f} {suffix}"
             break
 
-    return readable_str
+    return f"{rounded:,.2f} {suffix}"
 
 
 def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
