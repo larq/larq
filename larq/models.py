@@ -81,6 +81,27 @@ def _number_as_readable_str(num: float) -> str:
     return num + unit
 
 
+def _memory_as_readable_str(num_bits: int) -> str:
+    """Generate a human-readable string for the memory size.
+
+    1 KiB = 1024 B; we use the binary prefix (KiB) [1,2] instead of the decimal prefix
+    (KB) to avoid any confusion with multiplying by 1000 instead of 1024.
+
+    [1] https://en.wikipedia.org/wiki/Binary_prefix
+    [2] https://physics.nist.gov/cuu/Units/binary.html
+    """
+
+    suffixes = ["B", "KiB", "MiB", "GiB"]
+    num_bytes = num_bits / 8
+
+    for i, suffix in enumerate(suffixes):
+        rounded = num_bytes / (1024 ** i)
+        if rounded < 1024:
+            break
+
+    return f"{rounded:,.2f} {suffix}"
+
+
 def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
     try:
         assert not np.isnan(x)
@@ -335,11 +356,8 @@ class ModelProfile(LayerProfile):
                 "Non-trainable params",
                 _number_as_readable_str(self.weight_count(trainable=False)),
             ],
-            ["Model size:", f"{self.memory / (8*1024*1024):.2f} MB"],
-            [
-                "Float-32 Equivalent",
-                f"{self.fp_equivalent_memory / (8*1024*1024):.2f} MB",
-            ],
+            ["Model size:", _memory_as_readable_str(self.memory)],
+            ["Float-32 Equivalent", _memory_as_readable_str(self.fp_equivalent_memory)],
             [
                 "Compression Ratio of Memory",
                 self.memory / max(1e-8, self.fp_equivalent_memory),
