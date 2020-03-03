@@ -84,10 +84,11 @@ def _number_as_readable_str(num: float) -> str:
 def _memory_as_readable_str(num_bits: int) -> str:
     """Generate a human-readable string for the memory size.
 
-    1 KiB = 1024 B; we use the binary prefix (KiB) [1] instead of the decimal prefix
+    1 KiB = 1024 B; we use the binary prefix (KiB) [1,2] instead of the decimal prefix
     (KB) to avoid any confusion with multiplying by 1000 instead of 1024.
 
     [1] https://en.wikipedia.org/wiki/Binary_prefix
+    [2] https://physics.nist.gov/cuu/Units/binary.html
     """
 
     suffixes = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
