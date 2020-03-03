@@ -91,7 +91,7 @@ def _memory_as_readable_str(num_bits: int) -> str:
     [2] https://physics.nist.gov/cuu/Units/binary.html
     """
 
-    suffixes = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
+    suffixes = ["B", "KiB", "MiB", "GiB"]
     num_bytes = num_bits / 8
 
     for i, suffix in enumerate(suffixes):
