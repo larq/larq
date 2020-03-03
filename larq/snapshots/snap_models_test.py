@@ -4,11 +4,10 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots[
-    "test_summary 1"
-] = """+sequential stats----------------------------------------------------------------------------------------------------------------+
+snapshots['test_summary 1'] = '''+sequential stats----------------------------------------------------------------------------------------------------------------+
 | Layer                   Input prec.           Outputs  # 1-bit  # 2-bit  # 32-bit  Memory  1-bit MACs  2-bit MACs  32-bit MACs |
 |                               (bit)                        x 1      x 1       x 1    (kB)                                      |
 +--------------------------------------------------------------------------------------------------------------------------------+
@@ -21,22 +20,20 @@ snapshots[
 +--------------------------------------------------------------------------------------------------------------------------------+
 | Total                                                     1600      288     38794  151.80      158752       34848      1218368 |
 +--------------------------------------------------------------------------------------------------------------------------------+
-+sequential summary-----------------------------+
-| Total params                       40.7 k     |
-| Trainable params                   1.95 k     |
-| Non-trainable params               38.7 k     |
-| Model size:                        151.80 KiB |
-| Float-32 Equivalent                158.91 KiB |
-| Compression Ratio of Memory        0.96       |
-| Number of MACs                     1.41 M     |
-| Ratio of MACs that are binarized   0.1124     |
-| Ratio of MACs that are ternarized  0.0247     |
-+-----------------------------------------------+
-"""
++sequential summary--------------------------+
+| Total params                       40.7 k  |
+| Trainable params                   1.95 k  |
+| Non-trainable params               38.7 k  |
+| Model size:                        152 KiB |
+| Float-32 Equivalent                159 KiB |
+| Compression Ratio of Memory        0.96    |
+| Number of MACs                     1.41 M  |
+| Ratio of MACs that are binarized   0.1124  |
+| Ratio of MACs that are ternarized  0.0247  |
++--------------------------------------------+
+'''
 
-snapshots[
-    "test_summary 2"
-] = """+sequential_1 stats--------------------+
+snapshots['test_summary 2'] = '''+sequential_1 stats--------------------+
 | Layer   Input prec.  Outputs  Memory |
 |               (bit)             (kB) |
 +--------------------------------------+
@@ -53,4 +50,4 @@ snapshots[
 | Compression Ratio of Memory  0.00   |
 | Number of MACs               0      |
 +-------------------------------------+
-"""
+'''

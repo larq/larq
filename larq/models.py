@@ -91,15 +91,18 @@ def _memory_as_readable_str(num_bits: int) -> str:
     [2] https://physics.nist.gov/cuu/Units/binary.html
     """
 
-    suffixes = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"]
+    suffixes = ["B", "KiB", "MiB", "GiB"]
     num_bytes = num_bits / 8
 
     for i, suffix in enumerate(suffixes):
         rounded = num_bytes / (1024 ** i)
-        if rounded < 1024 or i == len(suffixes) - 1:
-            break
-
-    return f"{rounded:,.2f} {suffix}"
+        if rounded < 1024:
+            rounded_str = (
+                f"{rounded:#.3g}".rstrip(".") if rounded < 1000 else f"{rounded:#.4g}"
+            )
+            return f"{rounded_str} {suffix}"
+    else:
+        return f"{rounded:,.0f} {suffix}"
 
 
 def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
