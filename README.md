@@ -7,6 +7,8 @@ Larq is an open-source deep learning library for training neural networks with e
 
 Existing deep neural networks use 32 bits, 16 bits or 8 bits to encode each weight and activation, making them large, slow and power-hungry. This prohibits many applications in resource-constrained environments. Larq is the first step towards solving this. It is designed to provide an easy to use, composable way to train BNNs (1 bit) and other types of Quantized Neural Networks (QNNs) and is based on the `tf.keras` interface.
 
+*Larq is part of a family of libraries for BNN development; you can also check out [Larq Zoo](https://github.com/larq/zoo) for pretrained models and [Larq Compute Engine](https://github.com/larq/compute-engine) for deployment on mobile and edge devices.*
+
 ## Getting Started
 
 To build a QNN, Larq introduces the concept of [quantized layers](https://docs.larq.dev/larq/api/layers/) and [quantizers](https://docs.larq.dev/larq/api/quantizers/). A quantizer defines the way of transforming a full precision input to a quantized output and the pseudo-gradient method used for the backwards pass. Each quantized layer requires an `input_quantizer` and a `kernel_quantizer` that describe the way of quantizing the incoming activations and weights of the layer respectively. If both `input_quantizer` and `kernel_quantizer` are `None` the layer is equivalent to a full precision layer.
@@ -50,3 +52,7 @@ You can install Larq with Python's [pip](https://pip.pypa.io/en/stable/) package
 ```shell
 pip install larq
 ```
+
+## About
+
+Larq is being developed by a team of deep learning researchers and engineers at Plumerai to help accelerate both our own research and the general adoption of Binarized Neural Networks.
