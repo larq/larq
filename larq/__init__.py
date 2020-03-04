@@ -7,6 +7,7 @@ import larq.metrics as metrics
 import larq.models as models
 import larq.optimizers as optimizers
 import larq.quantizers as quantizers
+import larq.utils as utils
 
 __all__ = [
     "layers",
@@ -18,4 +19,5 @@ __all__ = [
     "models",
     "quantizers",
     "optimizers",
+    "utils",
 ]
