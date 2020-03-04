@@ -229,6 +229,10 @@ class Bop(tf.keras.optimizers.Optimizer):
     Setting the threshold too high results in little learning, while setting it
     too low results in overly noisy behaviour.
 
+    !!! warning
+        The `is_binary_variable` check of this optimizer will only target variables that
+        have been explicitly marked as being binary using `NoOpQuantizer(precision=1)`.
+
     !!! example
         ```python
         no_op_quantizer = lq.quantizers.NoOpQuantizer(precision=1)
