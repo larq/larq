@@ -104,6 +104,34 @@ class TestCaseOptimizer:
             # Should raise on first call to apply_gradients()
             model.fit(train_images[:1], train_labels[:1], epochs=1)
 
+    def test_wrong_predicate(self):
+        """Make sure we throw when an optimizer does not claim variables."""
+
+        with pytest.raises(ValueError):
+            naughty_case_opt = lq.optimizers.CaseOptimizer(
+                (lambda var: False, lq.optimizers.Bop()),
+                default_optimizer=tf.keras.optimizers.Adam(0.01),
+            )
+
+            # Simple MNIST model
+            mnist = tf.keras.datasets.mnist
+            (train_images, train_labels), _ = mnist.load_data()
+            model = tf.keras.Sequential(
+                [
+                    tf.keras.layers.Flatten(input_shape=(28, 28)),
+                    tf.keras.layers.Dense(128, activation="relu"),
+                    tf.keras.layers.Dense(10, activation="softmax"),
+                ]
+            )
+            model.compile(
+                loss="sparse_categorical_crossentropy",
+                optimizer=naughty_case_opt,
+                metrics=["acc"],
+            )
+
+            # Should raise on first call to apply_gradients()
+            model.fit(train_images[:1], train_labels[:1], epochs=1)
+
     def test_weights(self):
         (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
         model = tf.keras.Sequential(

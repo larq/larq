@@ -210,6 +210,13 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                         f"No `default_optimizer` provided to train variable `{var}`."
                     )
 
+        # Make sure that each optimizer touches at least one variable
+        for optimizer_index, (_, optimizer) in enumerate(self.pred_opt_pairs):
+            if not optimizer_index in self.var_opt_mapping.values():
+                raise ValueError(
+                    f"Optimizer `{optimizer}` did not claim any variables."
+                )
+
 
 @utils.register_keras_custom_object
 class Bop(tf.keras.optimizers.Optimizer):
