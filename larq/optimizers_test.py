@@ -82,7 +82,7 @@ class TestCaseOptimizer:
     def test_missing_default(self):
         with pytest.warns(Warning):
             naughty_case_opt = lq.optimizers.CaseOptimizer(
-                (lambda var: False, lq.optimizers.Bop())
+                (lambda var: True, lq.optimizers.Bop())
             )
 
             # Simple MNIST model
