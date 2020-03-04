@@ -36,9 +36,8 @@ class TestCommonFunctionality:
         ],
     )
     def test_serialization(self, module, name, ref_cls):
-        if name:
-            fn = module.get(name)
-            assert fn.__class__ == ref_cls
+        fn = module.get(name)
+        assert fn.__class__ == ref_cls
         fn = module.get(ref_cls())
         assert fn.__class__ == ref_cls
         assert type(fn.precision) == int
