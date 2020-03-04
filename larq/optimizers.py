@@ -212,7 +212,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
         # Make sure that each optimizer touches at least one variable
         for optimizer_index, (_, optimizer) in enumerate(self.pred_opt_pairs):
-            if not optimizer_index in self.var_opt_mapping.values():
+            if optimizer_index not in self.var_opt_mapping.values():
                 raise ValueError(
                     f"Optimizer `{optimizer}` did not claim any variables."
                 )
