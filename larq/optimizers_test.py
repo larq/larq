@@ -82,7 +82,7 @@ class TestCaseOptimizer:
     def test_missing_default(self):
         with pytest.warns(Warning):
             naughty_case_opt = lq.optimizers.CaseOptimizer(
-                (lambda var: True, lq.optimizers.Bop())
+                (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
             )
 
             # Simple MNIST model
@@ -91,7 +91,12 @@ class TestCaseOptimizer:
             model = tf.keras.Sequential(
                 [
                     tf.keras.layers.Flatten(input_shape=(28, 28)),
-                    tf.keras.layers.Dense(128, activation="relu"),
+                    lq.layers.QuantDense(
+                        64,
+                        input_quantizer="ste_sign",
+                        kernel_quantizer=lq.quantizers.NoOpQuantizer(precision=1),
+                        activation="relu",
+                    ),
                     tf.keras.layers.Dense(10, activation="softmax"),
                 ]
             )

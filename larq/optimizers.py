@@ -210,6 +210,9 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                         f"No `default_optimizer` provided to train variable `{var}`."
                     )
 
+        print("!~!!!!")
+        print(self.var_opt_mapping)
+
         # Make sure that each optimizer touches at least one variable
         for optimizer_index, (_, optimizer) in enumerate(self.pred_opt_pairs):
             if optimizer_index not in self.var_opt_mapping.values():
