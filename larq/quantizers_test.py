@@ -33,11 +33,13 @@ class TestCommonFunctionality:
             ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
             ("swish_sign", lq.quantizers.SwishSign),
             ("ste_tern", lq.quantizers.SteTern),
+            (None, lq.quantizers.NoOpQuantizer),
         ],
     )
     def test_serialization(self, module, name, ref_cls):
-        fn = module.get(name)
-        assert fn.__class__ == ref_cls
+        if name:
+            fn = module.get(name)
+            assert fn.__class__ == ref_cls
         fn = module.get(ref_cls())
         assert fn.__class__ == ref_cls
         assert type(fn.precision) == int

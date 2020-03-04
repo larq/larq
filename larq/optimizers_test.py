@@ -109,7 +109,12 @@ class TestCaseOptimizer:
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Flatten(input_shape=(28, 28)),
-                lq.layers.QuantDense(64, input_quantizer="ste_sign", activation="relu"),
+                lq.layers.QuantDense(
+                    64,
+                    input_quantizer="ste_sign",
+                    kernel_quantizer=lq.quantizers.NoOpQuantizer(1),
+                    activation="relu",
+                ),
                 tf.keras.layers.Dense(10, activation="softmax"),
             ]
         )
