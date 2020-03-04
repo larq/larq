@@ -52,6 +52,15 @@ class TestCommonFunctionality:
         assert fn.__class__ == ref_cls
         assert type(fn.precision) == int
 
+    def test_noop_serialization(self):
+        fn = lq.quantizers.get(lq.quantizers.NoOpQuantizer(precision=1))
+        assert fn.__class__ == lq.quantizers.NoOpQuantizer
+        assert fn.precision == 1
+        config = lq.quantizers.serialize(fn)
+        fn = lq.quantizers.deserialize(config)
+        assert fn.__class__ == lq.quantizers.NoOpQuantizer
+        assert fn.precision == 1
+
     def test_invalid_usage(self):
         with pytest.raises(ValueError):
             lq.quantizers.get(42)

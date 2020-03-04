@@ -59,6 +59,7 @@ __all__ = [
     "SteTern",
     "SteHeaviside",
     "DoReFaQuantizer",
+    "NoOpQuantizer",
 ]
 
 
@@ -162,6 +163,45 @@ class BaseQuantizer(tf.keras.layers.Layer):
     @property
     def non_trainable_weights(self):
         return []
+
+
+@utils.register_keras_custom_object
+class NoOpQuantizer(BaseQuantizer):
+    r"""Instantiates a serializable no-op quantizer.
+
+    \\[
+    q(x) = x
+    \\]
+
+    !!! warning
+        This quantizer will not change the input variable. It is only intended to mark
+        variables with a desired precision that will be recognized by optimizers like
+        `Bop` and add training metrics to track variable changes.
+
+    !!! example
+        ```python
+        layer = lq.layers.QuantDense(
+            16,
+            kernel_quantizer=lq.quantizers.NoOpQuantizer(precision=1),
+        )
+        layer.build((32,))
+        assert layer.kernel.precision == 1
+        ```
+
+    # Arguments
+    precision: Set the desired precision of the variable. This can be used to tag
+    metrics: An array of metrics to add to the layer. If `None` the metrics set in
+        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        available.
+    """
+    precision = None
+
+    def __init__(self, precision: int, **kwargs):
+        self.precision = precision
+        super().__init__(**kwargs)
+
+    def get_config(self):
+        return {**super().get_config(), "precision": self.precision}
 
 
 @utils.register_alias("ste_sign")

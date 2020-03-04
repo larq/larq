@@ -20,6 +20,9 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 
 !!! example
     ```python
+    no_op_quantizer = lq.quantizers.NoOpQuantizer(precision=1)
+    layer = lq.layers.QuantDense(16, kernel_quantizer=no_op_quantizer)
+
     case_optimizer = lq.optimizers.CaseOptimizer(
         (
             lq.optimizers.Bop.is_binary_variable,  # predicate
@@ -226,8 +229,15 @@ class Bop(tf.keras.optimizers.Optimizer):
     Setting the threshold too high results in little learning, while setting it
     too low results in overly noisy behaviour.
 
+    !!! warning
+        The `is_binary_variable` check of this optimizer will only target variables that
+        have been explicitly marked as being binary using `NoOpQuantizer(precision=1)`.
+
     !!! example
         ```python
+        no_op_quantizer = lq.quantizers.NoOpQuantizer(precision=1)
+        layer = lq.layers.QuantDense(16, kernel_quantizer=no_op_quantizer)
+
         optimizer = lq.optimizers.CaseOptimizer(
             (
                 lq.optimizers.Bop.is_binary_variable,
@@ -296,11 +306,11 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     @staticmethod
     def is_binary_variable(var: tf.Variable) -> bool:
-        """Returns True for binary variables named using the Larq Zoo naming scheme.
+        """Returns `True` for variables with `var.precision == 1`.
 
         This is an example of a predictate that can be used by the `CaseOptimizer`.
 
         # Arguments
         var: a `tf.Variable`.
         """
-        return "/kernel" in var.name and "quant_" in var.name
+        return getattr(var, "precision", 32) == 1
