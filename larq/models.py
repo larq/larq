@@ -74,9 +74,9 @@ def _number_as_readable_str(num: float) -> str:
         magnitude += 1
         num /= 1000.0
 
-    # ':#.3g' formats the number with 3 significant figures, without stripping
-    # trailing zeros.
-    num = f"{num:#.3g}".rstrip(".")
+    # ':.3g' formats the number with 3 significant figures, without stripping trailing
+    # zeros.
+    num = f"{num:.3g}".rstrip(".")
     unit = ["", " k", " M", " B", " T"][magnitude]
     return num + unit
 
