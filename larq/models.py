@@ -67,7 +67,7 @@ def _number_as_readable_str(num: float) -> str:
     # For numbers that are at least 1000 trillion (1 quadrillion) format with
     # scientific notation (3 s.f. = 2 d.p. in scientific notation).
     if num >= 1e15:
-        return f"{num:#.2E}"
+        return f"{num:.2E}"
 
     # Count the magnitude.
     magnitude = 0
