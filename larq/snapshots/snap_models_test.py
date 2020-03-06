@@ -7,7 +7,9 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_summary 1'] = '''+sequential stats----------------------------------------------------------------------------------------------------------------+
+snapshots[
+    "test_summary 1"
+] = """+sequential stats----------------------------------------------------------------------------------------------------------------+
 | Layer                   Input prec.           Outputs  # 1-bit  # 2-bit  # 32-bit  Memory  1-bit MACs  2-bit MACs  32-bit MACs |
 |                               (bit)                        x 1      x 1       x 1    (kB)                                      |
 +--------------------------------------------------------------------------------------------------------------------------------+
@@ -32,9 +34,11 @@ snapshots['test_summary 1'] = '''+sequential stats------------------------------
 | Ratio of MACs that are binarized   0.1124     |
 | Ratio of MACs that are ternarized  0.0247     |
 +-----------------------------------------------+
-'''
+"""
 
-snapshots['test_summary 2'] = '''+sequential_1 stats--------------------+
+snapshots[
+    "test_summary 2"
+] = """+sequential_1 stats--------------------+
 | Layer   Input prec.  Outputs  Memory |
 |               (bit)             (kB) |
 +--------------------------------------+
@@ -52,4 +56,4 @@ snapshots['test_summary 2'] = '''+sequential_1 stats--------------------+
 | Compression Ratio of Memory    0.00   |
 | Number of MACs                 0      |
 +---------------------------------------+
-'''
+"""
