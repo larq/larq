@@ -352,11 +352,12 @@ class ModelProfile(LayerProfile):
                 "Non-trainable params",
                 _number_as_readable_str(self.weight_count(trainable=False)),
             ],
-            ["Model size:", memory_as_readable_str(self.memory)],
+            ["Model size", memory_as_readable_str(self.memory)],
             [
                 "Model size (8-bit FP weights)",
                 memory_as_readable_str(self.int8_fp_weights_memory),
-            ]["Float-32 Equivalent", memory_as_readable_str(self.fp_equivalent_memory)],
+            ],
+            ["Float-32 Equivalent", memory_as_readable_str(self.fp_equivalent_memory)],
             [
                 "Compression Ratio of Memory",
                 self.memory / max(1e-8, self.fp_equivalent_memory),

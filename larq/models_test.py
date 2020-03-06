@@ -57,7 +57,7 @@ def test_layer_profile():
     ]
     bias_count = [32, 0, 0, 32, 0, 10]
     param_count = [k + b for k, b in zip(kernel_count, bias_count)]
-    memory = [
+    memory = [  # bits * (c * w * h * b) + bits * bias
         1 * (32 * 3 * 3 * 1) + 32 * 32,
         0,
         2 * (32 * 3 * 3),
