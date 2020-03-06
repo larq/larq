@@ -110,6 +110,14 @@ class WeightProfile:
     def fp_equivalent_memory(self) -> int:
         return 32 * self.count
 
+    @property
+    def int8_fp_weights_memory(self) -> int:
+        """Count any 32- or 18-bit weights as 8 bits instead."""
+
+        if self.bitwidth == 32 or self.bitwidth == 16:
+            return self.count * 8
+        return self.bitwidth * self.count
+
     def is_bias(self) -> bool:
         return "bias" in self._weight.name
 
@@ -147,6 +155,10 @@ class LayerProfile:
     @property
     def memory(self) -> int:
         return sum(p.memory for p in self.weight_profiles)
+
+    @property
+    def int8_fp_weights_memory(self) -> int:
+        return sum(p.int8_fp_weights_memory for p in self.weight_profiles)
 
     @property
     def fp_equivalent_memory(self) -> int:
@@ -248,6 +260,10 @@ class ModelProfile(LayerProfile):
         return sum(l.memory for l in self.layer_profiles)
 
     @property
+    def int8_fp_weights_memory(self) -> int:
+        return sum(l.int8_fp_weights_memory for l in self.layer_profiles)
+
+    @property
     def fp_equivalent_memory(self) -> int:
         return sum(l.fp_equivalent_memory for l in self.layer_profiles)
 
@@ -337,7 +353,10 @@ class ModelProfile(LayerProfile):
                 _number_as_readable_str(self.weight_count(trainable=False)),
             ],
             ["Model size:", memory_as_readable_str(self.memory)],
-            ["Float-32 Equivalent", memory_as_readable_str(self.fp_equivalent_memory)],
+            [
+                "Model size (8-bit FP weights)",
+                memory_as_readable_str(self.int8_fp_weights_memory),
+            ]["Float-32 Equivalent", memory_as_readable_str(self.fp_equivalent_memory)],
             [
                 "Compression Ratio of Memory",
                 self.memory / max(1e-8, self.fp_equivalent_memory),
@@ -415,6 +434,7 @@ def summary(
     - total number of trainable weights,
     - total number of non-trainable weights,
     - model size,
+    - model size (8-bit FP weights): memory footprint if FP weights were 8 bit,
     - float-32 equivalent size: memory footprint if all weights were 32 bit,
     - compression ratio achieved by quantizing weights,
     - total number of MAC operations,
