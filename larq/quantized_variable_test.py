@@ -4,7 +4,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from tensorflow.python.distribute.values import DistributedVariable
 
-from larq import quantized_scope
+from larq import context
 from larq.quantized_variable import QuantizedVariable
 from larq.testing_utils import evaluate
 
@@ -30,7 +30,7 @@ def test_read(eager_and_graph_mode, distribute_scope):
     assert evaluate(x.read_value()) == 3.5
     assert evaluate(tf.identity(x)) == 3.5
 
-    with quantized_scope.scope(True):
+    with context.quantized_scope(True):
         assert evaluate(x) == 7
         assert evaluate(x.value()) == 7
         assert evaluate(x.read_value()) == 7
@@ -43,7 +43,7 @@ def test_sparse_reads(eager_and_graph_mode):
 
     assert evaluate(x.sparse_read([0])) == 1
     assert evaluate(x.gather_nd([0])) == 1
-    with quantized_scope.scope(True):
+    with context.quantized_scope(True):
         assert evaluate(x.sparse_read([0])) == 2
         assert evaluate(x.gather_nd([0])) == 2
 
@@ -51,16 +51,16 @@ def test_sparse_reads(eager_and_graph_mode):
 def test_read_nested_scopes(eager_and_graph_mode, distribute_scope):
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
-    with quantized_scope.scope(True):
+    with context.quantized_scope(True):
         assert evaluate(x.read_value()) == 7
-        with quantized_scope.scope(False):
+        with context.quantized_scope(False):
             assert evaluate(x.read_value()) == 3.5
         assert evaluate(x.read_value()) == 7
 
 
 def test_method_delegations(eager_and_graph_mode, distribute_scope):
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
-    with quantized_scope.scope(True):
+    with context.quantized_scope(True):
         evaluate(x.initializer)
         assert evaluate(x.value()) == 7
         assert evaluate(x.read_value()) == 7
@@ -93,7 +93,7 @@ def test_method_delegations(eager_and_graph_mode, distribute_scope):
 def test_scatter_method_delegations(eager_and_graph_mode):
     x = QuantizedVariable.from_variable(get_var([3.5, 4]), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
-    with quantized_scope.scope(True):
+    with context.quantized_scope(True):
         assert_array_equal(evaluate(x.value()), [7, 8])
 
         def slices(val, index):
@@ -226,7 +226,7 @@ def test_checkpoint(tmp_path, eager_and_graph_mode):
     checkpoint.restore(save_path).assert_consumed().run_restore_ops()
     assert isinstance(x, QuantizedVariable)
     assert evaluate(x) == 123.0
-    with quantized_scope.scope(True):
+    with context.quantized_scope(True):
         assert evaluate(x) == 123.0 * 2
 
 
@@ -261,7 +261,7 @@ def test_optimizer(eager_mode, should_quantize):
     opt = tf.keras.optimizers.SGD(1.0)
 
     def loss():
-        with quantized_scope.scope(should_quantize):
+        with context.quantized_scope(should_quantize):
             return x + 1.0
 
     @tf.function
@@ -271,7 +271,7 @@ def test_optimizer(eager_mode, should_quantize):
     f()
     if should_quantize:
         assert evaluate(x) == 2.0
-        with quantized_scope.scope(should_quantize):
+        with context.quantized_scope(should_quantize):
             assert evaluate(x) == -2.0
     else:
         assert evaluate(x) == 0.0

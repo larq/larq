@@ -3,7 +3,7 @@ from typing import Optional
 
 import tensorflow as tf
 
-from larq import quantized_scope, quantizers
+from larq import context, quantizers
 from larq.quantized_variable import QuantizedVariable
 from larq.quantizers import Quantizer
 
@@ -24,7 +24,7 @@ class BaseLayer(tf.keras.layers.Layer):
     def call(self, inputs):
         if self.input_quantizer:
             inputs = self.input_quantizer(inputs)
-        with quantized_scope.scope(True):
+        with context.quantized_scope(True):
             return super().call(inputs)
 
     def get_config(self):

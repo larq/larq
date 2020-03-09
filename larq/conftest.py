@@ -3,7 +3,7 @@ import tensorflow as tf
 from packaging import version
 from tensorflow.python.eager import context
 
-from larq import quantized_scope
+from larq import context as lq_context
 
 
 @pytest.fixture
@@ -71,5 +71,5 @@ def distribute_scope(request):
 @pytest.fixture(params=[True, False])
 def quantized(request):
     """pytest fixture for running test quantized and non-quantized"""
-    with quantized_scope.scope(request.param):
+    with lq_context.quantized_scope(request.param):
         yield request.param

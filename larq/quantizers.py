@@ -49,7 +49,7 @@ from typing import Callable, Union
 
 import tensorflow as tf
 
-from larq import math, metrics as lq_metrics, utils
+from larq import context, math, metrics as lq_metrics, utils
 
 __all__ = [
     "SteSign",
@@ -191,7 +191,7 @@ class NoOpQuantizer(BaseQuantizer):
     # Arguments
     precision: Set the desired precision of the variable. This can be used to tag
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
     """
     precision = None
@@ -231,7 +231,7 @@ class SteSign(BaseQuantizer):
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # References
@@ -276,7 +276,7 @@ class ApproxSign(BaseQuantizer):
 
     # Arguments
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # References
@@ -319,7 +319,7 @@ class SteHeaviside(BaseQuantizer):
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # Returns
@@ -363,7 +363,7 @@ class SwishSign(BaseQuantizer):
     # Arguments
     beta: Larger values result in a closer approximation to the derivative of the sign.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # Returns
@@ -401,7 +401,7 @@ class MagnitudeAwareSign(BaseQuantizer):
     # Arguments
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # References
@@ -467,7 +467,7 @@ class SteTern(BaseQuantizer):
         Ternary Weight Networks threshold calculation.
     clip_value: Threshold for clipping gradients. If `None` gradients are not clipped.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # References
@@ -535,7 +535,7 @@ class DoReFaQuantizer(BaseQuantizer):
     # Arguments
     k_bit: number of bits for the quantization.
     metrics: An array of metrics to add to the layer. If `None` the metrics set in
-        `larq.metrics.scope` are used. Currently only the `flip_ratio` metric is
+        `larq.context.metrics_scope` are used. Currently only the `flip_ratio` metric is
         available.
 
     # Returns
@@ -607,5 +607,5 @@ def get_kernel_quantizer(identifier):
     """
     quantizer = get(identifier)
     if quantizer and not quantizer._custom_metrics:
-        quantizer._custom_metrics = lq_metrics.get_training_metrics()
+        quantizer._custom_metrics = context.get_training_metrics()
     return quantizer

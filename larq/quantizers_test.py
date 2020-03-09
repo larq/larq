@@ -361,7 +361,7 @@ def test_metrics(quantizer):
     assert len(model.layers[0]._metrics) == 0
 
     # Metric added using scope
-    with lq.metrics.scope(["flip_ratio"]):
+    with lq.context.metrics_scope(["flip_ratio"]):
         model = tf.keras.models.Sequential(
             [lq.layers.QuantDense(3, kernel_quantizer=quantizer_str, input_shape=(32,))]
         )
