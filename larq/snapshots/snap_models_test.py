@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots[
@@ -25,7 +26,8 @@ snapshots[
 | Total params                       40.7 k     |
 | Trainable params                   1.95 k     |
 | Non-trainable params               38.7 k     |
-| Model size:                        151.80 KiB |
+| Model size                         151.80 KiB |
+| Model size (8-bit FP weights)      38.15 KiB  |
 | Float-32 Equivalent                158.91 KiB |
 | Compression Ratio of Memory        0.96       |
 | Number of MACs                     1.41 M     |
@@ -44,13 +46,14 @@ snapshots[
 +--------------------------------------+
 | Total                              0 |
 +--------------------------------------+
-+sequential_1 summary-----------------+
-| Total params                 0      |
-| Trainable params             0      |
-| Non-trainable params         0      |
-| Model size:                  0.00 B |
-| Float-32 Equivalent          0.00 B |
-| Compression Ratio of Memory  0.00   |
-| Number of MACs               0      |
-+-------------------------------------+
++sequential_1 summary-------------------+
+| Total params                   0      |
+| Trainable params               0      |
+| Non-trainable params           0      |
+| Model size                     0.00 B |
+| Model size (8-bit FP weights)  0.00 B |
+| Float-32 Equivalent            0.00 B |
+| Compression Ratio of Memory    0.00   |
+| Number of MACs                 0      |
++---------------------------------------+
 """

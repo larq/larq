@@ -57,13 +57,21 @@ def test_layer_profile():
     ]
     bias_count = [32, 0, 0, 32, 0, 10]
     param_count = [k + b for k, b in zip(kernel_count, bias_count)]
-    memory = [
+    memory = [  # bits * (c * w * h * b) + bits * bias
         1 * (32 * 3 * 3 * 1) + 32 * 32,
         0,
         2 * (32 * 3 * 3),
         1 * (32 * 3 * 3 * 1 + 32 * 1 * 1 * 32) + 32 * 32,
         0,
         32 * (32 * 11 * 11 * 10 + 10),
+    ]
+    int8_fp_weights_mem = [
+        1 * (32 * 3 * 3 * 1) + 8 * 32,
+        0,
+        2 * (32 * 3 * 3),
+        1 * (32 * 3 * 3 * 1 + 32 * 1 * 1 * 32) + 8 * 32,
+        0,
+        8 * (32 * 11 * 11 * 10 + 10),
     ]
     fp_equiv_mem = [32 * n for n in param_count]
     input_precision = [None, None, 2, 1, None, None]
@@ -95,6 +103,7 @@ def test_layer_profile():
         assert profiles[i].unique_op_precisions == unique_op_precisions[i]
         assert profiles[i].memory == memory[i]
         assert profiles[i].fp_equivalent_memory == fp_equiv_mem[i]
+        assert profiles[i].int8_fp_weights_memory == int8_fp_weights_mem[i]
         assert profiles[i].op_count("mac") == mac_count[i]
         assert profiles[i].op_count("mac", 1) == bin_mac_count[i]
 
