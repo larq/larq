@@ -114,7 +114,7 @@ class WeightProfile:
     def int8_fp_weights_memory(self) -> int:
         """Count any 32- or 16-bit weights as 8 bits instead."""
 
-        if self.bitwidth == 32 or self.bitwidth == 16:
+        if self.bitwidth > 8:
             return self.count * 8
         return self.bitwidth * self.count
 
