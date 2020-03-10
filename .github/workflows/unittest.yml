@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tf-version: [1.14.0, 1.15.0, 2.0.0, 2.1.0]
+        tf-version: [1.14.0, 1.15.2, 2.0.1, 2.1.0, 2.2.0rc0]
 
     steps:
       - uses: actions/checkout@v1
@@ -35,7 +35,7 @@ jobs:
           python-version: 3.6
       - name: Install dependencies
         run: |
-          pip install tensorflow==2.0.0
+          pip install tensorflow-cpu==2.1.0
           pip install -e .[test]
       - name: Generate coverage report
         run: pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
