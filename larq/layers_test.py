@@ -69,7 +69,7 @@ class TestLayers:
         input_data = testing_utils.random_input(input_shape)
         random_weight = np.random.random() - 0.5
 
-        with lq.metrics.scope(["flip_ratio"]):
+        with lq.context.metrics_scope(["flip_ratio"]):
             quant_output = testing_utils.layer_test(
                 quantized_layer,
                 kwargs=dict(
@@ -104,7 +104,7 @@ class TestLayers:
         random_d_kernel = np.random.random() - 0.5
         random_p_kernel = np.random.random() - 0.5
 
-        with lq.metrics.scope(["flip_ratio"]):
+        with lq.context.metrics_scope(["flip_ratio"]):
             quant_output = testing_utils.layer_test(
                 quantized_layer,
                 kwargs=dict(
@@ -146,7 +146,7 @@ class TestLayers:
         input_data = testing_utils.random_input((2, 3, 7, 6))
         random_weight = np.random.random() - 0.5
 
-        with lq.metrics.scope(["flip_ratio"]):
+        with lq.context.metrics_scope(["flip_ratio"]):
             quant_output = testing_utils.layer_test(
                 lq.layers.QuantDepthwiseConv2D,
                 kwargs=dict(

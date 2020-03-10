@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from larq import quantized_scope
+from larq import context
 
 
 def test_eager_and_graph_mode_fixture(eager_and_graph_mode):
@@ -25,4 +25,4 @@ def test_distribute_scope(distribute_scope):
 
 
 def test_quantize_scope(quantized):
-    assert quantized_scope.should_quantize() == quantized
+    assert context.should_quantize() == quantized

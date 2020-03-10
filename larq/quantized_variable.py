@@ -7,7 +7,7 @@ from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
-from larq import quantized_scope
+from larq import context
 from larq.quantizers import Quantizer
 
 
@@ -116,7 +116,7 @@ class QuantizedVariable(tf.Variable):
         return variable
 
     def _quantize(self, value):
-        if self.quantizer and quantized_scope.should_quantize():
+        if self.quantizer and context.should_quantize():
             return self.quantizer(value)
         return value
 

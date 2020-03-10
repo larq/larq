@@ -1,6 +1,7 @@
 import larq.activations as activations
 import larq.callbacks as callbacks
 import larq.constraints as constraints
+import larq.context as context
 import larq.layers as layers
 import larq.math as math
 import larq.metrics as metrics
@@ -14,6 +15,7 @@ __all__ = [
     "activations",
     "callbacks",
     "constraints",
+    "context",
     "math",
     "metrics",
     "models",
