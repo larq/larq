@@ -158,18 +158,15 @@ class LayerProfile:
 
     @property
     def memory(self) -> int:
-        mem = sum(p.memory for p in self.weight_profiles)
-        return mem
+        return sum(p.memory for p in self.weight_profiles)
 
     @property
     def int8_fp_weights_memory(self) -> int:
-        mem = sum(p.int8_fp_weights_memory for p in self.weight_profiles)
-        return mem
+        return sum(p.int8_fp_weights_memory for p in self.weight_profiles)
 
     @property
     def fp_equivalent_memory(self) -> int:
-        mem = sum(p.fp_equivalent_memory for p in self.weight_profiles)
-        return mem
+        return sum(p.fp_equivalent_memory for p in self.weight_profiles)
 
     def weight_count(
         self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
