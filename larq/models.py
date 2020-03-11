@@ -2,12 +2,11 @@ import itertools
 from dataclasses import dataclass
 from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
 
+import larq.layers as lq_layers
 import numpy as np
 import tensorflow as tf
-from terminaltables import AsciiTable
-
-import larq.layers as lq_layers
 from larq.utils import memory_as_readable_str
+from terminaltables import AsciiTable
 
 __all__ = ["summary"]
 
@@ -93,14 +92,15 @@ def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
 
 
 class WeightProfile:
-    def __init__(self, weight, trainable: bool = True):
+    def __init__(self, weight, trainable: bool = True, count_multiplier: float = 1):
         self._weight = weight
         self.bitwidth = getattr(weight, "precision", 32)
         self.trainable = trainable
+        self.count_multiplier = count_multiplier
 
     @property
     def count(self) -> int:
-        return int(np.prod(self._weight.shape.as_list()))
+        return int(self.count_multiplier * np.prod(self._weight.shape.as_list()))
 
     @property
     def memory(self) -> int:
@@ -134,7 +134,11 @@ class LayerProfile:
         self._layer = layer
         self.weight_profiles = [
             WeightProfile(
-                weight, trainable=any(weight is w for w in layer.trainable_weights)
+                weight,
+                trainable=any(weight is w for w in layer.trainable_weights),
+                count_multiplier=0.5
+                if isinstance(layer, tf.keras.layers.BatchNormalization)
+                else 1,
             )
             for weight in layer.weights
         ]
@@ -155,19 +159,16 @@ class LayerProfile:
     @property
     def memory(self) -> int:
         mem = sum(p.memory for p in self.weight_profiles)
-        if isinstance(self._layer, tf.keras.layers.BatchNormalization):
-            mem /= 2
         return mem
 
     @property
     def int8_fp_weights_memory(self) -> int:
-        return sum(p.int8_fp_weights_memory for p in self.weight_profiles)
+        mem = sum(p.int8_fp_weights_memory for p in self.weight_profiles)
+        return mem
 
     @property
     def fp_equivalent_memory(self) -> int:
         mem = sum(p.fp_equivalent_memory for p in self.weight_profiles)
-        if isinstance(self._layer, tf.keras.layers.BatchNormalization):
-            mem /= 2
         return mem
 
     def weight_count(
@@ -179,8 +180,6 @@ class LayerProfile:
                 trainable is None or p.trainable == trainable
             ):
                 count += p.count
-        if isinstance(self._layer, tf.keras.layers.BatchNormalization):
-            count /= 2
         return count
 
     def op_count(
