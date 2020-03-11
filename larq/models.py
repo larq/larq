@@ -132,11 +132,20 @@ class OperationProfile:
 class LayerProfile:
     def __init__(self, layer: tf.keras.layers.Layer):
         self._layer = layer
+
+        weights = layer.weights
+        if isinstance(layer, tf.keras.layers.BatchNormalization):
+            fused_pairs = [("beta", "moving_mean"), ("gamma", "moving_variance")]
+            for pair in fused_pairs:
+                names = [w.name.split("/")[-1].replace(":0", "") for w in weights]
+                if pair[0] in names and pair[1] in names:
+                    weights.pop(names.index(pair[0]))
+
         self.weight_profiles = [
             WeightProfile(
                 weight, trainable=any(weight is w for w in layer.trainable_weights),
             )
-            for weight in layer.weights
+            for weight in weights
         ]
 
         self.op_profiles = []
@@ -176,7 +185,7 @@ class LayerProfile:
         return count
 
     def op_count(
-        self, op_type: Optional[str] = None, precision: Optional[int] = None,
+        self, op_type: Optional[str] = None, precision: Optional[int] = None
     ) -> Optional[int]:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
@@ -233,11 +242,7 @@ class LayerProfile:
     def generate_table_row(
         self, table_config: Mapping[str, Any]
     ) -> Sequence[Union[str, float]]:
-        row = [
-            self._layer.name,
-            self.input_precision or "-",
-            self.output_shape_str,
-        ]
+        row = [self._layer.name, self.input_precision or "-", self.output_shape_str]
         for i in table_config["param_bidtwidths"]:
             n = self.weight_count(i)
             n = _format_table_entry(n, table_config["param_units"])

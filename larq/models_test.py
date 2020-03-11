@@ -25,6 +25,7 @@ def get_profile_model():
                 padding="same",
                 use_bias=False,
             ),
+            tf.keras.layers.BatchNormalization(scale=False),
             lq.layers.QuantSeparableConv2D(
                 32,
                 (3, 3),
@@ -41,7 +42,7 @@ def get_profile_model():
 
 def test_model_profile():
     profile = ModelProfile(get_profile_model())
-    assert len(profile.layer_profiles) == 6
+    assert len(profile.layer_profiles) == 7
 
 
 def test_layer_profile():
@@ -51,16 +52,18 @@ def test_layer_profile():
         32 * 3 * 3 * 1,
         0,
         32 * 3 * 3,
+        0,
         32 * 3 * 3 * 1 + 32 * 1 * 1 * 32,
         0,
         32 * 11 * 11 * 10,
     ]
-    bias_count = [32, 0, 0, 32, 0, 10]
+    bias_count = [32, 0, 0, 64, 32, 0, 10]
     param_count = [k + b for k, b in zip(kernel_count, bias_count)]
     memory = [  # bits * (c * w * h * b) + bits * bias
         1 * (32 * 3 * 3 * 1) + 32 * 32,
         0,
         2 * (32 * 3 * 3),
+        32 * (2 * 32),
         1 * (32 * 3 * 3 * 1 + 32 * 1 * 1 * 32) + 32 * 32,
         0,
         32 * (32 * 11 * 11 * 10 + 10),
@@ -69,23 +72,25 @@ def test_layer_profile():
         1 * (32 * 3 * 3 * 1) + 8 * 32,
         0,
         2 * (32 * 3 * 3),
+        8 * (32 * 2),
         1 * (32 * 3 * 3 * 1 + 32 * 1 * 1 * 32) + 8 * 32,
         0,
         8 * (32 * 11 * 11 * 10 + 10),
     ]
     fp_equiv_mem = [32 * n for n in param_count]
-    input_precision = [None, None, 2, 1, None, None]
+    input_precision = [None, None, 2, None, 1, None, None]
     output_shape = [
         (-1, 64, 64, 32),
         (-1, 32, 32, 32),
+        (-1, 11, 11, 32),
         (-1, 11, 11, 32),
         (-1, 11, 11, 32),
         (-1, 11 * 11 * 32),
         (-1, 10),
     ]
     output_pixels = [int(np.prod(os[1:-1])) for os in output_shape]
-    unique_param_bidtwidths = [[1, 32], [], [2], [1, 32], [], [32]]
-    unique_op_precisions = [[32], [], [2], [1], [], [32]]
+    unique_param_bidtwidths = [[1, 32], [], [2], [32], [1, 32], [], [32]]
+    unique_op_precisions = [[32], [], [2], [], [1], [], [32]]
     mac_count = [params * pixels for params, pixels in zip(kernel_count, output_pixels)]
     bin_mac_count = [
         mc if (1 in pb and ip == 1) else 0
