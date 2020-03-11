@@ -184,7 +184,7 @@ class QuantizedVariable(tf.Variable):
     #
     # We do not define the following methods from Variable for the following
     # reasons:
-    #   * 'experimental_ref': Instead we inherit the definition from Variable.
+    #   * 'ref': Instead we inherit the definition from Variable.
     #     If we defined and delegated to Variable, the ref of an QuantizedVariable
     #     would be the same as the ref of the underlying variable, which would be
     #     strange as they are different Python objects.
