@@ -11,6 +11,7 @@ import tensorflow as tf
 from larq import utils
 from larq.layers_base import (
     QuantizerBase,
+    QuantizerBaseConv,
     QuantizerDepthwiseBase,
     QuantizerSeparableBase,
 )
@@ -120,7 +121,7 @@ class QuantDense(QuantizerBase, tf.keras.layers.Dense):
 
 
 @utils.register_keras_custom_object
-class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
+class QuantConv1D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv1D):
     """1D quantized convolution layer (e.g. temporal convolution).
 
     This layer creates a convolution kernel that is convolved with the layer input
@@ -149,6 +150,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
         input[t+1:]. Useful when modeling temporal data where the model should not
         violate the temporal order. See [WaveNet: A Generative Model for Raw Audio,
             section 2.1](https://arxiv.org/abs/1609.03499).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
     dilation_rate: an integer or tuple/list of a single integer, specifying the dilation
         rate to use for dilated convolution. Currently, specifying any `dilation_rate`
@@ -181,6 +183,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
         kernel_size,
         strides=1,
         padding="valid",
+        pad_values=0.0,
         data_format="channels_last",
         dilation_rate=1,
         activation=None,
@@ -201,6 +204,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
             kernel_size,
             strides=strides,
             padding=padding,
+            pad_values=pad_values,
             data_format=data_format,
             dilation_rate=dilation_rate,
             activation=activation,
@@ -219,7 +223,7 @@ class QuantConv1D(QuantizerBase, tf.keras.layers.Conv1D):
 
 
 @utils.register_keras_custom_object
-class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
+class QuantConv2D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv2D):
     """2D quantized convolution layer (e.g. spatial convolution over images).
 
     This layer creates a convolution kernel that is convolved
@@ -246,6 +250,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
         specify the same value for all spatial dimensions. Specifying any stride
         value != 1 is incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `"valid"` or `"same"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds to
         inputs with shape `(batch, height, width, channels)` while `channels_first`
@@ -290,6 +295,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
         kernel_size,
         strides=(1, 1),
         padding="valid",
+        pad_values=0.0,
         data_format=None,
         dilation_rate=(1, 1),
         activation=None,
@@ -310,6 +316,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
             kernel_size,
             strides=strides,
             padding=padding,
+            pad_values=pad_values,
             data_format=data_format,
             dilation_rate=dilation_rate,
             activation=activation,
@@ -328,7 +335,7 @@ class QuantConv2D(QuantizerBase, tf.keras.layers.Conv2D):
 
 
 @utils.register_keras_custom_object
-class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
+class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
     """3D convolution layer (e.g. spatial convolution over volumes).
 
     This layer creates a convolution kernel that is convolved
@@ -355,6 +362,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         same value for all spatial dimensions. Specifying any stride value != 1 is
         incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `"valid"` or `"same"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds to
         inputs with shape `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
@@ -405,6 +413,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
         kernel_size,
         strides=(1, 1, 1),
         padding="valid",
+        pad_values=0.0,
         data_format=None,
         dilation_rate=(1, 1, 1),
         activation=None,
@@ -425,6 +434,7 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
             kernel_size,
             strides=strides,
             padding=padding,
+            pad_values=pad_values,
             data_format=data_format,
             dilation_rate=dilation_rate,
             activation=activation,
@@ -443,7 +453,9 @@ class QuantConv3D(QuantizerBase, tf.keras.layers.Conv3D):
 
 
 @utils.register_keras_custom_object
-class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv2D):
+class QuantDepthwiseConv2D(
+    QuantizerDepthwiseBase, QuantizerBaseConv, tf.keras.layers.DepthwiseConv2D
+):
     """"Quantized depthwise separable 2D convolution.
     Depthwise Separable convolutions consists in performing just the first step in a
     depthwise spatial convolution (which acts on each input channel separately).
@@ -459,6 +471,7 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
         same value for all spatial dimensions. Specifying any stride value != 1 is
         incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `'valid'` or `'same'` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     depth_multiplier: The number of depthwise convolution output channels for each input
         channel. The total number of depthwise convolution output channels will be equal
         to `filters_in * depth_multiplier`.
@@ -503,6 +516,7 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
         kernel_size,
         strides=(1, 1),
         padding="valid",
+        pad_values=0.0,
         depth_multiplier=1,
         data_format=None,
         activation=None,
@@ -522,6 +536,7 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
             kernel_size=kernel_size,
             strides=strides,
             padding=padding,
+            pad_values=pad_values,
             depth_multiplier=depth_multiplier,
             data_format=data_format,
             activation=activation,
@@ -540,7 +555,9 @@ class QuantDepthwiseConv2D(QuantizerDepthwiseBase, tf.keras.layers.DepthwiseConv
 
 
 @utils.register_keras_custom_object
-class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv1D):
+class QuantSeparableConv1D(
+    QuantizerSeparableBase, QuantizerBaseConv, tf.keras.layers.SeparableConv1D
+):
     """Depthwise separable 1D quantized convolution.
 
     This layer performs a depthwise convolution that acts separately on channels,
@@ -559,6 +576,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         Specifying any `stride` value != 1 is incompatible with specifying
         any `dilation_rate` value != 1.
     padding: One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds
         to inputs with shape `(batch, length, channels)` while `channels_first`
@@ -603,6 +621,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         kernel_size,
         strides=1,
         padding="valid",
+        pad_values=0.0,
         data_format=None,
         dilation_rate=1,
         depth_multiplier=1,
@@ -628,6 +647,7 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
             kernel_size,
             strides=strides,
             padding=padding,
+            pad_values=pad_values,
             data_format=data_format,
             dilation_rate=dilation_rate,
             depth_multiplier=depth_multiplier,
@@ -651,7 +671,9 @@ class QuantSeparableConv1D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
 
 
 @utils.register_keras_custom_object
-class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv2D):
+class QuantSeparableConv2D(
+    QuantizerSeparableBase, QuantizerBaseConv, tf.keras.layers.SeparableConv2D
+):
     """Depthwise separable 2D convolution.
 
     Separable convolutions consist in first performing a depthwise spatial convolution
@@ -680,6 +702,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         the same value for all spatial dimensions. Specifying any stride value != 1
         is incompatible with specifying any `dilation_rate` value != 1.
     padding: one of `"valid"` or `"same"` (case-insensitive).
+    pad_values: The pad value to use when `padding="same"`.
     data_format: A string, one of `channels_last` (default) or `channels_first`.
         The ordering of the dimensions in the inputs. `channels_last` corresponds to
         inputs with shape `(batch, height, width, channels)` while `channels_first`
@@ -730,6 +753,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
         kernel_size,
         strides=(1, 1),
         padding="valid",
+        pad_values=0.0,
         data_format=None,
         dilation_rate=(1, 1),
         depth_multiplier=1,
@@ -755,6 +779,7 @@ class QuantSeparableConv2D(QuantizerSeparableBase, tf.keras.layers.SeparableConv
             kernel_size,
             strides=strides,
             padding=padding,
+            pad_values=pad_values,
             data_format=data_format,
             dilation_rate=dilation_rate,
             depth_multiplier=depth_multiplier,
