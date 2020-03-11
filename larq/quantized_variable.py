@@ -3,7 +3,10 @@
 from typing import Optional
 
 import tensorflow as tf
-from tensorflow.python.distribute.values import AggregatingVariable, DistributedVariable  # type: ignore
+from tensorflow.python.distribute.values import (  # type: ignore
+    AggregatingVariable,
+    DistributedVariable,
+)
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
