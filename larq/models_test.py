@@ -1,8 +1,9 @@
 import larq as lq
 import numpy as np
-import pytest
 import tensorflow as tf
 from larq.models import ModelProfile
+
+import pytest
 
 
 def get_profile_model():
@@ -24,7 +25,7 @@ def get_profile_model():
                 padding="same",
                 use_bias=False,
             ),
-            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.BatchNormalization(scale=False),
             lq.layers.QuantSeparableConv2D(
                 32,
                 (3, 3),

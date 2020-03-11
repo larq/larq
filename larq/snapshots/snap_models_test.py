@@ -23,7 +23,7 @@ snapshots['test_summary 1'] = '''+sequential stats------------------------------
 +--------------------------------------------------------------------------------------------------------------------------------+
 +sequential summary-----------------------------+
 | Total params                       40.7 k     |
-| Trainable params                   1.98 k     |
+| Trainable params                   1.95 k     |
 | Non-trainable params               38.8 k     |
 | Model size                         152.05 KiB |
 | Model size (8-bit FP weights)      38.21 KiB  |

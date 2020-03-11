@@ -92,15 +92,14 @@ def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
 
 
 class WeightProfile:
-    def __init__(self, weight, trainable: bool = True, count_multiplier: float = 1):
+    def __init__(self, weight, trainable: bool = True):
         self._weight = weight
         self.bitwidth = getattr(weight, "precision", 32)
         self.trainable = trainable
-        self.count_multiplier = count_multiplier
 
     @property
     def count(self) -> int:
-        return int(self.count_multiplier * np.prod(self._weight.shape.as_list()))
+        return int(np.prod(self._weight.shape.as_list()))
 
     @property
     def memory(self) -> int:
@@ -132,15 +131,20 @@ class OperationProfile:
 class LayerProfile:
     def __init__(self, layer: tf.keras.layers.Layer):
         self._layer = layer
+
+        weights = layer.weights
+        if isinstance(layer, tf.keras.layers.BatchNormalization):
+            fused_pairs = [("beta", "moving_mean"), ("gamma", "moving_variance")]
+            for pair in fused_pairs:
+                names = [w.name.split("/")[-1].replace(":0", "") for w in weights]
+                if pair[0] in names and pair[1] in names:
+                    weights.pop(names.index(pair[0]))
+
         self.weight_profiles = [
             WeightProfile(
-                weight,
-                trainable=any(weight is w for w in layer.trainable_weights),
-                count_multiplier=0.5
-                if isinstance(layer, tf.keras.layers.BatchNormalization)
-                else 1,
+                weight, trainable=any(weight is w for w in layer.trainable_weights),
             )
-            for weight in layer.weights
+            for weight in weights
         ]
 
         self.op_profiles = []
