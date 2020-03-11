@@ -49,15 +49,6 @@ We use [`black`](https://black.readthedocs.io/en/stable/) to format all of our c
 
 2. Wait until your PR is reviewed and merged.
 
-3. Create and push a new tag from the latest `master` branch (e.g. `v0.7.0`).
-
-   ```shell
-   git checkout master
-   git pull
-   git tag <version number>
-   git push --tags
-   ```
+3. Go to the [GitHub releases](https://github.com/larq/larq/releases), edit the release notes of the draft release, change the tag to the desired version (e.g. `v0.7.0`) and hit "Publish release".
 
 4. A [GitHub action](https://github.com/larq/larq/actions) will automatically publish a release to [PyPI](https://pypi.org/) based on the tag.
-
-5. Go to the [GitHub releases](https://github.com/larq/larq/releases) and publish the draft based on the tag you've just pushed and edit the release notes.
