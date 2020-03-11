@@ -192,12 +192,15 @@ def test_assign(eager_and_graph_mode, quantized, distribute_scope):
     assign = x.assign(0.0)
     assert_almost_equal(evaluate(assign), 0.0)
     assert_almost_equal(evaluate(assign.assign(latent_value)), value)
-    assign_add = x.assign_add(latent_value)
-    assert_almost_equal(evaluate(assign_add), value * 2)
-    assert_almost_equal(evaluate(assign_add.assign_add(latent_value)), value * 3)
-    assign_sub = x.assign_sub(latent_value)
-    assert_almost_equal(evaluate(assign_sub), value * 2)
-    assert_almost_equal(evaluate(assign_sub.assign_sub(latent_value)), value)
+    if version.parse(tf.__version__) >= version.parse("2.2"):
+        assert_almost_equal(
+            evaluate(x.assign_add(latent_value).assign_add(latent_value)), value * 3
+        )
+        assert_almost_equal(evaluate(x), value * 3)
+        assert_almost_equal(
+            evaluate(x.assign_sub(latent_value).assign_sub(latent_value)), value
+        )
+        assert_almost_equal(evaluate(x), value)
 
     # Assign with read_value=False
     assert_almost_equal(evaluate(x.assign(0.0)), 0.0)

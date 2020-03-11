@@ -48,7 +48,7 @@ def test_metric(eager_mode):
 def test_metric_wrong_shape(eager_mode):
     mcv = metrics.FlipRatio()
     mcv.build((3,))
-    with pytest.raises(ValueError):
+    with pytest.raises((ValueError, tf.errors.InvalidArgumentError)):
         mcv.update_state(np.array([1, 1]))
 
 
