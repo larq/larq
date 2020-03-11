@@ -3,7 +3,7 @@
 from typing import Optional
 
 import tensorflow as tf
-from tensorflow.python.distribute.values import DistributedVariable
+from tensorflow.python.distribute.values import AggregatingVariable, DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
@@ -74,11 +74,15 @@ class QuantizedVariable(tf.Variable):
         # Returns
         A QuantizedVariable that wraps the variable.
         """
-        if not isinstance(variable, DistributedVariable):  # type: ignore
+        if not isinstance(variable, (DistributedVariable, AggregatingVariable)):
             return cls(variable, quantizer, precision)
 
         class QuantizedDistributedVariable(cls, variable.__class__):
-            """A QuantizedVariable that also subclasses from DistributedVariable."""
+            """A QuantizedVariable that also subclasses from `variable.__class__`.
+
+            `variable.__class__` is either a `DistributedVariable` or an
+            `AggregatingVariable`.
+            """
 
             def get(self, *args, **kwargs):
                 # For some reason this is needed to make unit `x + x` pass on TF 1.14
