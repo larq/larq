@@ -2,11 +2,12 @@ import itertools
 from dataclasses import dataclass
 from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
 
-import larq.layers as lq_layers
 import numpy as np
 import tensorflow as tf
-from larq.utils import memory_as_readable_str
 from terminaltables import AsciiTable
+
+import larq.layers as lq_layers
+from larq.utils import memory_as_readable_str
 
 __all__ = ["summary"]
 

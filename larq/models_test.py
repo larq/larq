@@ -1,9 +1,9 @@
-import larq as lq
 import numpy as np
-import tensorflow as tf
-from larq.models import ModelProfile
-
 import pytest
+import tensorflow as tf
+
+import larq as lq
+from larq.models import ModelProfile
 
 
 def get_profile_model():
