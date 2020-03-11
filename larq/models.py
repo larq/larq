@@ -134,7 +134,7 @@ class LayerProfile:
         self._layer = layer
         self.weight_profiles = [
             WeightProfile(
-                weight, trainable=any(weight is w for w in layer.trainable_weights),
+                weight, trainable=any(weight is w for w in layer.trainable_weights)
             )
             for weight in layer.weights
         ]
@@ -154,7 +154,10 @@ class LayerProfile:
 
     @property
     def memory(self) -> int:
-        return sum(p.memory for p in self.weight_profiles)
+        mem = sum(p.memory for p in self.weight_profiles)
+        if isinstance(self._layer, tf.keras.layers.BatchNormalization):
+            mem /= 2
+        return mem
 
     @property
     def int8_fp_weights_memory(self) -> int:
@@ -162,7 +165,10 @@ class LayerProfile:
 
     @property
     def fp_equivalent_memory(self) -> int:
-        return sum(p.fp_equivalent_memory for p in self.weight_profiles)
+        mem = sum(p.fp_equivalent_memory for p in self.weight_profiles)
+        if isinstance(self._layer, tf.keras.layers.BatchNormalization):
+            mem /= 2
+        return mem
 
     def weight_count(
         self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
@@ -173,10 +179,12 @@ class LayerProfile:
                 trainable is None or p.trainable == trainable
             ):
                 count += p.count
+        if isinstance(self._layer, tf.keras.layers.BatchNormalization):
+            count /= 2
         return count
 
     def op_count(
-        self, op_type: Optional[str] = None, precision: Optional[int] = None,
+        self, op_type: Optional[str] = None, precision: Optional[int] = None
     ) -> Optional[int]:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
@@ -233,11 +241,7 @@ class LayerProfile:
     def generate_table_row(
         self, table_config: Mapping[str, Any]
     ) -> Sequence[Union[str, float]]:
-        row = [
-            self._layer.name,
-            self.input_precision or "-",
-            self.output_shape_str,
-        ]
+        row = [self._layer.name, self.input_precision or "-", self.output_shape_str]
         for i in table_config["param_bidtwidths"]:
             n = self.weight_count(i)
             n = _format_table_entry(n, table_config["param_units"])
