@@ -606,6 +606,6 @@ def get_kernel_quantizer(identifier):
     `Quantizer` or `None`
     """
     quantizer = get(identifier)
-    if quantizer and not quantizer._custom_metrics:
-        quantizer._custom_metrics = context.get_training_metrics()
+    if isinstance(quantizer, BaseQuantizer) and not quantizer._custom_metrics:
+        quantizer._custom_metrics = list(context.get_training_metrics())
     return quantizer

@@ -391,3 +391,18 @@ def test_metrics(quantizer):
         # In TF1.14, call() gets called twice, resulting in having an extra initial
         # metrics copy.
         assert len(model.layers[0].kernel_quantizer._metrics) == 2
+
+
+def test_get_kernel_quantizer_assigns_metrics():
+    with lq.context.metrics_scope(["flip_ratio"]):
+        ste_sign = lq.quantizers.get_kernel_quantizer("ste_sign")
+        assert "flip_ratio" in lq.context.get_training_metrics()
+
+    assert isinstance(ste_sign, lq.quantizers.SteSign)
+    assert "flip_ratio" in ste_sign._custom_metrics
+
+
+def test_get_kernel_quantizer_accepts_function():
+    custom_quantizer = lq.quantizers.get_kernel_quantizer(lambda x: x)
+    assert callable(custom_quantizer)
+    assert not hasattr(custom_quantizer, "_custom_metrics")
