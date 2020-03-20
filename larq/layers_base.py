@@ -14,7 +14,7 @@ def _compute_padding(stride, dilation_rate, input_size, filter_size):
     effective_filter_size = (filter_size - 1) * dilation_rate + 1
     output_size = (input_size + stride - 1) // stride
     total_padding = (output_size - 1) * stride + effective_filter_size - input_size
-    total_padding = total_padding if total_padding > 0 else 0
+    total_padding = max(total_padding, 0)
     padding = total_padding // 2
     return padding, padding + (total_padding % 2)
 
@@ -108,12 +108,6 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
             )
         )
 
-    def _get_spatial_padding_same_shape(self, shape):
-        return [
-            size + sum(pad)
-            for size, pad in zip(shape, self._get_spatial_padding_same(shape))
-        ]
-
     def _get_spatial_shape(self, input_shape):
         return (
             input_shape[1:-1]
@@ -130,9 +124,10 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         )
 
     def _get_padding_same_shape(self, input_shape):
-        spatial_shape = self._get_spatial_padding_same_shape(
-            self._get_spatial_shape(input_shape)
-        )
+        spatial_shape = [
+            (size + stride - 1) // stride if size is not None else None
+            for size, stride in zip(self._get_spatial_shape(input_shape), self.strides)
+        ]
         if self.data_format == "channels_last":
             return tf.TensorShape([input_shape[0], *spatial_shape, input_shape[-1]])
         return tf.TensorShape([*input_shape[:2], *spatial_shape])
