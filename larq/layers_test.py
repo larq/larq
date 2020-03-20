@@ -209,16 +209,17 @@ class TestLayers:
     @pytest.mark.parametrize(
         "layer_cls, input_shape",
         [
-            (lq.layers.QuantConv1D, (None, None, 3)),
-            (lq.layers.QuantConv2D, (None, None, None, 3)),
-            (lq.layers.QuantConv3D, (None, None, None, None, 3)),
-            (lq.layers.QuantSeparableConv1D, (None, None, 3)),
-            (lq.layers.QuantSeparableConv2D, (None, None, None, 3)),
-            (lq.layers.QuantDepthwiseConv2D, (None, None, None, 3)),
+            (lq.layers.QuantConv1D, (None, 3)),
+            (lq.layers.QuantConv2D, (None, None, 3)),
+            (lq.layers.QuantConv3D, (None, None, None, 3)),
+            (lq.layers.QuantSeparableConv1D, (None, 3)),
+            (lq.layers.QuantSeparableConv2D, (None, None, 3)),
+            (lq.layers.QuantDepthwiseConv2D, (None, None, 3)),
         ],
     )
     def test_non_zero_padding_unknown_inputs(self, layer_cls, input_shape):
-        layer_cls(16, 3, padding="same", pad_values=1.0).build(input_shape)
+        input = tf.keras.layers.Input(shape=input_shape)
+        layer_cls(16, 3, padding="same", pad_values=1.0)(input)
 
 
 class TestLayerWarns:
