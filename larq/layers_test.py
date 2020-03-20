@@ -217,9 +217,12 @@ class TestLayers:
             (lq.layers.QuantDepthwiseConv2D, (None, None, 3)),
         ],
     )
-    def test_non_zero_padding_unknown_inputs(self, layer_cls, input_shape):
+    @pytest.mark.parametrize("data_format", ["channels_last", "channels_first"])
+    def test_non_zero_padding_unknown_inputs(self, layer_cls, input_shape, data_format):
+        if data_format == "channels_first":
+            input_shape = reversed(input_shape)
         input = tf.keras.layers.Input(shape=input_shape)
-        layer_cls(16, 3, padding="same", pad_values=1.0)(input)
+        layer_cls(16, 3, padding="same", pad_values=1.0, data_format=data_format)(input)
 
 
 class TestLayerWarns:
