@@ -101,12 +101,12 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         )
 
     def _get_spatial_padding_same(self, shape):
-        return tuple(
+        return [
             _compute_padding(stride, dilation_rate, shape[i], filter_size)
             for i, (stride, dilation_rate, filter_size) in enumerate(
                 zip(self.strides, self.dilation_rate, self.kernel_size)
             )
-        )
+        ]
 
     def _get_spatial_shape(self, input_shape):
         return (
@@ -119,9 +119,9 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         input_shape = tf.shape(inputs)
         padding = self._get_spatial_padding_same(self._get_spatial_shape(input_shape))
         return (
-            ((0, 0), *padding, (0, 0))
+            [[0, 0], *padding, [0, 0]]
             if self.data_format == "channels_last"
-            else ((0, 0), (0, 0), *padding)
+            else [[0, 0], [0, 0], *padding]
         )
 
     def _get_padding_same_shape(self, input_shape):
