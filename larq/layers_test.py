@@ -207,22 +207,31 @@ class TestLayers:
         spy.assert_called_once_with(mocker.ANY, mocker.ANY, constant_values=1.0)
 
     @pytest.mark.parametrize(
-        "layer_cls, input_shape",
+        "layer_cls",
         [
-            (lq.layers.QuantConv1D, (None, 3)),
-            (lq.layers.QuantConv2D, (None, None, 3)),
-            (lq.layers.QuantConv3D, (None, None, None, 3)),
-            (lq.layers.QuantSeparableConv1D, (None, 3)),
-            (lq.layers.QuantSeparableConv2D, (None, None, 3)),
-            (lq.layers.QuantDepthwiseConv2D, (None, None, 3)),
+            lq.layers.QuantConv1D,
+            lq.layers.QuantConv2D,
+            lq.layers.QuantConv3D,
+            lq.layers.QuantSeparableConv1D,
+            lq.layers.QuantSeparableConv2D,
+            lq.layers.QuantDepthwiseConv2D,
         ],
     )
     @pytest.mark.parametrize("data_format", ["channels_last", "channels_first"])
-    def test_non_zero_padding_unknown_inputs(self, layer_cls, input_shape, data_format):
+    @pytest.mark.parametrize("static", [True, False])
+    def test_non_zero_padding_shapes(self, layer_cls, data_format, static):
+        layer = layer_cls(
+            16, 3, padding="same", pad_values=1.0, data_format=data_format
+        )
+        input_shape = [32 if static else None] * layer.rank + [3]
         if data_format == "channels_first":
             input_shape = reversed(input_shape)
         input = tf.keras.layers.Input(shape=input_shape)
-        layer_cls(16, 3, padding="same", pad_values=1.0, data_format=data_format)(input)
+
+        layer(input)
+        if static:
+            for dim in layer.output_shape[1:]:
+                assert dim is not None
 
 
 class TestLayerWarns:
