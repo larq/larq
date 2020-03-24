@@ -23,6 +23,7 @@ def get_profile_model():
                 input_quantizer=lq.quantizers.SteTern(),
                 depthwise_quantizer=lq.quantizers.SteTern(),
                 padding="same",
+                pad_values=1.0,
                 use_bias=False,
             ),
             tf.keras.layers.BatchNormalization(scale=False),

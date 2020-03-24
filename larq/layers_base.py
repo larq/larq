@@ -116,7 +116,9 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         )
 
     def _get_padding_same(self, inputs):
-        input_shape = tf.shape(inputs)
+        input_shape = inputs.shape
+        if not input_shape[1:].is_fully_defined():
+            input_shape = tf.shape(inputs)
         padding = self._get_spatial_padding_same(self._get_spatial_shape(input_shape))
         return (
             [[0, 0], *padding, [0, 0]]
