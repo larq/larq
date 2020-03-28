@@ -66,6 +66,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         not claimed by any other optimizer. (Must be passed as keyword argument.)
     """
 
+    _HAS_AGGREGATE_GRAD = True
+
     def __init__(
         self,
         *predicate_optimizer_pairs: Tuple[
@@ -118,7 +120,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             weights.extend(optimizer.weights)
         return weights
 
-    def apply_gradients(self, grads_and_vars, name: Optional[str] = None):
+    def apply_gradients(self, grads_and_vars, name: Optional[str] = None, **kwargs):
         """Apply gradients to variables for each optimizer.
 
         On the first call to `apply_gradients()`, compute the mapping from variables to
@@ -140,7 +142,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         # Apply gradients to each optimizer
         with tf.name_scope(self._name):
             train_ops = [
-                optimizer.apply_gradients(opt_grads_and_vars)
+                optimizer.apply_gradients(opt_grads_and_vars, **kwargs)
                 for optimizer, opt_grads_and_vars in zip(
                     self.optimizers, grad_var_lists
                 )
@@ -265,6 +267,8 @@ class Bop(tf.keras.optimizers.Optimizer):
     # References
     - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
     """
+
+    _HAS_AGGREGATE_GRAD = True
 
     def __init__(
         self, threshold: float = 1e-8, gamma: float = 1e-4, name: str = "Bop", **kwargs

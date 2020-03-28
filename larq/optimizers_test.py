@@ -213,6 +213,14 @@ class TestBopOptimizer:
             target=0,
         )
 
+    def test_mixed_precision(self):
+        opt = lq.optimizers.CaseOptimizer(
+            (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
+            default_optimizer=tf.keras.optimizers.Adam(0.01),
+        )
+        opt = tf.keras.mixed_precision.experimental.LossScaleOptimizer(opt, "dynamic")
+        _test_optimizer(opt, test_kernels_are_binary=True)
+
     def test_bop_tf_1_14_schedules(self):
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
