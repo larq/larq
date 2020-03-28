@@ -299,9 +299,6 @@ class Bop(tf.keras.optimizers.Optimizer):
         var_t = lq.math.sign(-tf.sign(var * m_t - threshold) * var)
         return var.assign(var_t).op
 
-    def _resource_apply_sparse(self, grad, var, indices):
-        raise NotImplementedError()
-
     def get_config(self):
         config = {
             "threshold": self._serialize_hyperparameter("threshold"),
