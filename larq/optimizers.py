@@ -138,12 +138,15 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
 
         # Apply gradients to each optimizer
-        train_ops = [
-            optimizer.apply_gradients(opt_grads_and_vars)
-            for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists)
-        ]
+        with tf.name_scope(self._name):
+            train_ops = [
+                optimizer.apply_gradients(opt_grads_and_vars)
+                for optimizer, opt_grads_and_vars in zip(
+                    self.optimizers, grad_var_lists
+                )
+            ]
 
-        return tf.group(*train_ops, name="train_with_group")
+            return tf.group(*train_ops, name=name or "train_with_group")
 
     def get_config(self):
         optimizer_configs = [opt.get_config() for (_, opt) in self.pred_opt_pairs]
