@@ -52,14 +52,16 @@ import tensorflow as tf
 from larq import context, math, metrics as lq_metrics, utils
 
 __all__ = [
-    "SteSign",
     "ApproxSign",
-    "MagnitudeAwareSign",
-    "SwishSign",
-    "SteTern",
-    "SteHeaviside",
+    "DoReFa",
     "DoReFaQuantizer",
+    "MagnitudeAwareSign",
+    "NoOp",
     "NoOpQuantizer",
+    "SteHeaviside",
+    "SteSign",
+    "SteTern",
+    "SwishSign",
 ]
 
 
@@ -166,7 +168,7 @@ class BaseQuantizer(tf.keras.layers.Layer):
 
 
 @utils.register_keras_custom_object
-class NoOpQuantizer(BaseQuantizer):
+class NoOp(BaseQuantizer):
     r"""Instantiates a serializable no-op quantizer.
 
     \\[
@@ -202,6 +204,11 @@ class NoOpQuantizer(BaseQuantizer):
 
     def get_config(self):
         return {**super().get_config(), "precision": self.precision}
+
+
+# `NoOp` used to be called `NoOpQuantizer`; this alias is for
+# backwards-compatibility.
+NoOpQuantizer = NoOp
 
 
 @utils.register_alias("ste_sign")
@@ -508,7 +515,7 @@ class SteTern(BaseQuantizer):
 
 @utils.register_alias("dorefa_quantizer")
 @utils.register_keras_custom_object
-class DoReFaQuantizer(BaseQuantizer):
+class DoReFa(BaseQuantizer):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -529,7 +536,7 @@ class DoReFaQuantizer(BaseQuantizer):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.DoReFaQuantizer
+    quantizers.DoReFa
     ```
 
     # Arguments
@@ -564,6 +571,11 @@ class DoReFaQuantizer(BaseQuantizer):
 
     def get_config(self):
         return {**super().get_config(), "k_bit": self.precision}
+
+
+# `DoReFa` used to be called `DoReFaQuantizer`; this alias is for
+# backwards-compatibility.
+DoReFaQuantizer = DoReFa
 
 
 Quantizer = Union[tf.keras.layers.Layer, Callable[[tf.Tensor], tf.Tensor]]

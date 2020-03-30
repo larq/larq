@@ -20,7 +20,7 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 
 !!! example
     ```python
-    no_op_quantizer = lq.quantizers.NoOpQuantizer(precision=1)
+    no_op_quantizer = lq.quantizers.NoOp(precision=1)
     layer = lq.layers.QuantDense(16, kernel_quantizer=no_op_quantizer)
 
     case_optimizer = lq.optimizers.CaseOptimizer(
@@ -243,11 +243,11 @@ class Bop(tf.keras.optimizers.Optimizer):
 
     !!! warning
         The `is_binary_variable` check of this optimizer will only target variables that
-        have been explicitly marked as being binary using `NoOpQuantizer(precision=1)`.
+        have been explicitly marked as being binary using `NoOp(precision=1)`.
 
     !!! example
         ```python
-        no_op_quantizer = lq.quantizers.NoOpQuantizer(precision=1)
+        no_op_quantizer = lq.quantizers.NoOp(precision=1)
         layer = lq.layers.QuantDense(16, kernel_quantizer=no_op_quantizer)
 
         optimizer = lq.optimizers.CaseOptimizer(
