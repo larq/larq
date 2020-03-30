@@ -53,12 +53,12 @@ class TestCommonFunctionality:
         assert type(fn.precision) == int
 
     def test_noop_serialization(self):
-        fn = lq.quantizers.get(lq.quantizers.NoOpQuantizer(precision=1))
-        assert fn.__class__ == lq.quantizers.NoOpQuantizer
+        fn = lq.quantizers.get(lq.quantizers.NoOp(precision=1))
+        assert fn.__class__ == lq.quantizers.NoOp
         assert fn.precision == 1
         config = lq.quantizers.serialize(fn)
         fn = lq.quantizers.deserialize(config)
-        assert fn.__class__ == lq.quantizers.NoOpQuantizer
+        assert fn.__class__ == lq.quantizers.NoOp
         assert fn.precision == 1
 
     def test_invalid_usage(self):
@@ -217,7 +217,7 @@ class TestQuantization:
 
     def test_dorefa_quantize(self):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaQuantizer(2)(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(2)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         k_bit = 2
@@ -333,7 +333,7 @@ class TestGradients:
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.DoReFaQuantizer(2)(tf_x)
+            activation = lq.quantizers.DoReFa(2)(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), ste_grad(x))
 
@@ -347,7 +347,7 @@ class TestGradients:
         ("swish_sign", lq.quantizers.SwishSign),
         ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
         ("ste_tern", lq.quantizers.SteTern),
-        ("dorefa_quantizer", lq.quantizers.DoReFaQuantizer),
+        ("dorefa_quantizer", lq.quantizers.DoReFa),
     ],
 )
 def test_metrics(quantizer):
@@ -406,3 +406,8 @@ def test_get_kernel_quantizer_accepts_function():
     custom_quantizer = lq.quantizers.get_kernel_quantizer(lambda x: x)
     assert callable(custom_quantizer)
     assert not hasattr(custom_quantizer, "_custom_metrics")
+
+
+def test_backwards_compat_aliases():
+    assert lq.quantizers.DoReFaQuantizer == lq.quantizers.DoReFa
+    assert lq.quantizers.NoOpQuantizer == lq.quantizers.NoOp
