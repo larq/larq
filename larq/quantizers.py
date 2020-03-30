@@ -536,7 +536,7 @@ class DoReFa(BaseQuantizer):
     \end{cases}\\]
 
     ```plot-activation
-    quantizers.DoReFaQuantizer
+    quantizers.DoReFa
     ```
 
     # Arguments

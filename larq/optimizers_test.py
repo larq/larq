@@ -94,7 +94,7 @@ class TestCaseOptimizer:
                     lq.layers.QuantDense(
                         64,
                         input_quantizer="ste_sign",
-                        kernel_quantizer=lq.quantizers.NoOpQuantizer(precision=1),
+                        kernel_quantizer=lq.quantizers.NoOp(precision=1),
                         activation="relu",
                     ),
                     tf.keras.layers.Dense(10, activation="softmax"),
@@ -145,7 +145,7 @@ class TestCaseOptimizer:
                 lq.layers.QuantDense(
                     64,
                     input_quantizer="ste_sign",
-                    kernel_quantizer=lq.quantizers.NoOpQuantizer(precision=1),
+                    kernel_quantizer=lq.quantizers.NoOp(precision=1),
                     activation="relu",
                 ),
                 tf.keras.layers.Dense(10, activation="softmax"),
