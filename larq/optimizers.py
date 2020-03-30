@@ -66,6 +66,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         not claimed by any other optimizer. (Must be passed as keyword argument.)
     """
 
+    _HAS_AGGREGATE_GRAD = True
+
     def __init__(
         self,
         *predicate_optimizer_pairs: Tuple[
@@ -118,7 +120,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             weights.extend(optimizer.weights)
         return weights
 
-    def apply_gradients(self, grads_and_vars, name: Optional[str] = None):
+    def apply_gradients(self, grads_and_vars, name: Optional[str] = None, **kwargs):
         """Apply gradients to variables for each optimizer.
 
         On the first call to `apply_gradients()`, compute the mapping from variables to
@@ -138,12 +140,15 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
 
         # Apply gradients to each optimizer
-        train_ops = [
-            optimizer.apply_gradients(opt_grads_and_vars)
-            for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists)
-        ]
+        with tf.name_scope(self._name):
+            train_ops = [
+                optimizer.apply_gradients(opt_grads_and_vars, **kwargs)
+                for optimizer, opt_grads_and_vars in zip(
+                    self.optimizers, grad_var_lists
+                )
+            ]
 
-        return tf.group(*train_ops, name="train_with_group")
+            return tf.group(*train_ops, name=name or "train_with_group")
 
     def get_config(self):
         optimizer_configs = [opt.get_config() for (_, opt) in self.pred_opt_pairs]
@@ -263,6 +268,8 @@ class Bop(tf.keras.optimizers.Optimizer):
     - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
     """
 
+    _HAS_AGGREGATE_GRAD = True
+
     def __init__(
         self, threshold: float = 1e-8, gamma: float = 1e-4, name: str = "Bop", **kwargs
     ):
@@ -291,9 +298,6 @@ class Bop(tf.keras.optimizers.Optimizer):
         m_t = m.assign_add(gamma * (grad - m))
         var_t = lq.math.sign(-tf.sign(var * m_t - threshold) * var)
         return var.assign(var_t).op
-
-    def _resource_apply_sparse(self, grad, var, indices):
-        raise NotImplementedError()
 
     def get_config(self):
         config = {
