@@ -11,14 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tf-version: [1.14.0, 1.15.2, 2.0.1, 2.1.0, 2.2.0rc2]
+        tf-version: [1.14.0, 1.15.2, 2.0.1, 2.1.0]
+        python-version: [3.7]
+        include:
+          - tf-version: 2.2.0rc2
+            python-version: 3.8
 
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           pip install tensorflow==${{matrix.tf-version}}
