@@ -166,6 +166,9 @@ class BaseQuantizer(tf.keras.layers.Layer):
     def non_trainable_weights(self):
         return []
 
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
 
 @utils.register_keras_custom_object
 class NoOp(BaseQuantizer):
