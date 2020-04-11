@@ -44,6 +44,4 @@ jobs:
       - name: Generate coverage report
         run: pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
       - name: Upload coverage to Codecov
-        run: curl -s https://codecov.io/bash | bash -s -- -t $token -f ./coverage.xml -F unittests
-        env:
-          token: ${{secrets.CODECOV_TOKEN}}
+        run: curl -s https://codecov.io/bash | bash -s -- -f ./coverage.xml -F unittests
