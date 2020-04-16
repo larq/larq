@@ -246,7 +246,7 @@ class SteSign(BaseQuantizer):
 
     # References
     - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
-      Activations Constrained to +1 or -1](http://arxiv.org/abs/1602.02830)
+      Activations Constrained to +1 or -1](https://arxiv.org/abs/1602.02830)
     """
     precision = 1
 
@@ -292,7 +292,7 @@ class ApproxSign(BaseQuantizer):
     # References
     - [Bi-Real Net: Enhancing the Performance of 1-bit CNNs With Improved
       Representational Capability and Advanced
-      Training Algorithm](http://arxiv.org/abs/1808.00278)
+      Training Algorithm](https://arxiv.org/abs/1808.00278)
     """
     precision = 1
 
@@ -481,7 +481,7 @@ class SteTern(BaseQuantizer):
         available.
 
     # References
-    - [Ternary Weight Networks](http://arxiv.org/abs/1605.04711)
+    - [Ternary Weight Networks](https://arxiv.org/abs/1605.04711)
     """
 
     precision = 2
