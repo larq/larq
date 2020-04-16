@@ -14,7 +14,7 @@ from larq import utils
 @utils.register_alias("flip_ratio")
 @utils.register_keras_custom_object
 class FlipRatio(tf.keras.metrics.Metric):
-    """Computes the mean ration of changed values in a given tensor.
+    """Computes the mean ratio of changed values in a given tensor.
 
     !!! example
         ```python
