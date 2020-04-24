@@ -222,7 +222,7 @@ class LayerProfile:
             return "?"
 
     @property
-    def output_pixels(self) -> int:
+    def output_pixels(self) -> Optional[int]:
         """Number of pixels for a single feature map (1 for fully connected layers)."""
         if not self.output_shape:
             return None
