@@ -150,7 +150,7 @@ class LayerProfile:
 
         self.op_profiles = []
 
-        if isinstance(layer, mac_containing_layers):
+        if isinstance(layer, mac_containing_layers) and self.output_pixels:
             for p in self.weight_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
@@ -224,12 +224,13 @@ class LayerProfile:
     @property
     def output_pixels(self) -> int:
         """Number of pixels for a single feature map (1 for fully connected layers)."""
+        if not self.output_shape:
+            return None
         if len(self.output_shape) == 4:
             return int(np.prod(self.output_shape[1:3]))
-        elif len(self.output_shape) == 2:
+        if len(self.output_shape) == 2:
             return 1
-        else:
-            raise NotImplementedError()
+        raise NotImplementedError()
 
     @property
     def unique_param_bidtwidths(self) -> Sequence[int]:
