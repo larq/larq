@@ -54,3 +54,25 @@ snapshots['test_summary 2'] = '''+sequential_1 stats--------------------+
 | Number of MACs                 0      |
 +---------------------------------------+
 '''
+
+snapshots['test_subclass_model_summary 1'] = '''+toy_model stats-------------------------------------------------------------+
+| Layer                     Input prec.   Outputs  # 1-bit  # 32-bit  Memory |
+|                                 (bit)                x 1       x 1    (kB) |
++----------------------------------------------------------------------------+
+| quant_conv2d                        -  multiple      864        32    0.23 |
+| global_average_pooling2d            -  multiple        0         0       0 |
+| dense                               -  multiple        0       330    1.29 |
++----------------------------------------------------------------------------+
+| Total                                                864       362    1.52 |
++----------------------------------------------------------------------------+
++toy_model summary------------------------+
+| Total params                   1.23 k   |
+| Trainable params               1.23 k   |
+| Non-trainable params           0        |
+| Model size                     1.52 KiB |
+| Model size (8-bit FP weights)  470.00 B |
+| Float-32 Equivalent            4.79 KiB |
+| Compression Ratio of Memory    0.32     |
+| Number of MACs                 0        |
++-----------------------------------------+
+'''

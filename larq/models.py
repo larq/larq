@@ -150,7 +150,7 @@ class LayerProfile:
 
         self.op_profiles = []
 
-        if isinstance(layer, mac_containing_layers):
+        if isinstance(layer, mac_containing_layers) and self.output_pixels:
             for p in self.weight_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
@@ -190,7 +190,10 @@ class LayerProfile:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
-        if isinstance(self._layer, op_count_supported_layer_types):
+        if (
+            isinstance(self._layer, op_count_supported_layer_types)
+            and self.output_pixels
+        ):
             count = 0
             for op in self.op_profiles:
                 if (precision is None or op.precision == precision) and (
@@ -222,14 +225,15 @@ class LayerProfile:
             return "?"
 
     @property
-    def output_pixels(self) -> int:
+    def output_pixels(self) -> Optional[int]:
         """Number of pixels for a single feature map (1 for fully connected layers)."""
+        if not self.output_shape:
+            return None
         if len(self.output_shape) == 4:
             return int(np.prod(self.output_shape[1:3]))
-        elif len(self.output_shape) == 2:
+        if len(self.output_shape) == 2:
             return 1
-        else:
-            raise NotImplementedError()
+        raise NotImplementedError()
 
     @property
     def unique_param_bidtwidths(self) -> Sequence[int]:

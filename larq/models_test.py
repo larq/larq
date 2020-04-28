@@ -6,6 +6,23 @@ import larq as lq
 from larq.models import ModelProfile
 
 
+class ToyModel(tf.keras.Model):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.conv = lq.layers.QuantConv2D(
+            filters=32,
+            kernel_size=(3, 3),
+            kernel_quantizer="ste_sign",
+            input_shape=(64, 64, 1),
+            padding="same",
+        )
+        self.pool = tf.keras.layers.GlobalAvgPool2D()
+        self.dense = tf.keras.layers.Dense(10, activation="softmax")
+
+    def call(self, inputs):
+        return self.dense(self.pool(self.conv(inputs)))
+
+
 def get_profile_model():
     return tf.keras.models.Sequential(
         [
@@ -124,6 +141,14 @@ def test_summary(snapshot, capsys):
     model = tf.keras.models.Sequential(
         [tf.keras.layers.Lambda(lambda x: tf.zeros(2), input_shape=(32, 32))]
     )
+    lq.models.summary(model)
+    captured = capsys.readouterr()
+    snapshot.assert_match(captured.out)
+
+
+def test_subclass_model_summary(snapshot, capsys):
+    model = ToyModel()
+    model.build((None, 32, 32, 3))
     lq.models.summary(model)
     captured = capsys.readouterr()
     snapshot.assert_match(captured.out)
