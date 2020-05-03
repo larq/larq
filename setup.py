@@ -33,7 +33,7 @@ setup(
             "packaging>=19.2,<21.0",
             "pytest>=5.2.4,<5.5.0",
             "pytest-cov~=2.8.1",
-            "pytest-xdist>=1.30,<1.32",
+            "pytest-xdist>=1.30,<1.33",
             "pytest-mock>=2.0,<3.2",
             "pytype>=2020.01.07,<2020.3.0",
             "snapshottest~=0.5.1",
