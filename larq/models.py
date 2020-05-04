@@ -423,7 +423,7 @@ class SummaryTable(AsciiTable):
 
 
 def summary(
-    model, print_fn: Callable[[str], Any] = print, include_macs: bool = True
+    model, print_fn: Callable[[str], Any] = None, include_macs: bool = True
 ) -> None:
     """Prints a string summary of the network.
 
@@ -466,6 +466,9 @@ def summary(
             "`model.build()` or calling `model.fit()` with some data, or specify an "
             "`input_shape` argument in the first layer(s) for automatic build."
         )
+
+    if not print_fn:
+        print_fn = print
 
     model_profile = ModelProfile(model)
     print_fn(
