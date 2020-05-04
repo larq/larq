@@ -59,11 +59,12 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     `default_optimizer == None`, the variable is not trained.
 
     # Arguments
-    predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.Optimizer)` pairs,
-        where `pred`  takes one `tf.Variable` as argument and returns `True` if the
-        optimizer should be used for that variable, e.g. `pred(var) == True`.
-    default_optimizer: A `tf.keras.optimizers.Optimizer` to be applied to any variable
-        not claimed by any other optimizer. (Must be passed as keyword argument.)
+        predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.Optimizer)`
+            pairs, where `pred`  takes one `tf.Variable` as argument and returns `True`
+            if the optimizer should be used for that variable, e.g. `pred(var) == True`.
+        default_optimizer: A `tf.keras.optimizers.Optimizer` to be applied to any
+            variable not claimed by any other optimizer. (Must be passed as keyword
+            argument.)
     """
 
     _HAS_AGGREGATE_GRAD = True
@@ -260,12 +261,12 @@ class Bop(tf.keras.optimizers.Optimizer):
         ```
 
     # Arguments
-    threshold: magnitude of average gradient signal required to flip a weight.
-    gamma: the adaptivity rate.
-    name: name of the optimizer.
+        threshold: magnitude of average gradient signal required to flip a weight.
+        gamma: the adaptivity rate.
+        name: name of the optimizer.
 
     # References
-    - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
+        - [Latent Weights Do Not Exist: Rethinking Binarized Neural Network Optimization](https://papers.nips.cc/paper/8971-latent-weights-do-not-exist-rethinking-binarized-neural-network-optimization)
     """
 
     _HAS_AGGREGATE_GRAD = True
@@ -322,6 +323,6 @@ class Bop(tf.keras.optimizers.Optimizer):
         This is an example of a predictate that can be used by the `CaseOptimizer`.
 
         # Arguments
-        var: a `tf.Variable`.
+            var: a `tf.Variable`.
         """
         return getattr(var, "precision", 32) == 1
