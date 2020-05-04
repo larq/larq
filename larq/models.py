@@ -423,7 +423,9 @@ class SummaryTable(AsciiTable):
 
 
 def summary(
-    model, print_fn: Callable[[str], Any] = None, include_macs: bool = True
+    model: tf.keras.models.Model,
+    print_fn: Callable[[str], Any] = None,
+    include_macs: bool = True,
 ) -> None:
     """Prints a string summary of the network.
 
