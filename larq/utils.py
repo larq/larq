@@ -51,7 +51,7 @@ def set_precision(precision: int = 32):
     """A decorator to set the precision of a quantizer function
 
     # Arguments
-    precision: An integer defining the precision of the output.
+        precision: An integer defining the precision of the output.
     """
 
     def decorator(function):
