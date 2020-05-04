@@ -456,7 +456,7 @@ def summary(
         model: model instance.
         print_fn: Print function to use. Defaults to `print`. You can set it to a custom
             function in order to capture the string summary.
-        include_macs: whether or not to include the number of MAC-operations in the 
+        include_macs: whether or not to include the number of MAC-operations in the
             summary.
 
     # Raises

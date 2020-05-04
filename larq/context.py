@@ -31,7 +31,7 @@ def quantized_scope(quantize):
 
     # Arguments
         quantize: If `should_quantize` is `True`, `QuantizedVariable` will return their
-            quantized value in the forward pass. If `False`, `QuantizedVariable` will 
+            quantized value in the forward pass. If `False`, `QuantizedVariable` will
             act as a latent variable.
     """
     backup = should_quantize()
