@@ -451,13 +451,14 @@ def summary(
     - ratio of MAC operations that is binarized and can be accelated with XNOR-gates.
 
     # Arguments
-    model: `tf.keras` model instance.
-    print_fn: Print function to use. Defaults to `print`. You can set it to a custom
-        function in order to capture the string summary.
-    include_macs: whether or not to include the number of MAC-operations in the summary.
+        model: model instance.
+        print_fn: Print function to use. Defaults to `print`. You can set it to a custom
+            function in order to capture the string summary.
+        include_macs: whether or not to include the number of MAC-operations in the 
+            summary.
 
     # Raises
-    ValueError: if called before the model is built.
+        ValueError: if called before the model is built.
     """
 
     if not model.built:
