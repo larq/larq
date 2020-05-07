@@ -41,8 +41,8 @@ Check out our examples on how to train a Binarized Neural Network in just a few 
 
 Before installing Larq, please install:
 
-- [Python](https://www.python.org/) version `3.6` or `3.7`
-- [Tensorflow](https://www.tensorflow.org/install) version `1.14`, `1.15`, `2.0.0`, or `2.1.0`:
+- [Python](https://www.python.org/) version `3.6`, `3.7` or `3.8`
+- [Tensorflow](https://www.tensorflow.org/install) version `1.14`, `1.15`, `2.0`, `2.1` or `2.2`:
   ```shell
   pip install tensorflow  # or tensorflow-gpu
   ```
