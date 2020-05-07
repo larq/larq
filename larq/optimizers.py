@@ -139,10 +139,21 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             if var.name in self.var_opt_mapping:
                 grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
 
+        with tf.init_scope():
+            for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists):
+                optimizer._create_slots([v for (_, v) in grads_and_vars])
+
+        return tf.distribute.get_replica_context().merge_call(
+            self._apply_gradients, args=(grad_var_lists, name), kwargs=kwargs
+        )
+
+    def _apply_gradients(self, distribution, grad_var_lists, name, **kwargs):
         # Apply gradients to each optimizer
         with tf.name_scope(self._name):
             train_ops = [
-                optimizer.apply_gradients(opt_grads_and_vars, **kwargs)
+                distribution.extended.call_for_each_replica(
+                    optimizer.apply_gradients, args=(opt_grads_and_vars,), kwargs=kwargs
+                )
                 for optimizer, opt_grads_and_vars in zip(
                     self.optimizers, grad_var_lists
                 )
