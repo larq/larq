@@ -17,10 +17,10 @@ def sign(x):
     return a binary value and will never be zero.
 
     # Arguments
-    `x`: Input Tensor
+        `x`: Input Tensor
 
     # Returns
-    A Tensor with same type as `x`.
+        A Tensor with same type as `x`.
     """
     return tf.sign(tf.sign(x) + 0.1)
 
@@ -36,9 +36,9 @@ def heaviside(x):
     \\]
 
     # Arguments
-    `x`: Input Tensor
+        `x`: Input Tensor
 
     # Returns
-    A Tensor with same type as `x`.
+        A Tensor with same type as `x`.
     """
     return tf.sign(tf.nn.relu(x))

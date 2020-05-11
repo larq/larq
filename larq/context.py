@@ -30,9 +30,9 @@ def quantized_scope(quantize):
         ```
 
     # Arguments
-    quantize: If `should_quantize` is `True`, `QuantizedVariable` will return their
-        quantized value in the forward pass. If `False`, `QuantizedVariable` will act
-        as a latent variable.
+        quantize: If `should_quantize` is `True`, `QuantizedVariable` will return their
+            quantized value in the forward pass. If `False`, `QuantizedVariable` will
+            act as a latent variable.
     """
     backup = should_quantize()
     _quantized_scope.should_quantize = quantize
@@ -63,8 +63,8 @@ def metrics_scope(metrics=[]):
         ```
 
     # Arguments
-    metrics: Iterable of metrics to add to quantizers defined inside this context.
-        Currently only the `flip_ratio` metric is available.
+        metrics: Iterable of metrics to add to quantizers defined inside this context.
+            Currently only the `flip_ratio` metric is available.
     """
     for metric in metrics:
         if metric not in _available_metrics:
@@ -91,6 +91,6 @@ def get_training_metrics():
         ```
 
     # Returns
-    A set of training metrics in the current scope.
+        A set of training metrics in the current scope.
     """
     return _global_training_metrics

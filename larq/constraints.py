@@ -33,7 +33,7 @@ class WeightClip(tf.keras.constraints.Constraint):
     to be between `[-clip_value, clip_value]`.
 
     # Arguments
-    clip_value: The value to clip incoming weights.
+        clip_value: The value to clip incoming weights.
     """
 
     def __init__(self, clip_value: float = 1):

@@ -423,7 +423,9 @@ class SummaryTable(AsciiTable):
 
 
 def summary(
-    model, print_fn: Callable[[str], Any] = print, include_macs: bool = True
+    model: tf.keras.models.Model,
+    print_fn: Callable[[str], Any] = None,
+    include_macs: bool = True,
 ) -> None:
     """Prints a string summary of the network.
 
@@ -451,13 +453,14 @@ def summary(
     - ratio of MAC operations that is binarized and can be accelated with XNOR-gates.
 
     # Arguments
-    model: `tf.keras` model instance.
-    print_fn: Print function to use. Defaults to `print`. You can set it to a custom
-        function in order to capture the string summary.
-    include_macs: whether or not to include the number of MAC-operations in the summary.
+        model: model instance.
+        print_fn: Print function to use. Defaults to `print`. You can set it to a custom
+            function in order to capture the string summary.
+        include_macs: whether or not to include the number of MAC-operations in the
+            summary.
 
     # Raises
-    ValueError: if called before the model is built.
+        ValueError: if called before the model is built.
     """
 
     if not model.built:
@@ -466,6 +469,9 @@ def summary(
             "`model.build()` or calling `model.fit()` with some data, or specify an "
             "`input_shape` argument in the first layer(s) for automatic build."
         )
+
+    if not print_fn:
+        print_fn = print
 
     model_profile = ModelProfile(model)
     print_fn(

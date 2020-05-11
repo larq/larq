@@ -26,11 +26,11 @@ class QuantizedVariable(tf.Variable):
         """Creates an QuantizedVariable instance.
 
         # Arguments
-        variable: A floating-point resource variable to wrap.
-        quantizer: An optional quantizer to transform the floating-point
-            variable to a fake quantized variable.
-        precision: An optional integer defining the precision of the quantized
-            variable. If `None`, `quantizer.precision` is used.
+            variable: A floating-point resource variable to wrap.
+            quantizer: An optional quantizer to transform the floating-point
+                variable to a fake quantized variable.
+            precision: An optional integer defining the precision of the quantized
+                variable. If `None`, `quantizer.precision` is used.
         """
         if not resource_variable_ops.is_resource_variable(variable):
             raise ValueError(
@@ -68,14 +68,14 @@ class QuantizedVariable(tf.Variable):
         DistributedVariables and its subclasses to work properly.
 
         # Arguments
-        variable: A floating-point resource variable to wrap.
-        quantizer: An optional quantizer to transform the floating-point variable to a
-            fake quantized variable.
-        precision: An optional integer defining the precision of the quantized variable.
-            If `None`, `quantizer.precision` is used.
+            variable: A floating-point resource variable to wrap.
+            quantizer: An optional quantizer to transform the floating-point variable to
+                a fake quantized variable.
+            precision: An optional integer defining the precision of the quantized
+                variable. If `None`, `quantizer.precision` is used.
 
         # Returns
-        A QuantizedVariable that wraps the variable.
+            A QuantizedVariable that wraps the variable.
         """
         if not isinstance(variable, (DistributedVariable, AggregatingVariable)):  # type: ignore
             return cls(variable, quantizer, precision)
@@ -108,15 +108,16 @@ class QuantizedVariable(tf.Variable):
         AutoCastVariable. We return the original variable in that case.
 
         # Arguments
-        variable: A tf.Variable or op.
-        quantizer: An optional quantizer to transform the floating-point variable to a
-            fake quantized variable.
-        precision: An optional integer defining the precision of the quantized variable.
-            If `None`, `quantizer.precision` is used.
-        wrap: A boolean to define whether to wrap the variable in an QuantizedVariable.
+            variable: A tf.Variable or op.
+            quantizer: An optional quantizer to transform the floating-point variable to
+                a fake quantized variable.
+            precision: An optional integer defining the precision of the quantized
+                variable. If `None`, `quantizer.precision` is used.
+            wrap: A boolean to define whether to wrap the variable in a
+                `QuantizedVariable`.
 
         # Returns
-        An QuantizedVariable if wrap is True and variable is a resource variable.
+            A QuantizedVariable if wrap is True and variable is a resource variable.
         """
         if wrap and resource_variable_ops.is_resource_variable(variable):
             return QuantizedVariable.from_variable(variable, quantizer, precision)

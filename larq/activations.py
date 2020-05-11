@@ -35,10 +35,10 @@ def hard_tanh(x: tf.Tensor) -> tf.Tensor:
     ```
 
     # Arguments
-    x: Input tensor.
+        x: Input tensor.
 
     # Returns
-    Hard tanh activation.
+        Hard tanh activation.
     """
     return tf.clip_by_value(x, -1, 1)
 
@@ -53,11 +53,11 @@ def leaky_tanh(x: tf.Tensor, alpha: float = 0.2) -> tf.Tensor:
     ```
 
     # Arguments
-    x: Input tensor.
-    alpha: Slope of the activation function outside of [-1, 1].
+        x: Input tensor.
+        alpha: Slope of the activation function outside of [-1, 1].
 
     # Returns
-    Leaky tanh activation.
+        Leaky tanh activation.
     """
     return (
         tf.clip_by_value(x, -1, 1)

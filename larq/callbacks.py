@@ -17,18 +17,19 @@ class HyperparameterScheduler(keras.callbacks.Callback):
             HyperparameterScheduler(lambda x: 0.001 * (0.1 ** (x // 30)), "gamma", bop)
         ]
         ```
+
     # Arguments
-    schedule: a function that takes an epoch index as input
-        (integer, indexed from 0) and returns a new hyperparameter as output.
-    hyperparameter: str. the name of the hyperparameter to be scheduled.
-    optimizer: the optimizer that contains the hyperparameter that will be scheduled.
-        Defaults to `self.model.optimizer` if `optimizer == None`.
-    update_freq: str (optional), denotes on what update_freq to change the
-        hyperparameter. Can be either "epoch" (default) or "step".
-    verbose: int. 0: quiet, 1: update messages.
-    log_name: str (optional), under which name to log this hyperparameter to
-        Tensorboard. If `None`, defaults to `hyperparameter`. Use this if you have
-        several schedules for the same hyperparameter on different optimizers.
+        schedule: a function that takes an epoch index as input
+            (integer, indexed from 0) and returns a new hyperparameter as output.
+        hyperparameter: str. the name of the hyperparameter to be scheduled.
+        optimizer: the optimizer that contains the hyperparameter that will be scheduled.
+            Defaults to `self.model.optimizer` if `optimizer == None`.
+        update_freq: str (optional), denotes on what update_freq to change the
+            hyperparameter. Can be either "epoch" (default) or "step".
+        verbose: int. 0: quiet, 1: update messages.
+        log_name: str (optional), under which name to log this hyperparameter to
+            Tensorboard. If `None`, defaults to `hyperparameter`. Use this if you have
+            several schedules for the same hyperparameter on different optimizers.
     """
 
     def __init__(
