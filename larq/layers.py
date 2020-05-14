@@ -1016,10 +1016,10 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
         `depth` and `rows` and `cols` values might have changed due to padding.
 
     # References
-    - [A guide to convolution arithmetic for deep
-      learning](https://arxiv.org/abs/1603.07285v1)
-    - [Deconvolutional
-      Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+        - [A guide to convolution arithmetic for deep
+            learning](https://arxiv.org/abs/1603.07285v1)
+        - [Deconvolutional
+            Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
     """
 
     def __init__(
