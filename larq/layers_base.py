@@ -103,9 +103,7 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
     def __init__(self, *args, pad_values=0.0, **kwargs):
         self.pad_values = pad_values
         super().__init__(*args, **kwargs)
-
-    def _is_native_padding(self):
-        return self.padding != "same" or (
+        self._is_native_padding = self.padding != "same" or (
             not tf.is_tensor(self.pad_values) and self.pad_values == 0.0
         )
 
@@ -148,14 +146,14 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         return tf.TensorShape([*input_shape[:2], *spatial_shape])
 
     def build(self, input_shape):
-        if self._is_native_padding():
+        if self._is_native_padding:
             super().build(input_shape)
         else:
             with utils.patch_object(self, "padding", "valid"):
                 super().build(self._get_padding_same_shape(input_shape))
 
     def call(self, inputs):
-        if self._is_native_padding():
+        if self._is_native_padding:
             return super().call(inputs)
 
         inputs = tf.pad(
