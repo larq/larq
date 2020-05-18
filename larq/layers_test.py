@@ -203,8 +203,11 @@ class TestLayers:
         ref_layer = layer_cls(*args, padding="same", **kwargs)
         spy = mocker.spy(tf, "pad")
         layer = layer_cls(*args, padding="same", pad_values=1.0, **kwargs)
+        layer.build(inputs.shape)
+        conv_op = getattr(layer, "_convolution_op", None)
         assert layer(inputs).shape == ref_layer(inputs).shape
         spy.assert_called_once_with(mocker.ANY, mocker.ANY, constant_values=1.0)
+        assert conv_op == getattr(layer, "_convolution_op", None)
 
     @pytest.mark.parametrize(
         "layer_cls",
