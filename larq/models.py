@@ -262,40 +262,40 @@ class LayerProfile:
 
 class ModelProfile(LayerProfile):
     def __init__(self, model: tf.keras.models.Model):
-        self.layer_profiles = [LayerProfile(l) for l in model.layers]
+        self.layer_profiles = [LayerProfile(layer) for layer in model.layers]
 
     @property
     def memory(self) -> int:
-        return sum(l.memory for l in self.layer_profiles)
+        return sum(lp.memory for lp in self.layer_profiles)
 
     @property
     def int8_fp_weights_memory(self) -> int:
-        return sum(l.int8_fp_weights_memory for l in self.layer_profiles)
+        return sum(lp.int8_fp_weights_memory for lp in self.layer_profiles)
 
     @property
     def fp_equivalent_memory(self) -> int:
-        return sum(l.fp_equivalent_memory for l in self.layer_profiles)
+        return sum(lp.fp_equivalent_memory for lp in self.layer_profiles)
 
     def weight_count(
         self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
     ) -> int:
-        return sum(l.weight_count(bitwidth, trainable) for l in self.layer_profiles)
+        return sum(lp.weight_count(bitwidth, trainable) for lp in self.layer_profiles)
 
     def op_count(
         self, op_type: Optional[str] = None, bitwidth: Optional[int] = None
     ) -> int:
-        return sum(l.op_count(op_type, bitwidth) or 0 for l in self.layer_profiles)
+        return sum(lp.op_count(op_type, bitwidth) or 0 for lp in self.layer_profiles)
 
     @property
     def unique_param_bidtwidths(self) -> Sequence[int]:
         return sorted(
-            set(_flatten(l.unique_param_bidtwidths for l in self.layer_profiles))
+            set(_flatten(lp.unique_param_bidtwidths for lp in self.layer_profiles))
         )
 
     @property
     def unique_op_precisions(self) -> Sequence[int]:
         return sorted(
-            set(_flatten(l.unique_op_precisions for l in self.layer_profiles))
+            set(_flatten(lp.unique_op_precisions for lp in self.layer_profiles))
         )
 
     def _generate_table_header(self, table_config: Mapping[str, Any]) -> Sequence[str]:
