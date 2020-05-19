@@ -48,7 +48,6 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 from typing import Callable, Union
 
 import tensorflow as tf
-
 from larq import context, math, metrics as lq_metrics, utils
 
 __all__ = [
@@ -543,6 +542,11 @@ class DoReFa(BaseQuantizer):
     1 &  0 \leq x \leq 1 \\\
     0 & \text{else}
     \end{cases}\\]
+
+    !!! warning
+       While the DoReFa paper describes how to do quantization for both weights and
+       activations, this implementation is only valid for activations, and this
+       quantizer should therefore not be used as a kernel quantizer.
 
     ```plot-activation
     quantizers.DoReFa
