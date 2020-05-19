@@ -544,6 +544,11 @@ class DoReFa(BaseQuantizer):
     0 & \text{else}
     \end{cases}\\]
 
+    !!! warning
+       While the DoReFa paper describes how to do quantization for both weights and
+       activations, this implementation is only valid for activations, and this
+       quantizer should therefore not be used as a kernel quantizer.
+
     ```plot-activation
     quantizers.DoReFa
     ```
