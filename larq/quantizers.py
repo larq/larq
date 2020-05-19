@@ -48,6 +48,7 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 from typing import Callable, Union
 
 import tensorflow as tf
+
 from larq import context, math, metrics as lq_metrics, utils
 
 __all__ = [
