@@ -65,7 +65,7 @@ class FlipRatio(tf.keras.metrics.Metric):
 
     def update_state(self, values, sample_weight=None):
         if not self.built:
-            self._build(values.shape)
+            self.build(values.shape)
 
         values = tf.cast(values, self.values_dtype)
         unchanged_values = tf.math.count_nonzero(
