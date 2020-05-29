@@ -36,12 +36,6 @@ class FlipRatio(tf.keras.metrics.Metric):
         self.built = False
         self.values_dtype = tf.as_dtype(values_dtype)
 
-    def __call__(self, inputs, **kwargs):
-        if not self.built:
-            with tf.name_scope(self.name), tf.init_scope():
-                self.build(inputs.shape)
-        return super().__call__(inputs, **kwargs)
-
     def build(self, input_shape):
         self._previous_values = self.add_weight(
             "previous_values",
@@ -67,7 +61,8 @@ class FlipRatio(tf.keras.metrics.Metric):
         values = tf.cast(values, self.values_dtype)
 
         if not self.built:
-            self.build(values.shape)
+            with tf.name_scope(self.name), tf.init_scope():
+                self.build(values.shape)
 
         unchanged_values = tf.math.count_nonzero(
             tf.equal(self._previous_values, values)
