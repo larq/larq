@@ -3,16 +3,16 @@
 from typing import Optional
 
 import tensorflow as tf
-from tensorflow.python.distribute.values import DistributedVariable
+from tensorflow.python.distribute.values import DistributedVariable  # type: ignore
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
 from larq import context
 from larq.quantizers import Quantizer
 
-try:
-    from tensorflow.python.types.core import Tensor as TensorType
-    from tensorflow.python.distribute.ps_values import AggregatingVariable
+try:  # pragma: no cover
+    from tensorflow.python.types.core import Tensor as TensorType  # type: ignore
+    from tensorflow.python.distribute.ps_values import AggregatingVariable  # type: ignore
 except ModuleNotFoundError:
     TensorType = object
     from tensorflow.python.distribute.values import AggregatingVariable
@@ -366,5 +366,5 @@ tf.register_tensor_conversion_function(
 )
 try:
     ops.register_dense_tensor_like_type(QuantizedVariable)
-except AttributeError:
+except AttributeError:  # pragma: no cover
     pass
