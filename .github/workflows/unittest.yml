@@ -39,7 +39,7 @@ jobs:
           python-version: 3.6
       - name: Install dependencies
         run: |
-          pip install tensorflow-cpu==2.1.0
+          pip install tensorflow-cpu==2.2.0
           pip install -e .[test]
       - name: Generate coverage report
         run: pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc

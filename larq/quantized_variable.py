@@ -3,7 +3,7 @@
 from typing import Optional
 
 import tensorflow as tf
-from tensorflow.python.distribute.values import DistributedVariable  # type: ignore
+from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
@@ -81,7 +81,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         # Returns
             A QuantizedVariable that wraps the variable.
         """
-        if not isinstance(variable, (DistributedVariable, AggregatingVariable)):  # type: ignore
+        if not isinstance(variable, (DistributedVariable, AggregatingVariable)):
             return cls(variable, quantizer, precision)
 
         class QuantizedDistributedVariable(cls, variable.__class__):
