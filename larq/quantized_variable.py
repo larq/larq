@@ -3,18 +3,22 @@
 from typing import Optional
 
 import tensorflow as tf
-from tensorflow.python.distribute.values import (  # type: ignore
-    AggregatingVariable,
-    DistributedVariable,
-)
+from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
 from larq import context
 from larq.quantizers import Quantizer
 
+try:
+    from tensorflow.python.types.core import Tensor as TensorType
+    from tensorflow.python.distribute.ps_values import AggregatingVariable
+except ModuleNotFoundError:
+    TensorType = object
+    from tensorflow.python.distribute.values import AggregatingVariable
 
-class QuantizedVariable(tf.Variable):
+
+class QuantizedVariable(tf.Variable, TensorType):
     """A Variable that can be quantized in the forward pass in applicable contexts."""
 
     def __init__(
@@ -360,4 +364,7 @@ QuantizedVariable._OverloadAllOperators()
 tf.register_tensor_conversion_function(
     QuantizedVariable, QuantizedVariable._dense_var_to_tensor
 )
-ops.register_dense_tensor_like_type(QuantizedVariable)
+try:
+    ops.register_dense_tensor_like_type(QuantizedVariable)
+except AttributeError:
+    pass
