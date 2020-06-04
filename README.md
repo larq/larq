@@ -16,16 +16,21 @@ To build a QNN, Larq introduces the concept of [quantized layers](https://docs.l
 You can define a simple binarized fully-connected Keras model using the [Straight-Through Estimator](https://docs.larq.dev/larq/api/quantizers/#ste_sign) the following way:
 
 ```python
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Flatten(),
-    larq.layers.QuantDense(512,
-                           kernel_quantizer="ste_sign",
-                           kernel_constraint="weight_clip"),
-    larq.layers.QuantDense(10,
-                           input_quantizer="ste_sign",
-                           kernel_quantizer="ste_sign",
-                           kernel_constraint="weight_clip",
-                           activation="softmax")])
+model = tf.keras.models.Sequential(
+    [
+        tf.keras.layers.Flatten(),
+        larq.layers.QuantDense(
+            512, kernel_quantizer="ste_sign", kernel_constraint="weight_clip"
+        ),
+        larq.layers.QuantDense(
+            10,
+            input_quantizer="ste_sign",
+            kernel_quantizer="ste_sign",
+            kernel_constraint="weight_clip",
+            activation="softmax",
+        ),
+    ]
+)
 ```
 
 This layer can be used inside a [Keras model](https://www.tensorflow.org/guide/keras/overview#sequential_model) or with a [custom training loop](https://www.tensorflow.org/guide/keras/train_and_evaluate#part_ii_writing_your_own_training_evaluation_loops_from_scratch).
