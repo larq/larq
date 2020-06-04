@@ -186,8 +186,7 @@ class NoOp(BaseQuantizer):
     !!! example
         ```python
         layer = lq.layers.QuantDense(
-            16,
-            kernel_quantizer=lq.quantizers.NoOpQuantizer(precision=1),
+            16, kernel_quantizer=lq.quantizers.NoOpQuantizer(precision=1),
         )
         layer.build((32,))
         assert layer.kernel.precision == 1

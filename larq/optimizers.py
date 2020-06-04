@@ -263,10 +263,7 @@ class Bop(tf.keras.optimizers.Optimizer):
         layer = lq.layers.QuantDense(16, kernel_quantizer=no_op_quantizer)
 
         optimizer = lq.optimizers.CaseOptimizer(
-            (
-                lq.optimizers.Bop.is_binary_variable,
-                lq.optimizers.Bop(),
-            ),
+            (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
             default_optimizer=tf.keras.optimizers.Adam(0.01),  # for FP weights
         )
         ```
