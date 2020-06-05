@@ -8,7 +8,7 @@ def sign(x):
     \\[
     f(x) = \begin{cases}
       -1 & x < 0 \\\
-      1 & x \geq 0
+      \hphantom{-}1 & x \geq 0
     \end{cases}
     \\]
 
@@ -31,7 +31,7 @@ def heaviside(x):
     \\[
     q(x) = \begin{cases}
     +1 & x > 0 \\\
-    0 & x \leq 0
+    \hphantom{+}0 & x \leq 0
     \end{cases}
     \\]
 
