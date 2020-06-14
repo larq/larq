@@ -73,3 +73,8 @@ def quantized(request):
     """pytest fixture for running test quantized and non-quantized"""
     with lq_context.quantized_scope(request.param):
         yield request.param
+
+
+@pytest.fixture(params=["channels_last", "channels_first"])
+def data_format(request):
+    return request.param
