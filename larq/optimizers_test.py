@@ -169,7 +169,8 @@ class TestCaseOptimizer:
                 checked_weights += 1
         assert checked_weights == len(opt_weights)
 
-    def test_checkpoint(self, eager_mode, tmp_path):
+    @pytest.mark.usefixtures("eager_mode")
+    def test_checkpoint(self, tmp_path):
         # Build and run a simple model.
         var = tf.Variable([2.0])
         opt = tf.keras.optimizers.SGD(1.0, momentum=1.0)

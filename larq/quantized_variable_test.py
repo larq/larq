@@ -21,7 +21,8 @@ def test_inheritance(distribute_scope):
     assert isinstance(quantized_variable, DistributedVariable) is distribute_scope  # type: ignore
 
 
-def test_read(eager_and_graph_mode, distribute_scope):
+@pytest.mark.usefixtures("eager_and_graph_mode", "distribute_scope")
+def test_read():
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
 
@@ -37,7 +38,8 @@ def test_read(eager_and_graph_mode, distribute_scope):
         assert evaluate(tf.identity(x)) == 7
 
 
-def test_sparse_reads(eager_and_graph_mode):
+@pytest.mark.usefixtures("eager_and_graph_mode")
+def test_sparse_reads():
     x = QuantizedVariable.from_variable(get_var([1.0, 2.0]), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
 
@@ -48,7 +50,8 @@ def test_sparse_reads(eager_and_graph_mode):
         assert evaluate(x.gather_nd([0])) == 2
 
 
-def test_read_nested_scopes(eager_and_graph_mode, distribute_scope):
+@pytest.mark.usefixtures("eager_and_graph_mode", "distribute_scope")
+def test_read_nested_scopes():
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
     with context.quantized_scope(True):
@@ -58,7 +61,8 @@ def test_read_nested_scopes(eager_and_graph_mode, distribute_scope):
         assert evaluate(x.read_value()) == 7
 
 
-def test_method_delegations(eager_and_graph_mode, distribute_scope):
+@pytest.mark.usefixtures("eager_and_graph_mode")
+def test_method_delegations(distribute_scope):
     x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     with context.quantized_scope(True):
         evaluate(x.initializer)
@@ -90,7 +94,8 @@ def test_method_delegations(eager_and_graph_mode, distribute_scope):
         assert x.get_shape() == ()
 
 
-def test_scatter_method_delegations(eager_and_graph_mode):
+@pytest.mark.usefixtures("eager_and_graph_mode")
+def test_scatter_method_delegations():
     x = QuantizedVariable.from_variable(get_var([3.5, 4]), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
     with context.quantized_scope(True):
@@ -118,7 +123,8 @@ def test_scatter_method_delegations(eager_and_graph_mode):
         )
 
 
-def test_overloads(eager_and_graph_mode, quantized, distribute_scope):
+@pytest.mark.usefixtures("eager_and_graph_mode", "distribute_scope")
+def test_overloads(quantized):
     if quantized:
         x = QuantizedVariable.from_variable(get_var(3.5), quantizer=lambda x: 2 * x)
     else:
@@ -153,7 +159,8 @@ def test_overloads(eager_and_graph_mode, quantized, distribute_scope):
     assert_almost_equal(7, evaluate(abs(x)))
 
 
-def test_tensor_equality(quantized, eager_mode):
+@pytest.mark.usefixtures("eager_mode")
+def test_tensor_equality(quantized):
     if quantized:
         x = QuantizedVariable.from_variable(
             get_var([3.5, 4.0, 4.5]), quantizer=lambda x: 2 * x
@@ -167,7 +174,8 @@ def test_tensor_equality(quantized, eager_mode):
         assert_array_equal(x != [7.0, 8.0, 10.0], [False, False, True])
 
 
-def test_assign(eager_and_graph_mode, quantized, distribute_scope):
+@pytest.mark.usefixtures("eager_and_graph_mode", "distribute_scope")
+def test_assign(quantized):
     x = QuantizedVariable.from_variable(
         get_var(0.0, tf.float64), quantizer=lambda x: 2 * x
     )
@@ -218,7 +226,8 @@ def test_assign(eager_and_graph_mode, quantized, distribute_scope):
     assert_almost_equal(evaluate(tf.compat.v1.assign_sub(x, latent_value)), value)
 
 
-def test_checkpoint(tmp_path, eager_and_graph_mode):
+@pytest.mark.usefixtures("eager_and_graph_mode")
+def test_checkpoint(tmp_path):
     x = QuantizedVariable.from_variable(get_var(0.0), quantizer=lambda x: 2 * x)
     evaluate(x.initializer)
     evaluate(x.assign(123.0))
@@ -233,7 +242,8 @@ def test_checkpoint(tmp_path, eager_and_graph_mode):
         assert evaluate(x) == 123.0 * 2
 
 
-def test_invalid_wrapped_usage(distribute_scope):
+@pytest.mark.usefixtures("distribute_scope")
+def test_invalid_wrapped_usage():
     with pytest.raises(ValueError, match="`variable` must be of type"):
         QuantizedVariable.from_variable(tf.constant([1.0]))
     with pytest.raises(ValueError, match="`quantizer` must be `callable` or `None`"):
@@ -242,7 +252,8 @@ def test_invalid_wrapped_usage(distribute_scope):
         QuantizedVariable.from_variable(get_var([1.0]), precision=1.0)  # type: ignore
 
 
-def test_repr(snapshot, eager_and_graph_mode):
+@pytest.mark.usefixtures("eager_and_graph_mode")
+def test_repr(snapshot):
     x = get_var(0.0, name="x")
 
     class Quantizer:
@@ -258,8 +269,9 @@ def test_repr(snapshot, eager_and_graph_mode):
     snapshot.assert_match(repr(QuantizedVariable.from_variable(x, precision=1)))
 
 
+@pytest.mark.usefixtures("eager_mode")
 @pytest.mark.parametrize("should_quantize", [True, False])
-def test_optimizer(eager_mode, should_quantize):
+def test_optimizer(should_quantize):
     x = QuantizedVariable.from_variable(get_var(1.0), quantizer=lambda x: -x)
     opt = tf.keras.optimizers.SGD(1.0)
 

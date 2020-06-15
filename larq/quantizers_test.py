@@ -127,7 +127,8 @@ class TestQuantization:
         assert np.all(result[real_values <= 0] == 0)
         assert np.all(result[real_values > 0] == 1)
 
-    def test_magnitude_aware_sign_binarization(self, eager_mode):
+    @pytest.mark.usefixtures("eager_mode")
+    def test_magnitude_aware_sign_binarization(self):
         a = np.random.uniform(-2, 2, (3, 2, 2, 3))
         x = tf.Variable(a)
         y = lq.quantizers.MagnitudeAwareSign()(x)
@@ -234,6 +235,7 @@ class TestQuantization:
             )
 
 
+@pytest.mark.usefixtures("eager_mode")
 class TestGradients:
     """Test gradients for different quantizers."""
 
@@ -245,7 +247,7 @@ class TestGradients:
             lq.quantizers.SteHeaviside(clip_value=None),
         ],
     )
-    def test_identity_ste_grad(self, eager_mode, fn):
+    def test_identity_ste_grad(self, fn):
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
@@ -261,7 +263,7 @@ class TestGradients:
             lq.quantizers.SteHeaviside(),
         ],
     )
-    def test_ste_grad(self, eager_mode, fn):
+    def test_ste_grad(self, fn):
         @np.vectorize
         def ste_grad(x):
             if np.abs(x) <= 1:
@@ -276,7 +278,7 @@ class TestGradients:
         np.testing.assert_allclose(grad.numpy(), ste_grad(x))
 
     # Test with and without default threshold
-    def test_swish_grad(self, eager_mode):
+    def test_swish_grad(self):
         def swish_grad(x, beta):
             return (
                 beta * (2 - beta * x * np.tanh(beta * x / 2)) / (1 + np.cosh(beta * x))
@@ -294,7 +296,7 @@ class TestGradients:
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), swish_grad(x, beta=10.0))
 
-    def test_approx_sign_grad(self, eager_mode):
+    def test_approx_sign_grad(self):
         @np.vectorize
         def approx_sign_grad(x):
             if np.abs(x) <= 1:
@@ -308,7 +310,7 @@ class TestGradients:
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), approx_sign_grad(x))
 
-    def test_magnitude_aware_sign_grad(self, eager_mode):
+    def test_magnitude_aware_sign_grad(self):
         a = np.random.uniform(-2, 2, (3, 2, 2, 3))
         x = tf.Variable(a)
         with tf.GradientTape() as tape:
@@ -323,7 +325,7 @@ class TestGradients:
             grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
         )
 
-    def test_dorefa_ste_grad(self, eager_mode):
+    def test_dorefa_ste_grad(self):
         @np.vectorize
         def ste_grad(x):
             if x <= 1 and x >= 0:

@@ -19,7 +19,8 @@ def test_config():
     assert mcv2.values_dtype == tf.int16
 
 
-def test_metric(eager_mode):
+@pytest.mark.usefixtures("eager_mode")
+def test_metric():
     mcv = metrics.FlipRatio()
     mcv.build((2,))
     assert 0 == mcv.result().numpy()
@@ -45,7 +46,8 @@ def test_metric(eager_mode):
     assert 1.5 / 2 == mcv.result().numpy()
 
 
-def test_metric_implicit_build(eager_mode):
+@pytest.mark.usefixtures("eager_mode")
+def test_metric_implicit_build():
     mcv = metrics.FlipRatio()
 
     mcv.update_state(np.array([1, 1]))
@@ -67,14 +69,16 @@ def test_metric_implicit_build(eager_mode):
     assert 1.5 / 2 == mcv.result().numpy()
 
 
-def test_metric_wrong_shape(eager_mode):
+@pytest.mark.usefixtures("eager_mode")
+def test_metric_wrong_shape():
     mcv = metrics.FlipRatio()
     mcv.build((3,))
     with pytest.raises((ValueError, tf.errors.InvalidArgumentError)):
         mcv.update_state(np.array([1, 1]))
 
 
-def test_metric_in_graph_mode(graph_mode):
+@pytest.mark.usefixtures("graph_mode")
+def test_metric_in_graph_mode():
     mcv = metrics.FlipRatio()
     mcv.build((2,))
 
