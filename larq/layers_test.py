@@ -184,7 +184,6 @@ class TestLayers:
             (lq.layers.QuantDepthwiseConv2D, 4),
         ],
     )
-    @pytest.mark.parametrize("data_format", ["channels_last", "channels_first"])
     @pytest.mark.parametrize("dilation", [True, False])
     def test_non_zero_padding_layers(
         self, mocker, layer_cls, input_dim, data_format, dilation
@@ -220,7 +219,6 @@ class TestLayers:
             lq.layers.QuantDepthwiseConv2D,
         ],
     )
-    @pytest.mark.parametrize("data_format", ["channels_last", "channels_first"])
     @pytest.mark.parametrize("static", [True, False])
     def test_non_zero_padding_shapes(self, layer_cls, data_format, static):
         layer = layer_cls(
