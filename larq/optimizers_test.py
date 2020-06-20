@@ -214,6 +214,7 @@ class TestBopOptimizer:
             target=0,
         )
 
+    @pytest.mark.usefixtures("distribute_scope")
     def test_mixed_precision(self):
         opt = lq.optimizers.CaseOptimizer(
             (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
