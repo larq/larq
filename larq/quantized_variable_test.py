@@ -208,7 +208,7 @@ def test_assign(quantized, distribute_scope):
         assert_almost_equal(evaluate(tf.compat.v1.assign_sub(x, latent_value)), value)
 
         # Assign multiple times
-    if not distribute_scope:
+    if not distribute_scope and version.parse(tf.__version__) >= version.parse("2.2"):
         assign = x.assign(0.0)
         assert_almost_equal(evaluate(assign), 0.0)
         assert_almost_equal(evaluate(assign.assign(latent_value)), value)
