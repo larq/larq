@@ -85,10 +85,14 @@ def test_method_delegations(distribute_scope):
             # These attributes are not supported for DistributedVariables
             assert x.constraint is None
             assert x.initializer == x.latent_variable.initializer
-            # DistributedVariables.assign doesn't correctly return quantized variables
-            assert evaluate(x.assign(4)) == 8
-            assert evaluate(x.assign_add(1)) == 10
-            assert evaluate(x.assign_sub(1.5)) == 7
+        
+        def apply_and_read(x, fn, args):
+            evaluate(fn(*args))
+            return evaluate(x)
+
+        assert apply_and_read(x, x.assign, [4]) == 8
+        assert apply_and_read(x, x.assign_add, [1]) == 10
+        assert apply_and_read(x, x.assign_sub, [1.5]) == 7
         assert x.name == x.latent_variable.name
         assert x.device == x.latent_variable.device
         assert x.shape == ()
