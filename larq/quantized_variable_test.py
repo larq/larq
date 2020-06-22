@@ -85,7 +85,7 @@ def test_method_delegations(distribute_scope):
             # These attributes are not supported for DistributedVariables
             assert x.constraint is None
             assert x.initializer == x.latent_variable.initializer
-        
+
         def apply_and_read(x, fn, args):
             evaluate(fn(*args))
             return evaluate(x)
