@@ -1,9 +1,16 @@
 import pytest
 import tensorflow as tf
 from packaging import version
+from tensorflow.python.distribute import strategy_combinations
 from tensorflow.python.eager import context
 
 from larq import context as lq_context
+
+if version.parse(tf.__version__) >= version.parse("1.15"):
+    strategy_combinations.set_virtual_cpus_to_at_least(3)
+    distributed_devices = ["/cpu:1", "/cpu:2"]
+else:  # pragma: no cover
+    distributed_devices = ["/cpu:0"]
 
 
 @pytest.fixture
@@ -62,7 +69,7 @@ def keras_should_run_eagerly(request):
 @pytest.fixture(params=[False, True])
 def distribute_scope(request):
     if request.param is True:
-        with tf.distribute.MirroredStrategy(["cpu:0"]).scope():
+        with tf.distribute.MirroredStrategy(distributed_devices).scope():
             yield request.param
     else:
         yield request.param
