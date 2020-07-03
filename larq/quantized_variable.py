@@ -342,19 +342,19 @@ class QuantizedVariable(tf.Variable, TensorType):
     # For more info see https://github.com/tensorflow/tensorflow/commit/1fcda57f37c2ac854cabf1c3462eb14e39d36c60
     @property
     def _handle_name(self):
-        return self._variable._handle_name
+        return self.latent_variable._handle_name
 
     @_handle_name.setter
     def _handle_name(self, handle_name):
-        self._variable._handle_name = handle_name
+        self.latent_variable._handle_name = handle_name
 
     @property
     def _initializer_op(self):
-        return self._variable._initializer_op
+        return self.latent_variable._initializer_op
 
     @_initializer_op.setter
     def _initializer_op(self, initializer_op):
-        self._variable._initializer_op = initializer_op
+        self.latent_variable._initializer_op = initializer_op
 
     def _as_graph_element(self):
         return self._quantize(self.latent_variable._as_graph_element())
