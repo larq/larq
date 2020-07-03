@@ -9,7 +9,7 @@ from larq import context as lq_context
 if version.parse(tf.__version__) >= version.parse("1.15"):
     strategy_combinations.set_virtual_cpus_to_at_least(3)
     distributed_devices = ["/cpu:1", "/cpu:2"]
-else:  # pragma: no cover
+else:
     distributed_devices = ["/cpu:0"]
 
 

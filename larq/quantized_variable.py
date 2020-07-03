@@ -10,7 +10,7 @@ from tensorflow.python.ops import resource_variable_ops
 from larq import context
 from larq.quantizers import Quantizer
 
-try:  # pragma: no cover
+try:
     from tensorflow.python.types.core import Tensor as TensorType  # type: ignore
     from tensorflow.python.distribute.ps_values import AggregatingVariable  # type: ignore
 except ModuleNotFoundError:
@@ -366,5 +366,5 @@ tf.register_tensor_conversion_function(
 )
 try:
     ops.register_dense_tensor_like_type(QuantizedVariable)
-except AttributeError:  # pragma: no cover
+except AttributeError:
     pass

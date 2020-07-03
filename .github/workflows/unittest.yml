@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tf-version: [1.14.0, 1.15.2, 2.0.1, 2.1.0, 2.3.0rc0]
+        tf-version: [1.14.0, 1.15.3, 2.0.2, 2.1.1, 2.2.0, 2.3.0rc0]
         python-version: [3.7]
         include:
+          - tf-version: 2.2.0
+            python-version: 3.6
           - tf-version: 2.2.0
             python-version: 3.8
 
@@ -25,23 +27,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install tensorflow==${{matrix.tf-version}}
+          pip install tensorflow-cpu==${{matrix.tf-version}} || pip install tensorflow==${{matrix.tf-version}}
           pip install -e .[test]
       - name: Test with pytest
-        run: pytest . -n auto
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2.0.1
-        with:
-          python-version: 3.6
-      - name: Install dependencies
-        run: |
-          pip install tensorflow-cpu==2.2.0
-          pip install -e .[test]
-      - name: Generate coverage report
         run: pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
       - name: Upload coverage to Codecov
-        run: curl -s https://codecov.io/bash | bash -s -- -f ./coverage.xml -F unittests
+        run: bash <(curl -s https://codecov.io/bash) -f ./coverage.xml -F unittests
