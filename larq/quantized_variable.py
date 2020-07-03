@@ -324,6 +324,13 @@ class QuantizedVariable(tf.Variable, TensorType):
         # models with normal variables, and vice versa.
         return self.latent_variable._gather_saveables_for_checkpoint()
 
+    def _map_resources(self):
+        # By delegating this method to the wrapped variable, SavedModel with
+        # QuantizedVariables are identical to SavedModel with normal variables.
+        obj_map, resource_map = self.latent_variable._map_resources()
+        obj_map[self] = obj_map[self.latent_variable]
+        return obj_map, resource_map
+
     # TODO: Maybe encode the fact the variable is an QuantizedVariable in to_proto().
     def to_proto(self, *args, **kwargs):
         return self.latent_variable.to_proto(*args, **kwargs)
@@ -332,7 +339,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         return self.latent_variable.from_proto(*args, **kwargs)
 
     # Delegate the private attributes _handle_name and _initializer_op to
-    # self._variable. SavedModel sets these attributes when loading a model. For
+    # self.latent_variable. SavedModel sets these attributes when loading a model. For
     # example, it sets _handle_name here:
     # https://github.com/tensorflow/tensorflow/blob/db26bd574fa95b5bdd53c08463dd19407cc0297e/tensorflow/python/keras/saving/saved_model/load.py#L211
     # We need to expose these attributes on AutoCastVariable as well for

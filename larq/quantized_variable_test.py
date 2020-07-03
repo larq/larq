@@ -305,10 +305,6 @@ def test_optimizer(should_quantize):
 @pytest.mark.skipif(
     version.parse(tf.__version__) < version.parse("2"), reason="Requires TensorFlow 2",
 )
-@pytest.mark.skipif(
-    version.parse(tf.__version__) == version.parse("2.3.0rc0"),
-    reason="Currently broken on 2.3.0rc0.",
-)
 def test_saved_model(tmp_path):
     model_path = str(tmp_path / "model")
     x = np.random.normal(size=(4, 32))
