@@ -1,5 +1,4 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
-
 from typing import Optional
 
 import tensorflow as tf
@@ -10,12 +9,14 @@ from tensorflow.python.ops import resource_variable_ops
 from larq import context
 from larq.quantizers import Quantizer
 
+# pytype: disable=import-error
 try:
-    from tensorflow.python.types.core import Tensor as TensorType  # type: ignore
-    from tensorflow.python.distribute.ps_values import AggregatingVariable  # type: ignore
+    from tensorflow.python.distribute.ps_values import AggregatingVariable
+    from tensorflow.python.types.core import Tensor as TensorType
 except ModuleNotFoundError:
     TensorType = object
     from tensorflow.python.distribute.values import AggregatingVariable
+# pytype: enable=import-error
 
 
 class QuantizedVariable(tf.Variable, TensorType):
