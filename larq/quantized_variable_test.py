@@ -97,6 +97,9 @@ def test_method_delegations(distribute_scope):
         assert x.device == x.latent_variable.device
         assert x.shape == ()
         assert x.get_shape() == ()
+        if not distribute_scope:
+            x.set_shape(())
+            assert x.shape == ()
 
 
 @pytest.mark.usefixtures("eager_and_graph_mode")
@@ -107,11 +110,7 @@ def test_scatter_method_delegations():
         assert_array_equal(evaluate(x.value()), [7, 8])
 
         def slices(val, index):
-            return tf.IndexedSlices(
-                values=tf.constant(val, dtype=tf.float32),
-                indices=tf.constant(index, dtype=tf.int32),
-                dense_shape=tf.constant([2], dtype=tf.int32),
-            )
+            return tf.IndexedSlices(values=val, indices=index)
 
         assert_array_equal(evaluate(x.scatter_sub(slices(0.5, 0))), [6, 8])
         assert_array_equal(evaluate(x.scatter_add(slices(0.5, 0))), [7, 8])
@@ -120,12 +119,13 @@ def test_scatter_method_delegations():
             assert_array_equal(evaluate(x.scatter_min(slices(4.0, 1))), [7, 8])
             assert_array_equal(evaluate(x.scatter_mul(slices(2.0, 1))), [7, 16])
             assert_array_equal(evaluate(x.scatter_div(slices(2.0, 1))), [7, 8])
-        assert_array_equal(evaluate(x.scatter_update(slices(2, 1))), [7, 4])
+        assert_array_equal(evaluate(x.scatter_update(slices(2.0, 1))), [7, 4])
         assert_array_equal(evaluate(x.scatter_nd_sub([[0], [1]], [0.5, 1.0])), [6, 2])
         assert_array_equal(evaluate(x.scatter_nd_add([[0], [1]], [0.5, 1.0])), [7, 4])
         assert_array_equal(
             evaluate(x.scatter_nd_update([[0], [1]], [0.5, 1.0])), [1, 2]
         )
+        assert_array_equal(evaluate(x.batch_scatter_update(slices([2.0], [1]))), [1, 4])
 
 
 @pytest.mark.usefixtures("eager_and_graph_mode", "distribute_scope")

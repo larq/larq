@@ -203,7 +203,7 @@ class QuantizedVariable(tf.Variable, TensorType):
     #     strange as they are different Python objects.
 
     def set_shape(self, *args, **kwargs):
-        return self.latent_variable.set_shape(self, *args, **kwargs)
+        return self.latent_variable.set_shape(*args, **kwargs)
 
     @property
     def trainable(self):
