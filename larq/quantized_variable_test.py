@@ -309,6 +309,11 @@ def test_saved_model(tmp_path):
     model_path = str(tmp_path / "model")
     x = np.random.normal(size=(4, 32))
     model = testing_utils.get_small_bnn_model(x.shape[1], 16, 10)
+    weights = model.get_weights()
     model.save(model_path, save_format="tf")
     reloaded_model = tf.keras.models.load_model(model_path)
+    reloaded_weights = reloaded_model.get_weights()
     assert_almost_equal(reloaded_model.predict(x), model.predict(x))
+    assert len(reloaded_weights) == len(weights)
+    for reloaded_weight, weight in zip(reloaded_weights, weights):
+        assert_almost_equal(reloaded_weight, weight)
