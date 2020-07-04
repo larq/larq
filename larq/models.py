@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 from terminaltables import AsciiTable
 
-import larq.layers as lq_layers
+from larq import layers as lq_layers
 from larq.utils import memory_as_readable_str
 
 __all__ = ["summary"]
