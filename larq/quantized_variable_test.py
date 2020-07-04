@@ -97,9 +97,11 @@ def test_method_delegations(distribute_scope):
         assert x.device == x.latent_variable.device
         assert x.shape == ()
         assert x.get_shape() == ()
-        if not distribute_scope:
+        try:
             x.set_shape(())
             assert x.shape == ()
+        except NotImplementedError:
+            pass
 
 
 @pytest.mark.usefixtures("eager_and_graph_mode")
