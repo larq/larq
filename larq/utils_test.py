@@ -1,4 +1,4 @@
-import larq as lq
+from larq import utils
 
 
 def test_memory_as_readable_str():
@@ -50,4 +50,12 @@ def test_memory_as_readable_str():
     ]
 
     for i, correct_string in enumerate(correct_strings):
-        assert lq.utils.memory_as_readable_str(2 ** i) == correct_string
+        assert utils.memory_as_readable_str(2 ** i) == correct_string
+
+
+def test_set_precision():
+    @utils.set_precision(8)
+    def toy_quantizer(x):
+        return x
+
+    assert toy_quantizer.precision == 8
