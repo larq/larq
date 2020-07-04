@@ -47,20 +47,6 @@ def register_alias(name: str):
     return register_func
 
 
-def set_precision(precision: int = 32):
-    """A decorator to set the precision of a quantizer function
-
-    # Arguments
-        precision: An integer defining the precision of the output.
-    """
-
-    def decorator(function):
-        setattr(function, "precision", precision)
-        return function
-
-    return decorator
-
-
 @contextmanager
 def patch_object(object, name, value):
     """Temporarily overwrite attribute on object"""
