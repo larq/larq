@@ -29,7 +29,7 @@ setup(
         "test": [
             "black==19.10b0",
             "flake8>=3.7.9,<3.9.0",
-            "isort==5.0.1",
+            "isort==5.0.3",
             "packaging>=19.2,<21.0",
             "pytest>=5.2.4,<5.5.0",
             "pytest-cov>=2.8.1,<2.11.0",
