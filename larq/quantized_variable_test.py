@@ -1,10 +1,11 @@
+import numpy as np
 import pytest
 import tensorflow as tf
 from numpy.testing import assert_almost_equal, assert_array_equal
 from packaging import version
 from tensorflow.python.distribute.values import DistributedVariable
 
-from larq import context
+from larq import context, testing_utils
 from larq.quantized_variable import QuantizedVariable
 from larq.testing_utils import evaluate
 
@@ -301,3 +302,20 @@ def test_optimizer(should_quantize):
             assert evaluate(x) == -2.0
     else:
         assert evaluate(x) == 0.0
+
+
+@pytest.mark.skipif(
+    version.parse(tf.__version__) < version.parse("2"), reason="Requires TensorFlow 2",
+)
+def test_saved_model(tmp_path):
+    model_path = str(tmp_path / "model")
+    x = np.random.normal(size=(4, 32))
+    model = testing_utils.get_small_bnn_model(x.shape[1], 16, 10)
+    weights = model.get_weights()
+    model.save(model_path, save_format="tf")
+    reloaded_model = tf.keras.models.load_model(model_path)
+    reloaded_weights = reloaded_model.get_weights()
+    assert_almost_equal(reloaded_model.predict(x), model.predict(x))
+    assert len(reloaded_weights) == len(weights)
+    for reloaded_weight, weight in zip(reloaded_weights, weights):
+        assert_almost_equal(reloaded_weight, weight)
