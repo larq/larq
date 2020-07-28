@@ -31,7 +31,7 @@ setup(
             "flake8>=3.7.9,<3.9.0",
             "isort==5.2.0",
             "packaging>=19.2,<21.0",
-            "pytest>=5.2.4,<5.5.0",
+            "pytest>=5.2.4,<6.1.0",
             "pytest-cov>=2.8.1,<2.11.0",
             "pytest-xdist>=1.30,<1.35",
             "pytest-mock>=2.0,<3.3",
