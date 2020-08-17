@@ -192,8 +192,8 @@ def test_assign(quantized, distribute_scope):
     latent_value = 3.14
     value = latent_value * 2 if quantized else latent_value
 
-    # Assign doesn't correctly return a quantized variable in distribution scope
-    if not distribute_scope or not quantized:
+    # Assign doesn't correctly return a quantized variable in graph mode if a strategy is used
+    if tf.executing_eagerly() or not distribute_scope or not quantized:
         # Assign float32 values
         lv = tf.constant(latent_value, dtype=tf.float64)
         assert_almost_equal(evaluate(x.assign(lv)), value)
@@ -214,8 +214,10 @@ def test_assign(quantized, distribute_scope):
         )
         assert_almost_equal(evaluate(tf.compat.v1.assign_sub(x, latent_value)), value)
 
-        # Assign multiple times
-    if not distribute_scope and version.parse(tf.__version__) >= version.parse("2.2"):
+    # Assign multiple times
+    if version.parse(tf.__version__) >= version.parse("2.2") and (
+        tf.executing_eagerly() or not distribute_scope
+    ):
         assign = x.assign(0.0)
         assert_almost_equal(evaluate(assign), 0.0)
         assert_almost_equal(evaluate(assign.assign(latent_value)), value)
