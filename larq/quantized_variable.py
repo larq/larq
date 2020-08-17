@@ -19,6 +19,9 @@ except ModuleNotFoundError:
 # pytype: enable=import-error
 
 
+UNSPECIFIED = object()
+
+
 class QuantizedVariable(tf.Variable, TensorType):
     """A Variable that can be quantized in the forward pass in applicable contexts."""
 
@@ -27,6 +30,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         variable: tf.Variable,
         quantizer: Optional[Quantizer] = None,
         precision: Optional[int] = None,
+        op: Optional[tf.Operation] = UNSPECIFIED,
     ):
         """Creates an QuantizedVariable instance.
 
@@ -36,6 +40,7 @@ class QuantizedVariable(tf.Variable, TensorType):
                 variable to a fake quantized variable.
             precision: An optional integer defining the precision of the quantized
                 variable. If `None`, `quantizer.precision` is used.
+            op: An optional operation of this variable.
         """
         if not resource_variable_ops.is_resource_variable(variable):
             raise ValueError(
@@ -55,6 +60,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         self.latent_variable = variable
         self.quantizer = quantizer
         self.precision = precision or getattr(quantizer, "precision", None)
+        self._op = op
 
     @classmethod
     def from_variable(
@@ -62,6 +68,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         variable: tf.Variable,
         quantizer: Optional[Quantizer] = None,
         precision: Optional[int] = None,
+        op: Optional[tf.Operation] = UNSPECIFIED,
     ):
         """Creates a QuantizedVariable that wraps another variable.
 
@@ -78,12 +85,13 @@ class QuantizedVariable(tf.Variable, TensorType):
                 a fake quantized variable.
             precision: An optional integer defining the precision of the quantized
                 variable. If `None`, `quantizer.precision` is used.
+            op: An optional operation of this variable.
 
         # Returns
             A QuantizedVariable that wraps the variable.
         """
         if not isinstance(variable, (DistributedVariable, AggregatingVariable)):
-            return cls(variable, quantizer, precision)
+            return cls(variable, quantizer, precision, op=op)
 
         class QuantizedDistributedVariable(cls, variable.__class__):
             """A QuantizedVariable that also subclasses from `variable.__class__`.
@@ -96,37 +104,7 @@ class QuantizedVariable(tf.Variable, TensorType):
                 # For some reason this is needed to make unit `x + x` pass on TF 1.14
                 return self._quantize(self.latent_variable.get(*args, **kwargs))
 
-        return QuantizedDistributedVariable(variable, quantizer, precision)
-
-    @staticmethod
-    def _maybe_wrap(
-        variable: tf.Variable,
-        quantizer: Optional[Quantizer],
-        precision: Optional[int],
-        wrap: bool = True,
-    ) -> tf.Variable:
-        """Creates an QuantizedVariable that wraps another variable if applicable.
-
-        This function is used to wrap the return value of QuantizedVariable.assign.
-        Unfortunately MirroredVariable.assign will (incorrectly) return a Mirrored
-        value instead of a MirroredVariable. So we cannot properly wrap it in an
-        AutoCastVariable. We return the original variable in that case.
-
-        # Arguments
-            variable: A tf.Variable or op.
-            quantizer: An optional quantizer to transform the floating-point variable to
-                a fake quantized variable.
-            precision: An optional integer defining the precision of the quantized
-                variable. If `None`, `quantizer.precision` is used.
-            wrap: A boolean to define whether to wrap the variable in a
-                `QuantizedVariable`.
-
-        # Returns
-            A QuantizedVariable if wrap is True and variable is a resource variable.
-        """
-        if wrap and resource_variable_ops.is_resource_variable(variable):
-            return QuantizedVariable.from_variable(variable, quantizer, precision)
-        return variable
+        return QuantizedDistributedVariable(variable, quantizer, precision, op=op)
 
     def _quantize(self, value):
         if self.quantizer and context.should_quantize():
@@ -221,61 +199,88 @@ class QuantizedVariable(tf.Variable, TensorType):
     def constraint(self):
         return self.latent_variable.constraint
 
+    def _apply_assign_update(
+        self, update_fn, value, use_locking=None, name=None, read_value=True
+    ):
+        if ops.executing_eagerly_outside_functions():
+            assign_op = update_fn(value, use_locking, name, False)
+            if read_value:
+                return QuantizedVariable.from_variable(
+                    self.latent_variable, self.quantizer, self.precision, op=assign_op
+                )
+            return assign_op
+
+        # Fallback to wrapping the returned variable in graph mode if possible
+        assign_var = update_fn(value, use_locking, name, read_value)
+        if read_value and resource_variable_ops.is_resource_variable(assign_var):
+            return QuantizedVariable.from_variable(
+                assign_var, self.quantizer, self.precision
+            )
+        return assign_var
+
+    def _apply_update(self, update_fn, *args, **kwargs):
+        update_var = update_fn(*args, **kwargs)
+        if ops.executing_eagerly_outside_functions():
+            return self
+
+        # Fallback to wrapping the returned variable in graph mode if possible
+        if resource_variable_ops.is_resource_variable(update_var):
+            return QuantizedVariable.from_variable(
+                update_var, self.quantizer, self.precision
+            )
+        return update_var
+
     def assign(self, value, use_locking=None, name=None, read_value=True):
-        op = self.latent_variable.assign(value, use_locking, name, read_value)
-        return self._maybe_wrap(op, self.quantizer, self.precision, wrap=read_value)
+        return self._apply_assign_update(
+            self.latent_variable.assign, value, use_locking, name, read_value
+        )
 
     def assign_add(self, delta, use_locking=None, name=None, read_value=True):
-        op = self.latent_variable.assign_add(delta, use_locking, name, read_value)
-        return self._maybe_wrap(op, self.quantizer, self.precision, wrap=read_value)
+        return self._apply_assign_update(
+            self.latent_variable.assign_add, delta, use_locking, name, read_value
+        )
 
     def assign_sub(self, delta, use_locking=None, name=None, read_value=True):
-        op = self.latent_variable.assign_sub(delta, use_locking, name, read_value)
-        return self._maybe_wrap(op, self.quantizer, self.precision, wrap=read_value)
+        return self._apply_assign_update(
+            self.latent_variable.assign_sub, delta, use_locking, name, read_value
+        )
 
     def scatter_sub(self, *args, **kwargs):
-        var = self.latent_variable.scatter_sub(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_sub, *args, **kwargs)
 
     def scatter_add(self, *args, **kwargs):
-        var = self.latent_variable.scatter_add(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_add, *args, **kwargs)
 
     def scatter_max(self, *args, **kwargs):
-        var = self.latent_variable.scatter_max(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_max, *args, **kwargs)
 
     def scatter_min(self, *args, **kwargs):
-        var = self.latent_variable.scatter_min(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_min, *args, **kwargs)
 
     def scatter_mul(self, *args, **kwargs):
-        var = self.latent_variable.scatter_mul(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_mul, *args, **kwargs)
 
     def scatter_div(self, *args, **kwargs):
-        var = self.latent_variable.scatter_div(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_div, *args, **kwargs)
 
     def scatter_update(self, *args, **kwargs):
-        var = self.latent_variable.scatter_update(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_update, *args, **kwargs)
 
     def batch_scatter_update(self, *args, **kwargs):
-        var = self.latent_variable.batch_scatter_update(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(
+            self.latent_variable.batch_scatter_update, *args, **kwargs
+        )
 
     def scatter_nd_sub(self, *args, **kwargs):
-        var = self.latent_variable.scatter_nd_sub(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_nd_sub, *args, **kwargs)
 
     def scatter_nd_add(self, *args, **kwargs):
-        var = self.latent_variable.scatter_nd_add(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(self.latent_variable.scatter_nd_add, *args, **kwargs)
 
     def scatter_nd_update(self, *args, **kwargs):
-        var = self.latent_variable.scatter_nd_update(*args, **kwargs)
-        return self._maybe_wrap(var, self.quantizer, self.precision)
+        return self._apply_update(
+            self.latent_variable.scatter_nd_update, *args, **kwargs
+        )
 
     def count_up_to(self, *args, **kwargs):
         return self.latent_variable.count_up_to(*args, **kwargs)
@@ -305,6 +310,8 @@ class QuantizedVariable(tf.Variable, TensorType):
 
     @property
     def op(self):
+        if self._op is not UNSPECIFIED:
+            return self._op
         return self.latent_variable.op
 
     @property
@@ -365,7 +372,12 @@ class QuantizedVariable(tf.Variable, TensorType):
         self.latent_variable._initializer_op = initializer_op
 
     def _as_graph_element(self):
-        return self._quantize(self.latent_variable._as_graph_element())
+        if self.quantizer and context.should_quantize():
+            return self.quantizer(self.latent_variable)
+        graph_element = self.latent_variable._as_graph_element()
+        if graph_element is None:
+            return self._op
+        return graph_element
 
 
 QuantizedVariable._OverloadAllOperators()
