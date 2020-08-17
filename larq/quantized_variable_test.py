@@ -240,6 +240,44 @@ def test_assign(quantized, distribute_scope):
     assert_almost_equal(evaluate(x), value)
 
 
+@pytest.mark.usefixtures("eager_mode", "distribute_scope")
+def test_assign_tf_function(quantized):
+    x = QuantizedVariable.from_variable(get_var(0.0), quantizer=lambda x: 2 * x)
+
+    @tf.function
+    def run_assign():
+        return x.assign(1.0).assign_add(3.0).assign_add(3.0).assign_sub(2.0)
+
+    assert_almost_equal(evaluate(run_assign()), 10.0 if quantized else 5.0)
+
+
+@pytest.mark.usefixtures("eager_and_graph_mode", "distribute_scope")
+def test_assign_op():
+    x = QuantizedVariable.from_variable(get_var(0.0), quantizer=lambda x: 2 * x)
+
+    @tf.function
+    def func():
+        assert x.assign(1.0).op is not None
+        assert x.assign_add(1.0).op is not None
+        assert x.assign_sub(1.0).op is not None
+
+    func()
+
+
+@pytest.mark.usefixtures("eager_mode", "distribute_scope")
+def test_tf_function_control_dependencies(quantized):
+    x = QuantizedVariable.from_variable(get_var(0.0), quantizer=lambda x: 2 * x)
+
+    @tf.function
+    def func():
+        update = x.assign_add(1.0)
+        with tf.control_dependencies([update]):
+            x.assign_add(1.0)
+
+    func()
+    assert_almost_equal(evaluate(x), 4.0 if quantized else 2.0)
+
+
 @pytest.mark.usefixtures("eager_and_graph_mode")
 def test_checkpoint(tmp_path):
     x = QuantizedVariable.from_variable(get_var(0.0), quantizer=lambda x: 2 * x)
