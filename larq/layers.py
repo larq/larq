@@ -461,7 +461,8 @@ class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
 class QuantDepthwiseConv2D(
     QuantizerDepthwiseBase, QuantizerBaseConv, tf.keras.layers.DepthwiseConv2D
 ):
-    """"Quantized depthwise separable 2D convolution.
+    """Quantized depthwise separable 2D convolution.
+
     Depthwise Separable convolutions consists in performing just the first step in a
     depthwise spatial convolution (which acts on each input channel separately).
     The `depth_multiplier` argument controls how many output channels are generated per

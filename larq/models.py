@@ -143,7 +143,8 @@ class LayerProfile:
 
         self.weight_profiles = [
             WeightProfile(
-                weight, trainable=any(weight is w for w in layer.trainable_weights),
+                weight,
+                trainable=any(weight is w for w in layer.trainable_weights),
             )
             for weight in weights
         ]
