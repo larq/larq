@@ -251,10 +251,14 @@ class TestBopOptimizer:
         )
 
     @pytest.mark.parametrize(
-        "hyper", [5e-4, tf.keras.optimizers.schedules.PolynomialDecay(5e-4, 100)],
+        "hyper",
+        [5e-4, tf.keras.optimizers.schedules.PolynomialDecay(5e-4, 100)],
     )
     def test_bop_serialization_schedule(self, hyper):
-        bop = lq.optimizers.Bop(gamma=hyper, threshold=hyper,)
+        bop = lq.optimizers.Bop(
+            gamma=hyper,
+            threshold=hyper,
+        )
         new_bop = lq.optimizers.Bop.from_config(bop.get_config())
         assert isinstance(new_bop._get_hyper("gamma"), type(bop._get_hyper("gamma")))
         assert isinstance(

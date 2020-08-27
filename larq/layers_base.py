@@ -138,7 +138,10 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         spatial_shape = [
             _compute_padded_size(stride, dilation, size, filter_size)
             for size, stride, dilation, filter_size in zip(
-                spatial_input_shape, self.strides, self.dilation_rate, self.kernel_size,
+                spatial_input_shape,
+                self.strides,
+                self.dilation_rate,
+                self.kernel_size,
             )
         ]
         if self.data_format == "channels_last":
@@ -177,7 +180,10 @@ class QuantizerDepthwiseBase(BaseLayer):
     """
 
     def __init__(
-        self, *args, depthwise_quantizer: Optional[Quantizer] = None, **kwargs,
+        self,
+        *args,
+        depthwise_quantizer: Optional[Quantizer] = None,
+        **kwargs,
     ):
         self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
 

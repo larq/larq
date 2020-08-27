@@ -179,7 +179,10 @@ def layer_test(
     # See b/120160788 for more details. This should be mitigated after 2.0.
     model = tf.keras.models.Model(x, layer(x))
     model.compile(
-        "rmsprop", "mse", weighted_metrics=["acc"], run_eagerly=should_run_eagerly,
+        "rmsprop",
+        "mse",
+        weighted_metrics=["acc"],
+        run_eagerly=should_run_eagerly,
     )
     model.train_on_batch(input_data, actual_output)
 

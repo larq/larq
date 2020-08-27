@@ -41,7 +41,9 @@ class TestHyperparameterScheduler:
 
         # We shouldn' t need to specify the optimizer
         test_scheduler = HyperparameterScheduler(
-            schedule=scheduler, hyperparameter="lr", verbose=1,
+            schedule=scheduler,
+            hyperparameter="lr",
+            verbose=1,
         )
 
         num_epochs = 2
@@ -76,12 +78,17 @@ class TestHyperparameterScheduler:
         # Test that we don't accept incorrect `update_freq`
         with pytest.raises(ValueError):
             HyperparameterScheduler(
-                schedule=scheduler, hyperparameter="lr", update_freq="wrong",
+                schedule=scheduler,
+                hyperparameter="lr",
+                update_freq="wrong",
             )
 
         # The actual scheduler we'll use
         test_scheduler = HyperparameterScheduler(
-            schedule=scheduler, hyperparameter="lr", update_freq="step", verbose=1,
+            schedule=scheduler,
+            hyperparameter="lr",
+            update_freq="step",
+            verbose=1,
         )
 
         num_epochs = 1
@@ -107,7 +114,8 @@ class TestHyperparameterScheduler:
         bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
         adam = tf.keras.optimizers.Adam(0.01)
         case_optimizer = lq.optimizers.CaseOptimizer(
-            (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
+            (lq.optimizers.Bop.is_binary_variable, bop),
+            default_optimizer=adam,
         )
 
         model.compile(
@@ -179,7 +187,9 @@ class TestHyperparameterScheduler:
             return 1.0 / (1.0 + x)
 
         wrong_scheduler = HyperparameterScheduler(
-            schedule=scheduler, hyperparameter="invalid_param", verbose=1,
+            schedule=scheduler,
+            hyperparameter="invalid_param",
+            verbose=1,
         )
 
         with pytest.raises(ValueError):
