@@ -11,7 +11,7 @@ setup(
     version="0.10.0",
     python_requires=">=3.6",
     author="Plumerai",
-    author_email="lukas@plumerai.co.uk",
+    author_email="opensource@plumerai.com",
     description="An Open Source Machine Learning Library for Training Binarized Neural Networks",
     long_description=readme(),
     long_description_content_type="text/markdown",
