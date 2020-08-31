@@ -5,7 +5,8 @@
 
 Larq is an open-source deep learning library for training neural networks with extremely low precision weights and activations, such as Binarized Neural Networks (BNNs).
 
-Existing deep neural networks use 32 bits, 16 bits or 8 bits to encode each weight and activation, making them large, slow and power-hungry. This prohibits many applications in resource-constrained environments. Larq is the first step towards solving this. It is designed to provide an easy to use, composable way to train BNNs (1 bit) and other types of Quantized Neural Networks (QNNs) and is based on the `tf.keras` interface.
+Existing deep neural networks use 32 bits, 16 bits or 8 bits to encode each weight and activation, making them large, slow and power-hungry.
+This prohibits many applications in resource-constrained environments. Larq is the first step towards solving this. It is designed to provide an easy to use, composable way to train BNNs (1 bit) and other types of Quantized Neural Networks (QNNs) and is based on the `tf.keras` interface. Note that efficient inference using a trained BNN requires the use of an optimized inference engine; we provide these for several platforms in [Larq Compute Engine](https://github.com/larq/compute-engine).
 
 *Larq is part of a family of libraries for BNN development; you can also check out [Larq Zoo](https://github.com/larq/zoo) for pretrained models and [Larq Compute Engine](https://github.com/larq/compute-engine) for deployment on mobile and edge devices.*
 
