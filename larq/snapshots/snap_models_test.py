@@ -78,23 +78,23 @@ snapshots['test_subclass_model_summary 1'] = '''+toy_model stats----------------
 '''
 
 snapshots['test_functional_model_summary 1'] = '''+model stats-----------------------------------------------------------------------------+
-| Layer            Input prec.           Outputs  # 1-bit  # 32-bit  Memory  32-bit MACs |
-|                        (bit)                        x 1       x 1    (kB)              |
+| layer            input prec.           outputs  # 1-bit  # 32-bit  memory  32-bit macs |
+|                        (bit)                        x 1       x 1    (kb)              |
 +----------------------------------------------------------------------------------------+
 | input_1                    -   (-1, 32, 32, 3)        0         0       0            ? |
 | quant_conv2d               -  (-1, 32, 32, 32)      864        32    0.23       884736 |
-| tf_op_layer_Mul            -  (-1, 32, 32, 32)        0         0       0            ? |
+| tf_op_layer_mul            -  (-1, 32, 32, 32)        0         0       0            ? |
 +----------------------------------------------------------------------------------------+
-| Total                                               864        32    0.23       884736 |
+| total                                               864        32    0.23       884736 |
 +----------------------------------------------------------------------------------------+
 +model summary----------------------------+
-| Total params                   896      |
-| Trainable params               896      |
-| Non-trainable params           0        |
-| Model size                     236.00 B |
-| Model size (8-bit FP weights)  140.00 B |
-| Float-32 Equivalent            3.50 KiB |
-| Compression Ratio of Memory    0.07     |
-| Number of MACs                 885 k    |
+| total params                   896      |
+| trainable params               896      |
+| non-trainable params           0        |
+| model size                     236.00 b |
+| model size (8-bit fp weights)  140.00 b |
+| float-32 equivalent            3.50 kib |
+| compression ratio of memory    0.07     |
+| number of macs                 885 k    |
 +-----------------------------------------+
 '''

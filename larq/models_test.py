@@ -169,7 +169,7 @@ def test_subclass_model_summary(snapshot, capsys):
 def test_functional_model_summary(snapshot, capsys):
     lq.models.summary(get_functional_model())
     captured = capsys.readouterr()
-    snapshot.assert_match(captured.out)
+    snapshot.assert_match(captured.out.lower())
 
 
 def test_summary_invalid_model():
