@@ -77,7 +77,7 @@ snapshots['test_subclass_model_summary 1'] = '''+toy_model stats----------------
 +-----------------------------------------+
 '''
 
-snapshots['test_functional_model_summary 1'] = '''+model stats-----------------------------------------------------------------------------+
+snapshots['test_functional_model_summary 1'] = '''+toy_model stats-------------------------------------------------------------------------+
 | layer            input prec.           outputs  # 1-bit  # 32-bit  memory  32-bit macs |
 |                        (bit)                        x 1       x 1    (kb)              |
 +----------------------------------------------------------------------------------------+
@@ -87,7 +87,7 @@ snapshots['test_functional_model_summary 1'] = '''+model stats------------------
 +----------------------------------------------------------------------------------------+
 | total                                               864        32    0.23       884736 |
 +----------------------------------------------------------------------------------------+
-+model summary----------------------------+
++toy_model summary------------------------+
 | total params                   896      |
 | trainable params               896      |
 | non-trainable params           0        |

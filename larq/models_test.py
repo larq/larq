@@ -32,7 +32,7 @@ def get_functional_model():
         padding="same",
     )(input)
     x *= 0.5
-    return tf.keras.Model(input, x)
+    return tf.keras.Model(input, x, name="toy_model")
 
 
 def get_profile_model():
