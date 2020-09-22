@@ -26,7 +26,10 @@ class ToyModel(tf.keras.Model):
 def get_functional_model():
     input = tf.keras.Input((32, 32, 3))
     x = lq.layers.QuantConv2D(
-        filters=32, kernel_size=(3, 3), kernel_quantizer="ste_sign", padding="same",
+        filters=32,
+        kernel_size=(3, 3),
+        kernel_quantizer="ste_sign",
+        padding="same",
     )(input)
     x *= 0.5
     return tf.keras.Model(input, x)
