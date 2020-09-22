@@ -31,7 +31,8 @@ def get_functional_model():
         kernel_quantizer="ste_sign",
         padding="same",
     )(input)
-    x *= 0.5
+    y, z = tf.split(x, 2, axis=-1)
+    x = tf.concat([y, z], axis=-1)
     return tf.keras.Model(input, x, name="toy_model")
 
 
