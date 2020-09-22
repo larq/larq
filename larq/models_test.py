@@ -23,6 +23,19 @@ class ToyModel(tf.keras.Model):
         return self.dense(self.pool(self.conv(inputs)))
 
 
+def get_functional_model():
+    input = tf.keras.Input((32, 32, 3))
+    x = lq.layers.QuantConv2D(
+        filters=32,
+        kernel_size=(3, 3),
+        kernel_quantizer="ste_sign",
+        padding="same",
+    )(input)
+    y, z = tf.split(x, 2, axis=-1)
+    x = tf.concat([y, z], axis=-1)
+    return tf.keras.Model(input, x, name="toy_model")
+
+
 def get_profile_model():
     return tf.keras.models.Sequential(
         [
@@ -152,6 +165,12 @@ def test_subclass_model_summary(snapshot, capsys):
     lq.models.summary(model)
     captured = capsys.readouterr()
     snapshot.assert_match(captured.out)
+
+
+def test_functional_model_summary(snapshot, capsys):
+    lq.models.summary(get_functional_model())
+    captured = capsys.readouterr()
+    snapshot.assert_match(captured.out.lower())
 
 
 def test_summary_invalid_model():
