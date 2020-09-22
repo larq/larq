@@ -76,3 +76,25 @@ snapshots['test_subclass_model_summary 1'] = '''+toy_model stats----------------
 | Number of MACs                 0        |
 +-----------------------------------------+
 '''
+
+snapshots['test_functional_model_summary 1'] = '''+model stats----------------------------------------------------------------------------------+
+| Layer            Input prec.                Outputs  # 1-bit  # 32-bit  Memory  32-bit MACs |
+|                        (bit)                             x 1       x 1    (kB)              |
++---------------------------------------------------------------------------------------------+
+| input_1                    -   ((None, 32, 32, 3),)        0         0       0            ? |
+| quant_conv2d               -       (-1, 32, 32, 32)      864        32    0.23       884736 |
+| tf_op_layer_Mul            -  ((None, 32, 32, 32),)        0         0       0            ? |
++---------------------------------------------------------------------------------------------+
+| Total                                                    864        32    0.23       884736 |
++---------------------------------------------------------------------------------------------+
++model summary----------------------------+
+| Total params                   896      |
+| Trainable params               896      |
+| Non-trainable params           0        |
+| Model size                     236.00 B |
+| Model size (8-bit FP weights)  140.00 B |
+| Float-32 Equivalent            3.50 KiB |
+| Compression Ratio of Memory    0.07     |
+| Number of MACs                 885 k    |
++-----------------------------------------+
+'''
