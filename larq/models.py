@@ -92,6 +92,10 @@ def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
         return "?"
 
 
+def _normalize_shape(shape):
+    return tuple(dim if dim else -1 for dim in shape)
+
+
 class WeightProfile:
     def __init__(self, weight, trainable: bool = True):
         self._weight = weight
@@ -214,7 +218,12 @@ class LayerProfile:
     @property
     def output_shape(self) -> Optional[Sequence[int]]:
         try:
-            return tuple(dim if dim else -1 for dim in self._layer.output_shape)
+            output_shape = self._layer.output_shape
+            if isinstance(output_shape, list):
+                if len(output_shape) == 1:
+                    return _normalize_shape(output_shape[0])
+                return [_normalize_shape(shape) for shape in output_shape]
+            return _normalize_shape(output_shape)
         except AttributeError:
             return None
 
