@@ -103,9 +103,10 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
     def __init__(self, *args, pad_values=0.0, **kwargs):
         self.pad_values = pad_values
         super().__init__(*args, **kwargs)
-        self._is_native_padding = self.padding != "same" or (
-            not tf.is_tensor(self.pad_values) and self.pad_values == 0.0
-        )
+        is_zero_padding = not tf.is_tensor(self.pad_values) and self.pad_values == 0.0
+        self._is_native_padding = self.padding != "same" or is_zero_padding
+        if self.padding == "causal" and not is_zero_padding:
+            raise ValueError("Causal padding with `pad_values != 0` is not supported.")
 
     def _get_spatial_padding_same(self, shape):
         return [
