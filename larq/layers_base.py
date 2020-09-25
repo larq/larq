@@ -5,9 +5,15 @@ import tensorflow as tf
 
 from larq import context, quantizers, utils
 from larq.quantized_variable import QuantizedVariable
-from larq.quantizers import Quantizer
+from larq.quantizers import NoOpQuantizer, Quantizer
 
 log = logging.getLogger(__name__)
+
+
+def _is_binary(quantizer):
+    return getattr(quantizer, "precision", None) == 1 and not isinstance(
+        quantizer, NoOpQuantizer
+    )
 
 
 def _compute_padded_size(stride, dilation_rate, input_size, filter_size):
@@ -81,9 +87,9 @@ class QuantizerBase(BaseLayer):
         self.kernel_quantizer = quantizers.get_kernel_quantizer(kernel_quantizer)
 
         super().__init__(*args, **kwargs)
-        if kernel_quantizer and not self.kernel_constraint:
+        if _is_binary(self.kernel_quantizer) and not self.kernel_constraint:
             log.warning(
-                "Using a weight quantizer without setting `kernel_constraint` "
+                "Using a binary weight quantizer without setting `kernel_constraint` "
                 "may result in starved weights (where the gradient is always zero)."
             )
 
@@ -189,9 +195,9 @@ class QuantizerDepthwiseBase(BaseLayer):
         self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
 
         super().__init__(*args, **kwargs)
-        if depthwise_quantizer and not self.depthwise_constraint:
+        if _is_binary(self.depthwise_quantizer) and not self.depthwise_constraint:
             log.warning(
-                "Using a weight quantizer without setting `depthwise_constraint` "
+                "Using a binary weight quantizer without setting `depthwise_constraint` "
                 "may result in starved weights (where the gradient is always zero)."
             )
 
@@ -224,14 +230,14 @@ class QuantizerSeparableBase(BaseLayer):
         self.pointwise_quantizer = quantizers.get_kernel_quantizer(pointwise_quantizer)
 
         super().__init__(*args, **kwargs)
-        if depthwise_quantizer and not self.depthwise_constraint:
+        if _is_binary(self.depthwise_quantizer) and not self.depthwise_constraint:
             log.warning(
-                "Using `depthwise_quantizer` without setting `depthwise_constraint` "
+                "Using a binary `depthwise_quantizer` without setting `depthwise_constraint` "
                 "may result in starved weights (where the gradient is always zero)."
             )
-        if pointwise_quantizer and not self.pointwise_constraint:
+        if _is_binary(self.pointwise_quantizer) and not self.pointwise_constraint:
             log.warning(
-                "Using `pointwise_quantizer` without setting `pointwise_constraint` "
+                "Using a binary `pointwise_quantizer` without setting `pointwise_constraint` "
                 "may result in starved weights (where the gradient is always zero)."
             )
 
