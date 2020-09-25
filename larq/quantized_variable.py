@@ -332,10 +332,10 @@ class QuantizedVariable(tf.Variable, TensorType):
         # models with normal variables, and vice versa.
         return self.latent_variable._gather_saveables_for_checkpoint()
 
-    def _map_resources(self):
+    def _map_resources(self, *args):
         # By delegating this method to the wrapped variable, SavedModel with
         # QuantizedVariables are identical to SavedModel with normal variables.
-        obj_map, resource_map = self.latent_variable._map_resources()
+        obj_map, resource_map = self.latent_variable._map_resources(*args)
         obj_map[self] = obj_map[self.latent_variable]
         return obj_map, resource_map
 
