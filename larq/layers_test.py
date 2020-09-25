@@ -276,6 +276,10 @@ class TestLayerWarns:
         )
         assert caplog.records == []
 
+    def test_conv1d_non_zero_padding_raises(self):
+        with pytest.raises(ValueError, match=r".*pad_values.*"):
+            lq.layers.QuantConv1D(24, 3, padding="causal", pad_values=1.0)
+
 
 @pytest.mark.parametrize(
     "quant_layer,layer",
