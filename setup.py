@@ -36,7 +36,7 @@ setup(
             "pytest-xdist>=1.30,<2.2",
             "pytest-mock>=2.0,<3.4",
             "pytype==2020.9.24",
-            "snapshottest~=0.5.1",
+            "snapshottest>=0.5.1,<0.7.0",
         ],
     },
     classifiers=[
