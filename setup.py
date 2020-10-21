@@ -22,6 +22,7 @@ setup(
         "numpy >= 1.15.4, < 2.0",
         "terminaltables>=3.1.0",
         "dataclasses ; python_version<'3.7'",
+        "importlib-metadata ~= 2.0 ; python_version<'3.8'",
     ],
     extras_require={
         "tensorflow": ["tensorflow>=1.14.0"],
