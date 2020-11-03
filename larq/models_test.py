@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 
 import larq as lq
 from larq.models import ModelProfile
@@ -170,7 +171,8 @@ def test_subclass_model_summary(snapshot, capsys):
 def test_functional_model_summary(snapshot, capsys):
     lq.models.summary(get_functional_model())
     captured = capsys.readouterr()
-    snapshot.assert_match(captured.out.lower())
+    key = "2.4+" if version.parse(tf.__version__) >= version.parse("2.3.9") else "<2.4"
+    snapshot.assert_match(captured.out.lower(), key)
 
 
 def test_summary_invalid_model():
