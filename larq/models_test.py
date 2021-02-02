@@ -145,6 +145,82 @@ def test_layer_profile():
         assert profiles[i].op_count("mac", 1) == bin_mac_count[i]
 
 
+def test_layer_profile_1d():
+    model = tf.keras.models.Sequential(
+        [
+            lq.layers.QuantConv1D(
+                filters=32,
+                kernel_size=3,
+                input_shape=(64, 6),
+                kernel_quantizer="ste_sign",
+                padding="same",
+            ),
+            tf.keras.layers.MaxPooling1D(2),
+            lq.layers.QuantSeparableConv1D(
+                filters=16,
+                kernel_size=3,
+                input_quantizer="ste_sign",
+                depthwise_quantizer="ste_sign",
+                pointwise_quantizer="ste_sign",
+                padding="same",
+            ),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(10, trainable=False),
+        ]
+    )
+    profile = ModelProfile(model)
+
+    kernel_count = [(32 * 3 * 6), 0, (32 * 3 + 16 * 32), 0, (16 * 32 * 10)]
+    bias_count = [32, 0, 16, 0, 10]
+    param_count = [k + b for k, b in zip(kernel_count, bias_count)]
+    memory = [  # bits * (c * w * d) + bits * bias
+        1 * (32 * 3 * 6) + 32 * 32,
+        0,
+        1 * (32 * 3 + 16 * 32) + 32 * 16,
+        0,
+        32 * (32 * 16 * 10 + 10),
+    ]
+    int8_fp_weights_mem = [
+        1 * (32 * 3 * 6) + 8 * 32,
+        0,
+        1 * (32 * 3 + 16 * 32) + 8 * 16,
+        0,
+        8 * (32 * 16 * 10 + 10),
+    ]
+    fp_equiv_mem = [32 * n for n in param_count]
+    input_precision = [None, None, 1, None, None]
+    output_shape = [
+        (-1, 64, 32),
+        (-1, 32, 32),
+        (-1, 32, 16),
+        (-1, 32 * 16),
+        (-1, 10),
+    ]
+    output_pixels = [int(np.prod(os[1:-1])) for os in output_shape]
+    unique_param_bidtwidths = [[1, 32], [], [1, 32], [], [32]]
+    unique_op_precisions = [[32], [], [1], [], [32]]
+    mac_count = [params * pixels for params, pixels in zip(kernel_count, output_pixels)]
+    bin_mac_count = [
+        mc if (1 in pb and ip == 1) else 0
+        for mc, pb, ip in zip(mac_count, unique_param_bidtwidths, input_precision)
+    ]
+
+    profiles = profile.layer_profiles
+    for i in range(len(profiles)):
+        print(f"Testing layer {i}...")
+        assert profiles[i].input_precision == input_precision[i]
+        assert profiles[i].output_shape == output_shape[i]
+        assert profiles[i].output_pixels == output_pixels[i]
+        assert profiles[i].weight_count() == param_count[i]
+        assert profiles[i].unique_param_bidtwidths == unique_param_bidtwidths[i]
+        assert profiles[i].unique_op_precisions == unique_op_precisions[i]
+        assert profiles[i].memory == memory[i]
+        assert profiles[i].fp_equivalent_memory == fp_equiv_mem[i]
+        assert profiles[i].int8_fp_weights_memory == int8_fp_weights_mem[i]
+        assert profiles[i].op_count("mac") == mac_count[i]
+        assert profiles[i].op_count("mac", 1) == bin_mac_count[i]
+
+
 def test_summary(snapshot, capsys):
     model = get_profile_model()
     lq.models.summary(model)
