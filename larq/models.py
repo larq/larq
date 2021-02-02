@@ -11,21 +11,6 @@ from larq.utils import memory_as_readable_str
 
 __all__ = ["summary"]
 
-op_count_supported_layer_types = (
-    lq_layers.QuantConv2D,
-    lq_layers.QuantSeparableConv2D,
-    lq_layers.QuantDepthwiseConv2D,
-    lq_layers.QuantDense,
-    tf.keras.layers.Conv2D,
-    tf.keras.layers.SeparableConv2D,
-    tf.keras.layers.DepthwiseConv2D,
-    tf.keras.layers.Dense,
-    tf.keras.layers.Flatten,
-    tf.keras.layers.BatchNormalization,
-    tf.keras.layers.MaxPool2D,
-    tf.keras.layers.AveragePooling2D,
-)
-
 mac_containing_layers = (
     lq_layers.QuantConv2D,
     lq_layers.QuantSeparableConv2D,
@@ -35,8 +20,21 @@ mac_containing_layers = (
     tf.keras.layers.SeparableConv2D,
     tf.keras.layers.DepthwiseConv2D,
     tf.keras.layers.Dense,
+    lq_layers.QuantConv1D,
+    lq_layers.QuantSeparableConv1D,
+    tf.keras.layers.Conv1D,
+    tf.keras.layers.SeparableConv1D,
 )
 
+op_count_supported_layer_types = (
+    tf.keras.layers.Flatten,
+    tf.keras.layers.BatchNormalization,
+    tf.keras.layers.MaxPool2D,
+    tf.keras.layers.AveragePooling2D,
+    tf.keras.layers.MaxPool1D,
+    tf.keras.layers.AveragePooling1D,
+    *mac_containing_layers,
+)
 
 T = TypeVar("T")
 
@@ -241,6 +239,8 @@ class LayerProfile:
             return None
         if len(self.output_shape) == 4:
             return int(np.prod(self.output_shape[1:3]))
+        if len(self.output_shape) == 3:
+            return self.output_shape[1]
         if len(self.output_shape) == 2:
             return 1
         raise NotImplementedError()
@@ -266,7 +266,6 @@ class LayerProfile:
             n = self.op_count("mac", i)
             n = _format_table_entry(n, table_config["mac_units"])
             row.append(n)
-
         return row
 
 
