@@ -59,6 +59,7 @@ __all__ = [
     "MagnitudeAwareSign",
     "NoOp",
     "NoOpQuantizer",
+    "Quantizer",
     "SteHeaviside",
     "SteSign",
     "SteTern",
@@ -147,8 +148,22 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
-class BaseQuantizer(tf.keras.layers.Layer):
-    """Base class for defining quantizers with Larq metrics."""
+class Quantizer(tf.keras.layers.Layer):
+    """Common base class for defining quantizers.
+
+    # Attributes
+        precision: An integer defining the precision of the output. This value will be
+            used by `lq.models.summary()` for improved logging.
+    """
+
+    precision = None
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
+
+class _BaseQuantizer(Quantizer):
+    """Private base class for defining quantizers with Larq metrics."""
 
     def __init__(self, *args, metrics=None, **kwargs):
         self._custom_metrics = metrics
@@ -169,12 +184,9 @@ class BaseQuantizer(tf.keras.layers.Layer):
     def non_trainable_weights(self):
         return []
 
-    def compute_output_shape(self, input_shape):
-        return input_shape
-
 
 @utils.register_keras_custom_object
-class NoOp(BaseQuantizer):
+class NoOp(_BaseQuantizer):
     r"""Instantiates a serializable no-op quantizer.
 
     \\[
@@ -218,7 +230,7 @@ NoOpQuantizer = NoOp
 
 @utils.register_alias("ste_sign")
 @utils.register_keras_custom_object
-class SteSign(BaseQuantizer):
+class SteSign(_BaseQuantizer):
     r"""Instantiates a serializable binary quantizer.
 
     \\[
@@ -267,7 +279,7 @@ class SteSign(BaseQuantizer):
 
 @utils.register_alias("approx_sign")
 @utils.register_keras_custom_object
-class ApproxSign(BaseQuantizer):
+class ApproxSign(_BaseQuantizer):
     r"""Instantiates a serializable binary quantizer.
     \\[
     q(x) = \begin{cases}
@@ -306,7 +318,7 @@ class ApproxSign(BaseQuantizer):
 
 @utils.register_alias("ste_heaviside")
 @utils.register_keras_custom_object
-class SteHeaviside(BaseQuantizer):
+class SteHeaviside(_BaseQuantizer):
     r"""
     Instantiates a binarization quantizer with output values 0 and 1.
     \\[
@@ -355,7 +367,7 @@ class SteHeaviside(BaseQuantizer):
 
 @utils.register_alias("swish_sign")
 @utils.register_keras_custom_object
-class SwishSign(BaseQuantizer):
+class SwishSign(_BaseQuantizer):
     r"""Sign binarization function.
 
     \\[
@@ -403,7 +415,7 @@ class SwishSign(BaseQuantizer):
 
 @utils.register_alias("magnitude_aware_sign")
 @utils.register_keras_custom_object
-class MagnitudeAwareSign(BaseQuantizer):
+class MagnitudeAwareSign(_BaseQuantizer):
     r"""Instantiates a serializable magnitude-aware sign quantizer for Bi-Real Net.
 
     A scaled sign function computed according to Section 3.3 in
@@ -446,7 +458,7 @@ class MagnitudeAwareSign(BaseQuantizer):
 
 @utils.register_alias("ste_tern")
 @utils.register_keras_custom_object
-class SteTern(BaseQuantizer):
+class SteTern(_BaseQuantizer):
     r"""Instantiates a serializable ternarization quantizer.
 
     \\[
@@ -525,7 +537,7 @@ class SteTern(BaseQuantizer):
 
 @utils.register_alias("dorefa_quantizer")
 @utils.register_keras_custom_object
-class DoReFa(BaseQuantizer):
+class DoReFa(_BaseQuantizer):
     r"""Instantiates a serializable k_bit quantizer as in the DoReFa paper.
 
     \\[
@@ -634,6 +646,6 @@ def get_kernel_quantizer(identifier):
         `Quantizer` or `None`
     """
     quantizer = get(identifier)
-    if isinstance(quantizer, BaseQuantizer) and not quantizer._custom_metrics:
+    if isinstance(quantizer, _BaseQuantizer) and not quantizer._custom_metrics:
         quantizer._custom_metrics = list(context.get_training_metrics())
     return quantizer
