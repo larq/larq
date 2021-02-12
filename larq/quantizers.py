@@ -157,6 +157,7 @@ class BaseQuantizer(tf.keras.layers.Layer):
     def build(self, input_shape):
         if self._custom_metrics and "flip_ratio" in self._custom_metrics:
             self.flip_ratio = lq_metrics.FlipRatio(name=f"flip_ratio/{self.name}")
+            self.flip_ratio.build(input_shape)
         super().build(input_shape)
 
     def call(self, inputs):
