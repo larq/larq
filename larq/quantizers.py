@@ -59,6 +59,7 @@ __all__ = [
     "MagnitudeAwareSign",
     "NoOp",
     "NoOpQuantizer",
+    "Quantizer",
     "SteHeaviside",
     "SteSign",
     "SteTern",
@@ -147,7 +148,21 @@ def ste_heaviside(x: tf.Tensor, clip_value: float = 1.0) -> tf.Tensor:
     return _call(x)
 
 
-class BaseQuantizer(tf.keras.layers.Layer):
+class Quantizer(tf.keras.layers.Layer):
+    """Common base class for defining quantizers.
+
+    # Attributes
+        precision: An integer defining the precision of the output. This value will be
+            used by `lq.models.summary()` for improved logging.
+    """
+
+    precision = None
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
+
+class BaseQuantizer(Quantizer):
     """Base class for defining quantizers with Larq metrics."""
 
     def __init__(self, *args, metrics=None, **kwargs):
@@ -168,9 +183,6 @@ class BaseQuantizer(tf.keras.layers.Layer):
     @property
     def non_trainable_weights(self):
         return []
-
-    def compute_output_shape(self, input_shape):
-        return input_shape
 
 
 @utils.register_keras_custom_object
