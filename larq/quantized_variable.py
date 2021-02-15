@@ -7,7 +7,7 @@ from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
 
 from larq import context
-from larq.quantizers import Quantizer
+from larq.quantizers import QuantizerType
 
 # pytype: disable=import-error
 try:
@@ -28,7 +28,7 @@ class QuantizedVariable(tf.Variable, TensorType):
     def __init__(
         self,
         variable: tf.Variable,
-        quantizer: Optional[Quantizer] = None,
+        quantizer: Optional[QuantizerType] = None,
         precision: Optional[int] = None,
         op: Optional[tf.Operation] = UNSPECIFIED,
     ):
@@ -66,7 +66,7 @@ class QuantizedVariable(tf.Variable, TensorType):
     def from_variable(
         cls,
         variable: tf.Variable,
-        quantizer: Optional[Quantizer] = None,
+        quantizer: Optional[QuantizerType] = None,
         precision: Optional[int] = None,
         op: Optional[tf.Operation] = UNSPECIFIED,
     ):
