@@ -5,14 +5,14 @@ import tensorflow as tf
 
 from larq import context, quantizers, utils
 from larq.quantized_variable import QuantizedVariable
-from larq.quantizers import NoOpQuantizer, Quantizer
+from larq.quantizers import NoOp, Quantizer
 
 log = logging.getLogger(__name__)
 
 
 def _is_binary(quantizer):
     return getattr(quantizer, "precision", None) == 1 and not isinstance(
-        quantizer, NoOpQuantizer
+        quantizer, NoOp
     )
 
 
