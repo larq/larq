@@ -606,7 +606,7 @@ class DoReFa(_BaseQuantizer):
 DoReFaQuantizer = DoReFa
 
 
-Quantizer = Union[tf.keras.layers.Layer, Callable[[tf.Tensor], tf.Tensor]]
+QuantizerType = Union[Quantizer, Callable[[tf.Tensor], tf.Tensor]]
 
 
 def serialize(quantizer: tf.keras.layers.Layer):

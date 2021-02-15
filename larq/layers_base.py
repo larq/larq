@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from larq import context, quantizers, utils
 from larq.quantized_variable import QuantizedVariable
-from larq.quantizers import NoOpQuantizer, Quantizer
+from larq.quantizers import NoOpQuantizer, QuantizerType
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class BaseLayer(tf.keras.layers.Layer):
             "input_quantizer": quantizers.serialize(self.input_quantizer),
         }
 
-    def _get_quantizer(self, name) -> Optional[Quantizer]:
+    def _get_quantizer(self, name) -> Optional[QuantizerType]:
         """Get quantizer for given kernel name"""
         return None
 
@@ -93,7 +93,7 @@ class QuantizerBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[QuantizerType]:
         return self.kernel_quantizer if name == "kernel" else None
 
     def get_config(self):
@@ -189,7 +189,7 @@ class QuantizerDepthwiseBase(BaseLayer):
     def __init__(
         self,
         *args,
-        depthwise_quantizer: Optional[Quantizer] = None,
+        depthwise_quantizer: Optional[QuantizerType] = None,
         **kwargs,
     ):
         self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
@@ -201,7 +201,7 @@ class QuantizerDepthwiseBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[QuantizerType]:
         return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
     def get_config(self):
@@ -222,8 +222,8 @@ class QuantizerSeparableBase(BaseLayer):
     def __init__(
         self,
         *args,
-        depthwise_quantizer: Optional[Quantizer] = None,
-        pointwise_quantizer: Optional[Quantizer] = None,
+        depthwise_quantizer: Optional[QuantizerType] = None,
+        pointwise_quantizer: Optional[QuantizerType] = None,
         **kwargs,
     ):
         self.depthwise_quantizer = quantizers.get_kernel_quantizer(depthwise_quantizer)
@@ -241,7 +241,7 @@ class QuantizerSeparableBase(BaseLayer):
                 "may result in starved weights (where the gradient is always zero)."
             )
 
-    def _get_quantizer(self, name: str) -> Optional[Quantizer]:
+    def _get_quantizer(self, name: str) -> Optional[QuantizerType]:
         if name == "depthwise_kernel":
             return self.depthwise_quantizer
         if name == "pointwise_kernel":
