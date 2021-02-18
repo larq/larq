@@ -121,6 +121,10 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             weights.extend(optimizer.weights)
         return weights
 
+    @tf.keras.optimizers.Optimizer.iterations.setter
+    def iterations(self, variable):
+        raise NotImplementedError("CaseOptimzer does not support setting iterations.")
+
     def apply_gradients(self, grads_and_vars, name: Optional[str] = None, **kwargs):
         """Apply gradients to variables for each optimizer.
 
@@ -141,6 +145,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
 
         with tf.init_scope():
+            _ = self.iterations
+            # This is only necessary in TF 2.0 and older, but doesn't hurt on newer versions
             for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists):
                 optimizer._create_slots([v for (_, v) in grads_and_vars])
 
