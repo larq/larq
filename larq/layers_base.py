@@ -52,10 +52,10 @@ class BaseLayer(tf.keras.layers.Layer):
             return super().call(inputs)
 
     def get_config(self):
-        return {
-            **super().get_config(),
-            "input_quantizer": quantizers.serialize(self.input_quantizer),
-        }
+        quantizer_config = quantizers.serialize(self.input_quantizer)
+        if quantizer_config is not None:
+            quantizer_config["config"]["dtype"] = self.dtype
+        return {**super().get_config(), "input_quantizer": quantizer_config}
 
     def _get_quantizer(self, name) -> Optional[QuantizerType]:
         """Get quantizer for given kernel name"""
@@ -97,9 +97,12 @@ class QuantizerBase(BaseLayer):
         return self.kernel_quantizer if name == "kernel" else None
 
     def get_config(self):
+        quantizer_config = quantizers.serialize(self.kernel_quantizer)
+        if quantizer_config is not None:
+            quantizer_config["config"]["dtype"] = self.dtype
         return {
             **super().get_config(),
-            "kernel_quantizer": quantizers.serialize(self.kernel_quantizer),
+            "kernel_quantizer": quantizer_config,
         }
 
 
@@ -205,9 +208,12 @@ class QuantizerDepthwiseBase(BaseLayer):
         return self.depthwise_quantizer if name == "depthwise_kernel" else None
 
     def get_config(self):
+        quantizer_config = quantizers.serialize(self.depthwise_quantizer)
+        if quantizer_config is not None:
+            quantizer_config["config"]["dtype"] = self.dtype
         return {
             **super().get_config(),
-            "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
+            "depthwise_quantizer": quantizer_config,
         }
 
 
@@ -249,8 +255,14 @@ class QuantizerSeparableBase(BaseLayer):
         return None
 
     def get_config(self):
+        depthwise_quantizer_config = quantizers.serialize(self.depthwise_quantizer)
+        if depthwise_quantizer_config is not None:
+            depthwise_quantizer_config["config"]["dtype"] = self.dtype
+        pointwise_quantizer_config = quantizers.serialize(self.pointwise_quantizer)
+        if pointwise_quantizer_config is not None:
+            pointwise_quantizer_config["config"]["dtype"] = self.dtype
         return {
             **super().get_config(),
-            "depthwise_quantizer": quantizers.serialize(self.depthwise_quantizer),
-            "pointwise_quantizer": quantizers.serialize(self.pointwise_quantizer),
+            "depthwise_quantizer": depthwise_quantizer_config,
+            "pointwise_quantizer": pointwise_quantizer_config,
         }
