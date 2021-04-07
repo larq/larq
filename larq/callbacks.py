@@ -41,7 +41,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         verbose: int = 0,
         log_name: Optional[str] = None,
     ):
-        super(HyperparameterScheduler, self).__init__()
+        super().__init__()
         self.optimizer = optimizer
         self.schedule = schedule
         self.hyperparameter = hyperparameter
