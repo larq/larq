@@ -80,10 +80,13 @@ class FlipRatio(tf.keras.metrics.Metric):
     def result(self):
         return tf.compat.v1.div_no_nan(self.total, self.count - 1)
 
-    def reset_states(self):
+    def reset_state(self):
         tf.keras.backend.batch_set_value(
             [(v, 0) for v in self.variables if v is not self._previous_values]
         )
+
+    def reset_states(self):
+        self.reset_state()  # For backwards compatibility with < 2.5
 
     def get_config(self):
         return {**super().get_config(), "values_dtype": self.values_dtype.name}
