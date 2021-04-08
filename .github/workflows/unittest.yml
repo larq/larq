@@ -18,6 +18,8 @@ jobs:
             python-version: 3.6
           - tf-version: 2.4.1
             python-version: 3.8
+          - tf-version: 2.5.0rc0
+            python-version: 3.9
 
     steps:
       - uses: actions/checkout@v2
