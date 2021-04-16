@@ -245,7 +245,7 @@ class TestQuantization:
         # go through the same test like for the DoReFa activation quantizer
         divider = np.amax(np.abs(np.tanh(real_values)))
         preprocessed = np.tanh(real_values) / divider
-        preprocessed = (preprocessed / 2.) + 0.5
+        preprocessed = (preprocessed / 2.0) + 0.5
         assert not np.any(result > 1)
         assert not np.any(result < -1)
         # In the assertion, the output scaling from [0,1] to [-1,1] now needs
@@ -258,7 +258,7 @@ class TestQuantization:
                     (preprocessed > (2 * i - 1) / (2 * n))
                     & (preprocessed < (2 * i + 1) / (2 * n))
                 ],
-                2 * (i / n) - 1.
+                2 * (i / n) - 1.0,
             )
 
 
@@ -379,7 +379,7 @@ class TestGradients:
             # quantizek function is supposed to be 1 everywhere, because it
             # is used on its linear region only. tanh does all the limiting.
             dividend = np.amax(np.abs(np.tanh(x)))
-            return 1 / (np.cosh(x)**2.) / dividend
+            return 1 / (np.cosh(x) ** 2.0) / dividend
 
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)

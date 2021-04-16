@@ -665,7 +665,7 @@ class DoReFaKernel(DoReFa):
         # So when all elements are zero, nothing is normed. This is achieved by
         # dividing by 1.
         dividend = tf.math.reduce_max(tf.math.abs(limited))
-        dividend = tf.where(dividend == 0., tf.ones_like(dividend), dividend)
+        dividend = tf.where(dividend == 0.0, tf.ones_like(dividend), dividend)
 
         # Need to stop the gradient here. Otherwise, for the maximum element,
         # which gives the dividend, normed is limited/limited (for this one
@@ -680,11 +680,11 @@ class DoReFaKernel(DoReFa):
 
         # Norm and scale from value range [-1,1] to [0,1]
         normed = limited / dividend
-        normed = (normed / 2.) + 0.5
+        normed = (normed / 2.0) + 0.5
 
         # Quantize and scale back to [-1,1] range
         quantized = super().call(normed)
-        quantized = (2. * quantized) - 1.
+        quantized = (2.0 * quantized) - 1.0
 
         return quantized
 
