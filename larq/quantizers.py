@@ -667,6 +667,17 @@ class DoReFaKernel(DoReFa):
         dividend = tf.reduce_max(tf.abs(limited))
         dividend = tf.where(dividend == 0., tf.ones_like(dividend), dividend)
         
+        #Need to stop the gradient here. Otherwise, for the maximum element,
+        #which gives the dividend, normed is limited/limited (for this one
+        #maximum digit). The derivative of y = x/x, dy/dx is just zero, when
+        #one does the simplification y = x/x = 1. But TF does NOT do this
+        #simplification when computing the gradient for the
+        #normed = limited/dividend operation. As a result, this gradient becomes
+        #complex, because during the computation, "dividend" is not just a
+        #constant, but depends on "limited" instead. Here, tf.stop_gradient
+        #is used to mark "dividend" as a constant explicitly.
+        dividend = tf.stop_gradient(dividend)
+        
         #Norm and scale from value range [-1,1] to [0,1]
         normed = limited / dividend
         normed = (normed / 2.) + 0.5
