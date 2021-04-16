@@ -399,7 +399,7 @@ class TestGradients:
         ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
         ("ste_tern", lq.quantizers.SteTern),
         ("dorefa_quantizer", lq.quantizers.DoReFa),
-		("dorefa_kernel_quantizer", lq.quantizers.DoReFaKernel),
+        ("dorefa_kernel_quantizer", lq.quantizers.DoReFaKernel),
     ],
 )
 def test_metrics(quantizer):

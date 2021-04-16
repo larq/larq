@@ -673,7 +673,7 @@ class DoReFaKernel(DoReFa):
         #one does the simplification y = x/x = 1. But TF does NOT do this
         #simplification when computing the gradient for the
         #normed = limited/dividend operation. As a result, this gradient becomes
-        #complex, because during the computation, "dividend" is not just a
+        #complicated, because during the computation, "dividend" is not just a
         #constant, but depends on "limited" instead. Here, tf.stop_gradient
         #is used to mark "dividend" as a constant explicitly.
         dividend = tf.stop_gradient(dividend)
