@@ -57,6 +57,7 @@ __all__ = [
     "DoReFa",
     "DoReFaQuantizer",
     "DoReFaKernel",
+    "DoReFaKernelQuantizer",
     "MagnitudeAwareSign",
     "NoOp",
     "NoOpQuantizer",
