@@ -412,4 +412,5 @@ def test_get_kernel_quantizer_accepts_function():
 
 def test_backwards_compat_aliases():
     assert lq.quantizers.DoReFaQuantizer == lq.quantizers.DoReFa
+    assert lq.quantizers.DoReFaKernelQuantizer == lq.quantizers.DoReFaKernel
     assert lq.quantizers.NoOpQuantizer == lq.quantizers.NoOp
