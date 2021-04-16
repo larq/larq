@@ -338,6 +338,28 @@ class TestGradients:
             activation = lq.quantizers.DoReFa(2)(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), ste_grad(x))
+		
+    def test_dorefa_kernel_tanh_grad(self):
+        #For other tests, the golden gradient is defined using python
+        #expressions and "converted" to a numpy function using np.vectorize.
+        #But the kernel quantizer does a max-operation over the full
+        #quantized tensor, so np.vectorize, which causes the gradient to be
+        #called element-wise, needs to be skipped!
+        #@np.vectorize
+        def tanh_grad(x):
+            #1/(cosh**2) is the derivative of tanh. The gradients of the
+            #scaling operations cancel each other and the gradient of the
+            #quantizek function is supposed to be 1 everywhere, because it
+            #is used on its linear region only. tanh does all the limiting.
+            dividend = np.amax(np.abs(np.tanh(x)))
+            return 1 / (np.cosh(x)**2.) / dividend
+
+        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
+        tf_x = tf.Variable(x)
+        with tf.GradientTape() as tape:
+            activation = lq.quantizers.DoReFaKernel(2)(tf_x)
+        grad = tape.gradient(activation, tf_x)
+        np.testing.assert_allclose(grad.numpy(), tanh_grad(x))
 
 
 @pytest.mark.parametrize(
