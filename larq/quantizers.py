@@ -664,7 +664,7 @@ class DoReFaKernel(DoReFa):
         #If all elements are 0., we would get a div by zero.
         #So when all elements are zero, nothing is normed. This is achieved by
         #dividing by 1.
-        dividend = tf.reduce_max(tf.abs(limited))
+        dividend = tf.math.reduce_max(tf.math.abs(limited))
         dividend = tf.where(dividend == 0., tf.ones_like(dividend), dividend)
         
         #Need to stop the gradient here. Otherwise, for the maximum element,
