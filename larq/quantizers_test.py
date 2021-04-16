@@ -233,6 +233,33 @@ class TestQuantization:
                 ]
                 == i / n
             )
+            
+    def test_dorefa_kernel_quantize(self):
+        x = tf.keras.backend.placeholder(ndim=2)
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaKernel(2)(x)])
+        real_values = testing_utils.generate_real_values_with_zeros()
+        result = f([real_values])[0]
+        k_bit = 2
+        n = 2 ** k_bit - 1
+        #Create the preprocessed and scaled stimulus, which is then ready to
+        #go through the same test like for the DoReFa activation quantizer
+        divider = np.amax(np.abs(np.tanh(real_values)))
+        preprocessed = np.tanh(real_values) / divider
+        preprocessed = (preprocessed / 2.) + 0.5
+        assert not np.any(result > 1)
+        assert not np.any(result < -1)
+        #In the assertion, the output scaling from [0,1] to [-1,1] now needs
+        #to be done here like in the weight quantizer when comparing digits
+        #of the quantized tensor to golden, quantized values. The golden,
+        #quantized value "i / n" is on the [0,1] range.
+        for i in range(n + 1):
+            np.testing.assert_allclose(
+                result[
+                    (preprocessed > (2 * i - 1) / (2 * n))
+                    & (preprocessed < (2 * i + 1) / (2 * n))
+                ],
+                2 * (i / n) - 1.
+            )
 
 
 @pytest.mark.usefixtures("eager_mode")
