@@ -657,8 +657,7 @@ class DoReFaKernel(DoReFa):
 
     def call(self, inputs):
         
-        #tanh(0.) yields nan, but a limiter should yield 0.
-        limited = tf.where(inputs == 0., inputs, tf.math.tanh(inputs))
+        limited = tf.math.tanh(inputs)
         
         #Divider for max-value norm.
         #If all elements are 0., we would get a div by zero.
