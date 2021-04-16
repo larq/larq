@@ -602,30 +602,30 @@ class DoReFa(_BaseQuantizer):
 
     def get_config(self):
         return {**super().get_config(), "k_bit": self.precision}
-        
-        
+
+
 @utils.register_alias("dorefa_kernel_quantizer")
 @utils.register_keras_custom_object
 class DoReFaKernel(DoReFa):
     r"""Instantiates a serializable k_bit kernel quantizer as in the DoReFa paper.
-    
+
     This quantizer is the same like the `DoReFa` quantizer, but adds a preprocessing.
     Instead of limiting input operands (or in this case: weights) using a hard
     limiter, a tangens hyperbolicus is applied to achieve a softer limiting
     with a gradient, which is contineously differentiable itself.
-    
+
     \\[
     w_{lim}(w) = tanh(w)
     \\]
-    
+
     Furthermore, the weights of each layer are normed, such that the weight with
     the largest magnitude gets the largest or smallest (depending on its sign)
     quantizable value. That way, the full quantizable numeric range is utilized.
-    
+
     \\[
     w_{norm}(w) = \frac{w}{max(|w|)}
     \\]
-    
+
     The formulas can be found in the paper in section 2.3. Please note, that
     the paper refers to weights being quantized on a numeric range of [-1,1], while
     activations are quantized on the numeric range [0,1]. `DoReFa` defines the
@@ -635,11 +635,11 @@ class DoReFaKernel(DoReFa):
     The hard limiting inside `DoReFa` becomes ineffective, because its input
     is already limited by the hyperbolic tangent. The full quantization
     function including the adaption of numeric ranges is
-    
+
     \\[
     q(w) = 2quantize_{k}(\frac{w_{norm}\left(w_{lim}\left(w\right)\right)}{2} + \frac{1}{2}) - 1
     \\]
-    
+
     !!! warning
         This quantizer works for weights on the range [-1,1], which matches the
         default setting of `constraints.weight_clip`. Do not use this quantizer
@@ -648,7 +648,7 @@ class DoReFaKernel(DoReFa):
     ```plot-activation
     quantizers.DoReFaKernel
     ```
-    
+
     The interface of this quantizer is the same like the one of `DoReFa`.
 
     # References
@@ -657,35 +657,35 @@ class DoReFaKernel(DoReFa):
     """
 
     def call(self, inputs):
-        
+
         limited = tf.math.tanh(inputs)
-        
-        #Divider for max-value norm.
-        #If all elements are 0., we would get a div by zero.
-        #So when all elements are zero, nothing is normed. This is achieved by
-        #dividing by 1.
+
+        # Divider for max-value norm.
+        # If all elements are 0., we would get a div by zero.
+        # So when all elements are zero, nothing is normed. This is achieved by
+        # dividing by 1.
         dividend = tf.math.reduce_max(tf.math.abs(limited))
         dividend = tf.where(dividend == 0., tf.ones_like(dividend), dividend)
-        
-        #Need to stop the gradient here. Otherwise, for the maximum element,
-        #which gives the dividend, normed is limited/limited (for this one
-        #maximum digit). The derivative of y = x/x, dy/dx is just zero, when
-        #one does the simplification y = x/x = 1. But TF does NOT do this
-        #simplification when computing the gradient for the
-        #normed = limited/dividend operation. As a result, this gradient becomes
-        #complicated, because during the computation, "dividend" is not just a
-        #constant, but depends on "limited" instead. Here, tf.stop_gradient
-        #is used to mark "dividend" as a constant explicitly.
+
+        # Need to stop the gradient here. Otherwise, for the maximum element,
+        # which gives the dividend, normed is limited/limited (for this one
+        # maximum digit). The derivative of y = x/x, dy/dx is just zero, when
+        # one does the simplification y = x/x = 1. But TF does NOT do this
+        # simplification when computing the gradient for the
+        # normed = limited/dividend operation. As a result, this gradient
+        # becomes complicated, because during the computation, "dividend" is
+        # not just a constant, but depends on "limited" instead. Here,
+        # tf.stop_gradient is used to mark "dividend" as a constant explicitly.
         dividend = tf.stop_gradient(dividend)
-        
-        #Norm and scale from value range [-1,1] to [0,1]
+
+        # Norm and scale from value range [-1,1] to [0,1]
         normed = limited / dividend
         normed = (normed / 2.) + 0.5
-        
-        #Quantize and scale back to [-1,1] range
-        quantized =  super().call(normed)
+
+        # Quantize and scale back to [-1,1] range
+        quantized = super().call(normed)
         quantized = (2. * quantized) - 1.
-        
+
         return quantized
 
 

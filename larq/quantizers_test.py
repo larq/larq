@@ -233,7 +233,7 @@ class TestQuantization:
                 ]
                 == i / n
             )
-            
+
     def test_dorefa_kernel_quantize(self):
         x = tf.keras.backend.placeholder(ndim=2)
         f = tf.keras.backend.function([x], [lq.quantizers.DoReFaKernel(2)(x)])
@@ -241,17 +241,17 @@ class TestQuantization:
         result = f([real_values])[0]
         k_bit = 2
         n = 2 ** k_bit - 1
-        #Create the preprocessed and scaled stimulus, which is then ready to
-        #go through the same test like for the DoReFa activation quantizer
+        # Create the preprocessed and scaled stimulus, which is then ready to
+        # go through the same test like for the DoReFa activation quantizer
         divider = np.amax(np.abs(np.tanh(real_values)))
         preprocessed = np.tanh(real_values) / divider
         preprocessed = (preprocessed / 2.) + 0.5
         assert not np.any(result > 1)
         assert not np.any(result < -1)
-        #In the assertion, the output scaling from [0,1] to [-1,1] now needs
-        #to be done here like in the weight quantizer when comparing digits
-        #of the quantized tensor to golden, quantized values. The golden,
-        #quantized value "i / n" is on the [0,1] range.
+        # In the assertion, the output scaling from [0,1] to [-1,1] now needs
+        # to be done here like in the weight quantizer when comparing digits
+        # of the quantized tensor to golden, quantized values. The golden,
+        # quantized value "i / n" is on the [0,1] range.
         for i in range(n + 1):
             np.testing.assert_allclose(
                 result[
@@ -365,19 +365,19 @@ class TestGradients:
             activation = lq.quantizers.DoReFa(2)(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), ste_grad(x))
-		
+
     def test_dorefa_kernel_tanh_grad(self):
-        #For other tests, the golden gradient is defined using python
-        #expressions and "converted" to a numpy function using np.vectorize.
-        #But the kernel quantizer does a max-operation over the full
-        #quantized tensor, so np.vectorize, which causes the gradient to be
-        #called element-wise, needs to be skipped!
-        #@np.vectorize
+        # For other tests, the golden gradient is defined using python
+        # expressions and "converted" to a numpy function using np.vectorize.
+        # But the kernel quantizer does a max-operation over the full
+        # quantized tensor, so np.vectorize, which causes the gradient to be
+        # called element-wise, needs to be skipped!
+        # @np.vectorize
         def tanh_grad(x):
-            #1/(cosh**2) is the derivative of tanh. The gradients of the
-            #scaling operations cancel each other and the gradient of the
-            #quantizek function is supposed to be 1 everywhere, because it
-            #is used on its linear region only. tanh does all the limiting.
+            # 1/(cosh**2) is the derivative of tanh. The gradients of the
+            # scaling operations cancel each other and the gradient of the
+            # quantizek function is supposed to be 1 everywhere, because it
+            # is used on its linear region only. tanh does all the limiting.
             dividend = np.amax(np.abs(np.tanh(x)))
             return 1 / (np.cosh(x)**2.) / dividend
 
