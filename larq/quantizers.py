@@ -56,7 +56,7 @@ __all__ = [
     "ApproxSign",
     "DoReFa",
     "DoReFaQuantizer",
-    "DoReFaWeight",
+    "DoReFaKernel",
     "MagnitudeAwareSign",
     "NoOp",
     "NoOpQuantizer",
@@ -662,7 +662,7 @@ class DoReFaKernel(DoReFa):
         
         #Divider for max-value norm.
         #If all elements are 0., we would get a div by zero.
-        #So when all elements are zero, nothing is normed. This achieved by
+        #So when all elements are zero, nothing is normed. This is achieved by
         #dividing by 1.
         dividend = tf.reduce_max(tf.abs(limited))
         dividend = tf.where(dividend == 0., tf.ones_like(dividend), dividend)
