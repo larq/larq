@@ -682,10 +682,7 @@ class DoReFaKernel(DoReFa):
         normed = (normed / 2.0) + 0.5
 
         # Quantize and scale back to [-1,1] range
-        quantized = super().call(normed)
-        quantized = (2.0 * quantized) - 1.0
-
-        return quantized
+        return 2.0 * super().call(normed) - 1.0
 
 
 # `DoReFa` used to be called `DoReFaQuantizer`; this alias is for
