@@ -692,7 +692,6 @@ class DoReFaKernel(DoReFa):
 # `DoReFa` used to be called `DoReFaQuantizer`; this alias is for
 # backwards-compatibility.
 DoReFaQuantizer = DoReFa
-DoReFaKernelQuantizer = DoReFaKernel
 
 
 QuantizerType = Union[Quantizer, Callable[[tf.Tensor], tf.Tensor]]
