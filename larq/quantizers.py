@@ -678,8 +678,7 @@ class DoReFaKernel(DoReFa):
         dividend = tf.stop_gradient(dividend)
 
         # Norm and scale from value range [-1,1] to [0,1]
-        normed = limited / dividend
-        normed = (normed / 2.0) + 0.5
+        normed = limited / dividend / 2.0 + 0.5
 
         # Quantize and scale back to [-1,1] range
         return 2.0 * super().call(normed) - 1.0
