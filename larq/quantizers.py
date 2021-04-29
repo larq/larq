@@ -614,7 +614,7 @@ class DoReFaKernel(DoReFa):
     with a gradient, which is contineously differentiable itself.
 
     \\[
-    w_{lim}(w) = tanh(w)
+    w_{lim}(w) = \tanh(w)
     \\]
 
     Furthermore, the weights of each layer are normed, such that the weight with
@@ -622,27 +622,27 @@ class DoReFaKernel(DoReFa):
     quantizable value. That way, the full quantizable numeric range is utilized.
 
     \\[
-    w_{norm}(w) = \frac{w}{max(|w|)}
+    w_{norm}(w) = \frac{w}{\max(|w|)}
     \\]
 
     The formulas can be found in the paper in section 2.3. Please note, that
-    the paper refers to weights being quantized on a numeric range of [-1,1], while
-    activations are quantized on the numeric range [0,1]. `DoReFa` defines the
+    the paper refers to weights being quantized on a numeric range of [-1, 1], while
+    activations are quantized on the numeric range [0, 1]. `DoReFa` defines the
     quantization function quantizek() from the paper with the correct numeric
-    range of [0,1], which is why the range needs to be adapted before applying
+    range of [0, 1], which is why the range needs to be adapted before applying
     `DoReFa` after applying the preprocessing (limit and norm).
     The hard limiting inside `DoReFa` becomes ineffective, because its input
     is already limited by the hyperbolic tangent. The full quantization
     function including the adaption of numeric ranges is
 
     \\[
-    q(w) = 2quantize_{k}(\frac{w_{norm}\left(w_{lim}\left(w\right)\right)}{2} + \frac{1}{2}) - 1
+    q(w) = 2 \, quantize_{k}(\frac{w_{norm}\left(w_{lim}\left(w\right)\right)}{2} + \frac{1}{2}) - 1
     \\]
 
     !!! warning
-        This quantizer works for weights on the range [-1,1], which matches the
+        This quantizer works for weights on the range [-1, 1], which matches the
         default setting of `constraints.weight_clip`. Do not use this quantizer
-        with a different constraint *clip_value* than the default one.
+        with a different constraint `clip_value` than the default one.
 
     ```plot-activation
     quantizers.DoReFaKernel
