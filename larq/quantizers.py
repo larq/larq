@@ -660,11 +660,7 @@ class DoReFaKernel(DoReFa):
         limited = tf.math.tanh(inputs)
 
         # Divider for max-value norm.
-        # If all elements are 0., we would get a div by zero.
-        # So when all elements are zero, nothing is normed. This is achieved by
-        # dividing by 1.
         dividend = tf.math.reduce_max(tf.math.abs(limited))
-        dividend = tf.where(dividend == 0.0, tf.ones_like(dividend), dividend)
 
         # Need to stop the gradient here. Otherwise, for the maximum element,
         # which gives the dividend, normed is limited/limited (for this one
@@ -677,8 +673,11 @@ class DoReFaKernel(DoReFa):
         # tf.stop_gradient is used to mark "dividend" as a constant explicitly.
         dividend = tf.stop_gradient(dividend)
 
-        # Norm and scale from value range [-1,1] to [0,1]
-        normed = limited / dividend / 2.0 + 0.5
+        # Norm and then scale from value range [-1,1] to [0,1].
+        # If the dividend used for the norm operation is 0, all elements of
+        # the weight tensor are 0 and divide_no_nan returns 0 for all weights.
+        # So if all elements of the weight tensor are zero, nothing is normed.
+        normed = tf.math.divide_no_nan(limited, dividend) / 2.0 + 0.5
 
         # Quantize and scale back to [-1,1] range
         return 2.0 * super().call(normed) - 1.0
