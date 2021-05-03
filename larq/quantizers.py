@@ -656,7 +656,6 @@ class DoReFaKernel(DoReFa):
     """
 
     def call(self, inputs):
-
         limited = tf.math.tanh(inputs)
 
         # Divider for max-value norm.
