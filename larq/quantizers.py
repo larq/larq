@@ -676,7 +676,7 @@ class DoReFaKernel(DoReFa):
         # If the dividend used for the norm operation is 0, all elements of
         # the weight tensor are 0 and divide_no_nan returns 0 for all weights.
         # So if all elements of the weight tensor are zero, nothing is normed.
-        normed = tf.math.divide_no_nan(limited, dividend) / 2.0 + 0.5
+        normed = tf.math.divide_no_nan(limited, 2.0 * dividend) + 0.5
 
         # Quantize and scale back to [-1,1] range
         return 2.0 * super().call(normed) - 1.0
