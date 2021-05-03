@@ -611,7 +611,7 @@ class DoReFaKernel(DoReFa):
     This quantizer is the same like the `DoReFa` quantizer, but adds a preprocessing.
     Instead of limiting input operands (or in this case: weights) using a hard
     limiter, a tangens hyperbolicus is applied to achieve a softer limiting
-    with a gradient, which is contineously differentiable itself.
+    with a gradient, which is continuously differentiable itself.
 
     \\[
     w_{lim}(w) = \tanh(w)
