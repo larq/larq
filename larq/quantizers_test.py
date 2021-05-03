@@ -234,12 +234,12 @@ class TestQuantization:
                 == i / n
             )
 
-    def test_dorefa_kernel_quantize(self):
+    @pytest.mark.parametrize("k_bit", [1, 2, 4, 6, 8])
+    def test_dorefa_kernel_quantize(self, k_bit):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaKernel(2)(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaKernel(k_bit)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
-        k_bit = 2
         n = 2 ** k_bit - 1
         # Create the preprocessed and scaled stimulus, which is then ready to
         # go through the same test like for the DoReFa activation quantizer
@@ -259,6 +259,7 @@ class TestQuantization:
                     & (preprocessed < (2 * i + 1) / (2 * n))
                 ],
                 2 * (i / n) - 1.0,
+                atol=1e-6,
             )
 
 
