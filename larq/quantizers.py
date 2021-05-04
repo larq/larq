@@ -56,7 +56,6 @@ __all__ = [
     "ApproxSign",
     "DoReFa",
     "DoReFaQuantizer",
-    "DoReFaKernel",
     "MagnitudeAwareSign",
     "NoOp",
     "NoOpQuantizer",
@@ -559,11 +558,42 @@ class DoReFa(_BaseQuantizer):
     0 & \text{else}
     \end{cases}\\]
 
+    The behavior for quantizing weights should be different in comparison to
+    the quantization of activations:
+    instead of limiting input operands (or in this case: weights) using a hard
+    limiter, a tangens hyperbolicus is applied to achieve a softer limiting
+    with a gradient, which is continuously differentiable itself.
+
+    \\[
+    w_{lim}(w) = \tanh(w)
+    \\]
+
+    Furthermore, the weights of each layer are normed, such that the weight with
+    the largest magnitude gets the largest or smallest (depending on its sign)
+    quantizable value. That way, the full quantizable numeric range is utilized.
+
+    \\[
+    w_{norm}(w) = \frac{w}{\max(|w|)}
+    \\]
+
+    The formulas can be found in the paper in section 2.3. Please note, that
+    the paper refers to weights being quantized on a numeric range of [-1, 1], while
+    activations are quantized on the numeric range [0, 1]. This implementation
+    uses the same ranges as specified in the paper.
+
+    The activation quantizer defines the function quantizek() from the paper with
+    the correct numeric range of [0, 1]. The kernel quantization mode adds
+    pre- and post-processing for numeric range adaptions, soft limiting and
+    norming. The full quantization function including the adaption of numeric ranges is
+
+    \\[
+    q(w) = 2 \, quantize_{k}(\frac{w_{norm}\left(w_{lim}\left(w\right)\right)}{2} + \frac{1}{2}) - 1
+    \\]
+
     !!! warning
-        While the DoReFa paper describes how to do quantization for both weights and
-        activations, this implementation is only valid for activations, and this
-        quantizer should therefore not be used as a kernel quantizer.
-        See `DoReFaKernel`.
+        The kernel mode works for weights on the range [-1, 1], which matches the
+        default setting of `constraints.weight_clip`. Do not use this quantizer
+        with a different constraint `clip_value` than the default one.
 
     ```plot-activation
     quantizers.DoReFa
@@ -571,12 +601,18 @@ class DoReFa(_BaseQuantizer):
 
     # Arguments
         k_bit: number of bits for the quantization.
+        mode: "activations" for clipping inputs on [0, 1] range or "kernel" for
+            soft-clipping and norming weights on [-1, 1] range before applying
+            quantization.
         metrics: An array of metrics to add to the layer. If `None` the metrics set in
             `larq.context.metrics_scope` are used. Currently only the `flip_ratio`
             metric is available.
 
     # Returns
         Quantization function
+
+    # Raises
+        ValueError for bad value of *mode*.
 
     # References
         - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low
@@ -645,59 +681,6 @@ class DoReFa(_BaseQuantizer):
 
     def get_config(self):
         return {**super().get_config(), "k_bit": self.precision}
-
-
-@utils.register_alias("dorefa_kernel_quantizer")
-@utils.register_keras_custom_object
-class DoReFaKernel(DoReFa):
-    r"""Instantiates a serializable k_bit kernel quantizer as in the DoReFa paper.
-
-    This quantizer is the same like the `DoReFa` quantizer, but adds a preprocessing.
-    Instead of limiting input operands (or in this case: weights) using a hard
-    limiter, a tangens hyperbolicus is applied to achieve a softer limiting
-    with a gradient, which is continuously differentiable itself.
-
-    \\[
-    w_{lim}(w) = \tanh(w)
-    \\]
-
-    Furthermore, the weights of each layer are normed, such that the weight with
-    the largest magnitude gets the largest or smallest (depending on its sign)
-    quantizable value. That way, the full quantizable numeric range is utilized.
-
-    \\[
-    w_{norm}(w) = \frac{w}{\max(|w|)}
-    \\]
-
-    The formulas can be found in the paper in section 2.3. Please note, that
-    the paper refers to weights being quantized on a numeric range of [-1, 1], while
-    activations are quantized on the numeric range [0, 1]. `DoReFa` defines the
-    quantization function quantizek() from the paper with the correct numeric
-    range of [0, 1], which is why the range needs to be adapted before applying
-    `DoReFa` after applying the preprocessing (limit and norm).
-    The hard limiting inside `DoReFa` becomes ineffective, because its input
-    is already limited by the hyperbolic tangent. The full quantization
-    function including the adaption of numeric ranges is
-
-    \\[
-    q(w) = 2 \, quantize_{k}(\frac{w_{norm}\left(w_{lim}\left(w\right)\right)}{2} + \frac{1}{2}) - 1
-    \\]
-
-    !!! warning
-        This quantizer works for weights on the range [-1, 1], which matches the
-        default setting of `constraints.weight_clip`. Do not use this quantizer
-        with a different constraint `clip_value` than the default one.
-
-    ```plot-activation
-    quantizers.DoReFaKernel
-    ```
-
-    The interface of this quantizer is the same like the one of `DoReFa`.
-
-    # References
-        - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low
-            Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
-    """
 
 
 # `DoReFa` used to be called `DoReFaQuantizer`; this alias is for
