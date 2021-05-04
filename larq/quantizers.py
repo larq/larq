@@ -680,7 +680,7 @@ class DoReFa(_BaseQuantizer):
         return super().call(outputs)
 
     def get_config(self):
-        return {**super().get_config(), "k_bit": self.precision}
+        return {**super().get_config(), "k_bit": self.precision, "mode": self.mode}
 
 
 # `DoReFa` used to be called `DoReFaQuantizer`; this alias is for
