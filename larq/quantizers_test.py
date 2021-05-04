@@ -237,7 +237,7 @@ class TestQuantization:
     @pytest.mark.parametrize("k_bit", [1, 2, 4, 6, 8])
     def test_dorefa_kernel_quantize(self, k_bit):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [lq.quantizers.DoReFaKernel(k_bit)(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(k_bit, mode="kernel")(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         n = 2 ** k_bit - 1
@@ -385,7 +385,7 @@ class TestGradients:
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.DoReFaKernel(2)(tf_x)
+            activation = lq.quantizers.DoReFa(2, mode="kernel")(tf_x)
         grad = tape.gradient(activation, tf_x)
         np.testing.assert_allclose(grad.numpy(), tanh_grad(x))
 
@@ -400,7 +400,6 @@ class TestGradients:
         ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
         ("ste_tern", lq.quantizers.SteTern),
         ("dorefa_quantizer", lq.quantizers.DoReFa),
-        ("dorefa_kernel_quantizer", lq.quantizers.DoReFaKernel),
     ],
 )
 def test_metrics(quantizer):
