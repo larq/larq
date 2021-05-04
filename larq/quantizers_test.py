@@ -216,49 +216,33 @@ class TestQuantization:
         assert not np.any(result > 1)
         assert not np.any(result < -1)
 
-    def test_dorefa_quantize(self):
+    @pytest.mark.parametrize("k_bit", [1, 2, 4, 6, 8])
+    @pytest.mark.parametrize("mode", ["activations", "kernel"])
+    def test_dorefa_quantize(self, k_bit, mode):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(2)(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(k_bit, mode)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
-        k_bit = 2
         n = 2 ** k_bit - 1
+        if mode == "kernel":
+            # Create the preprocessed and scaled stimulus, which is then ready to
+            # go through the same test like for the activation quantizer
+            divider = np.amax(np.abs(np.tanh(real_values)))
+            real_values = np.tanh(real_values) / divider
+            real_values = (real_values / 2.0) + 0.5
+            # The results, which are currently on [-1, 1] range get the same
+            # scaling, so they behave like they were created on the activation
+            # range and can be tested like that
+            result = result / 2. + 0.5
         assert not np.any(result > 1)
         assert not np.any(result < 0)
         for i in range(n + 1):
-            assert np.all(
+            np.testing.assert_allclose(
                 result[
                     (real_values > (2 * i - 1) / (2 * n))
                     & (real_values < (2 * i + 1) / (2 * n))
-                ]
-                == i / n
-            )
-
-    @pytest.mark.parametrize("k_bit", [1, 2, 4, 6, 8])
-    def test_dorefa_kernel_quantize(self, k_bit):
-        x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(k_bit, mode="kernel")(x)])
-        real_values = testing_utils.generate_real_values_with_zeros()
-        result = f([real_values])[0]
-        n = 2 ** k_bit - 1
-        # Create the preprocessed and scaled stimulus, which is then ready to
-        # go through the same test like for the DoReFa activation quantizer
-        divider = np.amax(np.abs(np.tanh(real_values)))
-        preprocessed = np.tanh(real_values) / divider
-        preprocessed = (preprocessed / 2.0) + 0.5
-        assert not np.any(result > 1)
-        assert not np.any(result < -1)
-        # In the assertion, the output scaling from [0,1] to [-1,1] now needs
-        # to be done here like in the weight quantizer when comparing digits
-        # of the quantized tensor to golden, quantized values. The golden,
-        # quantized value "i / n" is on the [0,1] range.
-        for i in range(n + 1):
-            np.testing.assert_allclose(
-                result[
-                    (preprocessed > (2 * i - 1) / (2 * n))
-                    & (preprocessed < (2 * i + 1) / (2 * n))
                 ],
-                2 * (i / n) - 1.0,
+                i / n,
                 atol=1e-6,
             )
 
