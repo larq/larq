@@ -337,21 +337,14 @@ class TestGradients:
             grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
         )
 
-    def test_dorefa_ste_grad(self):
+    @pytest.mark.parametrize("mode", ["activations", "kernel"])
+    def test_dorefa_ste_grad(self, mode):
         @np.vectorize
         def ste_grad(x):
             if x <= 1 and x >= 0:
                 return 1.0
             return 0.0
 
-        x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
-        tf_x = tf.Variable(x)
-        with tf.GradientTape() as tape:
-            activation = lq.quantizers.DoReFa(2)(tf_x)
-        grad = tape.gradient(activation, tf_x)
-        np.testing.assert_allclose(grad.numpy(), ste_grad(x))
-
-    def test_dorefa_kernel_tanh_grad(self):
         # For other tests, the golden gradient is defined using python
         # expressions and "converted" to a numpy function using np.vectorize.
         # But the kernel quantizer does a max-operation over the full
@@ -366,12 +359,17 @@ class TestGradients:
             dividend = np.amax(np.abs(np.tanh(x)))
             return 1 / (np.cosh(x) ** 2.0) / dividend
 
+        if mode == "activations":
+            expected_gradient = ste_grad
+        else:
+            expected_gradient = tanh_grad
+
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.DoReFa(2, mode="kernel")(tf_x)
+            activation = lq.quantizers.DoReFa(2, mode)(tf_x)
         grad = tape.gradient(activation, tf_x)
-        np.testing.assert_allclose(grad.numpy(), tanh_grad(x))
+        np.testing.assert_allclose(grad.numpy(), expected_gradient(x))
 
 
 @pytest.mark.parametrize(
