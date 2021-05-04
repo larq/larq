@@ -584,12 +584,51 @@ class DoReFa(_BaseQuantizer):
     """
     precision = None
 
-    def __init__(self, k_bit: int = 2, **kwargs):
+    def __init__(self, k_bit: int = 2, mode: str = "activations", **kwargs):
         self.precision = k_bit
+
+        if mode not in ("activations", "kernel"):
+            raise ValueError(f"Invalid DoReFa quantizer mode {mode}.")
+        self.mode = str(mode)
+
         super().__init__(**kwargs)
 
+    def weight_preprocess(self, inputs):
+        # Limit inputs to [-1, 1] range
+        limited = tf.math.tanh(inputs)
+
+        # Divider for max-value norm.
+        dividend = tf.math.reduce_max(tf.math.abs(limited))
+
+        # Need to stop the gradient here. Otherwise, for the maximum element,
+        # which gives the dividend, normed is limited/limited (for this one
+        # maximum digit). The derivative of y = x/x, dy/dx is just zero, when
+        # one does the simplification y = x/x = 1. But TF does NOT do this
+        # simplification when computing the gradient for the
+        # normed = limited/dividend operation. As a result, this gradient
+        # becomes complicated, because during the computation, "dividend" is
+        # not just a constant, but depends on "limited" instead. Here,
+        # tf.stop_gradient is used to mark "dividend" as a constant explicitly.
+        dividend = tf.stop_gradient(dividend)
+
+        # Norm and then scale from value range [-1,1] to [0,1] (the range
+        # expected by the core quantization operation).
+        # If the dividend used for the norm operation is 0, all elements of
+        # the weight tensor are 0 and divide_no_nan returns 0 for all weights.
+        # So if all elements of the weight tensor are zero, nothing is normed.
+        normed = tf.math.divide_no_nan(limited, 2.0 * dividend) + 0.5
+
+        return normed
+
     def call(self, inputs):
-        inputs = tf.clip_by_value(inputs, 0.0, 1.0)
+        # Depending on quantizer mode (activation or weight) just clip inputs
+        # on [0, 1] range or use weight preprocessing method.
+        if self.mode == "activations":
+            inputs = tf.clip_by_value(inputs, 0.0, 1.0)
+        elif self.mode == "kernel":
+            inputs = self.weight_preprocess(inputs)
+        else:
+            raise ValueError(f"Invalid DoReFa quantizer mode {self.mode}.")
 
         @tf.custom_gradient
         def _k_bit_with_identity_grad(x):
@@ -597,6 +636,11 @@ class DoReFa(_BaseQuantizer):
             return tf.round(x * n) / n, lambda dy: dy
 
         outputs = _k_bit_with_identity_grad(inputs)
+
+        # Scale weights from [0, 1] quantization range back to [-1,1] range
+        if self.mode == "kernel":
+            outputs = 2.0 * outputs - 1.0
+
         return super().call(outputs)
 
     def get_config(self):
@@ -654,32 +698,6 @@ class DoReFaKernel(DoReFa):
         - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low
             Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
     """
-
-    def call(self, inputs):
-        limited = tf.math.tanh(inputs)
-
-        # Divider for max-value norm.
-        dividend = tf.math.reduce_max(tf.math.abs(limited))
-
-        # Need to stop the gradient here. Otherwise, for the maximum element,
-        # which gives the dividend, normed is limited/limited (for this one
-        # maximum digit). The derivative of y = x/x, dy/dx is just zero, when
-        # one does the simplification y = x/x = 1. But TF does NOT do this
-        # simplification when computing the gradient for the
-        # normed = limited/dividend operation. As a result, this gradient
-        # becomes complicated, because during the computation, "dividend" is
-        # not just a constant, but depends on "limited" instead. Here,
-        # tf.stop_gradient is used to mark "dividend" as a constant explicitly.
-        dividend = tf.stop_gradient(dividend)
-
-        # Norm and then scale from value range [-1,1] to [0,1].
-        # If the dividend used for the norm operation is 0, all elements of
-        # the weight tensor are 0 and divide_no_nan returns 0 for all weights.
-        # So if all elements of the weight tensor are zero, nothing is normed.
-        normed = tf.math.divide_no_nan(limited, 2.0 * dividend) + 0.5
-
-        # Quantize and scale back to [-1,1] range
-        return 2.0 * super().call(normed) - 1.0
 
 
 # `DoReFa` used to be called `DoReFaQuantizer`; this alias is for
