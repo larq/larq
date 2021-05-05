@@ -582,7 +582,7 @@ class DoReFa(_BaseQuantizer):
     uses the same ranges as specified in the paper.
 
     The activation quantizer defines the function quantizek() from the paper with
-    the correct numeric range of [0, 1]. The kernel quantization mode adds
+    the correct numeric range of [0, 1]. The weight quantization mode adds
     pre- and post-processing for numeric range adaptions, soft limiting and
     norming. The full quantization function including the adaption of numeric ranges is
 
@@ -591,7 +591,7 @@ class DoReFa(_BaseQuantizer):
     \\]
 
     !!! warning
-        The kernel mode works for weights on the range [-1, 1], which matches the
+        The weight mode works for weights on the range [-1, 1], which matches the
         default setting of `constraints.weight_clip`. Do not use this quantizer
         with a different constraint `clip_value` than the default one.
 
@@ -601,7 +601,7 @@ class DoReFa(_BaseQuantizer):
 
     # Arguments
         k_bit: number of bits for the quantization.
-        mode: "activations" for clipping inputs on [0, 1] range or "kernel" for
+        mode: "activations" for clipping inputs on [0, 1] range or "weights" for
             soft-clipping and norming weights on [-1, 1] range before applying
             quantization.
         metrics: An array of metrics to add to the layer. If `None` the metrics set in
@@ -623,7 +623,7 @@ class DoReFa(_BaseQuantizer):
     def __init__(self, k_bit: int = 2, mode: str = "activations", **kwargs):
         self.precision = k_bit
 
-        if mode not in ("activations", "kernel"):
+        if mode not in ("activations", "weights"):
             raise ValueError(f"Invalid DoReFa quantizer mode {mode}.")
         self.mode = mode
 
@@ -661,7 +661,7 @@ class DoReFa(_BaseQuantizer):
         # on [0, 1] range or use weight preprocessing method.
         if self.mode == "activations":
             inputs = tf.clip_by_value(inputs, 0.0, 1.0)
-        elif self.mode == "kernel":
+        elif self.mode == "weights":
             inputs = self.weight_preprocess(inputs)
         else:
             raise ValueError(f"Invalid DoReFa quantizer mode {self.mode}.")
@@ -674,7 +674,7 @@ class DoReFa(_BaseQuantizer):
         outputs = _k_bit_with_identity_grad(inputs)
 
         # Scale weights from [0, 1] quantization range back to [-1,1] range
-        if self.mode == "kernel":
+        if self.mode == "weights":
             outputs = 2.0 * outputs - 1.0
 
         return super().call(outputs)

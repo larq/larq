@@ -217,14 +217,14 @@ class TestQuantization:
         assert not np.any(result < -1)
 
     @pytest.mark.parametrize("k_bit", [1, 2, 4, 6, 8])
-    @pytest.mark.parametrize("mode", ["activations", "kernel"])
+    @pytest.mark.parametrize("mode", ["activations", "weights"])
     def test_dorefa_quantize(self, k_bit, mode):
         x = tf.keras.backend.placeholder(ndim=2)
         f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(k_bit, mode)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
         n = 2 ** k_bit - 1
-        if mode == "kernel":
+        if mode == "weights":
             # Create the preprocessed and scaled stimulus, which is then ready to
             # go through the same test like for the activation quantizer
             divider = np.amax(np.abs(np.tanh(real_values)))
@@ -337,7 +337,7 @@ class TestGradients:
             grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
         )
 
-    @pytest.mark.parametrize("mode", ["activations", "kernel"])
+    @pytest.mark.parametrize("mode", ["activations", "weights"])
     def test_dorefa_ste_grad(self, mode):
         @np.vectorize
         def ste_grad(x):
@@ -347,7 +347,7 @@ class TestGradients:
 
         # For other tests, the golden gradient is defined using python
         # expressions and "converted" to a numpy function using np.vectorize.
-        # But the kernel quantizer does a max-operation over the full
+        # But the weight quantizer does a max-operation over the full
         # quantized tensor, so np.vectorize, which causes the gradient to be
         # called element-wise, needs to be skipped!
         # @np.vectorize
