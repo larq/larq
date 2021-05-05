@@ -66,6 +66,12 @@ class TestCommonFunctionality:
             lq.quantizers.get(42)
         with pytest.raises(ValueError):
             lq.quantizers.get("unknown")
+        with pytest.raises(ValueError):
+            lq.quantizers.DoReFa(k_bit=2, mode="unknown")
+        f = lq.quantizers.DoReFa(k_bit=2, mode="activations")
+        f.mode = "unknown"
+        with pytest.raises(ValueError):
+            f.call([0.])
 
     @pytest.mark.parametrize("quantizer", ["input_quantizer", "kernel_quantizer"])
     def test_layer_as_quantizer(self, quantizer, keras_should_run_eagerly):
