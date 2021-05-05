@@ -595,8 +595,14 @@ class DoReFa(_BaseQuantizer):
         default setting of `constraints.weight_clip`. Do not use this quantizer
         with a different constraint `clip_value` than the default one.
 
+    __`mode == "activations"`__
     ```plot-activation
     quantizers.DoReFa
+    ```
+
+    __`mode == "weights"`__
+    ```plot-activation
+    quantizers.DoReFa(mode='weights')
     ```
 
     # Arguments
