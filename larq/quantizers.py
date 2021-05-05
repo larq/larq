@@ -612,7 +612,7 @@ class DoReFa(_BaseQuantizer):
         Quantization function
 
     # Raises
-        ValueError for bad value of *mode*.
+        ValueError for bad value of `mode`.
 
     # References
         - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low
@@ -625,7 +625,7 @@ class DoReFa(_BaseQuantizer):
 
         if mode not in ("activations", "kernel"):
             raise ValueError(f"Invalid DoReFa quantizer mode {mode}.")
-        self.mode = str(mode)
+        self.mode = mode
 
         super().__init__(**kwargs)
 
