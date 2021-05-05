@@ -558,10 +558,42 @@ class DoReFa(_BaseQuantizer):
     0 & \text{else}
     \end{cases}\\]
 
+    The behavior for quantizing weights should be different in comparison to
+    the quantization of activations:
+    instead of limiting input operands (or in this case: weights) using a hard
+    limiter, a tangens hyperbolicus is applied to achieve a softer limiting
+    with a gradient, which is continuously differentiable itself.
+
+    \\[
+    w_{lim}(w) = \tanh(w)
+    \\]
+
+    Furthermore, the weights of each layer are normed, such that the weight with
+    the largest magnitude gets the largest or smallest (depending on its sign)
+    quantizable value. That way, the full quantizable numeric range is utilized.
+
+    \\[
+    w_{norm}(w) = \frac{w}{\max(|w|)}
+    \\]
+
+    The formulas can be found in the paper in section 2.3. Please note, that
+    the paper refers to weights being quantized on a numeric range of [-1, 1], while
+    activations are quantized on the numeric range [0, 1]. This implementation
+    uses the same ranges as specified in the paper.
+
+    The activation quantizer defines the function quantizek() from the paper with
+    the correct numeric range of [0, 1]. The weight quantization mode adds
+    pre- and post-processing for numeric range adaptions, soft limiting and
+    norming. The full quantization function including the adaption of numeric ranges is
+
+    \\[
+    q(w) = 2 \, quantize_{k}(\frac{w_{norm}\left(w_{lim}\left(w\right)\right)}{2} + \frac{1}{2}) - 1
+    \\]
+
     !!! warning
-        While the DoReFa paper describes how to do quantization for both weights and
-        activations, this implementation is only valid for activations, and this
-        quantizer should therefore not be used as a kernel quantizer.
+        The weight mode works for weights on the range [-1, 1], which matches the
+        default setting of `constraints.weight_clip`. Do not use this quantizer
+        with a different constraint `clip_value` than the default one.
 
     ```plot-activation
     quantizers.DoReFa
@@ -569,6 +601,9 @@ class DoReFa(_BaseQuantizer):
 
     # Arguments
         k_bit: number of bits for the quantization.
+        mode: `"activations"` for clipping inputs on [0, 1] range or `"weights"` for
+            soft-clipping and norming weights on [-1, 1] range before applying
+            quantization.
         metrics: An array of metrics to add to the layer. If `None` the metrics set in
             `larq.context.metrics_scope` are used. Currently only the `flip_ratio`
             metric is available.
@@ -576,18 +611,64 @@ class DoReFa(_BaseQuantizer):
     # Returns
         Quantization function
 
+    # Raises
+        ValueError for bad value of `mode`.
+
     # References
         - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low
             Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
     """
     precision = None
 
-    def __init__(self, k_bit: int = 2, **kwargs):
+    def __init__(self, k_bit: int = 2, mode: str = "activations", **kwargs):
         self.precision = k_bit
+
+        if mode not in ("activations", "weights"):
+            raise ValueError(
+                f"Invalid DoReFa quantizer mode {mode}. "
+                "Valid values are 'activations' and 'weights'."
+            )
+        self.mode = mode
+
         super().__init__(**kwargs)
 
+    def weight_preprocess(self, inputs):
+        # Limit inputs to [-1, 1] range
+        limited = tf.math.tanh(inputs)
+
+        # Divider for max-value norm.
+        dividend = tf.math.reduce_max(tf.math.abs(limited))
+
+        # Need to stop the gradient here. Otherwise, for the maximum element,
+        # which gives the dividend, normed is limited/limited (for this one
+        # maximum digit). The derivative of y = x/x, dy/dx is just zero, when
+        # one does the simplification y = x/x = 1. But TF does NOT do this
+        # simplification when computing the gradient for the
+        # normed = limited/dividend operation. As a result, this gradient
+        # becomes complicated, because during the computation, "dividend" is
+        # not just a constant, but depends on "limited" instead. Here,
+        # tf.stop_gradient is used to mark "dividend" as a constant explicitly.
+        dividend = tf.stop_gradient(dividend)
+
+        # Norm and then scale from value range [-1,1] to [0,1] (the range
+        # expected by the core quantization operation).
+        # If the dividend used for the norm operation is 0, all elements of
+        # the weight tensor are 0 and divide_no_nan returns 0 for all weights.
+        # So if all elements of the weight tensor are zero, nothing is normed.
+        return tf.math.divide_no_nan(limited, 2.0 * dividend) + 0.5
+
     def call(self, inputs):
-        inputs = tf.clip_by_value(inputs, 0.0, 1.0)
+        # Depending on quantizer mode (activation or weight) just clip inputs
+        # on [0, 1] range or use weight preprocessing method.
+        if self.mode == "activations":
+            inputs = tf.clip_by_value(inputs, 0.0, 1.0)
+        elif self.mode == "weights":
+            inputs = self.weight_preprocess(inputs)
+        else:
+            raise ValueError(
+                f"Invalid DoReFa quantizer mode {self.mode}. "
+                "Valid values are 'activations' and 'weights'."
+            )
 
         @tf.custom_gradient
         def _k_bit_with_identity_grad(x):
@@ -595,10 +676,15 @@ class DoReFa(_BaseQuantizer):
             return tf.round(x * n) / n, lambda dy: dy
 
         outputs = _k_bit_with_identity_grad(inputs)
+
+        # Scale weights from [0, 1] quantization range back to [-1,1] range
+        if self.mode == "weights":
+            outputs = 2.0 * outputs - 1.0
+
         return super().call(outputs)
 
     def get_config(self):
-        return {**super().get_config(), "k_bit": self.precision}
+        return {**super().get_config(), "k_bit": self.precision, "mode": self.mode}
 
 
 # `DoReFa` used to be called `DoReFaQuantizer`; this alias is for

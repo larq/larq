@@ -1,3 +1,5 @@
+import functools
+
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -66,6 +68,12 @@ class TestCommonFunctionality:
             lq.quantizers.get(42)
         with pytest.raises(ValueError):
             lq.quantizers.get("unknown")
+        with pytest.raises(ValueError):
+            lq.quantizers.DoReFa(k_bit=2, mode="unknown")
+        f = lq.quantizers.DoReFa(k_bit=2, mode="activations")
+        f.mode = "unknown"
+        with pytest.raises(ValueError):
+            f.call([0.0])
 
     @pytest.mark.parametrize("quantizer", ["input_quantizer", "kernel_quantizer"])
     def test_layer_as_quantizer(self, quantizer, keras_should_run_eagerly):
@@ -216,22 +224,34 @@ class TestQuantization:
         assert not np.any(result > 1)
         assert not np.any(result < -1)
 
-    def test_dorefa_quantize(self):
+    @pytest.mark.parametrize("k_bit", [1, 2, 4, 6, 8])
+    @pytest.mark.parametrize("mode", ["activations", "weights"])
+    def test_dorefa_quantize(self, k_bit, mode):
         x = tf.keras.backend.placeholder(ndim=2)
-        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(2)(x)])
+        f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(k_bit, mode)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
-        k_bit = 2
         n = 2 ** k_bit - 1
+        if mode == "weights":
+            # Create the preprocessed and scaled stimulus, which is then ready to
+            # go through the same test like for the activation quantizer
+            divider = np.amax(np.abs(np.tanh(real_values)))
+            real_values = np.tanh(real_values) / divider
+            real_values = (real_values / 2.0) + 0.5
+            # The results, which are currently on [-1, 1] range get the same
+            # scaling, so they behave like they were created on the activation
+            # range and can be tested like that
+            result = result / 2.0 + 0.5
         assert not np.any(result > 1)
         assert not np.any(result < 0)
         for i in range(n + 1):
-            assert np.all(
+            np.testing.assert_allclose(
                 result[
                     (real_values > (2 * i - 1) / (2 * n))
                     & (real_values < (2 * i + 1) / (2 * n))
-                ]
-                == i / n
+                ],
+                i / n,
+                atol=1e-6,
             )
 
 
@@ -325,19 +345,30 @@ class TestGradients:
             grad.numpy(), np.where(abs(a) < 1, np.ones(a.shape) * scale_vector, 0)
         )
 
-    def test_dorefa_ste_grad(self):
+    @pytest.mark.parametrize("mode", ["activations", "weights"])
+    def test_dorefa_ste_grad(self, mode):
         @np.vectorize
         def ste_grad(x):
             if x <= 1 and x >= 0:
                 return 1.0
             return 0.0
 
+        def tanh_grad(x):
+            # 1/(cosh**2) is the derivative of tanh. The gradients of the
+            # scaling operations cancel each other and the gradient of the
+            # quantizek function is supposed to be 1 everywhere, because it
+            # is used on its linear region only. tanh does all the limiting.
+            dividend = np.amax(np.abs(np.tanh(x)))
+            return 1 / (np.cosh(x) ** 2.0) / dividend
+
+        expected_gradient = ste_grad if mode == "activations" else tanh_grad
+
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)
         with tf.GradientTape() as tape:
-            activation = lq.quantizers.DoReFa(2)(tf_x)
+            activation = lq.quantizers.DoReFa(2, mode)(tf_x)
         grad = tape.gradient(activation, tf_x)
-        np.testing.assert_allclose(grad.numpy(), ste_grad(x))
+        np.testing.assert_allclose(grad.numpy(), expected_gradient(x))
 
 
 @pytest.mark.parametrize(
@@ -350,6 +381,7 @@ class TestGradients:
         ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
         ("ste_tern", lq.quantizers.SteTern),
         ("dorefa_quantizer", lq.quantizers.DoReFa),
+        ("dorefa_quantizer", functools.partial(lq.quantizers.DoReFa, mode="weights")),
     ],
 )
 def test_metrics(quantizer):
