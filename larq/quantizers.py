@@ -624,7 +624,8 @@ class DoReFa(_BaseQuantizer):
         self.precision = k_bit
 
         if mode not in ("activations", "weights"):
-            raise ValueError(f"Invalid DoReFa quantizer mode {mode}.")
+            raise ValueError(f"Invalid DoReFa quantizer mode {mode}. "
+                             f"Valid values are 'activations' and 'weights'.")
         self.mode = mode
 
         super().__init__(**kwargs)
@@ -664,7 +665,8 @@ class DoReFa(_BaseQuantizer):
         elif self.mode == "weights":
             inputs = self.weight_preprocess(inputs)
         else:
-            raise ValueError(f"Invalid DoReFa quantizer mode {self.mode}.")
+            raise ValueError(f"Invalid DoReFa quantizer mode {self.mode}. "
+                             f"Valid values are 'activations' and 'weights'.")
 
         @tf.custom_gradient
         def _k_bit_with_identity_grad(x):
