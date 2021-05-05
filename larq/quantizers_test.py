@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 from packaging import version
+import functools
 
 import larq as lq
 from larq import testing_utils
@@ -388,6 +389,7 @@ class TestGradients:
         ("magnitude_aware_sign", lq.quantizers.MagnitudeAwareSign),
         ("ste_tern", lq.quantizers.SteTern),
         ("dorefa_quantizer", lq.quantizers.DoReFa),
+        ("dorefa_quantizer", functools.partial(lq.quantizers.DoReFa, mode="weights")),
     ],
 )
 def test_metrics(quantizer):
