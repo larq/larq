@@ -1,8 +1,9 @@
+import functools
+
 import numpy as np
 import pytest
 import tensorflow as tf
 from packaging import version
-import functools
 
 import larq as lq
 from larq import testing_utils
