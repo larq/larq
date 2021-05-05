@@ -353,12 +353,6 @@ class TestGradients:
                 return 1.0
             return 0.0
 
-        # For other tests, the golden gradient is defined using python
-        # expressions and "converted" to a numpy function using np.vectorize.
-        # But the weight quantizer does a max-operation over the full
-        # quantized tensor, so np.vectorize, which causes the gradient to be
-        # called element-wise, needs to be skipped!
-        # @np.vectorize
         def tanh_grad(x):
             # 1/(cosh**2) is the derivative of tanh. The gradients of the
             # scaling operations cancel each other and the gradient of the
@@ -367,10 +361,7 @@ class TestGradients:
             dividend = np.amax(np.abs(np.tanh(x)))
             return 1 / (np.cosh(x) ** 2.0) / dividend
 
-        if mode == "activations":
-            expected_gradient = ste_grad
-        else:
-            expected_gradient = tanh_grad
+        expected_gradient = ste_grad if mode == "activations" else tanh_grad
 
         x = testing_utils.generate_real_values_with_zeros(shape=(8, 3, 3, 16))
         tf_x = tf.Variable(x)

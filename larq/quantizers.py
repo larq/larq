@@ -601,7 +601,7 @@ class DoReFa(_BaseQuantizer):
 
     # Arguments
         k_bit: number of bits for the quantization.
-        mode: "activations" for clipping inputs on [0, 1] range or "weights" for
+        mode: `"activations"` for clipping inputs on [0, 1] range or `"weights"` for
             soft-clipping and norming weights on [-1, 1] range before applying
             quantization.
         metrics: An array of metrics to add to the layer. If `None` the metrics set in
@@ -626,7 +626,7 @@ class DoReFa(_BaseQuantizer):
         if mode not in ("activations", "weights"):
             raise ValueError(
                 f"Invalid DoReFa quantizer mode {mode}. "
-                f"Valid values are 'activations' and 'weights'."
+                "Valid values are 'activations' and 'weights'."
             )
         self.mode = mode
 
@@ -655,9 +655,7 @@ class DoReFa(_BaseQuantizer):
         # If the dividend used for the norm operation is 0, all elements of
         # the weight tensor are 0 and divide_no_nan returns 0 for all weights.
         # So if all elements of the weight tensor are zero, nothing is normed.
-        normed = tf.math.divide_no_nan(limited, 2.0 * dividend) + 0.5
-
-        return normed
+        return tf.math.divide_no_nan(limited, 2.0 * dividend) + 0.5
 
     def call(self, inputs):
         # Depending on quantizer mode (activation or weight) just clip inputs
@@ -669,7 +667,7 @@ class DoReFa(_BaseQuantizer):
         else:
             raise ValueError(
                 f"Invalid DoReFa quantizer mode {self.mode}. "
-                f"Valid values are 'activations' and 'weights'."
+                "Valid values are 'activations' and 'weights'."
             )
 
         @tf.custom_gradient
