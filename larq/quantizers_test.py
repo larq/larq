@@ -72,7 +72,7 @@ class TestCommonFunctionality:
         f = lq.quantizers.DoReFa(k_bit=2, mode="activations")
         f.mode = "unknown"
         with pytest.raises(ValueError):
-            f.call([0.])
+            f.call([0.0])
 
     @pytest.mark.parametrize("quantizer", ["input_quantizer", "kernel_quantizer"])
     def test_layer_as_quantizer(self, quantizer, keras_should_run_eagerly):
@@ -240,7 +240,7 @@ class TestQuantization:
             # The results, which are currently on [-1, 1] range get the same
             # scaling, so they behave like they were created on the activation
             # range and can be tested like that
-            result = result / 2. + 0.5
+            result = result / 2.0 + 0.5
         assert not np.any(result > 1)
         assert not np.any(result < 0)
         for i in range(n + 1):
