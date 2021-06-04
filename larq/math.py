@@ -22,7 +22,8 @@ def sign(x):
     # Returns
         A Tensor with same type as `x`.
     """
-    return tf.sign(tf.sign(x) + 0.1)
+    ones = tf.ones_like(x)
+    return tf.where(x >= 0, ones, -ones)
 
 
 def heaviside(x):
@@ -41,4 +42,4 @@ def heaviside(x):
     # Returns
         A Tensor with same type as `x`.
     """
-    return tf.sign(tf.nn.relu(x))
+    return tf.where(x > 0, tf.ones_like(x), tf.zeros_like(x))
