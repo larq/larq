@@ -1,6 +1,14 @@
+import warnings
 from contextlib import contextmanager
 
+from packaging import version
 from tensorflow.keras.utils import get_custom_objects
+
+try:
+    from importlib import metadata  # type: ignore
+except ImportError:
+    # Running on pre-3.8 Python; use importlib-metadata package
+    import importlib_metadata as metadata  # type: ignore
 
 
 def memory_as_readable_str(num_bits: int) -> str:
@@ -68,3 +76,15 @@ def patch_object(object, name, value):
     setattr(object, name, value)
     yield
     setattr(object, name, old_value)
+
+
+def _check_lce_version():
+    try:
+        lce_version = metadata.version("larq-compute-engine")
+        if version.parse(lce_version) < version.parse("0.6.1"):
+            warnings.warn(
+                f"larq-compute-engine={lce_version} is not supported by this version of larq.\n"
+                "Please upgrade larq-compute-engine to v0.6.1 or newer."
+            )
+    except metadata.PackageNotFoundError:
+        pass
