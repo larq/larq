@@ -20,6 +20,7 @@ setup(
     license="Apache 2.0",
     install_requires=[
         "numpy >= 1.15.4, < 2.0",
+        "packaging>=19.2,<22.0",
         "terminaltables>=3.1.0",
         "dataclasses ; python_version<'3.7'",
         "importlib-metadata >= 2.0, < 4.0 ; python_version<'3.8'",
@@ -31,7 +32,6 @@ setup(
             "black==21.7b0",
             "flake8>=3.7.9,<3.10.0",
             "isort==5.9.2",
-            "packaging>=19.2,<22.0",
             "pytest>=5.2.4,<6.3.0",
             "pytest-cov>=2.8.1,<2.13.0",
             "pytest-xdist>=1.30,<2.4",

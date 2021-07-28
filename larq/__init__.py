@@ -12,6 +12,8 @@ from larq import (
     utils,
 )
 
+utils._check_lce_version()
+
 try:
     from importlib import metadata  # type: ignore
 except ImportError:
