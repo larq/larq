@@ -12,13 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2.2.2
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Install project dependencies
         run: |
-          pip install tensorflow-cpu==2.5.0
+          pip install tensorflow-cpu==2.6.0
           pip install -e .[test]
       - name: Run Flake8
         run: flake8
