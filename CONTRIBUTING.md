@@ -37,7 +37,7 @@ Inside the project directory run:
 pytest . -n auto
 ```
 
-A new version of the documentation will be automatically published once merged into the master branch.
+A new version of the documentation will be automatically published once merged into the main branch.
 
 ## Code style
 
