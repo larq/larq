@@ -36,7 +36,7 @@ setup(
             "pytest-cov>=2.8.1,<2.13.0",
             "pytest-xdist>=1.30,<2.5",
             "pytest-mock>=2.0,<3.7",
-            "pytype==2021.9.9",
+            "pytype==2021.9.27",
             "snapshottest>=0.5.1,<0.7.0",
         ],
     },
