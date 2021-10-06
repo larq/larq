@@ -3,6 +3,7 @@ import inspect
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 
 import larq as lq
 from larq import testing_utils
@@ -279,6 +280,17 @@ class TestLayerWarns:
     def test_conv1d_non_zero_padding_raises(self):
         with pytest.raises(ValueError, match=r".*pad_values.*"):
             lq.layers.QuantConv1D(24, 3, padding="causal", pad_values=1.0)
+
+    @pytest.mark.skipif(
+        version.parse(tf.__version__) >= version.parse("2.3"),
+        reason="Only raise error for old TF versions.",
+    )
+    @pytest.mark.parametrize(
+        "layer", [lq.layers.QuantConv1D, lq.layers.QuantConv2D, lq.layers.QuantConv3D]
+    )
+    def test_unsupported_groups(self, layer):
+        with pytest.raises(ValueError, match=r".*groups.*"):
+            layer(24, 3, groups=2)
 
 
 @pytest.mark.parametrize(

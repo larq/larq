@@ -7,6 +7,7 @@ is equivalent to a full precision layer.
 """
 
 import tensorflow as tf
+from packaging import version
 
 from larq import utils
 from larq.layers_base import (
@@ -157,6 +158,11 @@ class QuantConv1D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv1D):
             dilation rate to use for dilated convolution. Currently, specifying any
             `dilation_rate` value != 1 is incompatible with specifying any `strides`
             value != 1.
+        groups: A positive integer specifying the number of groups in which the input
+            is split along the channel axis. Each group is convolved separately with
+            `filters / groups` filters. The output is the concatenation of all the
+            `groups` results along the channel axis. Input channels and `filters`
+            must both be divisible by `groups`.
         activation: Activation function to use. If you don't specify anything, no
             activation is applied (`a(x) = x`).
         use_bias: Boolean, whether the layer uses a bias vector.
@@ -188,6 +194,7 @@ class QuantConv1D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv1D):
         pad_values=0.0,
         data_format="channels_last",
         dilation_rate=1,
+        groups=1,
         activation=None,
         use_bias=True,
         input_quantizer=None,
@@ -201,6 +208,11 @@ class QuantConv1D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv1D):
         bias_constraint=None,
         **kwargs,
     ):
+        if groups != 1:
+            if version.parse(tf.__version__) >= version.parse("2.3"):
+                kwargs = {**kwargs, "groups": groups}
+            else:
+                raise ValueError("`groups` != 1 requires TensorFlow version 2.3 or newer.")
         super().__init__(
             filters,
             kernel_size,
@@ -264,6 +276,11 @@ class QuantConv2D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv2D):
             same value for all spatial dimensions. Currently, specifying any
             `dilation_rate` value != 1 is incompatible with specifying any stride value
             != 1.
+        groups: A positive integer specifying the number of groups in which the input
+            is split along the channel axis. Each group is convolved separately with
+            `filters / groups` filters. The output is the concatenation of all the
+            `groups` results along the channel axis. Input channels and `filters` must
+            both be divisible by `groups`.
         activation: Activation function to use. If you don't specify anything,
             no activation is applied (`a(x) = x`).
         use_bias: Boolean, whether the layer uses a bias vector.
@@ -301,6 +318,7 @@ class QuantConv2D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv2D):
         pad_values=0.0,
         data_format=None,
         dilation_rate=(1, 1),
+        groups=1,
         activation=None,
         use_bias=True,
         input_quantizer=None,
@@ -314,6 +332,11 @@ class QuantConv2D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv2D):
         bias_constraint=None,
         **kwargs,
     ):
+        if groups != 1:
+            if version.parse(tf.__version__) >= version.parse("2.3"):
+                kwargs = {**kwargs, "groups": groups}
+            else:
+                raise ValueError("`groups` != 1 requires TensorFlow version 2.3 or newer.")
         super().__init__(
             filters,
             kernel_size,
@@ -379,6 +402,11 @@ class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
             same value for all spatial dimensions. Currently, specifying any
             `dilation_rate` value != 1 is incompatible with specifying any stride value
             != 1.
+        groups: A positive integer specifying the number of groups in which the input
+            is split along the channel axis. Each group is convolved separately with
+            `filters / groups` filters. The output is the concatenation of all the
+            `groups` results along the channel axis. Input channels and `filters` must
+            both be divisible by `groups`.
         activation: Activation function to use. If you don't specify anything,
             no activation is applied (`a(x) = x`).
         use_bias: Boolean, whether the layer uses a bias vector.
@@ -421,6 +449,7 @@ class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
         pad_values=0.0,
         data_format=None,
         dilation_rate=(1, 1, 1),
+        groups=1,
         activation=None,
         use_bias=True,
         input_quantizer=None,
@@ -434,6 +463,11 @@ class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
         bias_constraint=None,
         **kwargs,
     ):
+        if groups != 1:
+            if version.parse(tf.__version__) >= version.parse("2.3"):
+                kwargs = {**kwargs, "groups": groups}
+            else:
+                raise ValueError("`groups` != 1 requires TensorFlow version 2.3 or newer.")
         super().__init__(
             filters,
             kernel_size,
