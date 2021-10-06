@@ -212,7 +212,9 @@ class QuantConv1D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv1D):
             if version.parse(tf.__version__) >= version.parse("2.3"):
                 kwargs = {**kwargs, "groups": groups}
             else:
-                raise ValueError("`groups` != 1 requires TensorFlow version 2.3 or newer.")
+                raise ValueError(
+                    "`groups` != 1 requires TensorFlow version 2.3 or newer."
+                )
         super().__init__(
             filters,
             kernel_size,
@@ -336,7 +338,9 @@ class QuantConv2D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv2D):
             if version.parse(tf.__version__) >= version.parse("2.3"):
                 kwargs = {**kwargs, "groups": groups}
             else:
-                raise ValueError("`groups` != 1 requires TensorFlow version 2.3 or newer.")
+                raise ValueError(
+                    "`groups` != 1 requires TensorFlow version 2.3 or newer."
+                )
         super().__init__(
             filters,
             kernel_size,
@@ -467,7 +471,9 @@ class QuantConv3D(QuantizerBase, QuantizerBaseConv, tf.keras.layers.Conv3D):
             if version.parse(tf.__version__) >= version.parse("2.3"):
                 kwargs = {**kwargs, "groups": groups}
             else:
-                raise ValueError("`groups` != 1 requires TensorFlow version 2.3 or newer.")
+                raise ValueError(
+                    "`groups` != 1 requires TensorFlow version 2.3 or newer."
+                )
         super().__init__(
             filters,
             kernel_size,
