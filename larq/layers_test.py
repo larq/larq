@@ -314,13 +314,19 @@ def test_layer_kwargs(quant_layer, layer):
     quant_params_list = list(quant_params.keys())
     params_list = list(params.keys())
 
-    for p in (
+    ignored_params = [
         "input_quantizer",
         "kernel_quantizer",
         "depthwise_quantizer",
         "pointwise_quantizer",
         "pad_values",
-    ):
+    ]
+    if version.parse(tf.__version__) < version.parse("2.3"):
+        ignored_params.append("groups")
+        if layer in (tf.keras.layers.DepthwiseConv2D, tf.keras.layers.Conv3DTranspose):
+            ignored_params.append("dilation_rate")
+
+    for p in ignored_params:
         try:
             quant_params_list.remove(p)
         except ValueError:
