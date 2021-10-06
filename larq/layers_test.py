@@ -3,6 +3,7 @@ import inspect
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 
 import larq as lq
 from larq import testing_utils
@@ -280,6 +281,16 @@ class TestLayerWarns:
         with pytest.raises(ValueError, match=r".*pad_values.*"):
             lq.layers.QuantConv1D(24, 3, padding="causal", pad_values=1.0)
 
+    @pytest.mark.parametrize(
+        "layer", [lq.layers.QuantConv1D, lq.layers.QuantConv2D, lq.layers.QuantConv3D]
+    )
+    def test_groups(self, layer):
+        if version.parse(tf.__version__) < version.parse("2.3"):
+            with pytest.raises(ValueError, match=r".*groups.*"):
+                layer(24, 3, groups=2)
+        else:
+            assert layer(24, 3, groups=2).groups == 2
+
 
 @pytest.mark.parametrize(
     "quant_layer,layer",
@@ -302,13 +313,19 @@ def test_layer_kwargs(quant_layer, layer):
     quant_params_list = list(quant_params.keys())
     params_list = list(params.keys())
 
-    for p in (
+    ignored_params = [
         "input_quantizer",
         "kernel_quantizer",
         "depthwise_quantizer",
         "pointwise_quantizer",
         "pad_values",
-    ):
+    ]
+    if version.parse(tf.__version__) < version.parse("2.3"):
+        ignored_params.append("groups")
+        if layer in (tf.keras.layers.DepthwiseConv2D, tf.keras.layers.Conv3DTranspose):
+            ignored_params.append("dilation_rate")
+
+    for p in ignored_params:
         try:
             quant_params_list.remove(p)
         except ValueError:
