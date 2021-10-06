@@ -488,6 +488,11 @@ class QuantDepthwiseConv2D(
             It defaults to the `image_data_format` value found in your
             Keras config file at `~/.keras/keras.json`.
             If you never set it, then it will be 'channels_last'.
+        dilation_rate: an integer or tuple/list of 2 integers, specifying the dilation
+            rate to use for dilated convolution. Can be a single integer to specify the
+            same value for all spatial dimensions. Currently, specifying any
+            `dilation_rate` value != 1 is incompatible with specifying any stride value
+            != 1.
         activation: Activation function to use.
             If you don't specify anything, no activation is applied (ie. `a(x) = x`).
         use_bias: Boolean, whether the layer uses a bias vector.
@@ -527,6 +532,7 @@ class QuantDepthwiseConv2D(
         pad_values=0.0,
         depth_multiplier=1,
         data_format=None,
+        dilation_rate=(1, 1),
         activation=None,
         use_bias=True,
         input_quantizer=None,
@@ -547,6 +553,7 @@ class QuantDepthwiseConv2D(
             pad_values=pad_values,
             depth_multiplier=depth_multiplier,
             data_format=data_format,
+            dilation_rate=dilation_rate,
             activation=activation,
             use_bias=use_bias,
             input_quantizer=input_quantizer,
@@ -1032,6 +1039,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
         padding="valid",
         output_padding=None,
         data_format=None,
+        dilation_rate=(1, 1, 1),
         activation=None,
         use_bias=True,
         input_quantizer=None,
@@ -1052,6 +1060,7 @@ class QuantConv3DTranspose(QuantizerBase, tf.keras.layers.Conv3DTranspose):
             padding=padding,
             output_padding=output_padding,
             data_format=data_format,
+            dilation_rate=dilation_rate,
             activation=activation,
             use_bias=use_bias,
             input_quantizer=input_quantizer,
