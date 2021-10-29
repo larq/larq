@@ -4,6 +4,7 @@ from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
 from terminaltables import AsciiTable
 
 from larq import layers as lq_layers
@@ -26,6 +27,7 @@ mac_containing_layers = (
     tf.keras.layers.SeparableConv1D,
 )
 
+
 op_count_supported_layer_types = (
     tf.keras.layers.Flatten,
     tf.keras.layers.BatchNormalization,
@@ -35,6 +37,23 @@ op_count_supported_layer_types = (
     tf.keras.layers.AveragePooling1D,
     *mac_containing_layers,
 )
+
+
+def is_mac_containing_layer(layer: tf.keras.layers.Layer):
+    # Check if the layer is either one of the above, or a SavedModel version of it.
+    names = {cls.__name__ for cls in mac_containing_layers}
+    return isinstance(layer, mac_containing_layers) or (
+        isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
+    )
+
+
+def is_op_count_supported_layer(layer: tf.keras.layers.Layer):
+    # Check if the layer is either one of the above, or a SavedModel version of it.
+    names = {cls.__name__ for cls in op_count_supported_layer_types}
+    return isinstance(layer, op_count_supported_layer_types) or (
+        isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
+    )
+
 
 T = TypeVar("T")
 
@@ -153,7 +172,7 @@ class LayerProfile:
 
         self.op_profiles = []
 
-        if isinstance(layer, mac_containing_layers) and self.output_pixels:
+        if is_mac_containing_layer(layer) and self.output_pixels:
             for p in self.weight_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
@@ -193,10 +212,7 @@ class LayerProfile:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
-        if (
-            isinstance(self._layer, op_count_supported_layer_types)
-            and self.output_pixels
-        ):
+        if is_op_count_supported_layer(self._layer) and self.output_pixels:
             count = 0
             for op in self.op_profiles:
                 if (precision is None or op.precision == precision) and (
