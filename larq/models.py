@@ -273,11 +273,14 @@ class LayerProfile:
 class ModelProfile(LayerProfile):
     def __init__(self, model: tf.keras.models.Model):
         self.name = model.name
-        get_profile = lambda layer: (
-            LayerProfile(layer)
-            if not isinstance(layer, tf.keras.models.Model)
-            else ModelProfile(layer)
-        )
+
+        def get_profile(layer):
+            return (
+                LayerProfile(layer)
+                if not isinstance(layer, tf.keras.models.Model)
+                else ModelProfile(layer)
+            )
+
         self.layer_profiles = [get_profile(layer) for layer in model.layers]
 
     @property
