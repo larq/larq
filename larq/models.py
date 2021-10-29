@@ -4,7 +4,7 @@ from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
+from packaging import version
 from terminaltables import AsciiTable
 
 from larq import layers as lq_layers
@@ -41,18 +41,30 @@ op_count_supported_layer_types = (
 
 def is_mac_containing_layer(layer: tf.keras.layers.Layer):
     # Check if the layer is either one of the above, or a SavedModel version of it.
-    names = {cls.__name__ for cls in mac_containing_layers}
-    return isinstance(layer, mac_containing_layers) or (
-        isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
-    )
+    if isinstance(layer, mac_containing_layers):
+        return True
+
+    if version.parse(tf.__version__) >= version.parse("2.0"):
+        from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
+
+        names = {cls.__name__ for cls in mac_containing_layers}
+        return isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
+
+    return False
 
 
 def is_op_count_supported_layer(layer: tf.keras.layers.Layer):
     # Check if the layer is either one of the above, or a SavedModel version of it.
-    names = {cls.__name__ for cls in op_count_supported_layer_types}
-    return isinstance(layer, op_count_supported_layer_types) or (
-        isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
-    )
+    if isinstance(layer, op_count_supported_layer_types):
+        return True
+
+    if version.parse(tf.__version__) >= version.parse("2.0"):
+        from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
+
+        names = {cls.__name__ for cls in op_count_supported_layer_types}
+        return isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
+
+    return False
 
 
 T = TypeVar("T")
