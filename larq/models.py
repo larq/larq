@@ -317,6 +317,14 @@ class ModelProfile(LayerProfile):
             set(_flatten(lp.unique_op_precisions for lp in self.layer_profiles))
         )
 
+    @property
+    def input_precision(self) -> Optional[int]:
+        return self.layer_profiles[0].input_precision
+
+    @property
+    def output_shape(self) -> Optional[Sequence[int]]:
+        return self.layer_profiles[-1].output_shape
+
     def _generate_table_header(self, table_config: Mapping[str, Any]) -> Sequence[str]:
         return [
             "Layer",
