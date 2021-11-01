@@ -1,12 +1,11 @@
-from tempfile import TemporaryDirectory
-
 import numpy as np
 import pytest
 import tensorflow as tf
 from packaging import version
+from tensorflow.keras.utils import get_custom_objects
 
 import larq as lq
-from larq.models import ModelProfile
+from larq.models import ModelProfile, is_of_layer_type, mac_containing_layers
 
 
 class ToyModel(tf.keras.Model):
@@ -246,13 +245,14 @@ def test_subclass_model_summary(snapshot, capsys):
     snapshot.assert_match(captured.out)
 
 
-def test_saved_model_summary(capsys):
+def test_saved_model_summary(tmpdir):
     model = tf.keras.models.Sequential(
         [
             lq.layers.QuantConv2D(
                 filters=32,
                 kernel_size=(3, 3),
                 kernel_quantizer="ste_sign",
+                input_quantizer="ste_sign",
                 input_shape=(64, 64, 1),
                 padding="same",
             ),
@@ -260,17 +260,23 @@ def test_saved_model_summary(capsys):
             tf.keras.layers.Dense(10, activation="softmax"),
         ]
     )
-    lq.models.summary(model)
-    summary = capsys.readouterr().out
+    profile = ModelProfile(model).layer_profiles[0]
+    print(profile.op_profiles, [w.bitwidth for w in profile.weight_profiles], is_of_layer_type(profile._layer, mac_containing_layers), profile._layer.input_quantizer.precision)
+    # lq.models.summary(model)
+    # summary = capsys.readouterr().out
 
     # Save and reload
-    with TemporaryDirectory() as dir:
-        model.save(dir)
-        loaded_model = tf.keras.models.load_model(dir)
+    model.save(tmpdir)
+    # Un-register layer so we get a RevivedLayer instead
+    del get_custom_objects()["QuantConv2D"]
+    loaded_model = tf.keras.models.load_model(tmpdir)
 
     # Compare summaries
-    lq.models.summary(loaded_model)
-    assert capsys.readouterr().out == summary
+    profile = ModelProfile(loaded_model).layer_profiles[0]
+    print(profile.op_profiles,  [w.bitwidth for w in profile.weight_profiles], is_of_layer_type(profile._layer, mac_containing_layers), profile._layer.input_quantizer.precision)
+    # lq.models.summary(loaded_model)
+    # assert capsys.readouterr().out == summary
+    assert False
 
 
 def test_functional_model_summary(snapshot, capsys):
