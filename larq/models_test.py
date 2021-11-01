@@ -66,7 +66,7 @@ def get_profile_model():
                 pointwise_quantizer="ste_sign",
                 padding="same",
             ),
-            tf.keras.layers.Flatten(name="flatten"),
+            tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(10, trainable=False),
         ],
     )
