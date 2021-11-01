@@ -1,3 +1,5 @@
+from tempfile import TemporaryDirectory
+
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -242,6 +244,33 @@ def test_subclass_model_summary(snapshot, capsys):
     lq.models.summary(model)
     captured = capsys.readouterr()
     snapshot.assert_match(captured.out)
+
+
+def test_saved_model_summary(capsys):
+    model = tf.keras.models.Sequential(
+        [
+            lq.layers.QuantConv2D(
+                filters=32,
+                kernel_size=(3, 3),
+                kernel_quantizer="ste_sign",
+                input_shape=(64, 64, 1),
+                padding="same",
+            ),
+            tf.keras.layers.GlobalAvgPool2D(),
+            tf.keras.layers.Dense(10, activation="softmax"),
+        ]
+    )
+    lq.models.summary(model)
+    summary = capsys.readouterr().out
+
+    # Save and reload
+    with TemporaryDirectory() as dir:
+        model.save(dir)
+        loaded_model = tf.keras.models.load_model(dir)
+
+    # Compare summaries
+    lq.models.summary(loaded_model)
+    assert capsys.readouterr().out == summary
 
 
 def test_functional_model_summary(snapshot, capsys):
