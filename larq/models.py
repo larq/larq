@@ -1,6 +1,16 @@
 import itertools
 from dataclasses import dataclass
-from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Iterator,
+    Mapping,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 import tensorflow as tf
@@ -39,31 +49,19 @@ op_count_supported_layer_types = (
 )
 
 
-def is_mac_containing_layer(layer: tf.keras.layers.Layer):
-    # Check if the layer is either one of the above, or a SavedModel version of it.
-    if isinstance(layer, mac_containing_layers):
+def is_of_layer_type(layer: tf.keras.layers.Layer, types: Sequence[Type]) -> bool:
+    # Check if the layer type is either one of the specified types, or a
+    # SavedModel-reloaded version of it.
+    if isinstance(layer, types):
         return True
 
     if version.parse(tf.__version__) >= version.parse("2.0"):
         from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
 
-        names = {cls.__name__ for cls in mac_containing_layers}
+        names = {cls.__name__ for cls in types}
         return isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
 
-    return False
-
-
-def is_op_count_supported_layer(layer: tf.keras.layers.Layer):
-    # Check if the layer is either one of the above, or a SavedModel version of it.
-    if isinstance(layer, op_count_supported_layer_types):
-        return True
-
-    if version.parse(tf.__version__) >= version.parse("2.0"):
-        from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
-
-        names = {cls.__name__ for cls in op_count_supported_layer_types}
-        return isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
-
+    # SavedModels didn't exist prior to 2.0, so it's definitely not a RevivedLayer.
     return False
 
 
@@ -184,7 +182,7 @@ class LayerProfile:
 
         self.op_profiles = []
 
-        if is_mac_containing_layer(layer) and self.output_pixels:
+        if is_of_layer_type(layer, mac_containing_layers) and self.output_pixels:
             for p in self.weight_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
@@ -224,7 +222,10 @@ class LayerProfile:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
-        if is_op_count_supported_layer(self._layer) and self.output_pixels:
+        if (
+            is_of_layer_type(self._layer, op_count_supported_layer_types)
+            and self.output_pixels
+        ):
             count = 0
             for op in self.op_profiles:
                 if (precision is None or op.precision == precision) and (
