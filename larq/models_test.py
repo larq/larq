@@ -68,7 +68,21 @@ def get_profile_model():
             ),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(10, trainable=False),
-        ]
+        ],
+    )
+
+
+def get_submodel_profile_model(start_index=2, end_index=5):
+    # Same as above, but with a submodel as a layer
+    model = get_profile_model()
+
+    # Create submodel from e.g. the middle three layers
+    submodel = tf.keras.models.Sequential(
+        [layer for layer in model.layers[start_index:end_index]],
+    )
+
+    return tf.keras.models.Sequential(
+        [*model.layers[:start_index], submodel, *model.layers[end_index:]]
     )
 
 
@@ -234,6 +248,50 @@ def test_summary(snapshot, capsys):
     lq.models.summary(model)
     captured = capsys.readouterr()
     snapshot.assert_match(captured.out)
+
+
+def test_submodel_summary(capsys, snapshot):
+    default_profile = ModelProfile(get_profile_model())
+    submodel = get_submodel_profile_model(start_index=2, end_index=5)
+    submodel_profile = ModelProfile(submodel)
+    submodel_layer_profile = submodel_profile.layer_profiles[2]
+
+    # Assert that layer profile of the submodel "layer" matches the original layers
+    profiles = default_profile.layer_profiles[2:5]
+    assert submodel_layer_profile.input_precision == profiles[0].input_precision
+    assert submodel_layer_profile.output_shape == profiles[-1].output_shape
+    assert submodel_layer_profile.output_pixels == profiles[-1].output_pixels
+    assert submodel_layer_profile.weight_count() == sum(
+        (p.weight_count() for p in profiles)
+    )
+    bitwidths = []
+    op_precisions = []
+    for p in profiles:
+        bitwidths.extend(p.unique_param_bidtwidths)
+        op_precisions.extend(p.unique_op_precisions)
+
+    assert set(submodel_layer_profile.unique_param_bidtwidths) == set(bitwidths)
+    assert set(submodel_layer_profile.unique_op_precisions) == set(op_precisions)
+    assert submodel_layer_profile.memory == sum((p.memory for p in profiles))
+    assert submodel_layer_profile.fp_equivalent_memory == sum(
+        (p.fp_equivalent_memory for p in profiles)
+    )
+    assert submodel_layer_profile.int8_fp_weights_memory == sum(
+        (p.int8_fp_weights_memory for p in profiles)
+    )
+    assert submodel_layer_profile.op_count("mac") == sum(
+        (p.op_count("mac") for p in profiles)
+    )
+    assert submodel_layer_profile.op_count("mac", 1) == sum(
+        (p.op_count("mac", 1) for p in profiles)
+    )
+
+    # Assert that the total profile summary matches
+    assert submodel_profile.generate_summary() == default_profile.generate_summary()
+
+    # Snapshot the submodel profile itself to make sure it remains correct
+    lq.models.summary(get_submodel_profile_model())
+    snapshot.assert_match(capsys.readouterr().out)
 
 
 def test_subclass_model_summary(snapshot, capsys):

@@ -134,6 +134,7 @@ class OperationProfile:
 class LayerProfile:
     def __init__(self, layer: tf.keras.layers.Layer):
         self._layer = layer
+        self.name = layer.name
 
         weights = layer.weights
         if isinstance(layer, tf.keras.layers.BatchNormalization):
@@ -256,7 +257,7 @@ class LayerProfile:
     def generate_table_row(
         self, table_config: Mapping[str, Any]
     ) -> Sequence[Union[str, float]]:
-        row = [self._layer.name, self.input_precision or "-", self.output_shape_str]
+        row = [self.name, self.input_precision or "-", self.output_shape_str]
         for i in table_config["param_bidtwidths"]:
             n = self.weight_count(i)
             n = _format_table_entry(n, table_config["param_units"])
@@ -271,7 +272,16 @@ class LayerProfile:
 
 class ModelProfile(LayerProfile):
     def __init__(self, model: tf.keras.models.Model):
-        self.layer_profiles = [LayerProfile(layer) for layer in model.layers]
+        self.name = model.name
+
+        def get_profile(layer):
+            return (
+                LayerProfile(layer)
+                if not isinstance(layer, tf.keras.models.Model)
+                else ModelProfile(layer)
+            )
+
+        self.layer_profiles = [get_profile(layer) for layer in model.layers]
 
     @property
     def memory(self) -> int:
@@ -306,6 +316,14 @@ class ModelProfile(LayerProfile):
         return sorted(
             set(_flatten(lp.unique_op_precisions for lp in self.layer_profiles))
         )
+
+    @property
+    def input_precision(self) -> Optional[int]:
+        return self.layer_profiles[0].input_precision
+
+    @property
+    def output_shape(self) -> Optional[Sequence[int]]:
+        return self.layer_profiles[-1].output_shape
 
     def _generate_table_header(self, table_config: Mapping[str, Any]) -> Sequence[str]:
         return [
