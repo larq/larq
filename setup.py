@@ -23,6 +23,7 @@ setup(
         "terminaltables>=3.1.0",
         "dataclasses ; python_version<'3.7'",
         "importlib-metadata >= 2.0, < 4.0 ; python_version<'3.8'",
+        "packaging>=19.2,<22.0",
     ],
     extras_require={
         "tensorflow": ["tensorflow>=1.14.0"],
@@ -31,7 +32,6 @@ setup(
             "black==21.10b0",
             "flake8>=3.7.9,<4.1.0",
             "isort==5.9.3",
-            "packaging>=19.2,<22.0",
             "pytest>=5.2.4,<6.3.0",
             "pytest-cov>=2.8.1,<3.1.0",
             "pytest-xdist>=1.30,<2.5",

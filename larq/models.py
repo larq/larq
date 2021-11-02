@@ -1,9 +1,20 @@
 import itertools
 from dataclasses import dataclass
-from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Iterator,
+    Mapping,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 import tensorflow as tf
+from packaging import version
 from terminaltables import AsciiTable
 
 from larq import layers as lq_layers
@@ -26,6 +37,7 @@ mac_containing_layers = (
     tf.keras.layers.SeparableConv1D,
 )
 
+
 op_count_supported_layer_types = (
     tf.keras.layers.Flatten,
     tf.keras.layers.BatchNormalization,
@@ -35,6 +47,23 @@ op_count_supported_layer_types = (
     tf.keras.layers.AveragePooling1D,
     *mac_containing_layers,
 )
+
+
+def is_of_layer_type(layer: tf.keras.layers.Layer, types: Sequence[Type]) -> bool:
+    # Check if the layer type is either one of the specified types, or a
+    # SavedModel-reloaded version of it.
+    if isinstance(layer, types):
+        return True
+
+    if version.parse(tf.__version__) >= version.parse("2.0"):
+        from tensorflow.python.keras.saving.saved_model.load import RevivedLayer
+
+        names = {cls.__name__ for cls in types}
+        return isinstance(layer, RevivedLayer) and layer.__class__.__name__ in names
+
+    # SavedModels didn't exist prior to 2.0, so it's definitely not a RevivedLayer.
+    return False
+
 
 T = TypeVar("T")
 
@@ -154,7 +183,7 @@ class LayerProfile:
 
         self.op_profiles = []
 
-        if isinstance(layer, mac_containing_layers) and self.output_pixels:
+        if is_of_layer_type(layer, mac_containing_layers) and self.output_pixels:
             for p in self.weight_profiles:
                 if not p.is_bias():
                     self.op_profiles.append(
@@ -195,7 +224,7 @@ class LayerProfile:
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
         if (
-            isinstance(self._layer, op_count_supported_layer_types)
+            is_of_layer_type(self._layer, op_count_supported_layer_types)
             and self.output_pixels
         ):
             count = 0
