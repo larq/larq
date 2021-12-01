@@ -148,7 +148,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             _ = self.iterations
             # This is only necessary in TF 2.0 and older, but doesn't hurt on newer versions
             for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists):
-                optimizer._create_slots([v for (_, v) in grads_and_vars])
+                optimizer._create_slots([v for (_, v) in opt_grads_and_vars])
 
         return tf.distribute.get_replica_context().merge_call(
             self._apply_gradients, args=(grad_var_lists, name), kwargs=kwargs
