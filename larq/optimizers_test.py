@@ -155,13 +155,15 @@ class TestCaseOptimizer:
             loss="sparse_categorical_crossentropy",
             optimizer=lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=tf.keras.optimizers.SGD(0.1, momentum=0.9),
             ),
         )
         model.fit(train_images[:1], train_labels[:1], epochs=1)
 
         opt_weights = model.optimizer.weights
-        assert len(opt_weights) != 0
+        # SGD with momentum and Bop both create a single momentum variable per weight
+        # and one variable each to keep track of iterations
+        assert len(opt_weights) == len(model.weights) + 2
         checked_weights = 0
         for opt in model.optimizer.optimizers:
             for weight in opt.weights:
