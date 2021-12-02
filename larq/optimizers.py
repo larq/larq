@@ -46,6 +46,25 @@ from larq import utils
 __all__ = ["Bop", "CaseOptimizer"]
 
 
+# From https://github.com/keras-team/keras/blob/a8606fd45b760cce3e65727e9d62cae796c45930/keras/optimizer_v2/optimizer_v2.py#L1430-L1450
+def _var_key(var):
+    """Key for representing a primary variable, for looking up slots.
+    In graph mode the name is derived from the var shared name.
+    In eager mode the name is derived from the var unique id.
+    If distribution strategy exists, get the primary variable first.
+    Args:
+      var: the variable.
+    Returns:
+      the unique name of the variable.
+    """
+    # Get the distributed variable if it exists.
+    if hasattr(var, "_distributed_container"):
+        var = var._distributed_container()
+    if var._in_graph_mode:
+        return var._shared_name
+    return var._unique_id
+
+
 @utils.register_keras_custom_object
 class CaseOptimizer(tf.keras.optimizers.Optimizer):
     """An optmizer wrapper that applies different optimizers to a subset of variables.
@@ -141,8 +160,9 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
         # Split gradients and variables into a separate list for each optimizer
         grad_var_lists = [[] for _ in range(len(self.pred_opt_pairs) + 1)]
         for grad, var in grads_and_vars:
-            if var.name in self.var_opt_mapping:
-                grad_var_lists[self.var_opt_mapping[var.name]].append((grad, var))
+            var_key = _var_key(var)
+            if var_key in self.var_opt_mapping:
+                grad_var_lists[self.var_opt_mapping[var_key]].append((grad, var))
 
         with tf.init_scope():
             _ = self.iterations
@@ -214,20 +234,21 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
         self.var_opt_mapping = {}
 
-        for grad, var in grads_and_vars:
+        for _, var in grads_and_vars:
             num_optimizers = 0
+            var_key = _var_key(var)
 
             # Find the optimizer(s) that want to claim this variable
             for optimizer_index, (predicate, _) in enumerate(self.pred_opt_pairs):
                 if predicate(var):
-                    self.var_opt_mapping[var.name] = optimizer_index
+                    self.var_opt_mapping[var_key] = optimizer_index
                     num_optimizers += 1
 
             if num_optimizers > 1:
                 raise ValueError(f"Variable `{var}` claimed by multiple optimizers.")
             if num_optimizers == 0:
                 if self.default is not None:
-                    self.var_opt_mapping[var.name] = self.DEFAULT_OPT_INDEX
+                    self.var_opt_mapping[var_key] = self.DEFAULT_OPT_INDEX
                 else:
                     warnings.warn(
                         f"No `default_optimizer` provided to train variable `{var}`."
