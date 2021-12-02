@@ -46,6 +46,7 @@ from larq import utils
 __all__ = ["Bop", "CaseOptimizer"]
 
 
+# From https://github.com/keras-team/keras/blob/a8606fd45b760cce3e65727e9d62cae796c45930/keras/optimizer_v2/optimizer_v2.py#L1430-L1450
 def _var_key(var):
     """Key for representing a primary variable, for looking up slots.
     In graph mode the name is derived from the var shared name.
