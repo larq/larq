@@ -8,7 +8,7 @@ Larq is an open-source deep learning library for training neural networks with e
 Existing deep neural networks use 32 bits, 16 bits or 8 bits to encode each weight and activation, making them large, slow and power-hungry.
 This prohibits many applications in resource-constrained environments. Larq is the first step towards solving this. It is designed to provide an easy to use, composable way to train BNNs (1 bit) and other types of Quantized Neural Networks (QNNs) and is based on the `tf.keras` interface. Note that efficient inference using a trained BNN requires the use of an optimized inference engine; we provide these for several platforms in [Larq Compute Engine](https://github.com/larq/compute-engine).
 
-*Larq is part of a family of libraries for BNN development; you can also check out [Larq Zoo](https://github.com/larq/zoo) for pretrained models and [Larq Compute Engine](https://github.com/larq/compute-engine) for deployment on mobile and edge devices.*
+_Larq is part of a family of libraries for BNN development; you can also check out [Larq Zoo](https://github.com/larq/zoo) for pretrained models and [Larq Compute Engine](https://github.com/larq/compute-engine) for deployment on mobile and edge devices._
 
 ## Getting Started
 
@@ -48,7 +48,7 @@ Check out our examples on how to train a Binarized Neural Network in just a few 
 Before installing Larq, please install:
 
 - [Python](https://www.python.org/) version `3.6`, `3.7`, `3.8`, or `3.9`
-- [Tensorflow](https://www.tensorflow.org/install) version `1.14`, `1.15`, `2.0`, `2.1`, `2.2`, `2.3`, `2.4`, `2.5`, or `2.6`:
+- [Tensorflow](https://www.tensorflow.org/install) version `1.14`, `1.15`, `2.0`, `2.1`, `2.2`, `2.3`, `2.4`, `2.5`, `2.6`, `2.7`, `2.8`:
   ```shell
   pip install tensorflow  # or tensorflow-gpu
   ```
