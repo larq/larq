@@ -231,7 +231,7 @@ class TestQuantization:
         f = tf.keras.backend.function([x], [lq.quantizers.DoReFa(k_bit, mode)(x)])
         real_values = testing_utils.generate_real_values_with_zeros()
         result = f([real_values])[0]
-        n = 2 ** k_bit - 1
+        n = 2**k_bit - 1
         if mode == "weights":
             # Create the preprocessed and scaled stimulus, which is then ready to
             # go through the same test like for the activation quantizer

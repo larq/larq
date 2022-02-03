@@ -50,7 +50,7 @@ def test_memory_as_readable_str():
     ]
 
     for i, correct_string in enumerate(correct_strings):
-        assert utils.memory_as_readable_str(2 ** i) == correct_string
+        assert utils.memory_as_readable_str(2**i) == correct_string
 
 
 def test_set_precision():
