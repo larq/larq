@@ -678,7 +678,7 @@ class DoReFa(_BaseQuantizer):
 
         @tf.custom_gradient
         def _k_bit_with_identity_grad(x):
-            n = 2 ** self.precision - 1
+            n = 2**self.precision - 1
             return tf.round(x * n) / n, lambda dy: dy
 
         outputs = _k_bit_with_identity_grad(inputs)

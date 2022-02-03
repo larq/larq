@@ -17,7 +17,7 @@ def memory_as_readable_str(num_bits: int) -> str:
     num_bytes = num_bits / 8
 
     for i, suffix in enumerate(suffixes):
-        rounded = num_bytes / (1024 ** i)
+        rounded = num_bytes / (1024**i)
         if rounded < 1024:
             break
 
