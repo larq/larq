@@ -19,7 +19,7 @@ jobs:
       - name: Install project dependencies
         run: |
           pip install tensorflow-cpu==2.8.0
-          pip install -e .[test]
+          pip install -e .[lint,test]
       - name: Run Flake8
         run: flake8
       - name: Black code style
