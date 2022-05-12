@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from tensorflow.keras.utils import get_custom_objects
+import tensorflow as tf
 
 
 def memory_as_readable_str(num_bits: int) -> str:
@@ -26,7 +26,7 @@ def memory_as_readable_str(num_bits: int) -> str:
 
 def register_keras_custom_object(cls):
     """See https://github.com/tensorflow/addons/blob/master/tensorflow_addons/utils/keras_utils.py#L25"""
-    get_custom_objects()[cls.__name__] = cls
+    tf.keras.utils.get_custom_objects()[cls.__name__] = cls
     return cls
 
 
@@ -41,7 +41,7 @@ def register_alias(name: str):
     """
 
     def register_func(cls):
-        get_custom_objects()[name] = cls
+        tf.keras.utils.get_custom_objects()[name] = cls
         return cls
 
     return register_func
