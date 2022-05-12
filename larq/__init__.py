@@ -1,4 +1,4 @@
-from larq import (
+from larq import (  # pytype: disable=pyi-error
     activations,
     callbacks,
     constraints,
