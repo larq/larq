@@ -37,6 +37,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          pip install 'protobuf < 3.20'
           pip install tensorflow-cpu==${{matrix.tf-version}} || pip install tensorflow==${{matrix.tf-version}}
           pip install -e .[test]
       - name: Test with pytest
