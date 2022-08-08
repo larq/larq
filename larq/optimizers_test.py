@@ -8,11 +8,6 @@ import larq as lq
 from larq import testing_utils as lq_testing_utils
 
 
-def _assert_weights(weights, expected):
-    for w, e in zip(weights, expected):
-        np.testing.assert_allclose(np.squeeze(w), e)
-
-
 def _test_optimizer(
     optimizer, target=0.75, test_kernels_are_binary=True, trainable_bn=True
 ):
@@ -58,7 +53,9 @@ def _test_serialization(optimizer):
 class TestCaseOptimizer:
     def test_type_check_predicate(self):
         with pytest.raises(TypeError):
+            # pytype: disable=wrong-arg-types
             lq.optimizers.CaseOptimizer((False, lq.optimizers.Bop()))
+            # pytype: enable=wrong-arg-types
 
     def test_type_check_optimizer(self):
         with pytest.raises(TypeError):
