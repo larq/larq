@@ -18,7 +18,7 @@ jobs:
           python-version: 3.9
       - name: Install project dependencies
         run: |
-          pip install tensorflow-cpu==2.9.1
+          pip install tensorflow-cpu==2.10.0
           pip install -e .[lint,test]
       - name: Run Flake8
         run: flake8
