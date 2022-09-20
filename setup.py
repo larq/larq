@@ -39,7 +39,7 @@ setup(
             "black==22.8.0",
             "flake8>=3.7.9,<5.1.0",
             "isort==5.10.1",
-            "pytype==2022.9.8",
+            "pytype==2022.9.19",
         ],
     },
     classifiers=[
