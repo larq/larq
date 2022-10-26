@@ -31,7 +31,7 @@ setup(
             "packaging>=19.2,<22.0",
             "pytest>=5.2.4,<7.2.0",
             "pytest-cov>=2.8.1,<4.1.0",
-            "pytest-xdist>=1.30,<2.6",
+            "pytest-xdist>=1.30,<3.1",
             "pytest-mock>=2.0,<3.11",
             "snapshottest>=0.5.1,<0.7.0",
         ],
