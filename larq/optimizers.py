@@ -39,15 +39,16 @@ from copy import deepcopy
 from typing import Callable, Optional, Tuple
 
 import tensorflow as tf
+from packaging import version
 
 import larq as lq
 from larq import utils
 
 __all__ = ["Bop", "CaseOptimizer"]
 
-try:
+if version.parse(tf.__version__) >= version.parse("2.11.0rc0"):
     from tensorflow.keras.optimizers.legacy import Optimizer
-except ImportError:
+else:
     from tensorflow.keras.optimizers import Optimizer
 
 
