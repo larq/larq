@@ -45,6 +45,11 @@ from larq import utils
 
 __all__ = ["Bop", "CaseOptimizer"]
 
+try:
+    from tensorflow.keras.optimizers.legacy import Optimizer
+except ImportError:
+    from tensorflow.keras.optimizers import Optimizer
+
 
 # From https://github.com/keras-team/keras/blob/a8606fd45b760cce3e65727e9d62cae796c45930/keras/optimizer_v2/optimizer_v2.py#L1430-L1450
 def _var_key(var):
@@ -66,7 +71,7 @@ def _var_key(var):
 
 
 @utils.register_keras_custom_object
-class CaseOptimizer(tf.keras.optimizers.Optimizer):
+class CaseOptimizer(Optimizer):
     """An optmizer wrapper that applies different optimizers to a subset of variables.
 
     An optimizer is used to train a variable iff its accompanying predicate evaluates to
@@ -78,10 +83,10 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
     `default_optimizer == None`, the variable is not trained.
 
     # Arguments
-        predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.Optimizer)`
+        predicate_optimizer_pairs: One or more `(pred, tf.keras.optimizers.legacy.Optimizer)`
             pairs, where `pred`  takes one `tf.Variable` as argument and returns `True`
             if the optimizer should be used for that variable, e.g. `pred(var) == True`.
-        default_optimizer: A `tf.keras.optimizers.Optimizer` to be applied to any
+        default_optimizer: A `tf.keras.optimizers.legacy.Optimizer` to be applied to any
             variable not claimed by any other optimizer. (Must be passed as keyword
             argument.)
     """
@@ -90,10 +95,8 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
     def __init__(
         self,
-        *predicate_optimizer_pairs: Tuple[
-            Callable[[tf.Variable], bool], tf.keras.optimizers.Optimizer
-        ],
-        default_optimizer: Optional[tf.keras.optimizers.Optimizer] = None,
+        *predicate_optimizer_pairs: Tuple[Callable[[tf.Variable], bool], Optimizer],
+        default_optimizer: Optional[Optimizer] = None,
         name: str = "optimizer_case",
     ):
         super().__init__(name=name)
@@ -104,17 +107,17 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
                 raise TypeError(
                     f"Expected callable predicate at `predicate_optimizer_pairs[{i}][0]` but got `{type(predicate)}`."
                 )
-            if not isinstance(optimizer, tf.keras.optimizers.Optimizer):
+            if not isinstance(optimizer, Optimizer):
                 raise TypeError(
-                    f"Expected `tf.keras.optimizers.Optimizer` at `predicate_optimizer_pairs[{i}][1]` but got `{type(optimizer)}`."
+                    f"Expected `tf.keras.optimizers.legacy.Optimizer` at `predicate_optimizer_pairs[{i}][1]` but got `{type(optimizer)}`."
                 )
 
         # Type check for default optimizers
         if default_optimizer is not None and not isinstance(
-            default_optimizer, tf.keras.optimizers.Optimizer
+            default_optimizer, Optimizer
         ):
             raise TypeError(
-                f"Expected `tf.keras.optimizers.Optimizer` for `default_optimizer` but got `{type(default_optimizer)}`."
+                f"Expected `Optimizer` for `default_optimizer` but got `{type(default_optimizer)}`."
             )
 
         self.pred_opt_pairs = predicate_optimizer_pairs
@@ -140,7 +143,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
             weights.extend(optimizer.weights)
         return weights
 
-    @tf.keras.optimizers.Optimizer.iterations.setter
+    @Optimizer.iterations.setter
     def iterations(self, variable):
         raise NotImplementedError("CaseOptimzer does not support setting iterations.")
 
@@ -263,7 +266,7 @@ class CaseOptimizer(tf.keras.optimizers.Optimizer):
 
 
 @utils.register_keras_custom_object
-class Bop(tf.keras.optimizers.Optimizer):
+class Bop(Optimizer):
     """Binary optimizer (Bop).
 
     Bop is a latent-free optimizer for Binarized Neural Networks (BNNs) and
