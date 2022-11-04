@@ -23,12 +23,12 @@ setup(
         "terminaltables>=3.1.0",
         "dataclasses ; python_version<'3.7'",
         "importlib-metadata >= 2.0, < 4.0 ; python_version<'3.8'",
+        "packaging>=19.2",
     ],
     extras_require={
         "tensorflow": ["tensorflow>=1.14.0"],
         "tensorflow_gpu": ["tensorflow-gpu>=1.14.0"],
         "test": [
-            "packaging>=19.2,<22.0",
             "pytest>=5.2.4,<7.3.0",
             "pytest-cov>=2.8.1,<4.1.0",
             "pytest-xdist>=1.30,<3.1",

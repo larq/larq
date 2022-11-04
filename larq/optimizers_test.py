@@ -1,11 +1,17 @@
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 from tensorflow import keras
 from tensorflow.python.keras import testing_utils
 
 import larq as lq
 from larq import testing_utils as lq_testing_utils
+
+if version.parse(tf.__version__) >= version.parse("2.11.0rc0"):
+    from tensorflow.keras.optimizers import legacy as optimizers
+else:
+    from tensorflow.keras import optimizers
 
 
 def _test_optimizer(
@@ -112,7 +118,7 @@ class TestCaseOptimizer:
         with pytest.raises(ValueError):
             naughty_case_opt = lq.optimizers.CaseOptimizer(
                 (lambda var: False, lq.optimizers.Bop()),
-                default_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=optimizers.Adam(0.01),
             )
 
             # Simple MNIST model
@@ -152,7 +158,7 @@ class TestCaseOptimizer:
             loss="sparse_categorical_crossentropy",
             optimizer=lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default_optimizer=tf.keras.optimizers.SGD(0.1, momentum=0.9),
+                default_optimizer=optimizers.SGD(0.1, momentum=0.9),
             ),
         )
         model.fit(train_images[:1], train_labels[:1], epochs=1)
@@ -172,7 +178,7 @@ class TestCaseOptimizer:
     def test_checkpoint(self, tmp_path):
         # Build and run a simple model.
         var = tf.Variable([2.0])
-        opt = tf.keras.optimizers.SGD(1.0, momentum=1.0)
+        opt = optimizers.SGD(1.0, momentum=1.0)
         opt = lq.optimizers.CaseOptimizer((lambda var: True, opt))
         opt.minimize(lambda: var + 1.0, var_list=[var])
         slot_var = opt.optimizers[0].get_slot(var, "momentum")
@@ -198,7 +204,7 @@ class TestBopOptimizer:
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
@@ -206,7 +212,7 @@ class TestBopOptimizer:
         _test_optimizer(
             lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
             trainable_bn=False,
@@ -217,7 +223,7 @@ class TestBopOptimizer:
     def test_mixed_precision(self):
         opt = lq.optimizers.CaseOptimizer(
             (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-            default_optimizer=tf.keras.optimizers.Adam(0.01),
+            default_optimizer=optimizers.Adam(0.01),
         )
         try:
             opt = tf.keras.mixed_precision.LossScaleOptimizer(opt)
@@ -241,7 +247,7 @@ class TestBopOptimizer:
                         ),
                     ),
                 ),
-                default_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=optimizers.Adam(0.01),
             ),
             test_kernels_are_binary=True,
         )
@@ -250,7 +256,7 @@ class TestBopOptimizer:
         _test_serialization(
             lq.optimizers.CaseOptimizer(
                 (lq.optimizers.Bop.is_binary_variable, lq.optimizers.Bop()),
-                default_optimizer=tf.keras.optimizers.Adam(0.01),
+                default_optimizer=optimizers.Adam(0.01),
             ),
         )
 

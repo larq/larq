@@ -3,11 +3,17 @@ import math
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 from tensorflow.python.keras import testing_utils
 
 import larq as lq
 from larq import testing_utils as lq_testing_utils
 from larq.callbacks import HyperparameterScheduler
+
+if version.parse(tf.__version__) >= version.parse("2.11.0rc0"):
+    from tensorflow.keras.optimizers import legacy as optimizers
+else:
+    from tensorflow.keras import optimizers
 
 
 class TestHyperparameterScheduler:
@@ -112,7 +118,7 @@ class TestHyperparameterScheduler:
         x_train, y_train, model = self._create_data_and_model()
 
         bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
-        adam = tf.keras.optimizers.Adam(0.01)
+        adam = optimizers.Adam(0.01)
         case_optimizer = lq.optimizers.CaseOptimizer(
             (lq.optimizers.Bop.is_binary_variable, bop),
             default_optimizer=adam,
