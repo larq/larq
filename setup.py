@@ -2,14 +2,14 @@ from setuptools import find_packages, setup
 
 
 def readme():
-    with open("README.md", "r") as f:
+    with open("README.md") as f:
         return f.read()
 
 
 setup(
     name="larq",
     version="0.12.2",
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     author="Plumerai",
     author_email="opensource@plumerai.com",
     description="An Open Source Machine Learning Library for Training Binarized Neural Networks",
@@ -21,7 +21,6 @@ setup(
     install_requires=[
         "numpy >= 1.15.4, < 2.0",
         "terminaltables>=3.1.0",
-        "dataclasses ; python_version<'3.7'",
         "importlib-metadata >= 2.0, < 4.0 ; python_version<'3.8'",
         "packaging>=19.2",
     ],
@@ -50,7 +49,6 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

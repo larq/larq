@@ -11,9 +11,9 @@ from larq import testing_utils as lq_testing_utils
 from larq.callbacks import HyperparameterScheduler
 
 if version.parse(tf.__version__) >= version.parse("2.11.0rc0"):
-    from tensorflow.keras.optimizers import legacy as optimizers
+    from tensorflow.keras.optimizers import legacy as optimizers  # type: ignore
 else:
-    from tensorflow.keras import optimizers
+    from tensorflow.keras import optimizers  # type: ignore
 
 
 class TestHyperparameterScheduler:
