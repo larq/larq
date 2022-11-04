@@ -15,8 +15,6 @@ jobs:
         python-version: [3.7]
         include:
           - tf-version: 2.4.4
-            python-version: 3.6
-          - tf-version: 2.4.4
             python-version: 3.8
           - tf-version: 2.5.3
             python-version: 3.9
