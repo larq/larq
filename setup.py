@@ -30,7 +30,7 @@ setup(
         "test": [
             "pytest==7.3.*",
             "pytest-cov==4.0.*",
-            "pytest-xdist==3.2.*",
+            "pytest-xdist>=3.2,<3.4",
             "pytest-mock==3.10.*",
             "snapshottest==0.6.*",
         ],
