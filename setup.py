@@ -29,7 +29,7 @@ setup(
         "tensorflow_gpu": ["tensorflow-gpu>=1.14.0"],
         "test": [
             "pytest==7.3.*",
-            "pytest-cov==4.0.*",
+            "pytest-cov>=4.0,<4.2",
             "pytest-xdist==3.2.*",
             "pytest-mock==3.10.*",
             "snapshottest==0.6.*",
