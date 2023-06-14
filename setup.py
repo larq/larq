@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name="larq",
-    version="0.13.0",
+    version="0.13.1",
     python_requires=">=3.7",
     author="Plumerai",
     author_email="opensource@plumerai.com",
