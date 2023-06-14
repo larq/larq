@@ -35,7 +35,7 @@ setup(
             "snapshottest==0.6.*",
         ],
         "lint": [
-            "black==23.1.0",
+            "black==23.3.0",
             "flake8==6.0.*",
             "isort==5.11.*",
             "pytype==2022.10.26",
