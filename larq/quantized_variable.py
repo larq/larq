@@ -339,6 +339,15 @@ class QuantizedVariable(tf.Variable, TensorType):
         obj_map[self] = obj_map[self.latent_variable]
         return obj_map, resource_map
 
+    def _export_to_saved_model_graph(self, object_map, tensor_map, options, **kwargs):
+        # By delegating this method to the wrapped variable, SavedModel with
+        # QuantizedVariables are identical to SavedModel with normal variables.
+        resource_list = self.latent_variable._export_to_saved_model_graph(
+            object_map, tensor_map, options, **kwargs
+        )
+        object_map[self] = object_map[self.latent_variable]
+        return resource_list
+
     # TODO: Maybe encode the fact the variable is an QuantizedVariable in to_proto().
     def to_proto(self, *args, **kwargs):
         return self.latent_variable.to_proto(*args, **kwargs)
