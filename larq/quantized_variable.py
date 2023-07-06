@@ -144,6 +144,11 @@ class QuantizedVariable(tf.Variable, TensorType):
     def initial_value(self):
         return self._quantize(self.latent_variable.initial_value)
 
+    def __tf_tensor__(
+        self, dtype: Optional[tf.dtypes.DType] = None, name: Optional[str] = None
+    ) -> tf.Tensor:
+        return self._dense_var_to_tensor(dtype=dtype, name=name)
+
     def _should_act_as_resource_variable(self):
         """Pass resource_variable_ops.is_resource_variable check."""
         pass
