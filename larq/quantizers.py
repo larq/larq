@@ -47,6 +47,7 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 from typing import Callable, Union
 
 import tensorflow as tf
+from packaging import version
 
 from larq import context, math
 from larq import metrics as lq_metrics
@@ -701,11 +702,24 @@ DoReFaQuantizer = DoReFa
 QuantizerType = Union[Quantizer, Callable[[tf.Tensor], tf.Tensor]]
 
 
-def serialize(quantizer: tf.keras.layers.Layer):
+def serialize(quantizer: tf.keras.layers.Layer, use_legacy_format=False):
+    if use_legacy_format and (
+        version.parse(tf.__version__) >= version.parse("2.13.0rc0")
+    ):
+        return tf.keras.utils.legacy.serialize_keras_object(quantizer)
     return tf.keras.utils.serialize_keras_object(quantizer)
 
 
-def deserialize(name, custom_objects=None):
+def deserialize(name, custom_objects=None, use_legacy_format=False):
+    if use_legacy_format and (
+        version.parse(tf.__version__) >= version.parse("2.13.0rc0")
+    ):
+        return tf.keras.utils.legacy.deserialize_keras_object(
+            name,
+            module_objects=globals(),
+            custom_objects=custom_objects,
+            printable_module_name="quantization function",
+        )
     return tf.keras.utils.deserialize_keras_object(
         name,
         module_objects=globals(),
@@ -718,9 +732,11 @@ def get(identifier):
     if identifier is None:
         return None
     if isinstance(identifier, dict):
-        return deserialize(identifier)
+        use_legacy_format = "module" not in identifier
+        return deserialize(identifier, use_legacy_format=use_legacy_format)
     if isinstance(identifier, str):
-        return deserialize(str(identifier))
+        config = {"class_name": str(identifier), "config": {}}
+        return get(config)
     if callable(identifier):
         return identifier
     raise ValueError(

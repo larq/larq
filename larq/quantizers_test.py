@@ -38,14 +38,18 @@ class TestCommonFunctionality:
         ],
     )
     def test_serialization(self, module, name, ref_cls):
-        fn = module.get(name)
-        assert fn.__class__ == ref_cls
+        if module == tf.keras.activations and (
+            version.parse(tf.__version__) < version.parse("2.13")
+        ):
+            # New serialisation in Keras doesn't support using quantizers strings as activations
+            fn = module.get(name)
+            assert fn.__class__ == ref_cls
         fn = module.get(ref_cls())
         assert fn.__class__ == ref_cls
         assert type(fn.precision) == int
-        if module == tf.keras.activations and version.parse(
-            tf.__version__
-        ) < version.parse("1.15"):
+        if module == tf.keras.activations and (
+            version.parse(tf.__version__) < version.parse("1.15")
+        ):
             pytest.skip(
                 "TensorFlow < 1.15 does not support Quantizer classes as activations"
             )
