@@ -703,17 +703,13 @@ QuantizerType = Union[Quantizer, Callable[[tf.Tensor], tf.Tensor]]
 
 
 def serialize(quantizer: tf.keras.layers.Layer, use_legacy_format=False):
-    if use_legacy_format and (
-        version.parse(tf.__version__) >= version.parse("2.13.0rc0")
-    ):
+    if use_legacy_format and version.parse(tf.__version__) >= version.parse("2.13"):
         return tf.keras.utils.legacy.serialize_keras_object(quantizer)
     return tf.keras.utils.serialize_keras_object(quantizer)
 
 
 def deserialize(name, custom_objects=None, use_legacy_format=False):
-    if use_legacy_format and (
-        version.parse(tf.__version__) >= version.parse("2.13.0rc0")
-    ):
+    if use_legacy_format and version.parse(tf.__version__) >= version.parse("2.13"):
         return tf.keras.utils.legacy.deserialize_keras_object(
             name,
             module_objects=globals(),
