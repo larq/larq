@@ -73,7 +73,8 @@ def test_method_delegations(distribute_scope):
         if version.parse(tf.__version__) > version.parse("1.14"):
             assert x.synchronization == x.latent_variable.synchronization
         assert x.aggregation == x.latent_variable.aggregation
-        assert evaluate(x.initialized_value()) == 7
+        if version.parse(tf.__version__) < version.parse("2.13"):
+            assert evaluate(x.initialized_value()) == 7
         if not tf.executing_eagerly():
             if not distribute_scope:
                 # These functions are not supported for DistributedVariables

@@ -46,7 +46,7 @@ from larq import utils
 
 __all__ = ["Bop", "CaseOptimizer"]
 
-if version.parse(tf.__version__) >= version.parse("2.11.0rc0"):
+if version.parse(tf.__version__) >= version.parse("2.11"):
     from tensorflow.keras.optimizers.legacy import Optimizer  # type: ignore
 else:
     from tensorflow.keras.optimizers import Optimizer  # type: ignore
