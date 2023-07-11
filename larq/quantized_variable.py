@@ -2,6 +2,7 @@
 from typing import Optional
 
 import tensorflow as tf
+from packaging import version
 from tensorflow.python.distribute.values import DistributedVariable
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import resource_variable_ops
@@ -20,6 +21,41 @@ except ModuleNotFoundError:
 
 
 UNSPECIFIED = object()
+
+_SUPPORTS_TRACE_TYPE = version.parse(tf.__version__) >= version.parse("2.9")
+if _SUPPORTS_TRACE_TYPE:
+
+    class QuantizedVariableSpec(tf.types.experimental.TraceType):
+        """TraceType for QuantizedVariableSpec for tracing with tf.function.
+        This class implements the Type for QuantizedVariable used in tracing.
+        """
+
+        def __init__(self, value):
+            self.latent_variable = value
+
+        def is_subtype_of(self, other) -> bool:
+            """If the other spec is the same as `self`, return True."""
+            return self == other
+
+        def most_specific_common_supertype(self, others):
+            """`self` is the common supertype if all input types match it."""
+            return self if all(self == other for other in others) else None
+
+        def placeholder_value(self, placeholder_context=None):
+            """Use the QuantizedVariable value itself as a placeholder."""
+            return self.latent_variable
+
+        def _cast(self, value, _):
+            return value
+
+        def _to_tensors(self, value):
+            return []
+
+        def __hash__(self) -> int:
+            return hash(id(self.latent_variable))
+
+        def __eq__(self, other) -> bool:
+            return self is other
 
 
 class QuantizedVariable(tf.Variable, TensorType):
@@ -329,6 +365,11 @@ class QuantizedVariable(tf.Variable, TensorType):
 
     def get_shape(self):
         return self.latent_variable.get_shape()
+
+    def __tf_tracing_type__(self, context):
+        if _SUPPORTS_TRACE_TYPE:
+            return QuantizedVariableSpec(self)
+        return NotImplemented
 
     def _gather_saveables_for_checkpoint(self):
         # By delegating this method to the wrapped variable, checkpoints with
