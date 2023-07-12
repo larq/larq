@@ -22,10 +22,14 @@ except ModuleNotFoundError:
 
 UNSPECIFIED = object()
 
-_SUPPORTS_TRACE_TYPE = version.parse(tf.__version__) >= version.parse("2.9")
+_SUPPORTS_TRACE_TYPE = version.parse(tf.__version__) >= version.parse("2.8")
 if _SUPPORTS_TRACE_TYPE:
+    try:
+        from tensorflow.types.experimental import TraceType
+    except ImportError:
+        from tensorflow.python.types.trace import TraceType
 
-    class QuantizedVariableSpec(tf.types.experimental.TraceType):
+    class QuantizedVariableSpec(TraceType):
         """TraceType for QuantizedVariableSpec for tracing with tf.function.
         This class implements the Type for QuantizedVariable used in tracing.
         """
