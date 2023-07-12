@@ -279,6 +279,18 @@ def test_tf_function_control_dependencies(quantized):
     assert_almost_equal(evaluate(x), 4.0 if quantized else 2.0)
 
 
+def test_tf_function_with_variable_and_quantized_variable():
+    variable = get_var(tf.ones(2, 2))
+    quantized_variable = QuantizedVariable.from_variable(variable)
+
+    @tf.function
+    def f(x):
+        return x + 1
+
+    f(variable)
+    f(quantized_variable)
+
+
 @pytest.mark.usefixtures("eager_and_graph_mode")
 def test_checkpoint(tmp_path):
     x = QuantizedVariable.from_variable(get_var(0.0), quantizer=lambda x: 2 * x)
