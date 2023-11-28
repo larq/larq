@@ -1,0 +1,10 @@
+codeIntegrationId: 6564a01c9c47fc0019b39768
+projectId: 6564a0189c47fc0019b39764
+secretId: ""
+entryFile: leap_binder.py
+include:
+    - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
+    - larq/*.py
+    - larq/*/*
