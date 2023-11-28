@@ -17,7 +17,7 @@ from larq import (
     optimizers,
     quantizers,
     utils,
-)
+) # needed imports
 from larq.layers import QuantDense
 import tensorflow as tf
 
