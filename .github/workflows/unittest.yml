@@ -42,6 +42,8 @@ jobs:
             python-version: "3.11"
           - tf-version: 2.15.0
             python-version: "3.11"
+          - tf-version: 2.16.1
+            python-version: "3.11"
 
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +56,14 @@ jobs:
           pip install 'protobuf < 3.20'
           pip install tensorflow-cpu==${{matrix.tf-version}} || pip install tensorflow==${{matrix.tf-version}}
           pip install -e .[test]
+      - name: Install legacy tf-keras
+        if: matrix.tf-version == '2.16.1'
+        run: pip install tf-keras==2.16.0
       - name: Test with pytest
-        run: pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
+        run: |
+          if [[ "${{ matrix.tf-version }}" == "2.16.1" ]]; then
+            export TF_USE_LEGACY_KERAS=1
+          fi
+          pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
       - name: Upload coverage to Codecov
         run: bash <(curl -s https://codecov.io/bash) -f ./coverage.xml -F unittests
