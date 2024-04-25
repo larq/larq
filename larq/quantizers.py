@@ -44,6 +44,7 @@ lq.layers.QuantDense(64, kernel_quantizer="ste_sign")
 lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 ```
 """
+
 from typing import Callable, Union
 
 import tensorflow as tf
@@ -214,6 +215,7 @@ class NoOp(_BaseQuantizer):
             `larq.context.metrics_scope` are used. Currently only the `flip_ratio`
             metric is available.
     """
+
     precision = None
 
     def __init__(self, precision: int, **kwargs):
@@ -264,6 +266,7 @@ class SteSign(_BaseQuantizer):
         - [Binarized Neural Networks: Training Deep Neural Networks with Weights and
             Activations Constrained to +1 or -1](https://arxiv.org/abs/1602.02830)
     """
+
     precision = 1
 
     def __init__(self, clip_value: float = 1.0, **kwargs):
@@ -310,6 +313,7 @@ class ApproxSign(_BaseQuantizer):
             Representational Capability and Advanced Training
             Algorithm](https://arxiv.org/abs/1808.00278)
     """
+
     precision = 1
 
     def call(self, inputs):
@@ -352,6 +356,7 @@ class SteHeaviside(_BaseQuantizer):
     # Returns
         AND Binarization function
     """
+
     precision = 1
 
     def __init__(self, clip_value: float = 1.0, **kwargs):
@@ -400,6 +405,7 @@ class SwishSign(_BaseQuantizer):
     # References
         - [BNN+: Improved Binary Network Training](https://arxiv.org/abs/1812.11800)
     """
+
     precision = 1
 
     def __init__(self, beta: float = 5.0, **kwargs):
@@ -439,6 +445,7 @@ class MagnitudeAwareSign(_BaseQuantizer):
         Algorithm](https://arxiv.org/abs/1808.00278)
 
     """
+
     precision = 1
 
     def __init__(self, clip_value: float = 1.0, **kwargs):
@@ -625,6 +632,7 @@ class DoReFa(_BaseQuantizer):
         - [DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low
             Bitwidth Gradients](https://arxiv.org/abs/1606.06160)
     """
+
     precision = None
 
     def __init__(self, k_bit: int = 2, mode: str = "activations", **kwargs):
