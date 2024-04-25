@@ -33,7 +33,6 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
     ```
 """
 
-
 import warnings
 from copy import deepcopy
 from typing import Callable, Optional, Tuple

@@ -1,4 +1,5 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
+
 from typing import Optional
 
 import tensorflow as tf
