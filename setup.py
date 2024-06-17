@@ -19,7 +19,7 @@ setup(
     packages=find_packages(exclude=["larq.snapshots"]),
     license="Apache 2.0",
     install_requires=[
-        "numpy >= 1.15.4, < 2.0",
+        "numpy >= 1.15.4, < 3.0",
         "terminaltables>=3.1.0",
         "importlib-metadata >= 2.0, < 4.0 ; python_version<'3.8'",
         "packaging>=19.2",
