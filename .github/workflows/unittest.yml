@@ -44,6 +44,8 @@ jobs:
             python-version: "3.11"
           - tf-version: 2.16.1
             python-version: "3.11"
+          - tf-version: 2.17.0
+            python-version: "3.11"
 
     steps:
       - uses: actions/checkout@v4
@@ -59,9 +61,12 @@ jobs:
       - name: Install legacy tf-keras
         if: matrix.tf-version == '2.16.1'
         run: pip install tf-keras==2.16.0
+      - name: Install legacy tf-keras
+        if: matrix.tf-version == '2.17.0'
+        run: pip install tf-keras==2.17.0
       - name: Test with pytest
         run: |
-          if [[ "${{ matrix.tf-version }}" == "2.16.1" ]]; then
+          if [[ "${{ matrix.tf-version }}" == "2.16.1" || "${{ matrix.tf-version }}" == "2.17.0" ]]; then
             export TF_USE_LEGACY_KERAS=1
           fi
           pytest . -n auto --cov=larq --cov-report=xml --cov-config=.coveragerc
