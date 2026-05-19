@@ -9,6 +9,7 @@ or through the `activation` argument supported by all forward layers:
 ```python
 import tensorflow as tf
 import larq as lq
+
 ...
 x = lq.layers.QuantDense(64, activation=None)(x)
 x = lq.layers.QuantDense(64, input_quantizer="ste_sign")(x)
@@ -50,9 +51,8 @@ from typing import Callable, Union
 import tensorflow as tf
 from packaging import version
 
-from larq import context, math
+from larq import context, math, utils
 from larq import metrics as lq_metrics
-from larq import utils
 
 __all__ = [
     "ApproxSign",
@@ -203,7 +203,8 @@ class NoOp(_BaseQuantizer):
     !!! example
         ```python
         layer = lq.layers.QuantDense(
-            16, kernel_quantizer=lq.quantizers.NoOp(precision=1),
+            16,
+            kernel_quantizer=lq.quantizers.NoOp(precision=1),
         )
         layer.build((32,))
         assert layer.kernel.precision == 1

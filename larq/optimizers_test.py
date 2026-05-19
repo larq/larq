@@ -35,7 +35,7 @@ def _test_optimizer(
     trained_vars = [tf.keras.backend.get_value(w) for w in model.trainable_weights]
 
     # check all trainable variables have actually been updated
-    for v0, v1 in zip(initial_vars, trained_vars):
+    for v0, v1 in zip(initial_vars, trained_vars, strict=True):
         assert not np.all(v0 == v1)
 
     # Note that when kernels are treated as latent weights they need not be

@@ -50,14 +50,18 @@ _available_metrics = {"flip_ratio"}
 
 
 @contextlib.contextmanager
-def metrics_scope(metrics=[]):
+def metrics_scope(metrics=()):
     """A context manager to set the training metrics to be used in quantizers.
 
     !!! example
         ```python
         with larq.context.metrics_scope(["flip_ratio"]):
             model = tf.keras.models.Sequential(
-                [larq.layers.QuantDense(3, kernel_quantizer="ste_sign", input_shape=(32,))]
+                [
+                    larq.layers.QuantDense(
+                        3, kernel_quantizer="ste_sign", input_shape=(32,)
+                    )
+                ]
             )
         model.compile(loss="mse", optimizer="sgd")
         ```

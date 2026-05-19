@@ -16,12 +16,12 @@ def memory_as_readable_str(num_bits: int) -> str:
     suffixes = ["B", "KiB", "MiB", "GiB"]
     num_bytes = num_bits / 8
 
-    for i, suffix in enumerate(suffixes):
+    for i in range(len(suffixes)):
         rounded = num_bytes / (1024**i)
         if rounded < 1024:
             break
 
-    return f"{rounded:,.2f} {suffix}"
+    return f"{rounded:,.2f} {suffixes[i]}"
 
 
 def register_keras_custom_object(cls):
@@ -55,7 +55,7 @@ def set_precision(precision: int = 32):
     """
 
     def decorator(function):
-        setattr(function, "precision", precision)
+        function.precision = precision
         return function
 
     return decorator

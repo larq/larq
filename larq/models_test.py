@@ -104,7 +104,7 @@ def test_layer_profile():
         32 * 11 * 11 * 10,
     ]
     bias_count = [32, 0, 0, 64, 32, 0, 10]
-    param_count = [k + b for k, b in zip(kernel_count, bias_count)]
+    param_count = [k + b for k, b in zip(kernel_count, bias_count, strict=True)]
     memory = [  # bits * (c * w * h * b) + bits * bias
         1 * (32 * 3 * 3 * 1) + 32 * 32,
         0,
@@ -137,10 +137,15 @@ def test_layer_profile():
     output_pixels = [int(np.prod(os[1:-1])) for os in output_shape]
     unique_param_bidtwidths = [[1, 32], [], [2], [32], [1, 32], [], [32]]
     unique_op_precisions = [[32], [], [2], [], [1], [], [32]]
-    mac_count = [params * pixels for params, pixels in zip(kernel_count, output_pixels)]
+    mac_count = [
+        params * pixels
+        for params, pixels in zip(kernel_count, output_pixels, strict=True)
+    ]
     bin_mac_count = [
         mc if (1 in pb and ip == 1) else 0
-        for mc, pb, ip in zip(mac_count, unique_param_bidtwidths, input_precision)
+        for mc, pb, ip in zip(
+            mac_count, unique_param_bidtwidths, input_precision, strict=True
+        )
     ]
 
     profiles = profile.layer_profiles
@@ -186,7 +191,7 @@ def test_layer_profile_1d():
 
     kernel_count = [(32 * 3 * 6), 0, (32 * 3 + 16 * 32), 0, (16 * 32 * 10)]
     bias_count = [32, 0, 16, 0, 10]
-    param_count = [k + b for k, b in zip(kernel_count, bias_count)]
+    param_count = [k + b for k, b in zip(kernel_count, bias_count, strict=True)]
     memory = [  # bits * (c * w * d) + bits * bias
         1 * (32 * 3 * 6) + 32 * 32,
         0,
@@ -213,10 +218,15 @@ def test_layer_profile_1d():
     output_pixels = [int(np.prod(os[1:-1])) for os in output_shape]
     unique_param_bidtwidths = [[1, 32], [], [1, 32], [], [32]]
     unique_op_precisions = [[32], [], [1], [], [32]]
-    mac_count = [params * pixels for params, pixels in zip(kernel_count, output_pixels)]
+    mac_count = [
+        params * pixels
+        for params, pixels in zip(kernel_count, output_pixels, strict=True)
+    ]
     bin_mac_count = [
         mc if (1 in pb and ip == 1) else 0
-        for mc, pb, ip in zip(mac_count, unique_param_bidtwidths, input_precision)
+        for mc, pb, ip in zip(
+            mac_count, unique_param_bidtwidths, input_precision, strict=True
+        )
     ]
 
     profiles = profile.layer_profiles

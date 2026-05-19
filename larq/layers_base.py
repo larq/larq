@@ -118,7 +118,7 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         return [
             _compute_padding(stride, dilation_rate, shape[i], filter_size)
             for i, (stride, dilation_rate, filter_size) in enumerate(
-                zip(self.strides, self.dilation_rate, self.kernel_size)
+                zip(self.strides, self.dilation_rate, self.kernel_size, strict=True)
             )
         ]
 
@@ -149,6 +149,7 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
                 self.strides,
                 self.dilation_rate,
                 self.kernel_size,
+                strict=True,
             )
         ]
         if self.data_format == "channels_last":

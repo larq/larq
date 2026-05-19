@@ -170,7 +170,9 @@ class CaseOptimizer(Optimizer):
         with tf.init_scope():
             _ = self.iterations
             # This is only necessary in TF 2.0 and older, but doesn't hurt on newer versions
-            for optimizer, opt_grads_and_vars in zip(self.optimizers, grad_var_lists):
+            for optimizer, opt_grads_and_vars in zip(
+                self.optimizers, grad_var_lists, strict=False
+            ):
                 optimizer._create_slots([v for (_, v) in opt_grads_and_vars])
 
         return tf.distribute.get_replica_context().merge_call(
@@ -185,7 +187,7 @@ class CaseOptimizer(Optimizer):
                     optimizer.apply_gradients, args=(opt_grads_and_vars,), kwargs=kwargs
                 )
                 for optimizer, opt_grads_and_vars in zip(
-                    self.optimizers, grad_var_lists
+                    self.optimizers, grad_var_lists, strict=False
                 )
             ]
 
@@ -254,7 +256,8 @@ class CaseOptimizer(Optimizer):
                     self.var_opt_mapping[var_key] = self.DEFAULT_OPT_INDEX
                 else:
                     warnings.warn(
-                        f"No `default_optimizer` provided to train variable `{var}`."
+                        f"No `default_optimizer` provided to train variable `{var}`.",
+                        stacklevel=2,
                     )
 
         # Make sure that each optimizer touches at least one variable

@@ -22,7 +22,7 @@ class FlipRatio(tf.keras.metrics.Metric):
         m.update_state((1, 1))  # result: 0
         m.update_state((2, 2))  # result: 1
         m.update_state((1, 2))  # result: 0.75
-        print('Final result: ', m.result().numpy())  # Final result: 0.75
+        print("Final result: ", m.result().numpy())  # Final result: 0.75
         ```
 
     # Arguments

@@ -93,7 +93,7 @@ class QuantizedVariable(tf.Variable, TensorType):
                 "`quantizer` must be `callable` or `None`, "
                 f"but got `{type(quantizer)}`."
             )
-        if not (precision is None or type(precision) == int):
+        if not (precision is None or type(precision) is int):
             raise ValueError(
                 "`precision` must be of type `int` or `None`, "
                 f"but got `{type(precision)}`."

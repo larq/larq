@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v6
         with:
-          python-version: 3.9
+          python-version: "3.10"
       - name: Upgrade setuptools
         run: pip install --upgrade setuptools wheel
       - name: Build distribution
         run: python setup.py sdist bdist_wheel
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}

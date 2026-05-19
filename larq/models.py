@@ -48,8 +48,8 @@ def _bitsize_as_str(bitsize: int) -> str:
 
     try:
         return bitsize_names[bitsize]
-    except KeyError:
-        raise NotImplementedError()
+    except KeyError as err:
+        raise NotImplementedError() from err
 
 
 def _number_as_readable_str(num: float) -> str:
@@ -83,7 +83,7 @@ def _number_as_readable_str(num: float) -> str:
 def _format_table_entry(x: float, units: int = 1) -> Union[float, str]:
     try:
         assert not np.isnan(x)
-        if type(x) == str or x == 0 or units == 1:
+        if type(x) is str or x == 0 or units == 1:
             return x
         return x / units
     except Exception:
@@ -427,7 +427,7 @@ class ModelProfile(LayerProfile):
 
 def sanitize_table(table_data: Sequence[Sequence[Any]]) -> Sequence[Sequence[str]]:
     return [
-        [f"{v:.2f}" if type(v) == float else str(v) for v in row] for row in table_data
+        [f"{v:.2f}" if type(v) is float else str(v) for v in row] for row in table_data
     ]
 
 

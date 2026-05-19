@@ -11,7 +11,8 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
         adam = tf.keras.optimizers.Adam(0.01)
         optimizer = lq.optimizers.CaseOptimizer(
-            (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
+            (lq.optimizers.Bop.is_binary_variable, bop),
+            default_optimizer=adam,
         )
         callbacks = [
             HyperparameterScheduler(lambda x: 0.001 * (0.1 ** (x // 30)), "gamma", bop)
