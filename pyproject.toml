@@ -7,4 +7,4 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 select = ["I", "E", "W", "F", "B"]
-ignore = ["E501"]
+ignore = ["E501", "B905"]

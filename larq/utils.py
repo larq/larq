@@ -16,12 +16,12 @@ def memory_as_readable_str(num_bits: int) -> str:
     suffixes = ["B", "KiB", "MiB", "GiB"]
     num_bytes = num_bits / 8
 
-    for i in range(len(suffixes)):
+    for i, suffix in enumerate(suffixes):  # noqa: B007
         rounded = num_bytes / (1024**i)
         if rounded < 1024:
             break
 
-    return f"{rounded:,.2f} {suffixes[i]}"
+    return f"{rounded:,.2f} {suffix}"
 
 
 def register_keras_custom_object(cls):
