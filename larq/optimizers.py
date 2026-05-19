@@ -170,8 +170,8 @@ class CaseOptimizer(Optimizer):
         with tf.init_scope():
             _ = self.iterations
             # This is only necessary in TF 2.0 and older, but doesn't hurt on newer versions
-            for optimizer, opt_grads_and_vars in zip(
-                self.optimizers, grad_var_lists, strict=False
+            for optimizer, opt_grads_and_vars in zip(  # noqa: B905
+                self.optimizers, grad_var_lists
             ):
                 optimizer._create_slots([v for (_, v) in opt_grads_and_vars])
 
@@ -186,8 +186,8 @@ class CaseOptimizer(Optimizer):
                 distribution.extended.call_for_each_replica(
                     optimizer.apply_gradients, args=(opt_grads_and_vars,), kwargs=kwargs
                 )
-                for optimizer, opt_grads_and_vars in zip(
-                    self.optimizers, grad_var_lists, strict=False
+                for optimizer, opt_grads_and_vars in zip(  # noqa: B905
+                    self.optimizers, grad_var_lists
                 )
             ]
 

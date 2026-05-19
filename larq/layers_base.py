@@ -115,10 +115,11 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
             raise ValueError("Causal padding with `pad_values != 0` is not supported.")
 
     def _get_spatial_padding_same(self, shape):
+        # Runs inside tf.function; autograph's zip wrapper does not accept `strict=`.
         return [
             _compute_padding(stride, dilation_rate, shape[i], filter_size)
             for i, (stride, dilation_rate, filter_size) in enumerate(
-                zip(self.strides, self.dilation_rate, self.kernel_size, strict=True)
+                zip(self.strides, self.dilation_rate, self.kernel_size)  # noqa: B905
             )
         ]
 
@@ -144,12 +145,11 @@ class QuantizerBaseConv(tf.keras.layers.Layer):
         spatial_input_shape = self._get_spatial_shape(input_shape)
         spatial_shape = [
             _compute_padded_size(stride, dilation, size, filter_size)
-            for size, stride, dilation, filter_size in zip(
+            for size, stride, dilation, filter_size in zip(  # noqa: B905
                 spatial_input_shape,
                 self.strides,
                 self.dilation_rate,
                 self.kernel_size,
-                strict=True,
             )
         ]
         if self.data_format == "channels_last":
