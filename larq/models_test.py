@@ -272,7 +272,7 @@ def test_submodel_summary(capsys, snapshot):
     assert submodel_layer_profile.output_shape == profiles[-1].output_shape
     assert submodel_layer_profile.output_pixels == profiles[-1].output_pixels
     assert submodel_layer_profile.weight_count() == sum(
-        (p.weight_count() for p in profiles)
+        p.weight_count() for p in profiles
     )
     bitwidths = []
     op_precisions = []
@@ -282,18 +282,18 @@ def test_submodel_summary(capsys, snapshot):
 
     assert set(submodel_layer_profile.unique_param_bidtwidths) == set(bitwidths)
     assert set(submodel_layer_profile.unique_op_precisions) == set(op_precisions)
-    assert submodel_layer_profile.memory == sum((p.memory for p in profiles))
+    assert submodel_layer_profile.memory == sum(p.memory for p in profiles)
     assert submodel_layer_profile.fp_equivalent_memory == sum(
-        (p.fp_equivalent_memory for p in profiles)
+        p.fp_equivalent_memory for p in profiles
     )
     assert submodel_layer_profile.int8_fp_weights_memory == sum(
-        (p.int8_fp_weights_memory for p in profiles)
+        p.int8_fp_weights_memory for p in profiles
     )
     assert submodel_layer_profile.op_count("mac") == sum(
-        (p.op_count("mac") for p in profiles)
+        p.op_count("mac") for p in profiles
     )
     assert submodel_layer_profile.op_count("mac", 1) == sum(
-        (p.op_count("mac", 1) for p in profiles)
+        p.op_count("mac", 1) for p in profiles
     )
 
     # Assert that the total profile summary matches

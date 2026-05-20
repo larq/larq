@@ -1,7 +1,5 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
 
-from typing import Optional
-
 import tensorflow as tf
 from packaging import version
 from tensorflow.python.distribute.values import DistributedVariable
@@ -69,9 +67,9 @@ class QuantizedVariable(tf.Variable, TensorType):
     def __init__(
         self,
         variable: tf.Variable,
-        quantizer: Optional[QuantizerType] = None,
-        precision: Optional[int] = None,
-        op: Optional[tf.Operation] = UNSPECIFIED,
+        quantizer: QuantizerType | None = None,
+        precision: int | None = None,
+        op: tf.Operation | None = UNSPECIFIED,
     ):
         """Creates an QuantizedVariable instance.
 
@@ -107,9 +105,9 @@ class QuantizedVariable(tf.Variable, TensorType):
     def from_variable(
         cls,
         variable: tf.Variable,
-        quantizer: Optional[QuantizerType] = None,
-        precision: Optional[int] = None,
-        op: Optional[tf.Operation] = UNSPECIFIED,
+        quantizer: QuantizerType | None = None,
+        precision: int | None = None,
+        op: tf.Operation | None = UNSPECIFIED,
     ):
         """Creates a QuantizedVariable that wraps another variable.
 
@@ -186,7 +184,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         return self._quantize(self.latent_variable.initial_value)
 
     def __tf_tensor__(
-        self, dtype: Optional[tf.dtypes.DType] = None, name: Optional[str] = None
+        self, dtype: tf.dtypes.DType | None = None, name: str | None = None
     ) -> tf.Tensor:
         return self._dense_var_to_tensor(dtype=dtype, name=name)
 

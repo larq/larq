@@ -46,7 +46,7 @@ lq.layers.QuantDense(64, kernel_quantizer=lq.quantizers.SteSign(clip_value=1.0))
 ```
 """
 
-from typing import Callable, Optional, Union
+from collections.abc import Callable
 
 import tensorflow as tf
 from packaging import version
@@ -80,7 +80,7 @@ def _clipped_gradient(x, dy, clip_value):
     return tf.where(mask, dy, zeros)
 
 
-def ste_sign(x: tf.Tensor, clip_value: Optional[float] = 1.0) -> tf.Tensor:
+def ste_sign(x: tf.Tensor, clip_value: float | None = 1.0) -> tf.Tensor:
     @tf.custom_gradient
     def _call(x):
         def grad(dy):
@@ -122,7 +122,7 @@ def ste_tern(
     x: tf.Tensor,
     threshold_value: float = 0.05,
     ternary_weight_networks: bool = False,
-    clip_value: Optional[float] = 1.0,
+    clip_value: float | None = 1.0,
 ) -> tf.Tensor:
     @tf.custom_gradient
     def _call(x):
@@ -139,7 +139,7 @@ def ste_tern(
     return _call(x)
 
 
-def ste_heaviside(x: tf.Tensor, clip_value: Optional[float] = 1.0) -> tf.Tensor:
+def ste_heaviside(x: tf.Tensor, clip_value: float | None = 1.0) -> tf.Tensor:
     @tf.custom_gradient
     def _call(x):
         def grad(dy):
@@ -158,7 +158,7 @@ class Quantizer(tf.keras.layers.Layer):
             used by `lq.models.summary()` for improved logging.
     """
 
-    precision: Optional[int] = None
+    precision: int | None = None
 
     def compute_output_shape(self, input_shape):
         return input_shape
@@ -270,7 +270,7 @@ class SteSign(_BaseQuantizer):
 
     precision = 1
 
-    def __init__(self, clip_value: Optional[float] = 1.0, **kwargs):
+    def __init__(self, clip_value: float | None = 1.0, **kwargs):
         self.clip_value = clip_value
         super().__init__(**kwargs)
 
@@ -360,7 +360,7 @@ class SteHeaviside(_BaseQuantizer):
 
     precision = 1
 
-    def __init__(self, clip_value: Optional[float] = 1.0, **kwargs):
+    def __init__(self, clip_value: float | None = 1.0, **kwargs):
         self.clip_value = clip_value
         super().__init__(**kwargs)
 
@@ -449,7 +449,7 @@ class MagnitudeAwareSign(_BaseQuantizer):
 
     precision = 1
 
-    def __init__(self, clip_value: Optional[float] = 1.0, **kwargs):
+    def __init__(self, clip_value: float | None = 1.0, **kwargs):
         self.clip_value = clip_value
         super().__init__(**kwargs)
 
@@ -518,7 +518,7 @@ class SteTern(_BaseQuantizer):
         self,
         threshold_value: float = 0.05,
         ternary_weight_networks: bool = False,
-        clip_value: Optional[float] = 1.0,
+        clip_value: float | None = 1.0,
         **kwargs,
     ):
         self.threshold_value = threshold_value
@@ -708,7 +708,7 @@ class DoReFa(_BaseQuantizer):
 DoReFaQuantizer = DoReFa
 
 
-QuantizerType = Union[Quantizer, Callable[[tf.Tensor], tf.Tensor]]
+QuantizerType = Quantizer | Callable[[tf.Tensor], tf.Tensor]
 
 
 def serialize(quantizer: tf.keras.layers.Layer, use_legacy_format=False):

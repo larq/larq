@@ -128,15 +128,9 @@ def layer_test(
     y = layer(x)
     if tf.keras.backend.dtype(y) != expected_output_dtype:
         raise AssertionError(
-            "When testing layer %s, for input %s, found output "
-            "dtype=%s but expected to find %s.\nFull kwargs: %s"
-            % (
-                layer_cls.__name__,
-                x,
-                tf.keras.backend.dtype(y),
-                expected_output_dtype,
-                kwargs,
-            )
+            f"When testing layer {layer_cls.__name__}, for input {x}, found output "
+            f"dtype={tf.keras.backend.dtype(y)} but expected to find "
+            f"{expected_output_dtype}.\nFull kwargs: {kwargs}"
         )
     # check shape inference
     model = tf.keras.models.Model(x, y)
@@ -151,15 +145,9 @@ def layer_test(
         if expected_dim is not None:
             if expected_dim != actual_dim:
                 raise AssertionError(
-                    "When testing layer %s, for input %s, found output_shape="
-                    "%s but expected to find %s.\nFull kwargs: %s"
-                    % (
-                        layer_cls.__name__,
-                        x,
-                        actual_output_shape,
-                        expected_output_shape,
-                        kwargs,
-                    )
+                    f"When testing layer {layer_cls.__name__}, for input {x}, found "
+                    f"output_shape={actual_output_shape} but expected to find "
+                    f"{expected_output_shape}.\nFull kwargs: {kwargs}"
                 )
     if expected_output is not None:
         np.testing.assert_allclose(actual_output, expected_output, rtol=1e-3)
@@ -203,16 +191,10 @@ def layer_test(
         if expected_dim is not None:
             if expected_dim != actual_dim:
                 raise AssertionError(
-                    "When testing layer %s **after deserialization**, "
-                    "for input %s, found output_shape="
-                    "%s but expected to find inferred shape %s.\nFull kwargs: %s"
-                    % (
-                        layer_cls.__name__,
-                        x,
-                        actual_output_shape,
-                        expected_output_shape,
-                        kwargs,
-                    )
+                    f"When testing layer {layer_cls.__name__} **after "
+                    f"deserialization**, for input {x}, found "
+                    f"output_shape={actual_output_shape} but expected to find "
+                    f"inferred shape {expected_output_shape}.\nFull kwargs: {kwargs}"
                 )
     if expected_output is not None:
         np.testing.assert_allclose(actual_output, expected_output, rtol=1e-3)

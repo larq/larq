@@ -18,7 +18,8 @@ lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.0))
 ```
 """
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import tensorflow as tf
 

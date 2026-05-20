@@ -1,16 +1,7 @@
 import itertools
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Callable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    TypeVar,
-    Union,
-)
+from typing import Any, TypeVar
 
 import numpy as np
 import tensorflow as tf
@@ -90,7 +81,7 @@ def _number_as_readable_str(num: float) -> str:
     return num_str + unit
 
 
-def _format_table_entry(x: Any, units: int = 1) -> Union[float, str]:
+def _format_table_entry(x: Any, units: int = 1) -> float | str:
     try:
         assert not np.isnan(x)
         if type(x) is str or x == 0 or units == 1:
@@ -188,7 +179,7 @@ class LayerProfile:
         return sum(p.fp_equivalent_memory for p in self.weight_profiles)
 
     def weight_count(
-        self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
+        self, bitwidth: int | None = None, trainable: bool | None = None
     ) -> int:
         count = 0
         for p in self.weight_profiles:
@@ -199,8 +190,8 @@ class LayerProfile:
         return count
 
     def op_count(
-        self, op_type: Optional[str] = None, precision: Optional[int] = None
-    ) -> Optional[int]:
+        self, op_type: str | None = None, precision: int | None = None
+    ) -> int | None:
         if op_type != "mac":
             raise ValueError("Currently only counting of MAC-operations is supported.")
 
@@ -218,14 +209,14 @@ class LayerProfile:
         return None
 
     @property
-    def input_precision(self) -> Optional[int]:
+    def input_precision(self) -> int | None:
         try:
             return self._layer.input_quantizer.precision
         except AttributeError:
             return None
 
     @property
-    def output_shape(self) -> Optional[Sequence[int]]:
+    def output_shape(self) -> Sequence[int] | None:
         try:
             output_shape = self._layer.output_shape
             if isinstance(output_shape, list):
@@ -244,7 +235,7 @@ class LayerProfile:
             return "?"
 
     @property
-    def output_pixels(self) -> Optional[int]:
+    def output_pixels(self) -> int | None:
         """Number of pixels for a single feature map (1 for fully connected layers)."""
         if not self.output_shape:
             return None
@@ -266,8 +257,8 @@ class LayerProfile:
 
     def generate_table_row(
         self, table_config: Mapping[str, Any]
-    ) -> Sequence[Union[str, float]]:
-        row: List[Union[str, float]] = [
+    ) -> Sequence[str | float]:
+        row: list[str | float] = [
             self.name,
             self.input_precision or "-",
             self.output_shape_str,
@@ -310,13 +301,11 @@ class ModelProfile(LayerProfile):
         return sum(lp.fp_equivalent_memory for lp in self.layer_profiles)
 
     def weight_count(
-        self, bitwidth: Optional[int] = None, trainable: Optional[bool] = None
+        self, bitwidth: int | None = None, trainable: bool | None = None
     ) -> int:
         return sum(lp.weight_count(bitwidth, trainable) for lp in self.layer_profiles)
 
-    def op_count(
-        self, op_type: Optional[str] = None, bitwidth: Optional[int] = None
-    ) -> int:
+    def op_count(self, op_type: str | None = None, bitwidth: int | None = None) -> int:
         return sum(lp.op_count(op_type, bitwidth) or 0 for lp in self.layer_profiles)
 
     @property
@@ -332,11 +321,11 @@ class ModelProfile(LayerProfile):
         )
 
     @property
-    def input_precision(self) -> Optional[int]:
+    def input_precision(self) -> int | None:
         return self.layer_profiles[0].input_precision
 
     @property
-    def output_shape(self) -> Optional[Sequence[int]]:
+    def output_shape(self) -> Sequence[int] | None:
         return self.layer_profiles[-1].output_shape
 
     def _generate_table_header(self, table_config: Mapping[str, Any]) -> Sequence[str]:
@@ -354,8 +343,8 @@ class ModelProfile(LayerProfile):
 
     def _generate_table_total(
         self, table_config: Mapping[str, Any]
-    ) -> Sequence[Union[float, str]]:
-        row: List[Union[float, str]] = ["Total", "", ""]
+    ) -> Sequence[float | str]:
+        row: list[float | str] = ["Total", "", ""]
         for i in table_config["param_bidtwidths"]:
             row.append(
                 _format_table_entry(self.weight_count(i), table_config["param_units"])
@@ -369,7 +358,7 @@ class ModelProfile(LayerProfile):
 
     def generate_table(
         self, include_macs: bool = True
-    ) -> Sequence[Sequence[Union[float, str]]]:
+    ) -> Sequence[Sequence[float | str]]:
         table_config = {
             "param_bidtwidths": self.unique_param_bidtwidths,
             "mac_precisions": self.unique_op_precisions if include_macs else [],
@@ -378,7 +367,7 @@ class ModelProfile(LayerProfile):
             "mac_units": 1,
         }
 
-        table: List[Sequence[Union[float, str]]] = []
+        table: list[Sequence[float | str]] = []
 
         table.append(self._generate_table_header(table_config))
 
@@ -391,8 +380,8 @@ class ModelProfile(LayerProfile):
 
     def generate_summary(
         self, include_macs: bool = True
-    ) -> Sequence[Sequence[Union[str, float]]]:
-        summary: List[List[Union[str, float]]] = [
+    ) -> Sequence[Sequence[str | float]]:
+        summary: list[list[str | float]] = [
             ["Total params", _number_as_readable_str(self.weight_count())],
             [
                 "Trainable params",
@@ -465,7 +454,7 @@ class SummaryTable(AsciiTable):
 
 def summary(
     model: tf.keras.models.Model,
-    print_fn: Optional[Callable[[str], Any]] = None,
+    print_fn: Callable[[str], Any] | None = None,
     include_macs: bool = True,
 ) -> None:
     """Prints a string summary of the network.
