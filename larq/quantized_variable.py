@@ -134,7 +134,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         if not isinstance(variable, (DistributedVariable, AggregatingVariable)):
             return cls(variable, quantizer, precision, op=op)
 
-        class QuantizedDistributedVariable(cls, variable.__class__):
+        class QuantizedDistributedVariable(cls, variable.__class__):  # type: ignore[misc,valid-type]
             """A QuantizedVariable that also subclasses from `variable.__class__`.
 
             `variable.__class__` is either a `DistributedVariable` or an

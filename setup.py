@@ -32,7 +32,7 @@ setup(
             "pytest-xdist>=3.4",
             "pytest-mock>=3.11",
             "snapshottest==0.6.*",
-            "pytype==2024.10.11",
+            "mypy==2.1.0",
             "ruff==0.15.13",
         ],
     },

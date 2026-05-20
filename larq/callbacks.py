@@ -87,6 +87,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
 
         # We use optimizer.iterations (i.e. global step), since batch only
         # reflects the batch index in the current epoch.
+        assert self.optimizer is not None
         batch = keras.backend.get_value(self.optimizer.iterations)
         hp = self.set_hyperparameter(batch)
 

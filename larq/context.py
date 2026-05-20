@@ -45,7 +45,7 @@ def should_quantize():
     return getattr(_quantized_scope, "should_quantize", False)
 
 
-_global_training_metrics = set()
+_global_training_metrics: set = set()
 _available_metrics = {"flip_ratio"}
 
 
