@@ -371,5 +371,5 @@ def test_saved_model(tmp_path):
     reloaded_weights = reloaded_model.get_weights()
     assert_almost_equal(reloaded_model.predict(x), model.predict(x))
     assert len(reloaded_weights) == len(weights)
-    for reloaded_weight, weight in zip(reloaded_weights, weights):
+    for reloaded_weight, weight in zip(reloaded_weights, weights, strict=True):
         assert_almost_equal(reloaded_weight, weight)

@@ -1,4 +1,5 @@
-from typing import Any, Callable, MutableMapping, Optional
+from collections.abc import Callable, MutableMapping
+from typing import Any
 
 from tensorflow import keras
 
@@ -11,7 +12,8 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         bop = lq.optimizers.Bop(threshold=1e-6, gamma=1e-3)
         adam = tf.keras.optimizers.Adam(0.01)
         optimizer = lq.optimizers.CaseOptimizer(
-            (lq.optimizers.Bop.is_binary_variable, bop), default_optimizer=adam,
+            (lq.optimizers.Bop.is_binary_variable, bop),
+            default_optimizer=adam,
         )
         callbacks = [
             HyperparameterScheduler(lambda x: 0.001 * (0.1 ** (x // 30)), "gamma", bop)
@@ -36,10 +38,10 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         self,
         schedule: Callable,
         hyperparameter: str,
-        optimizer: Optional[keras.optimizers.Optimizer] = None,
+        optimizer: keras.optimizers.Optimizer | None = None,
         update_freq: str = "epoch",
         verbose: int = 0,
-        log_name: Optional[str] = None,
+        log_name: str | None = None,
     ):
         super().__init__()
         self.optimizer = optimizer
@@ -79,13 +81,14 @@ class HyperparameterScheduler(keras.callbacks.Callback):
         return hp
 
     def on_batch_begin(
-        self, batch: int, logs: Optional[MutableMapping[str, Any]] = None
+        self, batch: int, logs: MutableMapping[str, Any] | None = None
     ) -> None:
         if not self.update_freq == "step":
             return
 
         # We use optimizer.iterations (i.e. global step), since batch only
         # reflects the batch index in the current epoch.
+        assert self.optimizer is not None
         batch = keras.backend.get_value(self.optimizer.iterations)
         hp = self.set_hyperparameter(batch)
 
@@ -95,7 +98,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
             )
 
     def on_epoch_begin(
-        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+        self, epoch: int, logs: MutableMapping[str, Any] | None = None
     ) -> None:
         if not self.update_freq == "epoch":
             return
@@ -108,7 +111,7 @@ class HyperparameterScheduler(keras.callbacks.Callback):
             )
 
     def on_epoch_end(
-        self, epoch: int, logs: Optional[MutableMapping[str, Any]] = None
+        self, epoch: int, logs: MutableMapping[str, Any] | None = None
     ) -> None:
         logs = logs or {}
         hp = getattr(self.optimizer, self.hyperparameter)

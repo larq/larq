@@ -34,8 +34,8 @@ optimizer. A variable may not be claimed by more than one optimizer's predicate.
 """
 
 import warnings
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Callable, Optional, Tuple
 
 import tensorflow as tf
 from packaging import version
@@ -95,8 +95,8 @@ class CaseOptimizer(Optimizer):
 
     def __init__(
         self,
-        *predicate_optimizer_pairs: Tuple[Callable[[tf.Variable], bool], Optimizer],
-        default_optimizer: Optional[Optimizer] = None,
+        *predicate_optimizer_pairs: tuple[Callable[[tf.Variable], bool], Optimizer],
+        default_optimizer: Optimizer | None = None,
         name: str = "optimizer_case",
     ):
         super().__init__(name=name)
@@ -123,7 +123,7 @@ class CaseOptimizer(Optimizer):
         self.pred_opt_pairs = predicate_optimizer_pairs
         self.default = default_optimizer
 
-        self.var_opt_mapping = None
+        self.var_opt_mapping: dict[str, int] | None = None
 
         # List of optimizers ending in `default_optimizer`, for easier internal access
         self.optimizers = [opt for (_, opt) in self.pred_opt_pairs]
@@ -147,7 +147,7 @@ class CaseOptimizer(Optimizer):
     def iterations(self, variable):
         raise NotImplementedError("CaseOptimzer does not support setting iterations.")
 
-    def apply_gradients(self, grads_and_vars, name: Optional[str] = None, **kwargs):
+    def apply_gradients(self, grads_and_vars, name: str | None = None, **kwargs):
         """Apply gradients to variables for each optimizer.
 
         On the first call to `apply_gradients()`, compute the mapping from variables to
@@ -159,9 +159,10 @@ class CaseOptimizer(Optimizer):
             # Convert `grads_and_vars` to list so we can iterate multiple times over it
             grads_and_vars = list(grads_and_vars)
             self._compute_var_opt_mapping(grads_and_vars)
+        assert self.var_opt_mapping is not None
 
         # Split gradients and variables into a separate list for each optimizer
-        grad_var_lists = [[] for _ in range(len(self.pred_opt_pairs) + 1)]
+        grad_var_lists: list[list] = [[] for _ in range(len(self.pred_opt_pairs) + 1)]
         for grad, var in grads_and_vars:
             var_key = _var_key(var)
             if var_key in self.var_opt_mapping:
@@ -254,7 +255,8 @@ class CaseOptimizer(Optimizer):
                     self.var_opt_mapping[var_key] = self.DEFAULT_OPT_INDEX
                 else:
                     warnings.warn(
-                        f"No `default_optimizer` provided to train variable `{var}`."
+                        f"No `default_optimizer` provided to train variable `{var}`.",
+                        stacklevel=2,
                     )
 
         # Make sure that each optimizer touches at least one variable

@@ -11,20 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v6
         with:
-          python-version: 3.9
+          python-version: "3.10"
       - name: Install project dependencies
         run: |
           pip install tensorflow-cpu==2.15.0
-          pip install -e .[lint,test]
-      - name: Run Flake8
-        run: flake8
-      - name: Black code style
-        run: black --check --target-version py37 --exclude 'build/|\.mypy_cache/|\.venv/|env/|larq/snapshots/|.pytype/' .
-      - name: Check import order with isort
-        run: isort . --check --diff
-      - name: Type check with PyType
-        run: pytype --jobs auto
+          pip install -e .[test]
+      - name: Ruff format check
+        run: ruff format . --check
+      - name: Ruff lint check
+        run: ruff check .
+      - name: Type check with mypy
+        run: mypy

@@ -1,7 +1,5 @@
 """Contains QuantizedVariable, a variable that can be quantized in the forward pass."""
 
-from typing import Optional
-
 import tensorflow as tf
 from packaging import version
 from tensorflow.python.distribute.values import DistributedVariable
@@ -69,9 +67,9 @@ class QuantizedVariable(tf.Variable, TensorType):
     def __init__(
         self,
         variable: tf.Variable,
-        quantizer: Optional[QuantizerType] = None,
-        precision: Optional[int] = None,
-        op: Optional[tf.Operation] = UNSPECIFIED,
+        quantizer: QuantizerType | None = None,
+        precision: int | None = None,
+        op: tf.Operation | None = UNSPECIFIED,
     ):
         """Creates an QuantizedVariable instance.
 
@@ -93,7 +91,7 @@ class QuantizedVariable(tf.Variable, TensorType):
                 "`quantizer` must be `callable` or `None`, "
                 f"but got `{type(quantizer)}`."
             )
-        if not (precision is None or type(precision) == int):
+        if not (precision is None or type(precision) is int):
             raise ValueError(
                 "`precision` must be of type `int` or `None`, "
                 f"but got `{type(precision)}`."
@@ -107,9 +105,9 @@ class QuantizedVariable(tf.Variable, TensorType):
     def from_variable(
         cls,
         variable: tf.Variable,
-        quantizer: Optional[QuantizerType] = None,
-        precision: Optional[int] = None,
-        op: Optional[tf.Operation] = UNSPECIFIED,
+        quantizer: QuantizerType | None = None,
+        precision: int | None = None,
+        op: tf.Operation | None = UNSPECIFIED,
     ):
         """Creates a QuantizedVariable that wraps another variable.
 
@@ -134,7 +132,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         if not isinstance(variable, (DistributedVariable, AggregatingVariable)):
             return cls(variable, quantizer, precision, op=op)
 
-        class QuantizedDistributedVariable(cls, variable.__class__):
+        class QuantizedDistributedVariable(cls, variable.__class__):  # type: ignore[misc,valid-type]
             """A QuantizedVariable that also subclasses from `variable.__class__`.
 
             `variable.__class__` is either a `DistributedVariable` or an
@@ -186,7 +184,7 @@ class QuantizedVariable(tf.Variable, TensorType):
         return self._quantize(self.latent_variable.initial_value)
 
     def __tf_tensor__(
-        self, dtype: Optional[tf.dtypes.DType] = None, name: Optional[str] = None
+        self, dtype: tf.dtypes.DType | None = None, name: str | None = None
     ) -> tf.Tensor:
         return self._dense_var_to_tensor(dtype=dtype, name=name)
 

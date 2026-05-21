@@ -104,7 +104,7 @@ def test_layer_profile():
         32 * 11 * 11 * 10,
     ]
     bias_count = [32, 0, 0, 64, 32, 0, 10]
-    param_count = [k + b for k, b in zip(kernel_count, bias_count)]
+    param_count = [k + b for k, b in zip(kernel_count, bias_count, strict=True)]
     memory = [  # bits * (c * w * h * b) + bits * bias
         1 * (32 * 3 * 3 * 1) + 32 * 32,
         0,
@@ -137,10 +137,15 @@ def test_layer_profile():
     output_pixels = [int(np.prod(os[1:-1])) for os in output_shape]
     unique_param_bidtwidths = [[1, 32], [], [2], [32], [1, 32], [], [32]]
     unique_op_precisions = [[32], [], [2], [], [1], [], [32]]
-    mac_count = [params * pixels for params, pixels in zip(kernel_count, output_pixels)]
+    mac_count = [
+        params * pixels
+        for params, pixels in zip(kernel_count, output_pixels, strict=True)
+    ]
     bin_mac_count = [
         mc if (1 in pb and ip == 1) else 0
-        for mc, pb, ip in zip(mac_count, unique_param_bidtwidths, input_precision)
+        for mc, pb, ip in zip(
+            mac_count, unique_param_bidtwidths, input_precision, strict=True
+        )
     ]
 
     profiles = profile.layer_profiles
@@ -186,7 +191,7 @@ def test_layer_profile_1d():
 
     kernel_count = [(32 * 3 * 6), 0, (32 * 3 + 16 * 32), 0, (16 * 32 * 10)]
     bias_count = [32, 0, 16, 0, 10]
-    param_count = [k + b for k, b in zip(kernel_count, bias_count)]
+    param_count = [k + b for k, b in zip(kernel_count, bias_count, strict=True)]
     memory = [  # bits * (c * w * d) + bits * bias
         1 * (32 * 3 * 6) + 32 * 32,
         0,
@@ -213,10 +218,15 @@ def test_layer_profile_1d():
     output_pixels = [int(np.prod(os[1:-1])) for os in output_shape]
     unique_param_bidtwidths = [[1, 32], [], [1, 32], [], [32]]
     unique_op_precisions = [[32], [], [1], [], [32]]
-    mac_count = [params * pixels for params, pixels in zip(kernel_count, output_pixels)]
+    mac_count = [
+        params * pixels
+        for params, pixels in zip(kernel_count, output_pixels, strict=True)
+    ]
     bin_mac_count = [
         mc if (1 in pb and ip == 1) else 0
-        for mc, pb, ip in zip(mac_count, unique_param_bidtwidths, input_precision)
+        for mc, pb, ip in zip(
+            mac_count, unique_param_bidtwidths, input_precision, strict=True
+        )
     ]
 
     profiles = profile.layer_profiles
@@ -262,7 +272,7 @@ def test_submodel_summary(capsys, snapshot):
     assert submodel_layer_profile.output_shape == profiles[-1].output_shape
     assert submodel_layer_profile.output_pixels == profiles[-1].output_pixels
     assert submodel_layer_profile.weight_count() == sum(
-        (p.weight_count() for p in profiles)
+        p.weight_count() for p in profiles
     )
     bitwidths = []
     op_precisions = []
@@ -272,18 +282,18 @@ def test_submodel_summary(capsys, snapshot):
 
     assert set(submodel_layer_profile.unique_param_bidtwidths) == set(bitwidths)
     assert set(submodel_layer_profile.unique_op_precisions) == set(op_precisions)
-    assert submodel_layer_profile.memory == sum((p.memory for p in profiles))
+    assert submodel_layer_profile.memory == sum(p.memory for p in profiles)
     assert submodel_layer_profile.fp_equivalent_memory == sum(
-        (p.fp_equivalent_memory for p in profiles)
+        p.fp_equivalent_memory for p in profiles
     )
     assert submodel_layer_profile.int8_fp_weights_memory == sum(
-        (p.int8_fp_weights_memory for p in profiles)
+        p.int8_fp_weights_memory for p in profiles
     )
     assert submodel_layer_profile.op_count("mac") == sum(
-        (p.op_count("mac") for p in profiles)
+        p.op_count("mac") for p in profiles
     )
     assert submodel_layer_profile.op_count("mac", 1) == sum(
-        (p.op_count("mac", 1) for p in profiles)
+        p.op_count("mac", 1) for p in profiles
     )
 
     # Assert that the total profile summary matches

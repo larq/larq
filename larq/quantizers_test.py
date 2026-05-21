@@ -46,7 +46,7 @@ class TestCommonFunctionality:
             assert fn.__class__ == ref_cls
         fn = module.get(ref_cls())
         assert fn.__class__ == ref_cls
-        assert type(fn.precision) == int
+        assert type(fn.precision) is int
         if module == tf.keras.activations and (
             version.parse(tf.__version__) < version.parse("1.15")
         ):
@@ -56,7 +56,7 @@ class TestCommonFunctionality:
         config = module.serialize(fn)
         fn = module.deserialize(config)
         assert fn.__class__ == ref_cls
-        assert type(fn.precision) == int
+        assert type(fn.precision) is int
 
     def test_noop_serialization(self):
         fn = lq.quantizers.get(lq.quantizers.NoOp(precision=1))

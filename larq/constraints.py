@@ -14,11 +14,12 @@ These layers expose 2 keyword arguments:
 import larq as lq
 
 lq.layers.QuantDense(64, kernel_constraint="weight_clip")
-lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.))
+lq.layers.QuantDense(64, kernel_constraint=lq.constraints.WeightClip(2.0))
 ```
 """
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import tensorflow as tf
 
