@@ -33,7 +33,7 @@ setup(
             "pytest-mock>=3.11",
             "snapshottest==0.6.*",
             "mypy==2.1.0",
-            "ruff==0.15.13",
+            "ruff==0.15.15",
         ],
     },
     classifiers=[
