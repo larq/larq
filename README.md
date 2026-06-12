@@ -1,3 +1,7 @@
+> [!WARNING]
+> **This repository is no longer maintained and has been archived; it is kept available in read-only mode.**
+> For information about products by the creators of this repository, visit [plumerai.com](https://plumerai.com).
+
 <img src="https://user-images.githubusercontent.com/13285808/66865479-39c3b600-ef8f-11e9-9bd4-d47b8e432140.gif" alt="logo" height="100px" align="left"/>
 <br/>
 
